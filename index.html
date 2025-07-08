@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Registro de Propinas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 100%;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #0f172a;
+      font-size: 1.6rem;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #3b82f6;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2563eb;
+    }
+
+    .btn-borrar {
+      background-color: #ef4444;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-borrar:hover {
+      background-color: #dc2626;
+    }
+
+    .tabla-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 480px;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e0f2fe;
+      color: #1e3a8a;
+    }
+
+    .resumen {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .acciones {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    @media screen and (min-width: 600px) {
+      .acciones {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📋 Registro de Propinas</h2>
+
+    <label>Fecha (opcional):</label>
+    <input type="date" id="fecha">
+
+    <label>Monto Propina:</label>
+    <input type="number" id="monto">
+
+    <label>Valor del Punto (opcional):</label>
+    <input type="number" id="punto">
+
+    <div class="acciones">
+      <button onclick="registrarPropina()">Registrar</button>
+      <button onclick="exportarCSV()">⬇️ Exportar a Excel</button>
+    </div>
+
+    <div class="tabla-container">
+      <table id="tabla">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Valor Punto</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="resumen" id="resumen"></div>
+  </div>
+
+  <script>
+    function formatearNumero(numero) {
+      return Number(numero).toLocaleString("es-CL");
+    }
+
+    function cargarDatos() {
+      const datos = JSON.parse(localStorage.getItem("propinas")) || [];
+      const tbody = document.querySelector("#tabla tbody");
+      tbody.innerHTML = "";
+
+      let totalPeriodo = 0;
+
+      const hoy = new Date();
+      let inicioPeriodo = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 15);
+      let finPeriodo = new Date(hoy.getFullYear(), hoy.getMonth(), 14);
+
+      if (hoy.getDate() >= 15) {
+        inicioPeriodo = new Date(hoy.getFullYear(), hoy.getMonth(), 15);
+        finPeriodo = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 14);
+      }
+
+      datos.forEach((p, index) => {
+        const fechaParts = p.fecha.split("-");
+        const fechaObj = new Date(`${fechaParts[2]}-${fechaParts[1]}-${fechaParts[0]}`);
+        const montoNum = parseFloat(p.monto);
+
+        if (fechaObj >= inicioPeriodo && fechaObj <= finPeriodo) {
+          totalPeriodo += montoNum;
+        }
+
+        const fila = `<tr>
+          <td>${p.fecha}</td>
+          <td>${formatearNumero(montoNum)}</td>
+          <td>${p.valor ? formatearNumero(p.valor) : ""}</td>
+          <td><button class="btn-borrar" onclick="eliminarEntrada(${index})">🗑️</button></td>
+        </tr>`;
+        tbody.innerHTML += fila;
+      });
+
+      const resumen = document.getElementById("resumen");
+      resumen.innerHTML = `
+        🔄 Total del período (15 al 14): $${formatearNumero(totalPeriodo)}
+      `;
+    }
+
+    function registrarPropina() {
+      const monto = document.getElementById("monto").value;
+      const valor = document.getElementById("punto").value;
+      const fechaManual = document.getElementById("fecha").value;
+
+      if (!monto) return;
+
+      let fechaFormateada = "";
+      if (fechaManual) {
+        const [año, mes, dia] = fechaManual.split("-");
+        fechaFormateada = `${dia}-${mes}-${año}`;
+      } else {
+        const hoy = new Date();
+        const dia = String(hoy.getDate()).padStart(2, "0");
+        const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+        const año = hoy.getFullYear();
+        fechaFormateada = `${dia}-${mes}-${año}`;
+      }
+
+      const nuevaEntrada = { fecha: fechaFormateada, monto, valor };
+      const datos = JSON.parse(localStorage.getItem("propinas")) || [];
+
+      datos.push(nuevaEntrada);
+      localStorage.setItem("propinas", JSON.stringify(datos));
+
+      document.getElementById("fecha").value = "";
+      document.getElementById("monto").value = "";
+      document.getElementById("punto").value = "";
+      cargarDatos();
+    }
+
+    function eliminarEntrada(index) {
+      const datos = JSON.parse(localStorage.getItem("propinas")) || [];
+      datos.splice(index, 1);
+      localStorage.setItem("propinas", JSON.stringify(datos));
+      cargarDatos();
+    }
+
+    function exportarCSV() {
+      const datos = JSON.parse(localStorage.getItem("propinas")) || [];
+      if (datos.length === 0) return alert("No hay datos para exportar.");
+
+      let csv = "Fecha,Monto,Valor Punto\n";
+      datos.forEach(p => {
+        csv += `${p.fecha},${p.monto},${p.valor || ""}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "registro_propinas.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    cargarDatos();
+  </script>
+</body>
+</html>
