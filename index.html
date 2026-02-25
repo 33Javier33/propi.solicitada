@@ -1,261 +1,439 @@
 <!DOCTYPE html>
-<html lang="es">
+<html class="dark" lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Registro de Propinas</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f3f4f6;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Visor Socio V11</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
-    .container {
-      max-width: 100%;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      text-align: center;
-      color: #0f172a;
-      font-size: 1.6rem;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      margin-bottom: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-
-    button {
-      background-color: #3b82f6;
-      color: white;
-      font-weight: bold;
-      border: none;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #2563eb;
-    }
-
-    .btn-borrar {
-      background-color: #ef4444;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 5px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .btn-borrar:hover {
-      background-color: #dc2626;
-    }
-
-    .tabla-container {
-      overflow-x: auto;
-      margin-top: 20px;
-    }
-
-    table {
-      width: 100%;
-      min-width: 480px;
-      border-collapse: collapse;
-      font-size: 0.95rem;
-    }
-
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: center;
-    }
-
-    th {
-      background-color: #e0f2fe;
-      color: #1e3a8a;
-    }
-
-    .resumen {
-      margin-top: 20px;
-      font-weight: bold;
-      font-size: 1rem;
-    }
-
-    .acciones {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    @media screen and (min-width: 600px) {
-      .acciones {
-        flex-direction: row;
-        justify-content: space-between;
-      }
-    }
-  </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#3398db", "secondary": "#2ecc71", "bg-dark": "#121a20", "card-bg": "#1e293b", "danger": "#e74c3c", "warning": "#f39c12" },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { background-color: #121a20; color: #e2e8f0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(18, 26, 32, 0.9); }
+        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #3398db; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .secure-input { letter-spacing: 2px; font-family: monospace; font-weight: bold; }
+        .live-dot { height: 8px; width: 8px; background-color: #2ecc71; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
 </head>
-<body>
-  <div class="container">
-    <h2>📋 Registro de Propinas</h2>
+<body class="h-[100dvh] w-full overflow-hidden flex flex-col">
 
-    <label>Fecha (opcional):</label>
-    <input type="date" id="fecha">
+    <!-- LOGIN -->
+    <div id="loginScreen" class="fixed inset-0 z-50 bg-bg-dark flex flex-col items-center justify-center p-6">
+        <div class="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-6 border border-primary/30 shadow-[0_0_40px_rgba(51,152,219,0.3)]">
+            <span class="material-symbols-outlined text-4xl text-primary">lock_person</span>
+        </div>
+        <h1 class="text-2xl font-bold text-white mb-8">Portal Socios</h1>
+        
+        <form id="loginForm" class="w-full max-w-sm flex flex-col gap-4 relative">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-4 top-3.5 text-gray-500">vpn_key</span>
+                <input type="password" id="inputID" placeholder="ID (SOC-...)" 
+                    class="secure-input w-full bg-card-bg border border-gray-700 rounded-xl py-3.5 pl-12 pr-12 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-600"
+                    autocomplete="username">
+                <button type="button" id="toggleVisibility" class="absolute right-4 top-3.5 text-gray-500 hover:text-white">
+                    <span class="material-symbols-outlined text-xl">visibility</span>
+                </button>
+            </div>
+            <button type="submit" id="btnLogin" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center gap-2 disabled:opacity-50">
+                <span>Ver Cartola</span>
+                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </button>
+            <p id="loginError" class="text-red-400 text-sm text-center hidden mt-2 flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-sm">error</span> Credencial no válida
+            </p>
+        </form>
 
-    <label>Monto Propina:</label>
-    <input type="number" id="monto">
-
-    <label>Valor del Punto (opcional):</label>
-    <input type="number" id="punto">
-
-    <div class="acciones">
-      <button onclick="registrarPropina()">Registrar</button>
-      <button onclick="exportarCSV()">⬇️ Exportar a Excel</button>
+        <div id="loadingState" class="mt-8 flex flex-col items-center hidden">
+            <div class="spinner mb-2"></div>
+            <p class="text-xs text-gray-500">Sincronizando datos...</p>
+        </div>
     </div>
 
-    <div class="tabla-container">
-      <table id="tabla">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Monto</th>
-            <th>Valor Punto</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <!-- APP PRINCIPAL -->
+    <div id="appContainer" class="hidden flex-col h-full w-full max-w-md mx-auto bg-bg-dark shadow-2xl relative">
+        <!-- HEADER -->
+        <div class="flex items-center p-4 justify-between bg-bg-dark/90 ios-blur z-20 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-800 flex items-center justify-center text-white font-bold text-sm shadow-lg border border-white/10" id="userAvatar">U</div>
+                <div>
+                    <h2 class="text-sm font-bold leading-tight text-white" id="userName">...</h2>
+                    <div class="flex items-center gap-2">
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider" id="userArea">...</p>
+                        <span class="live-dot" title="Actualizando en tiempo real"></span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="logout()" class="p-2 rounded-full hover:bg-white/5 text-gray-400">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+
+        <!-- CONTENIDO -->
+        <div class="flex-1 overflow-y-auto p-4 pb-20 scrollbar-hide">
+            <div id="userCardContainer" class="fade-in">
+                <div class="flex flex-col items-center justify-center py-20">
+                    <div class="spinner mb-4"></div>
+                    <p class="text-sm text-gray-400">Calculando...</p>
+                </div>
+            </div>
+            
+            <!-- DATOS DE REFERENCIA (DINÁMICO PARA TODOS) -->
+            <div id="globalInfoPanel" class="mt-4 bg-white/5 border border-white/10 p-3 rounded-xl hidden flex justify-between items-center">
+                <span class="text-xs text-gray-400" id="globalRefLabel">Valor Punto Actual (Ref):</span>
+                <span class="text-sm font-bold text-primary" id="globalRefValue">$0</span>
+            </div>
+        </div>
     </div>
 
-    <div class="resumen" id="resumen"></div>
-  </div>
+    <script>
+        // ==========================================
+        // CONFIGURACIÓN: PEGA TUS URLs AQUÍ
+        // ==========================================
+        const SCRIPT_URL_SOCIOS = 'https://script.google.com/macros/s/AKfycbyr447pMQtsKoBfp8qTcB1uyE3rORhgPPmZM6Fgia3BgmIvtlZ_h04uGZrmx_HwubHQ/exec'; 
+        const SCRIPT_URL_RECAUDACIONES = 'https://script.google.com/macros/s/AKfycbz_kCb4aEe437zHGbRqnjCibw1NtAqfCbTNmsVPn9jaZOPBFaZ6-FwmiTLqVxq39X1P/exec';
+        // ==========================================
 
-  <script>
-    function formatearNumero(numero) {
-      return Number(numero).toLocaleString("es-CL");
-    }
+        let allSocios = [];
+        let selectedUser = null;
+        let updateInterval = null;
 
-    function cargarDatos() {
-      const datos = JSON.parse(localStorage.getItem("propinas")) || [];
-      const tbody = document.querySelector("#tabla tbody");
-      tbody.innerHTML = "";
+        const formatNumber = (n) => new Intl.NumberFormat('es-CL').format(Math.round(n)||0);
+        const formatMoney = (n) => `$${formatNumber(n)}`;
+        const formatDate = (d) => { if(!d) return ''; const [y, m, day] = d.includes('T') ? d.split('T')[0].split('-') : d.split('-'); return `${day}-${m}-${y}`; };
+        const parseMoney = (val) => { if (!val) return 0; if (typeof val === 'number') return val; const v = String(val).replace(/\./g, '').replace(',', '.'); return parseFloat(v) || 0; };
+        const normalizeDate = (s) => { if(!s) return ''; const str=String(s); return str.match(/^\d{4}-\d{2}-\d{2}/) ? str.substring(0,10) : (new Date(str).toISOString().split('T')[0]); };
 
-      let totalPeriodo = 0;
+        // 1. INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loading = document.getElementById('loadingState');
+            const btnLogin = document.getElementById('btnLogin');
+            btnLogin.disabled = true; loading.classList.remove('hidden');
+            
+            try {
+                const res = await fetch(`${SCRIPT_URL_SOCIOS}?action=getSocios`);
+                const json = await res.json();
+                if(json.status === 'success') {
+                    allSocios = json.data;
+                    btnLogin.disabled = false; loading.classList.add('hidden');
+                    const savedID = localStorage.getItem('visor_v11_id');
+                    if(savedID) {
+                        const user = allSocios.find(s => String(s.ID) === String(savedID));
+                        if(user) authenticateUser(user);
+                    }
+                }
+            } catch(e) { alert("Error de conexión. Intenta recargar."); }
+        });
 
-      const hoy = new Date();
-      let inicioPeriodo = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 15);
-      let finPeriodo = new Date(hoy.getFullYear(), hoy.getMonth(), 14);
+        // 2. LOGIN
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputID = document.getElementById('inputID').value.trim();
+            const user = allSocios.find(s => String(s.ID).toLowerCase() === inputID.toLowerCase());
+            
+            if (user) {
+                document.getElementById('loginError').classList.add('hidden');
+                authenticateUser(user);
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        });
 
-      if (hoy.getDate() >= 15) {
-        inicioPeriodo = new Date(hoy.getFullYear(), hoy.getMonth(), 15);
-        finPeriodo = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 14);
-      }
+        document.getElementById('toggleVisibility').addEventListener('click', function() {
+            const input = document.getElementById('inputID');
+            input.type = input.type === 'password' ? 'text' : 'password';
+            this.querySelector('span').textContent = input.type === 'password' ? 'visibility_off' : 'visibility';
+        });
 
-      datos.forEach((p, index) => {
-        const fechaParts = p.fecha.split("-");
-        const fechaObj = new Date(`${fechaParts[2]}-${fechaParts[1]}-${fechaParts[0]}`);
-        const montoNum = parseFloat(p.monto);
-
-        if (fechaObj >= inicioPeriodo && fechaObj <= finPeriodo) {
-          totalPeriodo += montoNum;
+        function authenticateUser(user) {
+            selectedUser = user;
+            localStorage.setItem('visor_v11_id', user.ID);
+            
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            document.getElementById('appContainer').classList.add('flex');
+            
+            document.getElementById('userName').textContent = `${user.Nombre} ${user.Apellido}`;
+            document.getElementById('userArea').textContent = `${user.Area} • ${user.TipoContrato}`;
+            document.getElementById('userAvatar').textContent = user.Nombre.charAt(0);
+            
+            loadAndCalculateData(false);
+            
+            if(updateInterval) clearInterval(updateInterval);
+            updateInterval = setInterval(() => { loadAndCalculateData(true); }, 10000);
         }
 
-        const fila = `<tr>
-          <td>${p.fecha}</td>
-          <td>${formatearNumero(montoNum)}</td>
-          <td>${p.valor ? formatearNumero(p.valor) : ""}</td>
-          <td><button class="btn-borrar" onclick="eliminarEntrada(${index})">🗑️</button></td>
-        </tr>`;
-        tbody.innerHTML += fila;
-      });
+        function logout() { 
+            if(updateInterval) clearInterval(updateInterval);
+            localStorage.removeItem('visor_v11_id'); 
+            location.reload(); 
+        }
 
-      const resumen = document.getElementById("resumen");
-      resumen.innerHTML = `
-        🔄 Total del período (15 al 14): $${formatearNumero(totalPeriodo)}
-      `;
-    }
+        // ==========================================================
+        // CÁLCULO INTELIGENTE (PLANTA vs PART-TIME)
+        // ==========================================================
+        async function loadAndCalculateData(isSilent) {
+            try {
+                // Descarga paralela
+                const [recRes, dataRes, saldosRes, cierreRes, diasRes] = await Promise.all([
+                    fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get&t=${Date.now()}`),
+                    fetch(SCRIPT_URL_SOCIOS, { method: 'POST', body: JSON.stringify({ action: 'getAllDataDesdeSheets' }) }),
+                    fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosAnteriores`),
+                    fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosCierre`),
+                    fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`)
+                ]);
 
-    function registrarPropina() {
-      const monto = document.getElementById("monto").value;
-      const valor = document.getElementById("punto").value;
-      const fechaManual = document.getElementById("fecha").value;
+                const recJson = await recRes.json();
+                const dataJson = await dataRes.json();
+                const saldosJson = await saldosRes.json();
+                const cierreJson = await cierreRes.json();
+                const diasJson = await diasRes.json();
 
-      if (!monto) return;
+                // 1. PROCESAR RECAUDACIÓN Y CALCULAR VALOR PUNTO GLOBAL (PLANTA)
+                let listaRec = recJson.data || recJson.result || [];
+                let mapRecaudacion = {}; // Para buscar por fecha (usado en ausencias y PT)
+                let brutoTotal = 0;
+                
+                // Acumulador GLOBAL del valor punto (Suma de montos/divisores diarios)
+                let valorPuntoAcumuladoGlobal = 0;
 
-      let fechaFormateada = "";
-      if (fechaManual) {
-        const [año, mes, dia] = fechaManual.split("-");
-        fechaFormateada = `${dia}-${mes}-${año}`;
-      } else {
-        const hoy = new Date();
-        const dia = String(hoy.getDate()).padStart(2, "0");
-        const mes = String(hoy.getMonth() + 1).padStart(2, "0");
-        const año = hoy.getFullYear();
-        fechaFormateada = `${dia}-${mes}-${año}`;
-      }
+                listaRec.forEach(r => {
+                    if(r.fecha && r.monto) {
+                        let m = parseMoney(r.monto);
+                        let div = parseFloat(r.divisor) || 0;
+                        let f = normalizeDate(r.fecha);
+                        
+                        // Guardar en mapa para búsquedas por fecha
+                        if(!mapRecaudacion[f]) mapRecaudacion[f] = { monto: 0, divisor: 0 };
+                        mapRecaudacion[f].monto += m;
+                        if(div > 0) mapRecaudacion[f].divisor = div; 
+                        
+                        brutoTotal += m;
 
-      const nuevaEntrada = { fecha: fechaFormateada, monto, valor };
-      const datos = JSON.parse(localStorage.getItem("propinas")) || [];
+                        // SUMAR AL HISTÓRICO GLOBAL (Si hay divisor válido)
+                        if(div > 0) {
+                            valorPuntoAcumuladoGlobal += (m / div);
+                        }
+                    }
+                });
 
-      datos.push(nuevaEntrada);
-      localStorage.setItem("propinas", JSON.stringify(datos));
+                // 2. Datos del Usuario Logueado
+                const s = selectedUser;
+                const isPartTime = (s.TipoContrato||'').toLowerCase().includes('part');
+                const misPuntosAntiguedad = calcularPuntos(s.FechaIngreso, s.Area);
+                
+                const extrasData = dataJson.extras || {};
+                const misAnticipos = dataJson.anticipos?.[s.ID] || [];
+                const totalAnt = misAnticipos.reduce((a,b)=>a+Number(b.cantidad||0),0);
+                
+                const misExtras = extrasData[s.ID] || [];
+                const misDescuentosPersonales = misExtras.filter(e => e.tipo === 'DESCUENTO_PERSONAL');
+                const totalDesc = misDescuentosPersonales.reduce((a,b)=>a+Number(b.monto||0),0);
+                
+                const saldoAnterior = (saldosJson.data?.[s.ID]||0) + (cierreJson.data?.[s.ID]||0);
 
-      document.getElementById("fecha").value = "";
-      document.getElementById("monto").value = "";
-      document.getElementById("punto").value = "";
-      cargarDatos();
-    }
+                // ======================================
+                // CÁLCULO SEGMENTADO
+                // ======================================
+                let propinaAsignada = 0;
+                let detalleInfo = "";
+                
+                // Variables para el Panel de Referencia
+                let refLabel = "";
+                let refValue = 0;
 
-    function eliminarEntrada(index) {
-      const datos = JSON.parse(localStorage.getItem("propinas")) || [];
-      datos.splice(index, 1);
-      localStorage.setItem("propinas", JSON.stringify(datos));
-      cargarDatos();
-    }
+                if (isPartTime) {
+                    // --- PART-TIME (Lógica Específica) ---
+                    const diasTrabajados = diasJson.data?.[s.ID] || [];
+                    
+                    // Sumamos el valor punto SOLO de sus días trabajados
+                    let sumaValoresPuntoPT = 0;
+                    let diasContados = 0;
 
-    function exportarCSV() {
-      const datos = JSON.parse(localStorage.getItem("propinas")) || [];
-      if (datos.length === 0) return alert("No hay datos para exportar.");
+                    diasTrabajados.forEach(dia => {
+                        const dataDia = mapRecaudacion[dia];
+                        if (dataDia && dataDia.divisor > 0) {
+                            // Valor punto EXACTO de ese día
+                            const valorPuntoDia = dataDia.monto / dataDia.divisor;
+                            sumaValoresPuntoPT += valorPuntoDia;
+                            diasContados++;
+                        }
+                    });
 
-      let csv = "Fecha,Monto,Valor Punto\n";
-      datos.forEach(p => {
-        csv += `${p.fecha},${p.monto},${p.valor || ""}\n`;
-      });
+                    // ASIGNADO = (Suma Valores Punto SUS DÍAS) * (Mis Puntos)
+                    propinaAsignada = sumaValoresPuntoPT * misPuntosAntiguedad;
+                    
+                    detalleInfo = `<span class="bg-warning/20 text-warning px-2 py-0.5 rounded text-xs font-bold border border-warning/30">${diasContados} Días Trab.</span>`;
+                    
+                    // Configurar Panel de Referencia para PT
+                    refLabel = "Valor Punto Acumulado (Mis Días):";
+                    refValue = sumaValoresPuntoPT;
 
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "registro_propinas.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+                } else {
+                    // --- PLANTA (Lógica Global) ---
+                    // Asignado = (Valor Punto ACUMULADO GLOBAL) * (Mis Puntos) * Factor Asistencia
+                    
+                    const ausencias = misExtras.filter(e => e.tipo === 'AUSENCIA');
+                    let dineroPerdido = 0;
+                    ausencias.forEach(aus => {
+                        const f = normalizeDate(aus.fecha);
+                        const dataDia = mapRecaudacion[f];
+                        if(dataDia) dineroPerdido += dataDia.monto;
+                    });
 
-    cargarDatos();
-  </script>
+                    let factor = brutoTotal > 0 ? (1 - (dineroPerdido / brutoTotal)) : 1;
+                    if(factor < 0) factor = 0;
+
+                    propinaAsignada = (valorPuntoAcumuladoGlobal * misPuntosAntiguedad) * factor;
+
+                    if(dineroPerdido > 0) detalleInfo = `<span class="bg-danger/20 text-danger px-2 py-0.5 rounded text-xs font-bold border border-danger/30">-${formatMoney(dineroPerdido)} (Ausencia)</span>`;
+                    
+                    // Configurar Panel de Referencia para Planta
+                    refLabel = "Valor Punto Histórico (Global):";
+                    refValue = valorPuntoAcumuladoGlobal;
+                }
+
+                // ACTUALIZAR PANEL DE REFERENCIA (Dinámico)
+                const panelRef = document.getElementById('globalInfoPanel');
+                document.getElementById('globalRefLabel').textContent = refLabel;
+                document.getElementById('globalRefValue').textContent = formatMoney(refValue);
+                panelRef.classList.remove('hidden');
+
+                // Renderizar Tarjeta
+                renderCard(s, propinaAsignada, totalAnt, totalDesc, saldoAnterior, detalleInfo, misAnticipos, misDescuentosPersonales);
+
+            } catch(e) {
+                console.error(e);
+                if(!isSilent) document.getElementById('userCardContainer').innerHTML = `<p class="text-red-400 text-center">Error en cálculo.</p>`;
+            }
+        }
+
+        function renderCard(s, asignado, totalAnt, totalDesc, saldoAnt, badgeHtml, listaAnticipos, listaNotas) {
+            
+            const saldoDisponible = asignado - totalAnt - totalDesc + saldoAnt;
+            
+            let aPagar = 0; 
+            let remanente = saldoDisponible;
+
+            if (saldoDisponible > 0) {
+                aPagar = Math.floor(saldoDisponible / 1000) * 1000;
+                remanente = saldoDisponible - aPagar;
+            }
+
+            const html = `
+                <div class="socio-distribucion-card p-4 rounded-xl bg-white/5 border border-white/10 shadow-lg relative overflow-hidden transition-all duration-300">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                        <span class="material-symbols-outlined text-9xl">account_balance_wallet</span>
+                    </div>
+
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-bold text-white text-lg">${s.Nombre} ${s.Apellido}</h3>
+                                <div class="flex gap-2 mt-1 flex-wrap">
+                                    <span class="bg-primary/20 text-primary text-xs px-2 py-0.5 rounded border border-primary/30 font-bold">
+                                        Puntos: ${calcularPuntos(s.FechaIngreso, s.Area)}
+                                    </span>
+                                    ${badgeHtml}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-1 mb-4 text-sm">
+                            <div class="flex justify-between items-center py-1 border-b border-white/5">
+                                <span class="text-gray-400">Asignado (Est.):</span> 
+                                <span class="font-bold text-blue-400 text-base">${formatMoney(asignado)}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1 bg-yellow-900/10 px-2 rounded border border-yellow-500/10">
+                                <span class="text-yellow-200">Saldo Anterior:</span>
+                                <strong class="text-white">${formatMoney(saldoAnt)}</strong>
+                            </div>
+                            <div class="flex justify-between items-center py-1 border-b border-white/5">
+                                <span class="text-gray-400">Total Anticipos:</span> 
+                                <span class="font-bold text-orange-400">${formatMoney(totalAnt)}</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1 border-b border-white/5">
+                                <span class="text-gray-400">Total Notas:</span> 
+                                <span class="font-bold text-red-400">${formatMoney(totalDesc)}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-900/10 border border-emerald-500/20 p-3 rounded-lg mb-4 backdrop-blur-sm">
+                            <p class="flex justify-between text-xs text-gray-300 mb-2">
+                                Saldo Real: <span class="font-bold ${saldoDisponible < 0 ? 'text-red-500' : 'text-white'}">${formatMoney(saldoDisponible)}</span>
+                            </p>
+                            <div class="flex justify-between items-end border-t border-white/10 pt-2">
+                                <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider">A Pagar (Efectivo)</span>
+                                <span class="text-2xl font-bold text-emerald-400 tracking-tight">${formatMoney(aPagar)}</span>
+                            </div>
+                            <p class="flex justify-between text-xs mt-1 ${remanente < 0 ? 'text-red-500' : 'text-purple-400'}">
+                                Pendiente: <span class="font-bold">${formatMoney(remanente)}</span>
+                            </p>
+                        </div>
+
+                        <div>
+                            <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-widest">Detalle Movimientos</h4>
+                            <div class="space-y-1.5">
+                                ${listaAnticipos.map(a => `
+                                    <div class="flex justify-between items-center bg-black/20 p-2 rounded border border-white/5">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-xs text-orange-400">attach_money</span>
+                                            <span class="text-xs text-gray-300">Anticipo</span>
+                                        </div>
+                                        <div class="text-right leading-tight">
+                                            <span class="text-xs font-bold text-white block">${formatMoney(a.cantidad)}</span>
+                                            <span class="text-[9px] text-gray-500">${formatDate(a.fecha)}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                
+                                ${listaNotas.map(d => `
+                                    <div class="flex justify-between items-center bg-red-900/10 p-2 rounded border border-red-500/10">
+                                        <div class="flex items-center gap-2 overflow-hidden">
+                                            <span class="material-symbols-outlined text-xs text-red-400 shrink-0">receipt_long</span>
+                                            <span class="text-xs text-gray-300 truncate max-w-[150px]">${d.detalle || 'Nota'}</span>
+                                        </div>
+                                        <span class="text-xs font-bold text-red-300 shrink-0">-${formatMoney(d.monto)}</span>
+                                    </div>
+                                `).join('')}
+
+                                ${listaAnticipos.length === 0 && listaNotas.length === 0 ? '<p class="text-[11px] text-center text-gray-600 italic py-2">Sin movimientos registrados.</p>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('userCardContainer').innerHTML = html;
+        }
+
+        function calcularPuntos(fechaIngreso, area) {
+            let anioIng = 0, mesIng = 0, diaIng = 0; if(!fechaIngreso) return 4;
+            const d = new Date(fechaIngreso); if(isNaN(d.getTime())) return 4;
+            anioIng = d.getFullYear(); mesIng = d.getMonth(); diaIng = d.getDate();
+            const hoy = new Date(); let anos = hoy.getFullYear() - anioIng;
+            if(hoy.getMonth()<mesIng || (hoy.getMonth()===mesIng && hoy.getDate()<diaIng)) anos--;
+            if(anos<0) anos=0; 
+            const pts = 4 + (anos*2); 
+            let tope = 12; const a = (area||'').toLowerCase();
+            if(a.includes('cambista')) tope=8; else if(a.includes('mesa')) tope=20; else if(a.includes('boveda')) tope=10; else if(a.includes('maquina')) tope=12;
+            return Math.min(pts, tope);
+        }
+    </script>
 </body>
 </html>
