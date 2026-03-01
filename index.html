@@ -3,437 +3,591 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Visor Socio V11</title>
+    <title>App Socio V18.12</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
     <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: { "primary": "#3398db", "secondary": "#2ecc71", "bg-dark": "#121a20", "card-bg": "#1e293b", "danger": "#e74c3c", "warning": "#f39c12" },
-                    fontFamily: { "display": ["Inter", "sans-serif"] },
-                },
-            },
+        tailwind.config = { 
+            darkMode: "class", 
+            theme: { 
+                extend: { 
+                    colors: { "primary": "#3398db", "bg-dark": "#0b1115", "card-bg": "#162129", "warning": "#f59e0b", "danger": "#ef4444", "success": "#10b981" },
+                    animation: { 'pulse-slow': 'pulse 3s infinite' }
+                } 
+            } 
         }
     </script>
+
     <style>
-        body { background-color: #121a20; color: #e2e8f0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(18, 26, 32, 0.9); }
-        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #3398db; animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .secure-input { letter-spacing: 2px; font-family: monospace; font-weight: bold; }
-        .live-dot { height: 8px; width: 8px; background-color: #2ecc71; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        body { background-color: #0b1115; color: #e2e8f0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+        .ios-blur { backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); background: rgba(11, 17, 21, 0.95); }
+        .tab-section { display: none; height: 100%; flex-direction: column; }
+        .tab-section.active { display: flex; }
+        input, textarea { background: #162129 !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; resize: none; }
+        .msg-row { display: flex; width: 100%; margin-bottom: 12px; align-items: flex-end; }
+        .msg-row.mine { justify-content: flex-end; }
+        .msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; color: #000; flex-shrink: 0; margin-right: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .msg-bubble { max-width: 75%; border-radius: 1.2rem; padding: 10px 14px; position: relative; word-wrap: break-word; font-size: 13px; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .msg-mine .msg-bubble { background: #3398db; color: white; border-bottom-right-radius: 2px; }
+        .msg-other .msg-bubble { background: #1f2937; color: #e2e8f0; border-bottom-left-radius: 2px; border: 1px solid rgba(255,255,255,0.05); }
+        .msg-admin .msg-bubble { background: #2f3640; border: 1px solid #f59e0b; color: #f59e0b; border-bottom-left-radius: 2px; }
+        .toast-box { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 350px; background: rgba(30, 41, 59, 0.98); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200; transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .toast-box.show { top: 20px; }
+        .chat-switch button { flex: 1; padding: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; transition: all 0.2s; border-radius: 0.6rem; }
+        .chat-switch button.active { background: #3398db; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .unread-dot { position: absolute; top: 4px; right: 25%; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 2px solid #0b1115; }
+        .calendar-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 11px; font-weight: bold; color: #64748b; }
+        .calendar-day.worked { background-color: #f59e0b; color: #000; font-weight: 900; }
+        .calendar-day.absent { background-color: #ef4444; color: #fff; font-weight: 900; }
+        .nav-btn.active { color: #3398db; }
+        .nav-btn.active span { font-variation-settings: 'FILL' 1; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* Animación para botones de edición */
+        .msg-actions { display: flex; gap: 8px; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.1); pt-2; }
     </style>
 </head>
-<body class="h-[100dvh] w-full overflow-hidden flex flex-col">
+<body class="h-[100dvh] w-full flex flex-col font-sans bg-bg-dark">
 
-    <!-- LOGIN -->
-    <div id="loginScreen" class="fixed inset-0 z-50 bg-bg-dark flex flex-col items-center justify-center p-6">
-        <div class="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-6 border border-primary/30 shadow-[0_0_40px_rgba(51,152,219,0.3)]">
-            <span class="material-symbols-outlined text-4xl text-primary">lock_person</span>
-        </div>
-        <h1 class="text-2xl font-bold text-white mb-8">Portal Socios</h1>
-        
-        <form id="loginForm" class="w-full max-w-sm flex flex-col gap-4 relative">
-            <div class="relative">
-                <span class="material-symbols-outlined absolute left-4 top-3.5 text-gray-500">vpn_key</span>
-                <input type="password" id="inputID" placeholder="ID (SOC-...)" 
-                    class="secure-input w-full bg-card-bg border border-gray-700 rounded-xl py-3.5 pl-12 pr-12 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-600"
-                    autocomplete="username">
-                <button type="button" id="toggleVisibility" class="absolute right-4 top-3.5 text-gray-500 hover:text-white">
-                    <span class="material-symbols-outlined text-xl">visibility</span>
-                </button>
-            </div>
-            <button type="submit" id="btnLogin" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 flex justify-center items-center gap-2 disabled:opacity-50">
-                <span>Ver Cartola</span>
-                <span class="material-symbols-outlined text-lg">arrow_forward</span>
-            </button>
-            <p id="loginError" class="text-red-400 text-sm text-center hidden mt-2 flex items-center justify-center gap-1">
-                <span class="material-symbols-outlined text-sm">error</span> Credencial no válida
-            </p>
-        </form>
-
-        <div id="loadingState" class="mt-8 flex flex-col items-center hidden">
-            <div class="spinner mb-2"></div>
-            <p class="text-xs text-gray-500">Sincronizando datos...</p>
+    <div id="toastNotification" class="toast-box backdrop-blur-md" onclick="switchTab('tab-chat')">
+        <div class="w-10 h-10 rounded-full bg-success flex items-center justify-center text-white shadow-lg shrink-0"><span class="material-symbols-outlined text-lg">chat</span></div>
+        <div class="flex-1 overflow-hidden">
+            <p class="text-[9px] font-black uppercase text-success tracking-widest mb-0.5">Nuevo Mensaje</p>
+            <p id="toastMessage" class="text-xs font-bold text-white truncate">...</p>
         </div>
     </div>
 
-    <!-- APP PRINCIPAL -->
-    <div id="appContainer" class="hidden flex-col h-full w-full max-w-md mx-auto bg-bg-dark shadow-2xl relative">
-        <!-- HEADER -->
-        <div class="flex items-center p-4 justify-between bg-bg-dark/90 ios-blur z-20 border-b border-white/5">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-800 flex items-center justify-center text-white font-bold text-sm shadow-lg border border-white/10" id="userAvatar">U</div>
-                <div>
-                    <h2 class="text-sm font-bold leading-tight text-white" id="userName">...</h2>
-                    <div class="flex items-center gap-2">
-                        <p class="text-[10px] text-gray-400 uppercase tracking-wider" id="userArea">...</p>
-                        <span class="live-dot" title="Actualizando en tiempo real"></span>
-                    </div>
+    <div id="usersModal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md hidden items-center justify-center p-6 fade-in">
+        <div class="bg-card-bg w-full max-w-sm rounded-[2rem] border border-white/10 flex flex-col h-[70vh] shadow-2xl">
+            <div class="p-5 border-b border-white/5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-sm font-black text-white uppercase italic tracking-widest">Contactar Socio</h3>
+                    <button onclick="toggleModal('usersModal', false)" class="text-gray-400 bg-white/5 p-2 rounded-full"><span class="material-symbols-outlined">close</span></button>
                 </div>
+                <input type="text" id="userSearch" onkeyup="renderUsersList()" placeholder="Buscar nombre..." class="w-full rounded-xl py-3 px-4 text-sm font-bold outline-none border border-white/10 bg-black/30 text-white">
             </div>
-            <button onclick="logout()" class="p-2 rounded-full hover:bg-white/5 text-gray-400">
-                <span class="material-symbols-outlined">logout</span>
-            </button>
+            <div id="usersListContent" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
+        </div>
+    </div>
+
+    <div id="calendarModal" class="fixed inset-0 z-[60] bg-bg-dark/95 flex flex-col items-center justify-center p-4 hidden fade-in backdrop-blur-md">
+        <div class="bg-card-bg w-full max-w-sm rounded-[2rem] border border-white/10 shadow-2xl relative flex flex-col max-h-[85vh]">
+            <div class="p-5 pb-2 shrink-0">
+                <button onclick="closeCalendar()" class="absolute top-5 right-5 text-gray-400 hover:text-white bg-white/5 p-1 rounded-full"><span class="material-symbols-outlined">close</span></button>
+                <h3 id="calendarTitle" class="text-xl font-black text-white uppercase italic">...</h3>
+                <p id="calendarMonthLabel" class="text-xs text-primary font-bold uppercase mb-4 tracking-wider">...</p>
+                <div id="calendarSummaryBox" class="bg-white/5 border border-white/10 rounded-2xl p-4 flex justify-between items-center mb-4">
+                    <div class="text-center"><p class="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Días</p><p id="modalTotalDias" class="text-2xl font-black text-white">0</p></div>
+                    <div class="h-8 w-px bg-white/10"></div>
+                    <div class="text-center"><p class="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Monto</p><p id="modalTotalGenerado" class="text-2xl font-black text-white">$0</p></div>
+                </div>
+                <div class="grid grid-cols-7 gap-2 mb-2 text-center text-[10px] text-gray-500 font-bold uppercase"><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div><div>D</div></div>
+                <div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
+            </div>
+            <div class="flex-1 overflow-y-auto px-5 pb-5 border-t border-white/5 pt-3">
+                <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3 italic">Detalle</h4>
+                <div id="calendarDetailsList" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginOverlay" class="fixed inset-0 z-[150] bg-bg-dark flex flex-col items-center justify-center p-6">
+        <div id="setupBox" class="w-full max-w-xs text-center hidden">
+            <h2 class="text-3xl font-black mb-6 italic text-primary uppercase tracking-tighter">Vincular Cuenta</h2>
+            <div class="space-y-3">
+                <input type="text" id="setupID" placeholder="ID SOCIO (EJ: SOC-001)" class="w-full rounded-2xl py-4 text-center font-black uppercase outline-none shadow-xl border border-white/10 text-white">
+                <input type="text" id="setupRUT" placeholder="RUT (12.345.678-9)" class="w-full rounded-2xl py-4 text-center font-bold outline-none shadow-xl border border-white/10 text-white">
+                <input type="password" id="setupPIN" maxlength="4" inputmode="numeric" placeholder="CREAR NUEVO PIN" class="w-full rounded-2xl py-4 text-center font-black outline-none tracking-[0.3em] shadow-xl border border-white/10 text-white">
+                <button onclick="handleSetup()" class="w-full bg-primary py-4 rounded-2xl font-black shadow-lg text-white active:scale-95 transition-transform uppercase italic tracking-widest">Activar Dispositivo</button>
+            </div>
+            <button onclick="cancelRecovery()" class="mt-4 text-[10px] text-gray-500 font-bold uppercase underline">Cancelar / Volver</button>
         </div>
 
-        <!-- CONTENIDO -->
-        <div class="flex-1 overflow-y-auto p-4 pb-20 scrollbar-hide">
-            <div id="userCardContainer" class="fade-in">
-                <div class="flex flex-col items-center justify-center py-20">
-                    <div class="spinner mb-4"></div>
-                    <p class="text-sm text-gray-400">Calculando...</p>
-                </div>
+        <div id="fastAccessBox" class="w-full max-w-xs text-center hidden">
+            <div class="mb-8">
+                <h2 id="fastName" class="text-2xl font-black text-white uppercase italic leading-tight">...</h2>
+                <p id="fastIDLabel" class="text-[10px] text-gray-500 font-black uppercase mt-2 tracking-[0.3em]">ID: ...</p>
             </div>
-            
-            <!-- DATOS DE REFERENCIA (DINÁMICO PARA TODOS) -->
-            <div id="globalInfoPanel" class="mt-4 bg-white/5 border border-white/10 p-3 rounded-xl hidden flex justify-between items-center">
-                <span class="text-xs text-gray-400" id="globalRefLabel">Valor Punto Actual (Ref):</span>
-                <span class="text-sm font-bold text-primary" id="globalRefValue">$0</span>
+            <input type="password" id="fastPIN" maxlength="4" inputmode="numeric" placeholder="••••" onkeydown="if(event.key==='Enter') handleFastLogin()" class="w-full rounded-3xl py-5 text-5xl text-center tracking-[0.4em] outline-none mb-6 shadow-2xl font-black border border-white/10 text-white bg-card-bg">
+            <button onclick="handleFastLogin()" class="w-full bg-primary py-4 rounded-2xl font-black shadow-lg uppercase tracking-widest active:scale-95 transition-transform text-white">Ingresar</button>
+            <div class="flex flex-col gap-4 mt-10 border-t border-white/5 pt-6">
+                <button onclick="recoverWithRUT()" class="text-[10px] text-warning font-bold uppercase tracking-wider hover:text-white transition-colors underline">¿Olvidó su ID? Recuperar con RUT</button>
+                <button onclick="switchToSetup()" class="text-[10px] text-gray-600 font-black uppercase">Cambiar de Usuario</button>
             </div>
         </div>
+        <div id="loadingState" class="mt-8 hidden"><div class="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div></div>
+    </div>
+
+    <div id="appContainer" class="hidden flex-col h-full w-full">
+        <header class="p-5 pt-6 flex items-center justify-between shrink-0 bg-bg-dark/90 ios-blur z-20 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div id="userAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-black uppercase border-2 border-white/10 shadow-lg text-sm">?</div>
+                <div>
+                    <h2 id="userNameLabel" class="text-sm font-black text-white uppercase leading-tight">...</h2>
+                    <p id="userAreaLabel" class="text-[9px] text-gray-500 uppercase font-black italic tracking-widest">...</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="text-gray-600 hover:text-red-500 transition-colors"><span class="material-symbols-outlined">logout</span></button>
+        </header>
+
+        <main class="flex-1 overflow-hidden relative">
+            <div id="tab-home" class="tab-section active overflow-y-auto px-5 pb-32 pt-4">
+                <div class="bg-gradient-to-br from-blue-600 to-primary p-7 rounded-[2.5rem] text-white shadow-2xl text-center mb-4 border-b-4 border-black/20">
+                    <p class="text-[10px] font-black opacity-80 uppercase tracking-[0.2em] mb-1">A Recibir Real</p>
+                    <h2 id="montoRecibirLabel" class="text-5xl font-black tracking-tighter mb-2">$0</h2>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <span id="remateTag" class="text-[9px] bg-black/20 px-3 py-1 rounded-full font-black uppercase italic">Remate: $0</span>
+                        <span id="globalPtsTag" class="text-[9px] bg-white/20 px-3 py-1 rounded-full font-black uppercase italic">Puntos: 0</span>
+                    </div>
+                </div>
+                <div id="detallesContables" class="bg-card-bg border border-white/5 rounded-3xl p-5 space-y-3 text-xs mb-4 shadow-xl font-bold text-gray-300"></div>
+                <div id="calendarBtnContainer" class="hidden mb-4"><button onclick="openCalendar()" class="w-full py-4 rounded-2xl flex items-center justify-center gap-3 font-black uppercase text-xs active:scale-95 transition-transform shadow-lg bg-card-bg border border-white/10 text-white"><span class="material-symbols-outlined">calendar_month</span> Ver Turnos / Ausencias</button></div>
+                <div class="space-y-3">
+                    <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1 italic">Historial de Anticipos</h4>
+                    <div id="anticiposList" class="space-y-2 pb-10 min-h-[100px]"><p class="text-center text-[10px] text-gray-600 py-4 italic">Cargando datos...</p></div>
+                </div>
+            </div>
+
+            <div id="tab-history" class="tab-section overflow-y-auto px-5 pb-32 pt-4">
+                <h4 class="text-[10px] font-black text-gray-500 uppercase text-center mb-6 italic tracking-[0.3em]">Histórico de Cajas</h4>
+                <div id="historyList" class="space-y-2 pb-10"></div>
+            </div>
+
+            <div id="tab-chat" class="tab-section px-4 h-full flex flex-col pt-4">
+                <div class="shrink-0 mb-3 space-y-2">
+                    <div class="chat-switch flex bg-card-bg rounded-2xl p-1 border border-white/5 shadow-lg">
+                        <button id="btnChatAdmin" class="active" onclick="setChatMode('ADMIN')"><span class="material-symbols-outlined text-[14px] align-text-bottom">admin_panel_settings</span> Notas Admin</button>
+                        <button id="btnChatSocial" onclick="setChatMode('SOCIAL')"><span class="material-symbols-outlined text-[14px] align-text-bottom">groups</span> Socios</button>
+                    </div>
+                    <div id="socialBar" class="hidden">
+                        <button onclick="toggleModal('usersModal', true)" class="w-full bg-card-bg border border-white/10 rounded-xl p-3 flex justify-between items-center active:scale-95 transition-transform shadow-md">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <div class="w-7 h-7 rounded-full bg-warning text-black flex items-center justify-center font-black text-[10px]" id="targetIcon">G</div>
+                                <div class="text-left overflow-hidden"><p class="text-[8px] text-gray-500 uppercase font-black">Chat Actual</p><p id="targetNameLabel" class="text-xs font-bold text-white italic truncate">👥 Chat General</p></div>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-500">expand_more</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="chatMessages" class="flex-1 overflow-y-auto space-y-1 p-1 no-scrollbar"></div>
+                
+                <div class="shrink-0 bg-bg-dark border-t border-white/10 p-3 pb-2 z-30">
+                    <div id="editModeIndicator" class="hidden flex justify-between items-center mb-1 px-2 text-[10px] text-warning font-bold uppercase"><span>Editando mensaje...</span><button onclick="cancelEdit()" class="text-gray-400"><span class="material-symbols-outlined text-sm">close</span></button></div>
+                    <form id="chatForm" onsubmit="handleSend(event)" class="w-full flex gap-2 items-end bg-card-bg border border-white/10 rounded-3xl p-1.5 shadow-xl">
+                        <textarea id="chatInput" rows="1" placeholder="Escribir mensaje..." class="flex-1 bg-transparent border-none outline-none text-sm text-white px-3 py-3 max-h-[100px]"></textarea>
+                        <button type="submit" id="sendBtn" class="bg-primary w-10 h-10 rounded-full text-white flex items-center justify-center active:scale-90 transition-transform shadow-lg mb-0.5 shrink-0"><span class="material-symbols-outlined text-lg">send</span></button>
+                    </form>
+                </div>
+                <div class="h-[90px] shrink-0"></div>
+            </div>
+        </main>
+
+        <nav class="fixed bottom-0 w-full bg-bg-dark/95 ios-blur border-t border-white/5 pb-8 pt-3 z-[40]">
+            <div class="flex justify-around items-center">
+                <button onclick="switchTab('tab-home')" class="nav-btn active flex flex-col items-center gap-1 w-20 text-primary transition-all" data-target="tab-home"><span class="material-symbols-outlined">payments</span><span class="text-[9px] font-black uppercase">Cartola</span></button>
+                <button onclick="switchTab('tab-history')" class="nav-btn flex flex-col items-center gap-1 w-20 text-gray-500 transition-all" data-target="tab-history"><span class="material-symbols-outlined">receipt_long</span><span class="text-[9px] font-black uppercase">Cajas</span></button>
+                <button onclick="switchTab('tab-chat')" class="nav-btn flex flex-col items-center gap-1 w-20 text-gray-500 relative transition-all" data-target="tab-chat"><div id="notifBadge" class="unread-dot hidden"></div><span class="material-symbols-outlined">forum</span><span class="text-[9px] font-black uppercase">Chat</span></button>
+            </div>
+        </nav>
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURACIÓN: PEGA TUS URLs AQUÍ
-        // ==========================================
         const SCRIPT_URL_SOCIOS = 'https://script.google.com/macros/s/AKfycbyr447pMQtsKoBfp8qTcB1uyE3rORhgPPmZM6Fgia3BgmIvtlZ_h04uGZrmx_HwubHQ/exec'; 
         const SCRIPT_URL_RECAUDACIONES = 'https://script.google.com/macros/s/AKfycbz_kCb4aEe437zHGbRqnjCibw1NtAqfCbTNmsVPn9jaZOPBFaZ6-FwmiTLqVxq39X1P/exec';
-        // ==========================================
 
-        let allSocios = [];
-        let selectedUser = null;
-        let updateInterval = null;
+        let allSocios=[], currentUser=null, messages={admin:[], social:[]}, currentChatMode='ADMIN', currentSocialTarget={id:'TODOS', name:'Chat General'}, lastMsgCount=parseInt(localStorage.getItem('lastMsgCountV18.11')||0), globalDiasCalendar=[], userTypeGlobal='', editingMessageId=null;
 
-        const formatNumber = (n) => new Intl.NumberFormat('es-CL').format(Math.round(n)||0);
-        const formatMoney = (n) => `$${formatNumber(n)}`;
-        const formatDate = (d) => { if(!d) return ''; const [y, m, day] = d.includes('T') ? d.split('T')[0].split('-') : d.split('-'); return `${day}-${m}-${y}`; };
-        const parseMoney = (val) => { if (!val) return 0; if (typeof val === 'number') return val; const v = String(val).replace(/\./g, '').replace(',', '.'); return parseFloat(v) || 0; };
-        const normalizeDate = (s) => { if(!s) return ''; const str=String(s); return str.match(/^\d{4}-\d{2}-\d{2}/) ? str.substring(0,10) : (new Date(str).toISOString().split('T')[0]); };
-
-        // 1. INICIALIZACIÓN
-        document.addEventListener('DOMContentLoaded', async () => {
-            const loading = document.getElementById('loadingState');
-            const btnLogin = document.getElementById('btnLogin');
-            btnLogin.disabled = true; loading.classList.remove('hidden');
-            
+        window.onload = async () => {
+            document.getElementById('loadingState').classList.remove('hidden');
             try {
                 const res = await fetch(`${SCRIPT_URL_SOCIOS}?action=getSocios`);
-                const json = await res.json();
-                if(json.status === 'success') {
-                    allSocios = json.data;
-                    btnLogin.disabled = false; loading.classList.add('hidden');
-                    const savedID = localStorage.getItem('visor_v11_id');
-                    if(savedID) {
-                        const user = allSocios.find(s => String(s.ID) === String(savedID));
-                        if(user) authenticateUser(user);
-                    }
-                }
-            } catch(e) { alert("Error de conexión. Intenta recargar."); }
-        });
+                allSocios = (await res.json()).data || [];
+                document.getElementById('loadingState').classList.add('hidden');
+                checkSecurity();
+            } catch(e) { console.error(e); }
+        };
 
-        // 2. LOGIN
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const inputID = document.getElementById('inputID').value.trim();
-            const user = allSocios.find(s => String(s.ID).toLowerCase() === inputID.toLowerCase());
-            
-            if (user) {
-                document.getElementById('loginError').classList.add('hidden');
-                authenticateUser(user);
+        function checkSecurity() {
+            const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            if(auth.id && auth.rut) {
+                document.getElementById('fastAccessBox').classList.remove('hidden');
+                document.getElementById('setupBox').classList.add('hidden');
+                document.getElementById('fastName').textContent = auth.name.split(' ')[0];
+                document.getElementById('fastIDLabel').textContent = `ID: ${auth.id}`;
+                setTimeout(()=>document.getElementById('fastPIN').focus(),100);
+            } else { switchToSetup(); }
+        }
+
+        function switchToSetup() {
+            document.getElementById('fastAccessBox').classList.add('hidden');
+            document.getElementById('setupBox').classList.remove('hidden');
+        }
+
+        function cancelRecovery() {
+            const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
+            if(auth.id) {
+                document.getElementById('setupBox').classList.add('hidden');
+                document.getElementById('fastAccessBox').classList.remove('hidden');
+            } else { alert("Debe vincular una cuenta primero."); }
+        }
+
+        function handleSetup() {
+            const id = document.getElementById('setupID').value.trim().toUpperCase();
+            const rut = document.getElementById('setupRUT').value.trim();
+            const pin = document.getElementById('setupPIN').value.trim();
+            const u = allSocios.find(s => String(s.ID).toUpperCase() === id);
+            if(u && pin.length===4) {
+                localStorage.setItem('visor_secure_auth', JSON.stringify({id:u.ID, rut:rut, pin:pin, name:u.Nombre}));
+                location.reload();
+            } else { alert("Datos incorrectos. Verifique ID y RUT."); }
+        }
+
+        function handleFastLogin() {
+            const pin = document.getElementById('fastPIN').value;
+            const auth = JSON.parse(localStorage.getItem('visor_secure_auth'));
+            if(pin === auth.pin) {
+                currentUser = allSocios.find(s => String(s.ID) === String(auth.id));
+                initApp();
+            } else { alert("PIN incorrecto"); document.getElementById('fastPIN').value = ''; }
+        }
+
+        function recoverWithRUT() {
+            const rutInput = prompt("Ingrese su RUT (Ej: 12.345.678-9):");
+            if(!rutInput) return;
+            const localAuth = JSON.parse(localStorage.getItem('visor_secure_auth')||'{}');
+            if(localAuth.rut === rutInput) {
+                alert(`¡RUT Verificado!\nSu ID es: ${localAuth.id}\n\nSe redirigirá para que cree un nuevo PIN.`);
+                switchToSetup();
+                document.getElementById('setupID').value = localAuth.id;
+                document.getElementById('setupRUT').value = rutInput;
             } else {
-                document.getElementById('loginError').classList.remove('hidden');
+                alert("El RUT no coincide con la sesión guardada.\n\nDeberá vincular nuevamente su cuenta.");
+                switchToSetup();
+                document.getElementById('setupRUT').value = rutInput;
             }
-        });
+        }
 
-        document.getElementById('toggleVisibility').addEventListener('click', function() {
-            const input = document.getElementById('inputID');
-            input.type = input.type === 'password' ? 'text' : 'password';
-            this.querySelector('span').textContent = input.type === 'password' ? 'visibility_off' : 'visibility';
-        });
-
-        function authenticateUser(user) {
-            selectedUser = user;
-            localStorage.setItem('visor_v11_id', user.ID);
-            
-            document.getElementById('loginScreen').classList.add('hidden');
+        function initApp() {
+            document.getElementById('loginOverlay').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
             document.getElementById('appContainer').classList.add('flex');
-            
-            document.getElementById('userName').textContent = `${user.Nombre} ${user.Apellido}`;
-            document.getElementById('userArea').textContent = `${user.Area} • ${user.TipoContrato}`;
-            document.getElementById('userAvatar').textContent = user.Nombre.charAt(0);
-            
-            loadAndCalculateData(false);
-            
-            if(updateInterval) clearInterval(updateInterval);
-            updateInterval = setInterval(() => { loadAndCalculateData(true); }, 10000);
+            document.getElementById('userNameLabel').textContent = `${currentUser.Nombre} ${currentUser.Apellido}`;
+            document.getElementById('userAreaLabel').textContent = currentUser.Area;
+            document.getElementById('userAvatar').textContent = currentUser.Nombre.charAt(0);
+            refresh();
+            setInterval(refresh, 25000);
         }
 
-        function logout() { 
-            if(updateInterval) clearInterval(updateInterval);
-            localStorage.removeItem('visor_v11_id'); 
-            location.reload(); 
-        }
+        const formatMoney = (n) => `$${new Intl.NumberFormat('es-CL').format(Math.round(n)||0)}`;
+        
+        // MODIFICADO: Formato de fecha día-mes-año
+        const cleanDateStr = (d) => {
+            if(!d) return "";
+            const s = String(d).substring(0, 10);
+            if(s.includes('-')) {
+                const parts = s.split('-');
+                if(parts[0].length === 4) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return s;
+        };
 
-        // ==========================================================
-        // CÁLCULO INTELIGENTE (PLANTA vs PART-TIME)
-        // ==========================================================
-        async function loadAndCalculateData(isSilent) {
+        const formatDateText = (dStr) => { 
+            let p = dStr.split('-'); 
+            let d;
+            if(p[0].length === 4) d = new Date(p[0], p[1]-1, p[2]);
+            else d = new Date(p[2], p[1]-1, p[0]);
+            return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' }).replace('.', ''); 
+        };
+
+        async function refresh() {
             try {
-                // Descarga paralela
-                const [recRes, dataRes, saldosRes, cierreRes, diasRes] = await Promise.all([
-                    fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get&t=${Date.now()}`),
+                const [recRes, dataRes, saldosRes, cierreRes, diasRes, adminNotesRes, socialNotesRes] = await Promise.all([
+                    fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get`),
                     fetch(SCRIPT_URL_SOCIOS, { method: 'POST', body: JSON.stringify({ action: 'getAllDataDesdeSheets' }) }),
                     fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosAnteriores`),
                     fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosCierre`),
-                    fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`)
+                    fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`),
+                    fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes`),
+                    fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes`).catch(()=>({ json: ()=>({data:[]}) })) 
                 ]);
 
-                const recJson = await recRes.json();
-                const dataJson = await dataRes.json();
-                const saldosJson = await saldosRes.json();
-                const cierreJson = await cierreRes.json();
-                const diasJson = await diasRes.json();
-
-                // 1. PROCESAR RECAUDACIÓN Y CALCULAR VALOR PUNTO GLOBAL (PLANTA)
-                let listaRec = recJson.data || recJson.result || [];
-                let mapRecaudacion = {}; // Para buscar por fecha (usado en ausencias y PT)
-                let brutoTotal = 0;
+                const recData = (await recRes.json()).data || [];
+                const fullSheets = await dataRes.json();
+                const sheetsData = fullSheets.data || fullSheets;
+                const saldosData = (await saldosRes.json()).data || {};
+                const cierreData = (await cierreRes.json()).data || {};
+                const diasTrabajados = (await diasRes.json()).data || {};
                 
-                // Acumulador GLOBAL del valor punto (Suma de montos/divisores diarios)
-                let valorPuntoAcumuladoGlobal = 0;
+                messages.admin = (await adminNotesRes.json()).data || [];
+                try { messages.social = (await socialNotesRes.json()).data || []; } catch(e){ messages.social = []; }
 
-                listaRec.forEach(r => {
-                    if(r.fecha && r.monto) {
-                        let m = parseMoney(r.monto);
-                        let div = parseFloat(r.divisor) || 0;
-                        let f = normalizeDate(r.fecha);
-                        
-                        // Guardar en mapa para búsquedas por fecha
-                        if(!mapRecaudacion[f]) mapRecaudacion[f] = { monto: 0, divisor: 0 };
-                        mapRecaudacion[f].monto += m;
-                        if(div > 0) mapRecaudacion[f].divisor = div; 
-                        
-                        brutoTotal += m;
-
-                        // SUMAR AL HISTÓRICO GLOBAL (Si hay divisor válido)
-                        if(div > 0) {
-                            valorPuntoAcumuladoGlobal += (m / div);
-                        }
-                    }
+                let mapVP = {};
+                recData.forEach(r => {
+                    let f = String(r.fecha).substring(0, 10); // Usamos ISO temporalmente para el mapeo
+                    let m = parseFloat(String(r.monto).replace(/\./g, '')) || 0;
+                    let d = parseFloat(r.divisor) || 1;
+                    if (!mapVP[f]) mapVP[f] = { totalVP: 0, montoReal: 0 };
+                    mapVP[f].totalVP += (m/d);
+                    mapVP[f].montoReal += m;
                 });
 
-                // 2. Datos del Usuario Logueado
-                const s = selectedUser;
-                const isPartTime = (s.TipoContrato||'').toLowerCase().includes('part');
-                const misPuntosAntiguedad = calcularPuntos(s.FechaIngreso, s.Area);
-                
-                const extrasData = dataJson.extras || {};
-                const misAnticipos = dataJson.anticipos?.[s.ID] || [];
-                const totalAnt = misAnticipos.reduce((a,b)=>a+Number(b.cantidad||0),0);
-                
-                const misExtras = extrasData[s.ID] || [];
-                const misDescuentosPersonales = misExtras.filter(e => e.tipo === 'DESCUENTO_PERSONAL');
-                const totalDesc = misDescuentosPersonales.reduce((a,b)=>a+Number(b.monto||0),0);
-                
-                const saldoAnterior = (saldosJson.data?.[s.ID]||0) + (cierreJson.data?.[s.ID]||0);
+                const dIng = new Date(currentUser.FechaIngreso), hoy = new Date();
+                let anos = hoy.getFullYear() - dIng.getFullYear();
+                if (hoy.getMonth() < dIng.getMonth() || (hoy.getMonth() === dIng.getMonth() && hoy.getDate() < dIng.getDate())) anos--;
+                const pts = Math.min(4 + (Math.max(0, anos) * 2), (currentUser.Area.includes('Mesa')?20:currentUser.Area.includes('Cambista')?8:currentUser.Area.includes('Boveda')?10:12));
 
-                // ======================================
-                // CÁLCULO SEGMENTADO
-                // ======================================
-                let propinaAsignada = 0;
-                let detalleInfo = "";
+                let puntoGlobalTotal = 0;
+                const esPT = String(currentUser.TipoContrato).toLowerCase().includes('part');
+                const sID = String(currentUser.ID).trim(); 
                 
-                // Variables para el Panel de Referencia
-                let refLabel = "";
-                let refValue = 0;
+                const allExtras = sheetsData.extras || {};
+                let userExtras = allExtras[sID] || allExtras[currentUser.ID] || [];
+                if(userExtras.length === 0) { const k = Object.keys(allExtras).find(key => String(key).trim() === sID); if(k) userExtras = allExtras[k]; }
 
-                if (isPartTime) {
-                    // --- PART-TIME (Lógica Específica) ---
-                    const diasTrabajados = diasJson.data?.[s.ID] || [];
-                    
-                    // Sumamos el valor punto SOLO de sus días trabajados
-                    let sumaValoresPuntoPT = 0;
-                    let diasContados = 0;
+                globalDiasCalendar = [];
+                userTypeGlobal = esPT ? 'PT' : 'PLANTA';
 
-                    diasTrabajados.forEach(dia => {
-                        const dataDia = mapRecaudacion[dia];
-                        if (dataDia && dataDia.divisor > 0) {
-                            // Valor punto EXACTO de ese día
-                            const valorPuntoDia = dataDia.monto / dataDia.divisor;
-                            sumaValoresPuntoPT += valorPuntoDia;
-                            diasContados++;
-                        }
+                if (esPT) {
+                    let myDias = diasTrabajados[sID] || diasTrabajados[currentUser.ID] || [];
+                    if(myDias.length===0) { const k = Object.keys(diasTrabajados).find(key => String(key).trim() === sID); if(k) myDias = diasTrabajados[k]; }
+                    myDias.forEach(dStr => {
+                        const fKey = String(dStr).substring(0,10);
+                        const vp = mapVP[fKey]?.totalVP || 0;
+                        puntoGlobalTotal += vp;
+                        if(vp>0) globalDiasCalendar.push({ fecha:fKey, valorPunto:vp, montoAsociado:vp*pts });
                     });
-
-                    // ASIGNADO = (Suma Valores Punto SUS DÍAS) * (Mis Puntos)
-                    propinaAsignada = sumaValoresPuntoPT * misPuntosAntiguedad;
-                    
-                    detalleInfo = `<span class="bg-warning/20 text-warning px-2 py-0.5 rounded text-xs font-bold border border-warning/30">${diasContados} Días Trab.</span>`;
-                    
-                    // Configurar Panel de Referencia para PT
-                    refLabel = "Valor Punto Acumulado (Mis Días):";
-                    refValue = sumaValoresPuntoPT;
-
                 } else {
-                    // --- PLANTA (Lógica Global) ---
-                    // Asignado = (Valor Punto ACUMULADO GLOBAL) * (Mis Puntos) * Factor Asistencia
-                    
-                    const ausencias = misExtras.filter(e => e.tipo === 'AUSENCIA');
-                    let dineroPerdido = 0;
-                    ausencias.forEach(aus => {
-                        const f = normalizeDate(aus.fecha);
-                        const dataDia = mapRecaudacion[f];
-                        if(dataDia) dineroPerdido += dataDia.monto;
+                    Object.values(mapVP).forEach(v => puntoGlobalTotal += v.totalVP);
+                    userExtras.filter(e => String(e.tipo).toUpperCase() === 'AUSENCIA').forEach(a => {
+                        const fKey = String(a.fecha).substring(0,10);
+                        const vp = mapVP[fKey]?.totalVP || 0;
+                        puntoGlobalTotal -= vp;
+                        globalDiasCalendar.push({ fecha:fKey, valorPunto:vp, montoAsociado:vp*pts });
                     });
-
-                    let factor = brutoTotal > 0 ? (1 - (dineroPerdido / brutoTotal)) : 1;
-                    if(factor < 0) factor = 0;
-
-                    propinaAsignada = (valorPuntoAcumuladoGlobal * misPuntosAntiguedad) * factor;
-
-                    if(dineroPerdido > 0) detalleInfo = `<span class="bg-danger/20 text-danger px-2 py-0.5 rounded text-xs font-bold border border-danger/30">-${formatMoney(dineroPerdido)} (Ausencia)</span>`;
-                    
-                    // Configurar Panel de Referencia para Planta
-                    refLabel = "Valor Punto Histórico (Global):";
-                    refValue = valorPuntoAcumuladoGlobal;
                 }
 
-                // ACTUALIZAR PANEL DE REFERENCIA (Dinámico)
-                const panelRef = document.getElementById('globalInfoPanel');
-                document.getElementById('globalRefLabel').textContent = refLabel;
-                document.getElementById('globalRefValue').textContent = formatMoney(refValue);
-                panelRef.classList.remove('hidden');
+                const allAnticipos = sheetsData.anticipos || {};
+                let userAnticipos = allAnticipos[sID] || allAnticipos[currentUser.ID] || [];
+                if(userAnticipos.length === 0) { const k = Object.keys(allAnticipos).find(key => String(key).trim() === sID); if(k) userAnticipos = allAnticipos[k]; }
 
-                // Renderizar Tarjeta
-                renderCard(s, propinaAsignada, totalAnt, totalDesc, saldoAnterior, detalleInfo, misAnticipos, misDescuentosPersonales);
+                const tAnt = userAnticipos.reduce((a,b)=>a+Number(b.cantidad||0),0);
+                const tDesc = userExtras.filter(e => e.tipo === 'DESCUENTO_PERSONAL').reduce((a,b)=>a+Number(b.monto||0),0);
+                let sAnt = (saldosData[sID] || saldosData[currentUser.ID] || 0) + (cierreData[sID] || cierreData[currentUser.ID] || 0);
 
-            } catch(e) {
-                console.error(e);
-                if(!isSilent) document.getElementById('userCardContainer').innerHTML = `<p class="text-red-400 text-center">Error en cálculo.</p>`;
+                const propinaBruta = puntoGlobalTotal * pts;
+                const saldoBruto = (propinaBruta + sAnt) - (tAnt + tDesc);
+                let remanente = saldoBruto > 0 ? saldoBruto % 1000 : saldoBruto;
+                let liquido = saldoBruto > 0 ? saldoBruto - remanente : 0;
+
+                document.getElementById('montoRecibirLabel').textContent = formatMoney(liquido);
+                document.getElementById('remateTag').textContent = `Remate: ${formatMoney(remanente)}`;
+                document.getElementById('globalPtsTag').textContent = `Puntos: ${Math.round(puntoGlobalTotal).toLocaleString('es-CL')}`;
+                document.getElementById('detallesContables').innerHTML = `<div class="flex justify-between border-b border-white/5 pb-2 uppercase"><span class="text-gray-500 italic">Bruta (${pts} pts)</span><b class="text-white">${formatMoney(propinaBruta)}</b></div><div class="flex justify-between border-b border-white/5 pb-2 uppercase"><span class="text-gray-500 italic">Saldo Anterior</span><b class="text-white">${formatMoney(sAnt)}</b></div><div class="flex justify-between text-red-400 uppercase pt-1"><span>Descuentos</span><b>-${formatMoney(tAnt + tDesc)}</b></div>`;
+
+                const listaContainer = document.getElementById('anticiposList');
+                const merged = [...userAnticipos, ...userExtras.filter(e => e.tipo === 'DESCUENTO_PERSONAL')].sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)));
+                if (merged.length > 0) {
+                    listaContainer.innerHTML = merged.map(a => `<div class="bg-card-bg p-4 rounded-2xl border border-white/5 flex justify-between items-center shadow-lg"><div><span class="text-[10px] text-gray-500 uppercase block">${cleanDateStr(a.fecha)}</span><span class="text-[9px] italic font-bold text-gray-300">${a.desc||a.tipo||'Anticipo'}</span></div><b class="text-red-400 text-xs">${formatMoney(a.cantidad||a.monto)}</b></div>`).join('');
+                } else { listaContainer.innerHTML = `<div class="text-center py-6 text-[10px] text-gray-600 uppercase italic font-bold">Sin movimientos registrados</div>`; }
+
+                document.getElementById('historyList').innerHTML = Object.entries(mapVP).sort((a,b) => b[0].localeCompare(a[0])).map(([f, d]) => `<div class="bg-card-bg p-4 rounded-2xl border border-white/5 flex justify-between items-center"><div><p class="text-[10px] text-gray-500 font-black uppercase">${cleanDateStr(f)}</p><p class="text-xs font-black uppercase">${formatMoney(d.montoReal)}</p></div><p class="text-primary font-black text-xs">VP: ${formatMoney(d.totalVP)}</p></div>`).join('');
+                
+                const btn = document.getElementById('calendarBtnContainer');
+                if(globalDiasCalendar.length > 0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
+
+                renderChat();
+                checkNotifications();
+            } catch(e) { console.error("Refresh Error", e); }
+        }
+
+        function setChatMode(mode) {
+            currentChatMode = mode;
+            document.getElementById('btnChatAdmin').className = mode==='ADMIN' ? 'active flex-1 py-2 rounded-xl text-[10px] font-black uppercase' : 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase text-gray-500';
+            document.getElementById('btnChatSocial').className = mode==='SOCIAL' ? 'active flex-1 py-2 rounded-xl text-[10px] font-black uppercase' : 'flex-1 py-2 rounded-xl text-[10px] font-black uppercase text-gray-500';
+            if(mode === 'SOCIAL') { document.getElementById('socialBar').classList.remove('hidden'); } 
+            else { document.getElementById('socialBar').classList.add('hidden'); }
+            renderChat();
+        }
+
+        function renderChat() {
+            const container = document.getElementById('chatMessages');
+            let list = [];
+            
+            if(currentChatMode === 'ADMIN') {
+                list = messages.admin.filter(n => {
+                    if (!n.destinatario || n.destinatario === '' || n.destinatario === 'ADMIN') return true; 
+                    if (String(n.destinatario) === String(currentUser.ID)) return true;
+                    if (String(n.socId) === String(currentUser.ID) && n.destinatario === 'ADMIN') return true;
+                    return false;
+                });
+            } else {
+                list = messages.social.filter(n => {
+                    if (currentSocialTarget.id === 'TODOS') return n.destinatario === 'TODOS';
+                    const sent = String(n.socId) === String(currentUser.ID) && String(n.destinatario) === String(currentSocialTarget.id);
+                    const received = String(n.socId) === String(currentSocialTarget.id) && String(n.destinatario) === String(currentUser.ID);
+                    return sent || received;
+                });
+            }
+
+            if(list.length === 0) { container.innerHTML = `<div class="text-center text-gray-600 mt-10 text-xs italic">No hay mensajes.</div>`; return; }
+
+            container.innerHTML = list.reverse().map(n => {
+                const isMine = String(n.socId) === String(currentUser.ID);
+                const msgContent = n.mensaje || n.nota;
+                const authorName = isMine ? 'Yo' : (n.autor || 'Anónimo');
+                const msgId = n.uuid || n.fecha;
+                
+                let rowClass = isMine ? 'msg-row mine' : 'msg-row other';
+                let bubbleClass = isMine ? 'msg-mine' : 'msg-other';
+                let avatarColor = isMine ? '#3398db' : '#f59e0b';
+                
+                if (currentChatMode === 'ADMIN' && !isMine && n.destinatario !== 'ADMIN') {
+                    bubbleClass = 'msg-admin';
+                    avatarColor = '#ef4444';
+                }
+
+                const avatarHTML = !isMine ? `<div class="msg-avatar" style="background:${avatarColor}">${authorName.charAt(0).toUpperCase()}</div>` : '';
+
+                // MODIFICADO: Se agregaron los botones de Editar y Borrar
+                return `
+                <div class="${rowClass}">
+                    ${avatarHTML}
+                    <div class="msg-bubble ${bubbleClass}">
+                        ${!isMine ? `<div class="text-[9px] font-black opacity-50 mb-1 uppercase">${authorName}</div>` : ''}
+                        <p>${msgContent}</p>
+                        <div class="flex justify-between items-center mt-2">
+                            <div class="text-[8px] opacity-40 font-bold uppercase">${cleanDateStr(n.fecha)} ${String(n.fecha).substring(11,16)}</div>
+                            ${isMine ? `
+                            <div class="flex gap-2">
+                                <button onclick="prepareEdit('${msgId}', \`${msgContent}\`)" class="opacity-50 hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[14px]">edit</span></button>
+                                <button onclick="deleteMsg('${msgId}')" class="opacity-50 hover:opacity-100 text-red-300 transition-opacity"><span class="material-symbols-outlined text-[14px]">delete</span></button>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function checkNotifications() {
+            const total = messages.admin.length + messages.social.length;
+            if (total > lastMsgCount) {
+                document.getElementById('notifBadge').classList.remove('hidden');
+                const all = [...messages.admin, ...messages.social].sort((a,b)=> new Date(b.fecha)-new Date(a.fecha));
+                const newest = all[0];
+                if(newest && String(newest.socId) !== String(currentUser.ID)) {
+                    showToast(newest.autor || 'Nuevo', newest.mensaje||newest.nota);
+                }
+                lastMsgCount = total;
+                localStorage.setItem('lastMsgCountV18.11', lastMsgCount);
             }
         }
 
-        function renderCard(s, asignado, totalAnt, totalDesc, saldoAnt, badgeHtml, listaAnticipos, listaNotas) {
-            
-            const saldoDisponible = asignado - totalAnt - totalDesc + saldoAnt;
-            
-            let aPagar = 0; 
-            let remanente = saldoDisponible;
+        function showToast(autor, msg) {
+            const t = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').textContent = `${autor}: ${msg}`;
+            t.classList.add('show');
+            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
+            setTimeout(()=>t.classList.remove('show'), 4000);
+        }
 
-            if (saldoDisponible > 0) {
-                aPagar = Math.floor(saldoDisponible / 1000) * 1000;
-                remanente = saldoDisponible - aPagar;
+        // --- SISTEMA DE EDICIÓN Y ENVÍO ---
+        const tx = document.getElementById('chatInput'); 
+        tx.addEventListener("input", function(){this.style.height=0;this.style.height=(this.scrollHeight)+"px"}, false);
+
+        function prepareEdit(id, text) { 
+            editingMessageId = id; 
+            const input = document.getElementById('chatInput'); 
+            input.value = text; 
+            input.focus(); 
+            document.getElementById('editModeIndicator').classList.remove('hidden'); 
+            document.getElementById('sendBtn').innerHTML='<span class="material-symbols-outlined">check</span>'; 
+            input.style.height = (input.scrollHeight) + 'px';
+        }
+
+        function cancelEdit() { 
+            editingMessageId = null; 
+            document.getElementById('chatInput').value = ''; 
+            document.getElementById('editModeIndicator').classList.add('hidden'); 
+            document.getElementById('sendBtn').innerHTML='<span class="material-symbols-outlined">send</span>'; 
+            document.getElementById('chatInput').style.height='auto'; 
+        }
+
+        async function handleSend(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            if(!input.value.trim()) return;
+            const btn = document.getElementById('sendBtn'); btn.disabled = true;
+            const url = currentChatMode === 'ADMIN' ? SCRIPT_URL_RECAUDACIONES : SCRIPT_URL_SOCIOS;
+            const dest = currentChatMode === 'ADMIN' ? 'ADMIN' : currentSocialTarget.id;
+            const action = editingMessageId ? 'editNote' : 'addNote';
+            
+            await fetch(url, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: action, 
+                    autor: currentUser.Nombre, 
+                    mensaje: input.value, 
+                    socId: currentUser.ID, 
+                    destinatario: dest, 
+                    noteId: editingMessageId 
+                })
+            });
+            cancelEdit(); btn.disabled = false; refresh();
+        }
+
+        async function deleteMsg(id) {
+            if(!confirm("¿Desea eliminar este mensaje permanentemente?")) return;
+            const url = currentChatMode === 'ADMIN' ? SCRIPT_URL_RECAUDACIONES : SCRIPT_URL_SOCIOS;
+            await fetch(url, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'deleteNote', noteId: id, autor: currentUser.Nombre }) 
+            });
+            refresh();
+        }
+
+        function toggleModal(id, show) { const m=document.getElementById(id); if(show){m.classList.remove('hidden');m.classList.add('flex'); if(id==='usersModal')renderUsersList();}else{m.classList.add('hidden');m.classList.remove('flex');} }
+        function renderUsersList() {
+            const term = document.getElementById('userSearch').value.toLowerCase();
+            const list = allSocios.filter(u => String(u.ID)!==String(currentUser.ID) && (u.Nombre.toLowerCase().includes(term) || u.Apellido.toLowerCase().includes(term)));
+            let html = `<button onclick="selectSocialTarget('TODOS','👥 Chat General')" class="w-full text-left p-3 rounded-xl hover:bg-white/5 flex items-center gap-3 border border-transparent hover:border-white/5 transition-all mb-1"><div class="w-8 h-8 rounded-full bg-warning text-black flex items-center justify-center font-bold text-xs">G</div><div><p class="text-xs font-bold text-white uppercase">Chat General</p><p class="text-[9px] text-gray-500 uppercase font-bold">Público</p></div></button>`;
+            list.forEach(u => html+=`<button onclick="selectSocialTarget('${u.ID}','${u.Nombre} ${u.Apellido}')" class="w-full text-left p-3 rounded-xl hover:bg-white/5 flex items-center gap-3 border border-transparent hover:border-white/5 transition-all"><div class="w-8 h-8 rounded-full bg-card-bg border border-white/10 text-primary flex items-center justify-center font-bold text-xs uppercase">${u.Nombre.charAt(0)}</div><div><p class="text-xs font-bold text-white uppercase truncate">${u.Nombre} ${u.Apellido}</p><p class="text-[9px] text-gray-500 uppercase font-bold tracking-wider">${u.Area}</p></div></button>`);
+            document.getElementById('usersListContent').innerHTML = html;
+        }
+        function selectSocialTarget(id, name) { currentSocialTarget={id,name}; document.getElementById('targetNameLabel').textContent=name; document.getElementById('targetIcon').textContent=id==='TODOS'?'G':name.charAt(0); toggleModal('usersModal',false); renderChat(); }
+        
+        function switchTab(id) {
+            document.querySelectorAll('.tab-section').forEach(t=>t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active','text-primary'));
+            document.getElementById(id).classList.add('active');
+            const btn = document.querySelector(`button[onclick="switchTab('${id}')"]`);
+            if(btn) btn.classList.add('active','text-primary');
+            if(id==='tab-chat') { document.getElementById('notifBadge').classList.add('hidden'); lastMsgCount=messages.admin.length+messages.social.length; localStorage.setItem('lastMsgCountV18.11', lastMsgCount); }
+        }
+        function logout() { localStorage.removeItem('visor_secure_auth'); location.reload(); }
+        function openCalendar() {
+            const modal = document.getElementById('calendarModal');
+            const now = new Date(); const year = now.getFullYear(); const month = now.getMonth();
+            document.getElementById('calendarMonthLabel').textContent = `${["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"][month]} ${year}`;
+            document.getElementById('calendarTitle').textContent = userTypeGlobal === 'PT' ? "Mis Turnos" : "Mis Ausencias";
+            let totalMonto = globalDiasCalendar.reduce((a,b)=>a+b.montoAsociado,0);
+            document.getElementById('modalTotalDias').textContent = globalDiasCalendar.length; document.getElementById('modalTotalGenerado').textContent = formatMoney(totalMonto);
+            const grid = document.getElementById('calendarGrid'); grid.innerHTML = '';
+            let firstDay = new Date(year, month, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1; 
+            for(let i=0; i<firstDay; i++) grid.innerHTML += `<div class="calendar-day empty"></div>`;
+            const daysInMonth = new Date(year, month+1, 0).getDate();
+            for(let i=1; i<=daysInMonth; i++) {
+                const fKey = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const marked = globalDiasCalendar.find(d => d.fecha === fKey);
+                grid.innerHTML += `<div class="calendar-day ${marked ? (userTypeGlobal==='PT'?'worked':'absent') : 'bg-white/5 text-gray-600'}">${i}</div>`;
             }
-
-            const html = `
-                <div class="socio-distribucion-card p-4 rounded-xl bg-white/5 border border-white/10 shadow-lg relative overflow-hidden transition-all duration-300">
-                    <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                        <span class="material-symbols-outlined text-9xl">account_balance_wallet</span>
-                    </div>
-
-                    <div class="relative z-10">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-bold text-white text-lg">${s.Nombre} ${s.Apellido}</h3>
-                                <div class="flex gap-2 mt-1 flex-wrap">
-                                    <span class="bg-primary/20 text-primary text-xs px-2 py-0.5 rounded border border-primary/30 font-bold">
-                                        Puntos: ${calcularPuntos(s.FechaIngreso, s.Area)}
-                                    </span>
-                                    ${badgeHtml}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-1 mb-4 text-sm">
-                            <div class="flex justify-between items-center py-1 border-b border-white/5">
-                                <span class="text-gray-400">Asignado (Est.):</span> 
-                                <span class="font-bold text-blue-400 text-base">${formatMoney(asignado)}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-1 bg-yellow-900/10 px-2 rounded border border-yellow-500/10">
-                                <span class="text-yellow-200">Saldo Anterior:</span>
-                                <strong class="text-white">${formatMoney(saldoAnt)}</strong>
-                            </div>
-                            <div class="flex justify-between items-center py-1 border-b border-white/5">
-                                <span class="text-gray-400">Total Anticipos:</span> 
-                                <span class="font-bold text-orange-400">${formatMoney(totalAnt)}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-1 border-b border-white/5">
-                                <span class="text-gray-400">Total Notas:</span> 
-                                <span class="font-bold text-red-400">${formatMoney(totalDesc)}</span>
-                            </div>
-                        </div>
-
-                        <div class="bg-emerald-900/10 border border-emerald-500/20 p-3 rounded-lg mb-4 backdrop-blur-sm">
-                            <p class="flex justify-between text-xs text-gray-300 mb-2">
-                                Saldo Real: <span class="font-bold ${saldoDisponible < 0 ? 'text-red-500' : 'text-white'}">${formatMoney(saldoDisponible)}</span>
-                            </p>
-                            <div class="flex justify-between items-end border-t border-white/10 pt-2">
-                                <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider">A Pagar (Efectivo)</span>
-                                <span class="text-2xl font-bold text-emerald-400 tracking-tight">${formatMoney(aPagar)}</span>
-                            </div>
-                            <p class="flex justify-between text-xs mt-1 ${remanente < 0 ? 'text-red-500' : 'text-purple-400'}">
-                                Pendiente: <span class="font-bold">${formatMoney(remanente)}</span>
-                            </p>
-                        </div>
-
-                        <div>
-                            <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-widest">Detalle Movimientos</h4>
-                            <div class="space-y-1.5">
-                                ${listaAnticipos.map(a => `
-                                    <div class="flex justify-between items-center bg-black/20 p-2 rounded border border-white/5">
-                                        <div class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-xs text-orange-400">attach_money</span>
-                                            <span class="text-xs text-gray-300">Anticipo</span>
-                                        </div>
-                                        <div class="text-right leading-tight">
-                                            <span class="text-xs font-bold text-white block">${formatMoney(a.cantidad)}</span>
-                                            <span class="text-[9px] text-gray-500">${formatDate(a.fecha)}</span>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                                
-                                ${listaNotas.map(d => `
-                                    <div class="flex justify-between items-center bg-red-900/10 p-2 rounded border border-red-500/10">
-                                        <div class="flex items-center gap-2 overflow-hidden">
-                                            <span class="material-symbols-outlined text-xs text-red-400 shrink-0">receipt_long</span>
-                                            <span class="text-xs text-gray-300 truncate max-w-[150px]">${d.detalle || 'Nota'}</span>
-                                        </div>
-                                        <span class="text-xs font-bold text-red-300 shrink-0">-${formatMoney(d.monto)}</span>
-                                    </div>
-                                `).join('')}
-
-                                ${listaAnticipos.length === 0 && listaNotas.length === 0 ? '<p class="text-[11px] text-center text-gray-600 italic py-2">Sin movimientos registrados.</p>' : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('userCardContainer').innerHTML = html;
+            document.getElementById('calendarDetailsList').innerHTML = globalDiasCalendar.map(d => `<div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5"><div><p class="text-[10px] font-black text-gray-400 uppercase">${formatDateText(d.fecha)}</p><p class="text-[9px] text-gray-600 italic">VP: ${formatMoney(d.valorPunto)}</p></div><span class="${userTypeGlobal==='PT'?'text-warning':'text-danger'} font-black text-sm">${userTypeGlobal==='PT'?'+':'-'}${formatMoney(d.montoAsociado)}</span></div>`).join('');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
         }
-
-        function calcularPuntos(fechaIngreso, area) {
-            let anioIng = 0, mesIng = 0, diaIng = 0; if(!fechaIngreso) return 4;
-            const d = new Date(fechaIngreso); if(isNaN(d.getTime())) return 4;
-            anioIng = d.getFullYear(); mesIng = d.getMonth(); diaIng = d.getDate();
-            const hoy = new Date(); let anos = hoy.getFullYear() - anioIng;
-            if(hoy.getMonth()<mesIng || (hoy.getMonth()===mesIng && hoy.getDate()<diaIng)) anos--;
-            if(anos<0) anos=0; 
-            const pts = 4 + (anos*2); 
-            let tope = 12; const a = (area||'').toLowerCase();
-            if(a.includes('cambista')) tope=8; else if(a.includes('mesa')) tope=20; else if(a.includes('boveda')) tope=10; else if(a.includes('maquina')) tope=12;
-            return Math.min(pts, tope);
-        }
+        function closeCalendar() { document.getElementById('calendarModal').classList.add('hidden'); }
     </script>
 </body>
 </html>
