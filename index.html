@@ -394,7 +394,7 @@
             </div>
             <div>
                 <label class="text-[11px] text-gray-500 font-semibold uppercase tracking-wider ml-1 mb-1.5 block">RUT</label>
-                <input type="text" id="setupRUT" placeholder="15.280.778-3" class="w-full rounded-2xl py-4 px-5 font-medium text-base text-center tracking-wider">
+                <input type="text" id="setupRUT" placeholder="Ej: 12.345.678-9" class="w-full rounded-2xl py-4 px-5 font-medium text-base text-center tracking-wider">
             </div>
             <div>
                 <label class="text-[11px] text-gray-500 font-semibold uppercase tracking-wider ml-1 mb-1.5 block">Crear PIN</label>
@@ -694,14 +694,14 @@
         return `${body}-${dv}`;
     }
     function validateRUT(rut) {
+        // Solo verificar formato mínimo: al menos 7 caracteres, contiene guión, dígito verificador es número o K
         let clean = cleanRUT(rut).replace(/-/g,'');
-        if (clean.length < 2) return false;
-        const dv = clean.slice(-1), body = clean.slice(0,-1);
+        if (clean.length < 7) return false;
+        const dv = clean.slice(-1);
+        const body = clean.slice(0,-1);
         if (!/^\d+$/.test(body)) return false;
-        let sum=0, mul=2;
-        for (let i=body.length-1; i>=0; i--) { sum+=parseInt(body[i])*mul; mul=mul===7?2:mul+1; }
-        const rem=11-(sum%11);
-        return dv === (rem===11?'0':rem===10?'K':String(rem));
+        if (!/^[\dK]$/.test(dv)) return false;
+        return true;
     }
 
     // ── HANDLE SETUP ──────────────────────────────────────────
@@ -710,7 +710,7 @@
         const rutRaw = document.getElementById('setupRUT').value.trim();
         const pin = document.getElementById('setupPIN').value.trim();
         if (!validateRUT(rutRaw)) {
-            alert("RUT no válido.\nEjemplo: 15.280.778-3");
+            alert("RUT no válido.\nEjemplo: 12.345.678-9");
             document.getElementById('setupRUT').focus();
             return;
         }
@@ -753,9 +753,9 @@
     }
 
     function recoverWithRUT() {
-        const rutInput = prompt("Ingrese su RUT para recuperar acceso\n(Ej: 15.280.778-3 o 15280778-3):");
+        const rutInput = prompt("Ingrese su RUT para recuperar acceso:");
         if (!rutInput) return;
-        if (!validateRUT(rutInput)) { alert("RUT no válido.\nEjemplo correcto: 15.280.778-3"); return; }
+        if (!validateRUT(rutInput)) { alert("RUT no válido.\nFormato: 12.345.678-9"); return; }
         const rutNorm = formatRUT(rutInput);
         const localAuth = JSON.parse(localStorage.getItem('visor_secure_auth')||'{}');
         const rutGuardado = localAuth.rut ? formatRUT(localAuth.rut) : '';
