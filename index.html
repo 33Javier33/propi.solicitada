@@ -780,6 +780,26 @@
         }).catch(()=>{});
     }
 
+    function logoutConexion() {
+        if (!currentUser) return;
+        // sendBeacon garantiza que el request se envía aunque el navegador esté cerrando
+        const payload = JSON.stringify({ action: 'logoutConexion', socioId: currentUser.ID });
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon(SCRIPT_URL_SOCIOS, blob);
+    }
+
+    // Registrar desconexión cuando el socio cierra o abandona la app
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden' && currentUser) logoutConexion();
+        if (document.visibilityState === 'visible'  && currentUser) pingConexion();
+    });
+    window.addEventListener('beforeunload', () => {
+        if (currentUser) logoutConexion();
+    });
+    window.addEventListener('pagehide', () => {
+        if (currentUser) logoutConexion();
+    });
+
     function initApp() {
         document.getElementById('loginOverlay').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('hidden');
