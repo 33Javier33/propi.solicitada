@@ -1,91 +1,107 @@
 <!DOCTYPE html>
-<html class="dark" lang="es">
+<html class="light" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>App Socio V19 - Banking</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <title>App Socio V19 - Lumina</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "bank-bg": "#0a0a0f",
-                        "bank-card": "#111118",
-                        "bank-surface": "#16161f",
-                        "bank-border": "rgba(255,255,255,0.06)",
-                        "bank-accent": "#7c6af5",
-                        "bank-accent2": "#5b4de8",
-                        "bank-green": "#00c896",
-                        "bank-red": "#ff4d6d",
-                        "bank-yellow": "#f5a623",
-                        "wa-bg": "#0b1014",
-                        "wa-mine": "#005c4b",
-                        "wa-other": "#1f2c34",
-                    }
+                        "lm-bg":          "#f8f9fa",
+                        "lm-surface":     "#ffffff",
+                        "lm-card":        "#ffffff",
+                        "lm-border":      "#e1e3e4",
+                        "lm-primary":     "#001723",
+                        "lm-primary-mid": "#002d40",
+                        "lm-accent":      "#264b5f",
+                        "lm-secondary":   "#006a62",
+                        "lm-tertiary":    "#705d00",
+                        "lm-green":       "#006a62",
+                        "lm-red":         "#ba1a1a",
+                        "lm-yellow":      "#705d00",
+                        "lm-muted":       "#72787d",
+                        "lm-subtle":      "#f3f4f5",
+                        "lm-high":        "#e7e8e9",
+                        /* chat */
+                        "wa-bg":          "#e5ddd5",
+                        "wa-mine":        "#d9fdd3",
+                        "wa-other":       "#ffffff",
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body":     ["Inter"],
+                        "label":    ["Inter"]
+                    },
                 }
             }
         }
     </script>
     <style>
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-        body { background: #0a0a0f; color: #e8e8f0; font-family: 'Inter', sans-serif; overflow: hidden; }
+        body { background: #f8f9fa; color: #191c1d; font-family: 'Inter', sans-serif; overflow: hidden; min-height: max(884px, 100dvh); }
 
         /* ── SCROLLBAR ── */
         ::-webkit-scrollbar { width: 0; }
 
         /* ── INPUTS ── */
         input {
-            background: #16161f !important;
-            border: 1px solid rgba(255,255,255,0.08) !important;
-            color: white !important;
+            background: #f3f4f5 !important;
+            border: 1px solid #c2c7cc !important;
+            color: #191c1d !important;
             transition: border 0.25s, box-shadow 0.25s;
         }
         input:focus {
-            border-color: #7c6af5 !important;
-            box-shadow: 0 0 0 3px rgba(124,106,245,0.15) !important;
+            border-color: #001723 !important;
+            box-shadow: 0 0 0 3px rgba(0,23,35,0.10) !important;
             outline: none;
         }
+        input::placeholder { color: #9ba3ab !important; }
 
         /* ── TABS ── */
         .tab-section { display: none; height: 100%; flex-direction: column; }
         .tab-section.active { display: flex; }
 
         /* ── NAV ── */
-        .nav-btn { color: #555570; transition: color 0.2s; }
-        .nav-btn.active { color: #7c6af5; }
+        .nav-btn { color: #9ba3ab; transition: color 0.2s; }
+        .nav-btn.active { color: #001723; }
         .nav-btn.active .nav-icon { font-variation-settings: 'FILL' 1; }
 
-        /* ── CARD SHINE ── */
+        /* ── HERO CARD ── */
         .card-shine {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: linear-gradient(135deg, #001723 0%, #002d40 55%, #264b5f 100%);
             position: relative; overflow: hidden;
         }
         .card-shine::before {
             content: ''; position: absolute; inset: 0;
-            background: linear-gradient(105deg, transparent 40%, rgba(124,106,245,0.08) 50%, transparent 60%);
+            background: linear-gradient(105deg, transparent 40%, rgba(167,203,228,0.08) 50%, transparent 60%);
         }
 
-        /* ── BANK GLASSMORPHISM ── */
+        /* ── GLASSMORPHISM (light) ── */
         .glass {
-            background: rgba(22, 22, 31, 0.8);
+            background: rgba(248,249,250,0.90);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
         }
 
         /* ── TOAST ── */
         .toast-box {
             position: fixed; top: -120px; left: 50%; transform: translateX(-50%);
             width: 92%; max-width: 380px;
-            background: rgba(17,17,24,0.97);
-            border: 1px solid rgba(124,106,245,0.3);
+            background: rgba(255,255,255,0.97);
+            border: 1px solid rgba(0,23,35,0.15);
             border-radius: 18px; padding: 14px 18px;
             display: flex; align-items: center; gap: 14px;
-            box-shadow: 0 24px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(124,106,245,0.1);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,23,35,0.06);
             z-index: 300; transition: top 0.45s cubic-bezier(0.34,1.56,0.64,1);
             backdrop-filter: blur(20px);
         }
@@ -94,85 +110,77 @@
         /* ── CALENDAR ── */
         .calendar-day {
             aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;
-            border-radius: 10px; font-size: 12px; font-weight: 500; color: #555570; transition: all 0.2s;
+            border-radius: 10px; font-size: 12px; font-weight: 500; color: #9ba3ab; transition: all 0.2s;
         }
-        .calendar-day.worked { background: rgba(0,200,150,0.15); color: #00c896; border: 1px solid rgba(0,200,150,0.25); }
-        .calendar-day.absent  { background: rgba(255,77,109,0.12); color: #ff4d6d; border: 1px solid rgba(255,77,109,0.25); }
+        .calendar-day.worked { background: rgba(0,106,98,0.10); color: #006a62; border: 1px solid rgba(0,106,98,0.20); }
+        .calendar-day.absent  { background: rgba(186,26,26,0.08); color: #ba1a1a; border: 1px solid rgba(186,26,26,0.18); }
 
         /* ── UNREAD DOT ── */
-        .unread-dot { position: absolute; top: 0px; right: 22%; width: 9px; height: 9px; background: #ff4d6d; border-radius: 50%; border: 2px solid #0a0a0f; }
+        .unread-dot { position: absolute; top: 0px; right: 22%; width: 9px; height: 9px; background: #ba1a1a; border-radius: 50%; border: 2px solid #f8f9fa; }
 
-        /* ── CHAT WHATSAPP ── */
-        #chatMessages { background: #0b1014; }
+        /* ── CHAT WHATSAPP (light) ── */
+        #chatMessages { background: #e5ddd5; }
 
-        /* WA chat header */
         .wa-header {
-            background: #1f2c34;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            background: #001723;
+            border-bottom: 1px solid rgba(0,0,0,0.10);
         }
 
-        /* WA message rows */
         .msg-row { display: flex; width: 100%; margin-bottom: 3px; align-items: flex-end; padding: 0 8px; }
         .msg-row.mine { justify-content: flex-end; }
         .msg-row.first-in-group { margin-top: 8px; }
 
-        /* WA bubbles */
         .msg-bubble {
             max-width: 82%;
             border-radius: 8px;
             padding: 7px 10px 6px 10px;
             position: relative; word-wrap: break-word;
             font-size: 14px; line-height: 1.45;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.35);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
-        /* tail for mine */
         .msg-mine .msg-bubble {
-            background: #005c4b; color: #e9edef;
+            background: #d9fdd3; color: #191c1d;
             border-bottom-right-radius: 2px;
         }
         .msg-mine .msg-bubble::after {
             content: ''; position: absolute; bottom: 0; right: -7px;
             border: 7px solid transparent;
-            border-bottom-color: #005c4b; border-right: 0;
+            border-bottom-color: #d9fdd3; border-right: 0;
             border-bottom-right-radius: 2px;
         }
-        /* tail for other */
         .msg-other .msg-bubble {
-            background: #1f2c34; color: #e9edef;
+            background: #ffffff; color: #191c1d;
             border-bottom-left-radius: 2px;
         }
         .msg-other .msg-bubble::after {
             content: ''; position: absolute; bottom: 0; left: -7px;
             border: 7px solid transparent;
-            border-bottom-color: #1f2c34; border-left: 0;
+            border-bottom-color: #ffffff; border-left: 0;
             border-bottom-left-radius: 2px;
         }
-        /* admin / soporte */
         .msg-admin .msg-bubble {
-            background: #2a2118; color: #f5d98b;
-            border: 1px solid rgba(245,166,35,0.2);
+            background: #fef3cd; color: #705d00;
+            border: 1px solid rgba(112,93,0,0.15);
             border-bottom-left-radius: 2px;
         }
         .msg-admin .msg-bubble::after {
             content: ''; position: absolute; bottom: 0; left: -7px;
             border: 7px solid transparent;
-            border-bottom-color: #2a2118; border-left: 0;
+            border-bottom-color: #fef3cd; border-left: 0;
         }
 
-        /* WA timestamp inside bubble */
         .wa-time {
             display: flex; align-items: center; justify-content: flex-end; gap: 3px;
-            font-size: 10px; color: rgba(255,255,255,0.38);
+            font-size: 10px; color: rgba(0,0,0,0.38);
             margin-top: 4px; line-height: 1;
         }
-        .msg-mine .wa-time { color: rgba(134,217,198,0.7); }
+        .msg-mine .wa-time { color: rgba(0,106,98,0.65); }
 
-        /* WA author name */
         .wa-author { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
 
         /* WA input bar */
         .wa-input-bar {
-            background: #1f2c34;
+            background: #f0f2f5;
             border-top: none;
             padding: 8px 10px;
             padding-bottom: calc(8px + env(safe-area-inset-bottom));
@@ -181,7 +189,7 @@
             flex: 1;
             display: flex;
             align-items: flex-end;
-            background: #2a3942;
+            background: #ffffff;
             border-radius: 24px;
             padding: 10px 16px;
             gap: 8px;
@@ -192,61 +200,57 @@
             min-height: 24px;
             max-height: 120px;
             overflow-y: auto;
-            color: #e9edef;
+            color: #191c1d;
             font-size: 15px;
             line-height: 1.5;
             font-family: 'Inter', sans-serif;
             word-break: break-word;
             white-space: pre-wrap;
             outline: none;
-            caret-color: #00a884;
+            caret-color: #006a62;
         }
         #chatInput:empty::before {
             content: attr(data-placeholder);
-            color: #8696a0;
+            color: #9ba3ab;
             pointer-events: none;
         }
-        /* Make sure tab-chat shows as flex when active */
         #tab-chat.active { display: flex !important; flex-direction: column; }
         .wa-send-btn {
             width: 46px; height: 46px;
-            background: #00a884;
+            background: #001723;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; transition: background 0.2s, transform 0.1s;
         }
-        .wa-send-btn:active { transform: scale(0.92); background: #008f72; }
+        .wa-send-btn:active { transform: scale(0.92); background: #002d40; }
 
-        /* WA date separator */
         .wa-date-sep {
             text-align: center; margin: 12px 0 6px;
-            font-size: 11px; color: #8696a0;
+            font-size: 11px; color: #72787d;
         }
         .wa-date-sep span {
-            background: #1f2c34;
+            background: #ddd9d0;
             padding: 4px 12px; border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(0,0,0,0.06);
         }
 
-        /* WA chat mode switch */
-        .wa-mode-switch { display: flex; background: #1f2c34; border-radius: 10px; overflow: hidden; }
-        .wa-mode-btn { flex: 1; padding: 9px; font-size: 12px; font-weight: 600; color: #8696a0; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .wa-mode-btn.active { background: #2a3942; color: #00a884; }
+        .wa-mode-switch { display: flex; background: rgba(255,255,255,0.12); border-radius: 10px; overflow: hidden; }
+        .wa-mode-btn { flex: 1; padding: 9px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.55); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .wa-mode-btn.active { background: rgba(255,255,255,0.18); color: #ffffff; }
 
-        /* ── EDIT INDICATOR ── */
         .edit-indicator {
-            background: #1f2c34;
-            border-left: 3px solid #00a884;
+            background: #f3f4f5;
+            border-left: 3px solid #006a62;
             border-radius: 4px;
             padding: 6px 10px;
             margin-bottom: 6px;
-            font-size: 12px; color: #8696a0;
+            font-size: 12px; color: #72787d;
             display: flex; justify-content: space-between; align-items: center;
         }
 
         /* ── LOGIN SCREEN ── */
         .login-glow {
-            background: radial-gradient(ellipse at 50% 0%, rgba(124,106,245,0.15) 0%, transparent 70%);
+            background: radial-gradient(ellipse at 50% 0%, rgba(0,23,35,0.06) 0%, transparent 70%);
         }
 
         /* ── CHIP TAGS ── */
@@ -255,7 +259,7 @@
         /* ── MOVEMENT ROW ── */
         .movement-row {
             display: flex; align-items: center; gap: 14px;
-            background: #111118; border: 1px solid rgba(255,255,255,0.05);
+            background: #ffffff; border: 1px solid #e7e8e9;
             border-radius: 16px; padding: 14px 16px;
         }
         .movement-icon {
@@ -268,7 +272,12 @@
         .pulse-dot { animation: pulse-dot 2s infinite; }
 
         /* ── MODAL ── */
-        .bank-modal { background: #111118; border: 1px solid rgba(255,255,255,0.06); border-radius: 28px; }
+        .bank-modal {
+            background: #ffffff;
+            border: 1px solid #e1e3e4;
+            border-radius: 28px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.12);
+        }
 
         /* ── SKELETON LOADER ── */
         @keyframes shimmer {
@@ -276,13 +285,13 @@
             100% { background-position: 600px 0; }
         }
         .skeleton {
-            background: linear-gradient(90deg, #1a1a24 25%, #22222e 50%, #1a1a24 75%);
+            background: linear-gradient(90deg, #e7e8e9 25%, #f3f4f5 50%, #e7e8e9 75%);
             background-size: 600px 100%;
             animation: shimmer 1.6s infinite linear;
             border-radius: 10px;
         }
         .skeleton-card {
-            background: linear-gradient(90deg, #181820 25%, #20202c 50%, #181820 75%);
+            background: linear-gradient(90deg, #e1e3e4 25%, #edeeef 50%, #e1e3e4 75%);
             background-size: 600px 100%;
             animation: shimmer 1.6s infinite linear;
             border-radius: 28px;
@@ -298,6 +307,14 @@
         .fade-up-2 { animation: fadeUp 0.4s 0.12s ease both; }
         .fade-up-3 { animation: fadeUp 0.4s 0.20s ease both; }
         .fade-up-4 { animation: fadeUp 0.4s 0.28s ease both; }
+
+        /* ── NAV BOTTOM ── */
+        #bottomNav {
+            background: rgba(248,249,250,0.92);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(0,0,0,0.07);
+        }
     </style>
 </head>
 <body class="h-[100dvh] w-full flex flex-col">
@@ -306,32 +323,32 @@
      TOAST NOTIFICATION
 ══════════════════════════════════════════ -->
 <div id="toastNotification" class="toast-box" onclick="switchTab('tab-chat')">
-    <div class="w-10 h-10 rounded-2xl bg-bank-accent/20 flex items-center justify-center text-bank-accent shrink-0">
+    <div class="w-10 h-10 rounded-2xl bg-lm-primary/10 flex items-center justify-center text-lm-primary shrink-0">
         <span class="material-symbols-outlined text-lg">chat_bubble</span>
     </div>
     <div class="flex-1 overflow-hidden">
-        <p class="text-[10px] font-semibold text-bank-accent uppercase tracking-widest mb-0.5">Nuevo Mensaje</p>
-        <p id="toastMessage" class="text-sm font-medium text-white truncate">...</p>
+        <p class="text-[10px] font-semibold text-lm-accent uppercase tracking-widest mb-0.5">Nuevo Mensaje</p>
+        <p id="toastMessage" class="text-sm font-medium text-lm-primary truncate">...</p>
     </div>
 </div>
 
 <!-- ══════════════════════════════════════════
      MODAL: CONTACTAR SOCIO
 ══════════════════════════════════════════ -->
-<div id="usersModal" class="fixed inset-0 z-[100] bg-black/70 backdrop-blur-md hidden items-center justify-center p-5">
+<div id="usersModal" class="fixed inset-0 z-[100] bg-black/40 backdrop-blur-md hidden items-center justify-center p-5">
     <div class="bank-modal w-full max-w-sm flex flex-col h-[72vh] shadow-2xl">
-        <div class="p-5 border-b border-white/5">
+        <div class="p-5 border-b border-lm-border">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <p class="text-[10px] text-bank-accent font-semibold tracking-widest uppercase mb-0.5">Mensajería</p>
-                    <h3 class="text-base font-bold text-white">Seleccionar Contacto</h3>
+                    <p class="text-[10px] text-lm-accent font-semibold tracking-widest uppercase mb-0.5">Mensajería</p>
+                    <h3 class="text-base font-bold text-lm-primary">Seleccionar Contacto</h3>
                 </div>
-                <button onclick="toggleModal('usersModal', false)" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white">
+                <button onclick="toggleModal('usersModal', false)" class="w-9 h-9 flex items-center justify-center rounded-full bg-lm-subtle text-lm-muted hover:text-lm-primary">
                     <span class="material-symbols-outlined text-lg">close</span>
                 </button>
             </div>
             <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-[18px]">search</span>
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-lm-muted text-[18px]">search</span>
                 <input type="text" id="userSearch" onkeyup="renderUsersList()" placeholder="Buscar por nombre..." class="w-full rounded-2xl py-3 pl-10 pr-4 text-sm font-medium outline-none">
             </div>
         </div>
@@ -342,33 +359,157 @@
 <!-- ══════════════════════════════════════════
      MODAL: CALENDARIO
 ══════════════════════════════════════════ -->
-<div id="calendarModal" class="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md flex flex-col items-center justify-center p-4 hidden">
+<div id="calendarModal" class="fixed inset-0 z-[60] bg-black/40 backdrop-blur-md flex flex-col items-center justify-center p-4 hidden">
     <div class="bank-modal w-full max-w-sm relative flex flex-col max-h-[88vh] shadow-2xl">
-        <div class="p-6 pb-4 shrink-0 border-b border-white/5">
-            <button onclick="closeCalendar()" class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white">
+        <div class="p-6 pb-4 shrink-0 border-b border-lm-border">
+            <button onclick="closeCalendar()" class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-full bg-lm-subtle text-lm-muted hover:text-lm-primary">
                 <span class="material-symbols-outlined text-lg">close</span>
             </button>
-            <p class="text-[10px] text-bank-accent font-semibold tracking-widest uppercase mb-1">Calendario</p>
-            <h3 id="calendarTitle" class="text-xl font-bold text-white mb-0.5">...</h3>
-            <p id="calendarMonthLabel" class="text-sm text-gray-400 font-medium mb-5">...</p>
+            <p class="text-[10px] text-lm-accent font-semibold tracking-widest uppercase mb-1">Calendario</p>
+            <h3 id="calendarTitle" class="text-xl font-bold text-lm-primary mb-0.5">...</h3>
+            <p id="calendarMonthLabel" class="text-sm text-lm-muted font-medium mb-5">...</p>
             <div class="grid grid-cols-2 gap-3 mb-5">
-                <div class="bg-bank-surface rounded-2xl p-4 border border-white/5">
-                    <p class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Días</p>
-                    <p id="modalTotalDias" class="text-2xl font-bold text-white">0</p>
+                <div class="bg-lm-subtle rounded-2xl p-4 border border-lm-border">
+                    <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider mb-1">Días</p>
+                    <p id="modalTotalDias" class="text-2xl font-bold text-lm-primary">0</p>
                 </div>
-                <div class="bg-bank-surface rounded-2xl p-4 border border-white/5">
-                    <p class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1">Monto</p>
-                    <p id="modalTotalGenerado" class="text-xl font-bold text-bank-green">$0</p>
+                <div class="bg-lm-subtle rounded-2xl p-4 border border-lm-border">
+                    <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider mb-1">Monto</p>
+                    <p id="modalTotalGenerado" class="text-xl font-bold text-lm-green">$0</p>
                 </div>
             </div>
-            <div class="grid grid-cols-7 gap-1.5 mb-2 text-center text-[10px] text-gray-600 font-semibold uppercase tracking-wider">
+            <div class="grid grid-cols-7 gap-1.5 mb-2 text-center text-[10px] text-lm-muted font-semibold uppercase tracking-wider">
                 <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div><div>Do</div>
             </div>
             <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
         </div>
         <div class="flex-1 overflow-y-auto p-5 pt-4">
-            <p class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-3">Detalle Mensual</p>
+            <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider mb-3">Detalle Mensual</p>
             <div id="calendarDetailsList" class="space-y-2.5"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: AYUDA / ONBOARDING
+══════════════════════════════════════════ -->
+<div id="helpModal" class="fixed inset-0 z-[200] bg-black/50 backdrop-blur-md hidden items-end justify-center">
+    <div style="background:#ffffff;border-radius:28px 28px 0 0;width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 -24px 64px rgba(0,0,0,0.15);overflow:hidden;">
+
+        <!-- Barra superior -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 20px 0 20px;flex-shrink:0;">
+            <span id="helpCounter" style="font-size:11px;font-weight:700;color:#9ba3ab;letter-spacing:0.08em;text-transform:uppercase;">1 / 9</span>
+            <button onclick="closeHelp()" style="width:32px;height:32px;border-radius:50%;background:#f3f4f5;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <span class="material-symbols-outlined" style="font-size:16px;color:#72787d;">close</span>
+            </button>
+        </div>
+
+        <!-- Dots -->
+        <div id="helpDots" style="display:flex;align-items:center;gap:6px;padding:14px 20px 0 20px;flex-shrink:0;flex-wrap:wrap;"></div>
+
+        <!-- Contenido scrollable -->
+        <div style="flex:1;overflow-y:auto;padding:24px 24px 8px 24px;">
+            <!-- Ícono -->
+            <div id="helpIconWrap" style="width:68px;height:68px;border-radius:20px;border:1.5px solid;display:flex;align-items:center;justify-content:center;margin-bottom:20px;transition:all 0.3s;">
+                <span id="helpIcon" class="material-symbols-outlined" style="font-size:34px;transition:color 0.3s;" >help</span>
+            </div>
+            <!-- Título -->
+            <h2 id="helpTitle" style="font-family:Manrope,sans-serif;font-size:22px;font-weight:800;color:#001723;line-height:1.25;margin-bottom:14px;"></h2>
+            <!-- Cuerpo -->
+            <p id="helpBody" style="font-size:14px;line-height:1.7;color:#42484c;margin-bottom:16px;"></p>
+            <!-- Preview visual -->
+            <div id="helpPreview" style="margin-top:4px;"></div>
+        </div>
+
+        <!-- Botones -->
+        <div style="display:flex;gap:10px;padding:20px 24px;padding-bottom:calc(20px + env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid #f3f4f5;">
+            <button id="helpBtnPrev" onclick="helpPrev()" style="flex:0 0 auto;width:46px;height:46px;border-radius:14px;background:#f3f4f5;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <span class="material-symbols-outlined" style="font-size:20px;color:#72787d;">arrow_back</span>
+            </button>
+            <button id="helpBtnNext" onclick="helpNext()" style="flex:1;height:46px;border-radius:14px;border:none;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#ffffff;transition:background 0.3s;">
+                Siguiente
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: ACERCA DE
+══════════════════════════════════════════ -->
+<div id="aboutModal" class="fixed inset-0 z-[200] bg-black/50 backdrop-blur-md hidden items-end justify-center">
+    <div style="background:#ffffff;border-radius:28px 28px 0 0;width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 -24px 64px rgba(0,0,0,0.15);overflow:hidden;">
+
+        <!-- Handle -->
+        <div style="width:36px;height:4px;background:#e1e3e4;border-radius:2px;margin:14px auto 0;flex-shrink:0;"></div>
+
+        <!-- Scrollable -->
+        <div style="flex:1;overflow-y:auto;padding:24px 24px 32px;">
+
+            <!-- Marca -->
+            <div style="text-align:center;margin-bottom:28px;">
+                <div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#001723,#264b5f);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 8px 24px rgba(0,23,35,0.20);">
+                    <span class="material-symbols-outlined" style="font-size:36px;color:#ffffff;font-variation-settings:'FILL' 1">code</span>
+                </div>
+                <div style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:#001723;letter-spacing:-0.01em;">CarlosPN Interactive<sup style="font-size:11px;font-weight:700;">®</sup></div>
+                <div style="font-size:12px;color:#72787d;font-weight:500;margin-top:4px;letter-spacing:0.04em;">SISTEMA PROFESIONAL DE GESTIÓN · 2026</div>
+            </div>
+
+            <!-- Divisor -->
+            <div style="height:1px;background:#f3f4f5;margin-bottom:24px;"></div>
+
+            <!-- Foto / Avatar autor -->
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+                <div style="width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,#001723,#006a62);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(0,23,35,0.15);">
+                    <span style="font-family:Manrope,sans-serif;font-size:22px;font-weight:800;color:#fff;">C</span>
+                </div>
+                <div>
+                    <div style="font-family:Manrope,sans-serif;font-size:16px;font-weight:800;color:#001723;">Carlos</div>
+                    <div style="font-size:12px;color:#006a62;font-weight:600;margin-top:1px;">Croupier · Casino de Puerto Varas</div>
+                    <div style="font-size:11px;color:#9ba3ab;margin-top:1px;">Encargado — La Comisión Propina</div>
+                </div>
+            </div>
+
+            <!-- Bio -->
+            <div style="background:#f8f9fa;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #f0f1f2;">
+                <p style="font-size:13px;line-height:1.75;color:#42484c;margin:0;">
+                    Colaborador del Casino de Puerto Varas desde <b style="color:#001723;">2013</b>, actualmente a cargo de la gestión del <b style="color:#001723;">Fondo Solidario de Propina</b> como parte de La Comisión Propina — el equipo que vela por los derechos y el bienestar económico de los socios.
+                </p>
+            </div>
+
+            <div style="background:#f8f9fa;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #f0f1f2;">
+                <p style="font-size:13px;line-height:1.75;color:#42484c;margin:0;">
+                    Apasionado por la <b style="color:#001723;">computación y la tecnología</b>, lleva más de <b style="color:#001723;">5 años</b> desarrollando aplicaciones y sistemas con entusiasmo, dedicación y mucho esfuerzo propio — siempre buscando soluciones prácticas y modernas para su equipo.
+                </p>
+            </div>
+
+            <!-- App info -->
+            <div style="background:linear-gradient(135deg,#001723,#002d40);border-radius:16px;padding:16px;margin-bottom:24px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                    <span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.6)">smartphone</span>
+                    <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;">Esta aplicación</span>
+                </div>
+                <p style="font-size:13px;line-height:1.7;color:rgba(255,255,255,0.75);margin:0 0 10px;">
+                    Diseñada y desarrollada íntegramente para el Fondo Solidario — permite a cada socio consultar su balance, historial, movimientos y comunicarse con el equipo desde su celular, en tiempo real.
+                </p>
+                <div style="display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
+                    <span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.35)">update</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 19 · 2026</span>
+                </div>
+            </div>
+
+            <!-- Firma -->
+            <div style="text-align:center;">
+                <div style="font-size:11px;color:#c2c7cc;font-weight:500;letter-spacing:0.06em;">Hecho con</div>
+                <div style="font-size:13px;color:#9ba3ab;font-weight:600;margin-top:2px;">❤️ pasión &amp; ☕ café</div>
+                <div style="font-size:11px;color:#c2c7cc;margin-top:8px;font-style:italic;">CarlosPN Interactive® — Todos los derechos reservados</div>
+            </div>
+        </div>
+
+        <!-- Botón cerrar -->
+        <div style="padding:16px 24px;padding-bottom:calc(16px + env(safe-area-inset-bottom));border-top:1px solid #f3f4f5;flex-shrink:0;">
+            <button onclick="toggleAbout(false)" style="width:100%;height:46px;border-radius:14px;background:#001723;border:none;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#ffffff;">
+                Cerrar
+            </button>
         </div>
     </div>
 </div>
@@ -376,35 +517,35 @@
 <!-- ══════════════════════════════════════════
      LOGIN OVERLAY
 ══════════════════════════════════════════ -->
-<div id="loginOverlay" class="fixed inset-0 z-[150] bg-bank-bg login-glow flex flex-col items-center justify-center p-6">
+<div id="loginOverlay" class="fixed inset-0 z-[150] bg-lm-bg login-glow flex flex-col items-center justify-center p-6">
 
     <!-- SETUP / VINCULAR -->
     <div id="setupBox" class="w-full max-w-sm hidden">
         <div class="text-center mb-8">
-            <div class="w-20 h-20 rounded-3xl bg-bank-accent/10 border border-bank-accent/20 mx-auto mb-5 flex items-center justify-center">
-                <span class="material-symbols-outlined text-4xl text-bank-accent">account_balance</span>
+            <div class="w-20 h-20 rounded-3xl bg-lm-primary/8 border border-lm-primary/15 mx-auto mb-5 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-lm-primary">account_balance</span>
             </div>
-            <h1 class="text-2xl font-bold text-white mb-1">Vincular Cuenta</h1>
-            <p class="text-sm text-gray-500">Ingrese sus datos para activar el dispositivo</p>
+            <h1 class="font-headline text-2xl font-bold text-lm-primary mb-1">Vincular Cuenta</h1>
+            <p class="text-sm text-lm-muted">Ingrese sus datos para activar el dispositivo</p>
         </div>
         <div class="space-y-3">
             <div>
-                <label class="text-[11px] text-gray-500 font-semibold uppercase tracking-wider ml-1 mb-1.5 block">ID Socio</label>
+                <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">ID Socio</label>
                 <input type="text" id="setupID" placeholder="Ej: SOC-001" class="w-full rounded-2xl py-4 px-5 font-medium text-base">
             </div>
             <div>
-                <label class="text-[11px] text-gray-500 font-semibold uppercase tracking-wider ml-1 mb-1.5 block">RUT</label>
+                <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">RUT</label>
                 <input type="text" id="setupRUT" placeholder="Ej: 12.345.678-9" class="w-full rounded-2xl py-4 px-5 font-medium text-base text-center tracking-wider">
             </div>
             <div>
-                <label class="text-[11px] text-gray-500 font-semibold uppercase tracking-wider ml-1 mb-1.5 block">Crear PIN</label>
+                <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">Crear PIN</label>
                 <input type="password" id="setupPIN" maxlength="4" inputmode="numeric" placeholder="••••" class="w-full rounded-2xl py-4 px-5 font-medium text-2xl text-center tracking-[0.5em]">
             </div>
-            <button onclick="handleSetup()" class="w-full bg-bank-accent hover:bg-bank-accent2 py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-bank-accent/20 mt-2">
+            <button onclick="handleSetup()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20 mt-2">
                 Activar Dispositivo
             </button>
         </div>
-        <button onclick="cancelRecovery()" class="mt-6 w-full text-sm text-gray-600 font-medium hover:text-white transition-colors text-center">
+        <button onclick="cancelRecovery()" class="mt-6 w-full text-sm text-lm-muted font-medium hover:text-lm-primary transition-colors text-center">
             Cancelar / Volver
         </button>
     </div>
@@ -412,26 +553,26 @@
     <!-- FAST ACCESS / PIN -->
     <div id="fastAccessBox" class="w-full max-w-sm hidden">
         <div class="text-center mb-10">
-            <div class="w-20 h-20 rounded-full bg-bank-surface border-2 border-bank-accent/30 mx-auto mb-5 flex items-center justify-center shadow-xl shadow-bank-accent/10">
-                <span id="fastAvatarIcon" class="text-3xl font-bold text-bank-accent">?</span>
+            <div class="w-20 h-20 rounded-full bg-lm-high border-2 border-lm-primary/20 mx-auto mb-5 flex items-center justify-center shadow-xl shadow-lm-primary/10">
+                <span id="fastAvatarIcon" class="text-3xl font-bold text-lm-primary font-headline">?</span>
             </div>
-            <h2 id="fastName" class="text-2xl font-bold text-white">...</h2>
-            <p id="fastIDLabel" class="text-sm text-gray-500 mt-1">ID: ...</p>
+            <h2 id="fastName" class="font-headline text-2xl font-bold text-lm-primary">...</h2>
+            <p id="fastIDLabel" class="text-sm text-lm-muted mt-1">ID: ...</p>
         </div>
         <div class="mb-6">
-            <label class="text-[11px] text-gray-500 font-semibold uppercase tracking-wider text-center block mb-3">Ingrese su PIN</label>
+            <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider text-center block mb-3">Ingrese su PIN</label>
             <input type="password" id="fastPIN" maxlength="4" inputmode="numeric" placeholder="••••"
                 onkeydown="if(event.key==='Enter') handleFastLogin()"
-                class="w-full rounded-2xl py-5 text-4xl text-center tracking-[0.6em] text-white bg-bank-surface border-bank-border">
+                class="w-full rounded-2xl py-5 text-4xl text-center tracking-[0.6em] text-lm-primary">
         </div>
-        <button onclick="handleFastLogin()" class="w-full bg-bank-accent hover:bg-bank-accent2 py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-bank-accent/20">
+        <button onclick="handleFastLogin()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20">
             Ingresar
         </button>
         <div class="flex flex-col gap-4 mt-8">
-            <button onclick="recoverWithRUT()" class="text-sm text-bank-accent font-medium hover:text-indigo-300 transition-colors text-center">
+            <button onclick="recoverWithRUT()" class="text-sm text-lm-accent font-medium hover:text-lm-primary transition-colors text-center">
                 ¿Olvidó su PIN?
             </button>
-            <button onclick="cambiarUsuario()" class="text-sm text-gray-600 font-medium hover:text-white transition-colors text-center">
+            <button onclick="cambiarUsuario()" class="text-sm text-lm-muted font-medium hover:text-lm-primary transition-colors text-center">
                 Cambiar de Usuario
             </button>
         </div>
@@ -439,8 +580,8 @@
 
     <!-- SPINNER -->
     <div id="loadingState" class="hidden flex-col items-center gap-4 mt-8">
-        <div class="w-10 h-10 border-[3px] border-bank-accent/20 border-t-bank-accent rounded-full animate-spin"></div>
-        <p class="text-sm text-gray-500">Cargando...</p>
+        <div class="w-10 h-10 border-[3px] border-lm-primary/20 border-t-lm-primary rounded-full animate-spin"></div>
+        <p class="text-sm text-lm-muted">Cargando...</p>
     </div>
 </div>
 
@@ -452,18 +593,21 @@
     <!-- HEADER -->
     <header class="px-5 pt-safe-top py-3.5 flex items-center justify-between shrink-0 glass z-20">
         <div class="flex items-center gap-3">
-            <div id="userAvatar" class="w-10 h-10 rounded-2xl bg-gradient-to-br from-bank-accent to-bank-accent2 flex items-center justify-center text-white font-bold text-base shadow-lg">?</div>
+            <div id="userAvatar" class="w-10 h-10 rounded-2xl bg-gradient-to-br from-lm-primary to-lm-accent flex items-center justify-center text-white font-bold text-base shadow-lg font-headline">?</div>
             <div>
-                <p class="text-[10px] text-gray-500 font-medium">Bienvenido</p>
-                <h2 id="userNameLabel" class="text-sm font-semibold text-white leading-tight">...</h2>
+                <p class="text-[10px] text-lm-muted font-medium">Bienvenido</p>
+                <h2 id="userNameLabel" class="text-sm font-semibold text-lm-primary leading-tight">...</h2>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <div class="flex items-center gap-1.5 bg-bank-surface border border-white/5 rounded-xl px-3 py-1.5">
-                <div class="w-1.5 h-1.5 rounded-full bg-bank-green pulse-dot"></div>
-                <span id="userAreaLabel" class="text-[11px] text-gray-300 font-medium">...</span>
+            <div class="flex items-center gap-1.5 bg-lm-subtle border border-lm-border rounded-xl px-3 py-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-lm-green pulse-dot"></div>
+                <span id="userAreaLabel" class="text-[11px] text-lm-primary font-medium">...</span>
             </div>
-            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-gray-500 hover:text-bank-red transition-colors">
+            <button onclick="openHelp()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-lm-subtle text-lm-muted hover:text-lm-primary transition-colors border border-lm-border">
+                <span class="material-symbols-outlined text-[18px]">help</span>
+            </button>
+            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-lm-subtle text-lm-muted hover:text-lm-red transition-colors border border-lm-border">
                 <span class="material-symbols-outlined text-[18px]">logout</span>
             </button>
         </div>
@@ -473,28 +617,26 @@
     <main class="flex-1 overflow-hidden relative">
 
         <!-- ── TAB: HOME (BALANCE) ── -->
-        <div id="tab-home" class="tab-section active overflow-y-auto pb-32 pt-1">
+        <div id="tab-home" class="tab-section active overflow-y-auto pb-32 pt-1 bg-lm-bg">
 
             <!-- HERO BALANCE CARD -->
             <div class="mx-4 mt-4 mb-5 card-shine rounded-[28px] p-6 shadow-2xl relative overflow-hidden" style="min-height:180px">
-                <!-- Background decoration -->
-                <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-bank-accent/8 blur-2xl pointer-events-none"></div>
-                <div class="absolute right-10 bottom-0 w-24 h-24 rounded-full bg-blue-500/5 blur-xl pointer-events-none"></div>
-                <!-- Card chip -->
+                <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5 blur-2xl pointer-events-none"></div>
+                <div class="absolute right-10 bottom-0 w-24 h-24 rounded-full bg-lm-secondary/10 blur-xl pointer-events-none"></div>
                 <div class="flex items-start justify-between mb-6 relative z-10">
                     <div>
-                        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1">Balance a Recibir</p>
-                        <h2 id="montoRecibirLabel" class="text-4xl font-bold text-white tracking-tight">$0</h2>
+                        <p class="text-[10px] font-semibold text-white/50 uppercase tracking-widest mb-1">Balance a Recibir</p>
+                        <h2 id="montoRecibirLabel" class="font-headline text-4xl font-bold text-white tracking-tight">$0</h2>
                     </div>
-                    <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-bank-accent text-xl">account_balance_wallet</span>
+                    <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white/80 text-xl">account_balance_wallet</span>
                     </div>
                 </div>
                 <div class="flex gap-2 relative z-10 flex-wrap">
-                    <span id="remateTag" class="chip bg-white/8 text-gray-300 border border-white/8">
+                    <span id="remateTag" class="chip bg-white/10 text-white/70 border border-white/10">
                         <span class="material-symbols-outlined text-[13px]">savings</span> Remanente: $0
                     </span>
-                    <span id="globalPtsTag" class="chip bg-bank-accent/15 text-indigo-200 border border-bank-accent/20">
+                    <span id="globalPtsTag" class="chip bg-white/10 text-white/80 border border-white/15">
                         <span class="material-symbols-outlined text-[13px]">stars</span> Puntos: 0
                     </span>
                 </div>
@@ -503,32 +645,32 @@
             <!-- RESUMEN CONTABLE -->
             <div class="px-4 mb-5">
                 <div class="flex items-center justify-between mb-3">
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Resumen Contable</p>
+                    <p class="text-[10px] font-bold text-lm-muted uppercase tracking-widest">Resumen Contable</p>
                 </div>
-                <div id="detallesContables" class="bg-bank-card border border-white/5 rounded-[20px] overflow-hidden divide-y divide-white/5 shadow-sm"></div>
+                <div id="detallesContables" class="bg-lm-card border border-lm-border rounded-[20px] overflow-hidden divide-y divide-lm-border shadow-sm"></div>
             </div>
 
             <!-- CALENDARIO BTN -->
             <div id="calendarBtnContainer" class="hidden px-4 mb-5">
-                <button onclick="openCalendar()" class="w-full py-3.5 rounded-[18px] flex items-center justify-center gap-3 font-semibold text-sm bg-bank-surface border border-white/6 text-white hover:bg-white/5 active:scale-[0.98] transition-all">
-                    <span class="material-symbols-outlined text-bank-accent text-[18px]">event_note</span>
+                <button onclick="openCalendar()" class="w-full py-3.5 rounded-[18px] flex items-center justify-center gap-3 font-semibold text-sm bg-lm-subtle border border-lm-border text-lm-primary hover:bg-lm-high active:scale-[0.98] transition-all">
+                    <span class="material-symbols-outlined text-lm-accent text-[18px]">event_note</span>
                     Ver Calendario de Turnos
                 </button>
             </div>
 
             <!-- ÚLTIMOS MOVIMIENTOS -->
             <div class="px-4">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Últimos Movimientos</p>
+                <p class="text-[10px] font-bold text-lm-muted uppercase tracking-widest mb-3">Últimos Movimientos</p>
                 <div id="anticiposList" class="space-y-2 pb-6 min-h-[80px]">
-                    <p class="text-center text-xs text-gray-600 py-8">Cargando movimientos...</p>
+                    <p class="text-center text-xs text-lm-muted py-8">Cargando movimientos...</p>
                 </div>
             </div>
         </div>
 
         <!-- ── TAB: HISTORIAL ── -->
-        <div id="tab-history" class="tab-section overflow-y-auto pb-32 pt-4">
+        <div id="tab-history" class="tab-section overflow-y-auto pb-32 pt-4 bg-lm-bg">
             <div class="px-4">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Historial de Rendimientos</p>
+                <p class="text-[10px] font-bold text-lm-muted uppercase tracking-widest mb-4">Historial de Rendimientos</p>
                 <div id="historyList" class="space-y-2.5 pb-6"></div>
             </div>
         </div>
@@ -549,55 +691,55 @@
             </div>
 
             <!-- Social Contact Bar -->
-            <div id="socialBar" class="hidden shrink-0" style="background:#182229; border-bottom:1px solid rgba(255,255,255,0.05)">
+            <div id="socialBar" class="hidden shrink-0" style="background:#002d40; border-bottom:1px solid rgba(255,255,255,0.08)">
                 <button onclick="toggleModal('usersModal', true)" class="w-full px-4 py-3 flex items-center gap-3">
-                    <div id="targetIcon" style="width:36px;height:36px;border-radius:50%;background:rgba(124,106,245,0.2);color:#7c6af5;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">G</div>
+                    <div id="targetIcon" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);color:#ffffff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">G</div>
                     <div class="flex-1 text-left">
-                        <p style="font-size:10px;color:#8696a0">Conversación actual</p>
+                        <p style="font-size:10px;color:rgba(255,255,255,0.5)">Conversación actual</p>
                         <p id="targetNameLabel" style="font-size:14px;font-weight:600;color:white">Chat General</p>
                     </div>
-                    <span class="material-symbols-outlined" style="color:#8696a0">expand_more</span>
+                    <span class="material-symbols-outlined" style="color:rgba(255,255,255,0.5)">expand_more</span>
                 </button>
             </div>
 
             <!-- Messages -->
-            <div id="chatMessages" style="flex:1; overflow-y:auto; padding:12px 0; background:#0b1014;"></div>
+            <div id="chatMessages" style="flex:1; overflow-y:auto; padding:12px 0;"></div>
 
-            <!-- INPUT BAR — siempre visible encima del nav -->
-            <div id="chatInputContainer" style="background:#1f2c34; padding:10px 12px 10px 12px; flex-shrink:0; border-top:1px solid rgba(255,255,255,0.05);">
+            <!-- INPUT BAR -->
+            <div id="chatInputContainer" style="background:#f0f2f5; padding:10px 12px 10px 12px; flex-shrink:0; border-top:1px solid rgba(0,0,0,0.06);">
                 <!-- Edit indicator -->
-                <div id="editModeIndicator" class="hidden" style="background:#1a2630;border-left:3px solid #00a884;border-radius:4px;padding:6px 10px;margin-bottom:8px;font-size:12px;color:#8696a0;display:flex;justify-content:space-between;align-items:center;">
+                <div id="editModeIndicator" class="hidden" style="background:#e8f5e9;border-left:3px solid #006a62;border-radius:4px;padding:6px 10px;margin-bottom:8px;font-size:12px;color:#72787d;display:flex;justify-content:space-between;align-items:center;">
                     <div style="display:flex;align-items:center;gap:6px;">
-                        <span class="material-symbols-outlined" style="font-size:14px;color:#00a884">edit</span>
+                        <span class="material-symbols-outlined" style="font-size:14px;color:#006a62">edit</span>
                         <span>Editando mensaje...</span>
                     </div>
-                    <button onclick="cancelEdit()" style="color:#8696a0">
+                    <button onclick="cancelEdit()" style="color:#9ba3ab">
                         <span class="material-symbols-outlined" style="font-size:16px">close</span>
                     </button>
                 </div>
                 <!-- Input row -->
                 <div style="display:flex; align-items:flex-end; gap:10px;">
-                    <div style="flex:1; background:#2a3942; border-radius:22px; padding:11px 16px; min-height:46px; display:flex; align-items:center;">
+                    <div style="flex:1; background:#ffffff; border-radius:22px; padding:11px 16px; min-height:46px; display:flex; align-items:center; border:1px solid #e1e3e4;">
                         <div id="chatInput"
                             contenteditable="true"
                             data-placeholder="Escribe un mensaje..."
-                            style="flex:1; outline:none; color:#e9edef; font-size:15px; line-height:1.5; font-family:Inter,sans-serif; max-height:100px; overflow-y:auto; word-break:break-word; white-space:pre-wrap; min-height:22px; width:100%;">
+                            style="flex:1; outline:none; color:#191c1d; font-size:15px; line-height:1.5; font-family:Inter,sans-serif; max-height:100px; overflow-y:auto; word-break:break-word; white-space:pre-wrap; min-height:22px; width:100%;">
                         </div>
                     </div>
-                    <button id="sendBtn" onclick="handleSend()" style="width:46px;height:46px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;">
+                    <button id="sendBtn" onclick="handleSend()" style="width:46px;height:46px;border-radius:50%;background:#001723;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;">
                         <span class="material-symbols-outlined" style="color:white;font-size:22px">send</span>
                     </button>
                 </div>
             </div>
             <!-- Spacer for bottom nav -->
-            <div id="chatSpacer" style="height:80px; flex-shrink:0; background:#1f2c34;"></div>
+            <div id="chatSpacer" style="height:80px; flex-shrink:0; background:#f0f2f5;"></div>
         </div>
 
     </main>
 
     <!-- BOTTOM NAV -->
-    <nav id="bottomNav" class="fixed bottom-0 w-full z-[40] glass pb-safe-bottom">
-        <div class="flex justify-around items-center px-4 pt-3 pb-4">
+    <nav id="bottomNav" class="fixed bottom-0 w-full z-[40] pb-safe-bottom">
+        <div class="flex justify-around items-center px-4 pt-3 pb-2">
             <button onclick="switchTab('tab-home')" class="nav-btn active flex flex-col items-center gap-1.5 w-20">
                 <span class="nav-icon material-symbols-outlined text-[24px]">account_balance_wallet</span>
                 <span class="text-[10px] font-semibold tracking-wide">Balance</span>
@@ -612,6 +754,10 @@
                 <span class="text-[10px] font-semibold tracking-wide">Mensajes</span>
             </button>
         </div>
+        <!-- Crédito -->
+        <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026</span>
+        </button>
     </nav>
 
 </div><!-- /appContainer -->
@@ -627,7 +773,6 @@
 
     // ── INIT ──────────────────────────────────────────────────
     window.onload = async () => {
-        // RUT auto-format
         const rutField = document.getElementById('setupRUT');
         if (rutField) {
             rutField.addEventListener('input', function() {
@@ -694,7 +839,6 @@
         return `${body}-${dv}`;
     }
     function validateRUT(rut) {
-        // Solo verificar formato mínimo: al menos 7 caracteres, contiene guión, dígito verificador es número o K
         let clean = cleanRUT(rut).replace(/-/g,'');
         if (clean.length < 7) return false;
         const dv = clean.slice(-1);
@@ -730,7 +874,6 @@
             document.getElementById('fastPIN').value = '';
             return;
         }
-        // Si los socios aún no cargaron, esperarlos antes de continuar
         if (allSocios.length === 0) {
             const spinner = document.getElementById('loadingState');
             spinner.classList.remove('hidden');
@@ -782,23 +925,67 @@
 
     function logoutConexion() {
         if (!currentUser) return;
-        // sendBeacon garantiza que el request se envía aunque el navegador esté cerrando
         const payload = JSON.stringify({ action: 'logoutConexion', socioId: currentUser.ID });
         const blob = new Blob([payload], { type: 'application/json' });
         navigator.sendBeacon(SCRIPT_URL_SOCIOS, blob);
     }
 
-    // Registrar desconexión cuando el socio cierra o abandona la app
+    // ── INACTIVIDAD (15 min acumulados solo en primer plano) ──
+    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos en ms
+    let inactivityAccum = 0;       // ms acumulados de inactividad
+    let inactivityStart = null;    // cuándo empezó el conteo actual
+    let inactivityTimer = null;    // intervalo de chequeo
+
+    function resetInactivity() {
+        inactivityAccum = 0;
+        inactivityStart = document.visibilityState === 'visible' ? Date.now() : null;
+    }
+
+    function startInactivityClock() {
+        if (inactivityTimer) return;
+        inactivityStart = Date.now();
+        inactivityTimer = setInterval(() => {
+            if (!currentUser) return;
+            if (inactivityStart === null) return; // pausado
+            const elapsed = Date.now() - inactivityStart;
+            if (inactivityAccum + elapsed >= INACTIVITY_LIMIT) {
+                clearInterval(inactivityTimer);
+                inactivityTimer = null;
+                logout();
+            }
+        }, 10000); // chequea cada 10s
+    }
+
+    function pauseInactivityClock() {
+        if (inactivityStart !== null) {
+            inactivityAccum += Date.now() - inactivityStart;
+            inactivityStart = null;
+        }
+    }
+
+    function resumeInactivityClock() {
+        if (inactivityAccum >= INACTIVITY_LIMIT) {
+            // Ya pasó el tiempo mientras estaba fuera → cerrar
+            logout();
+            return;
+        }
+        inactivityStart = Date.now();
+    }
+
+    // Eventos que resetean la inactividad
+    ['touchstart','touchmove','click','keydown','scroll'].forEach(ev => {
+        document.addEventListener(ev, () => { if (currentUser) resetInactivity(); }, { passive: true });
+    });
+
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden' && currentUser) logoutConexion();
-        if (document.visibilityState === 'visible'  && currentUser) pingConexion();
+        if (document.visibilityState === 'hidden') {
+            if (currentUser) { logoutConexion(); pauseInactivityClock(); }
+        } else {
+            if (currentUser) { pingConexion(); resumeInactivityClock(); }
+        }
     });
-    window.addEventListener('beforeunload', () => {
-        if (currentUser) logoutConexion();
-    });
-    window.addEventListener('pagehide', () => {
-        if (currentUser) logoutConexion();
-    });
+    window.addEventListener('beforeunload', () => { if (currentUser) logoutConexion(); });
+    window.addEventListener('pagehide', () => { if (currentUser) logoutConexion(); });
 
     function initApp() {
         document.getElementById('loginOverlay').classList.add('hidden');
@@ -809,17 +996,20 @@
         document.getElementById('userAvatar').textContent = currentUser.Nombre.charAt(0);
         initChatInput();
         showSkeletons();
-        pingConexion();                               // ping al entrar
+        pingConexion();
+        resetInactivity();
+        startInactivityClock();
+        checkFirstTimeHelp();
         refresh();
-        setInterval(refresh, 60000);                  // balance/historial cada 60s
-        setInterval(()=>refreshChat(false), 8000);    // mensajes cada 8s
-        setInterval(pingConexion, 120000);            // ping cada 2 min para mantener conexión activa
+        setInterval(refresh, 60000);
+        setInterval(()=>refreshChat(false), 8000);
+        setInterval(pingConexion, 120000);
     }
 
     // ── SKELETON LOADERS ──────────────────────────────────────
     function showSkeletons() {
         document.getElementById('montoRecibirLabel').innerHTML =
-            '<div class="skeleton h-9 w-36 rounded-xl"></div>';
+            '<div class="skeleton h-9 w-36 rounded-xl" style="background:linear-gradient(90deg,rgba(255,255,255,0.15) 25%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0.15) 75%);background-size:600px 100%;animation:shimmer 1.6s infinite linear;border-radius:10px;"></div>';
         document.getElementById('detallesContables').innerHTML = [1,2,3].map(()=>`
             <div class="flex justify-between items-center px-5 py-4">
                 <div class="flex items-center gap-3">
@@ -887,7 +1077,6 @@
             let newSocial = [];
             try { newSocial = (await socialRes.json()).data || []; } catch(e){}
 
-            // LOG: mostrar estructura real del primer mensaje social para depurar
             if (forceRender && newSocial.length > 0) {
                 const ultimo = newSocial[newSocial.length - 1];
                 console.log('=== ULTIMO MENSAJE SOCIAL ===', JSON.stringify(ultimo));
@@ -901,7 +1090,6 @@
             messages.social = newSocial;
             const newTotal = messages.admin.length + messages.social.length;
 
-            // Con forceRender siempre renderizar, sin importar si cambió el total
             renderChat(forceRender);
             if (newTotal !== prevTotal) checkNotifications();
 
@@ -909,18 +1097,17 @@
         finally { chatRefreshing = false; }
     }
 
-    // Debug temporal: muestra los campos reales del mensaje en pantalla
     function showDebugToast(msg) {
         const existing = document.getElementById('debugToast');
         if (existing) existing.remove();
         const d = document.createElement('div');
         d.id = 'debugToast';
-        d.style.cssText = 'position:fixed;bottom:120px;left:10px;right:10px;background:#1a1a2e;border:1px solid #7c6af5;border-radius:12px;padding:12px;z-index:999;font-size:11px;color:#ccc;word-break:break-all;';
-        d.innerHTML = '<b style="color:#7c6af5">Campos del mensaje (debug):</b><br>' + 
-            Object.entries(msg).map(([k,v])=>`<span style="color:#00c896">${k}</span>: ${v}`).join('<br>') +
-            '<br><br><b>Mi ID:</b> ' + currentUser.ID + 
+        d.style.cssText = 'position:fixed;bottom:120px;left:10px;right:10px;background:#fff;border:1px solid #001723;border-radius:12px;padding:12px;z-index:999;font-size:11px;color:#191c1d;word-break:break-all;box-shadow:0 8px 24px rgba(0,0,0,0.1);';
+        d.innerHTML = '<b style="color:#001723">Campos del mensaje (debug):</b><br>' +
+            Object.entries(msg).map(([k,v])=>`<span style="color:#006a62">${k}</span>: ${v}`).join('<br>') +
+            '<br><br><b>Mi ID:</b> ' + currentUser.ID +
             '<br><b>Target ID:</b> ' + currentSocialTarget.id +
-            '<button onclick="this.parentElement.remove()" style="float:right;color:#ff4d6d;font-size:14px;margin-top:4px">✕</button>';
+            '<button onclick="this.parentElement.remove()" style="float:right;color:#ba1a1a;font-size:14px;margin-top:4px">✕</button>';
         document.body.appendChild(d);
         setTimeout(() => d.remove(), 15000);
     }
@@ -1006,34 +1193,34 @@
             document.getElementById('remateTag').innerHTML=`<span class="material-symbols-outlined text-[13px]">savings</span> Remanente: ${formatMoney(remanente)}`;
             document.getElementById('globalPtsTag').innerHTML=`<span class="material-symbols-outlined text-[13px]">stars</span> Mis Puntos: ${Math.round(puntoGlobalTotal).toLocaleString('es-CL')}`;
 
-            // Resumen contable - estilo banco
+            // Resumen contable - Lumina style
             document.getElementById('detallesContables').innerHTML = `
                 <div class="flex justify-between items-center px-5 py-4">
                     <div class="flex items-center gap-3">
-                        <div class="movement-icon bg-bank-accent/10" style="width:36px;height:36px;border-radius:10px">
-                            <span class="material-symbols-outlined text-bank-accent text-[16px]">percent</span>
+                        <div class="movement-icon bg-lm-accent/10" style="width:36px;height:36px;border-radius:10px">
+                            <span class="material-symbols-outlined text-lm-accent text-[16px]">percent</span>
                         </div>
-                        <span class="text-sm text-gray-300">Total Bruto (${pts} pts)</span>
+                        <span class="text-sm text-lm-primary">Total Bruto (${pts} pts)</span>
                     </div>
-                    <b class="text-sm font-bold text-white">${formatMoney(propinaBruta)}</b>
+                    <b class="text-sm font-bold text-lm-primary">${formatMoney(propinaBruta)}</b>
                 </div>
                 <div class="flex justify-between items-center px-5 py-4">
                     <div class="flex items-center gap-3">
-                        <div class="movement-icon bg-bank-green/10" style="width:36px;height:36px;border-radius:10px">
-                            <span class="material-symbols-outlined text-bank-green text-[16px]">account_balance</span>
+                        <div class="movement-icon bg-lm-green/10" style="width:36px;height:36px;border-radius:10px">
+                            <span class="material-symbols-outlined text-lm-green text-[16px]">account_balance</span>
                         </div>
-                        <span class="text-sm text-gray-300">Saldo Anterior</span>
+                        <span class="text-sm text-lm-primary">Saldo Anterior</span>
                     </div>
-                    <b class="text-sm font-bold text-white">${formatMoney(sAnt)}</b>
+                    <b class="text-sm font-bold text-lm-primary">${formatMoney(sAnt)}</b>
                 </div>
                 <div class="flex justify-between items-center px-5 py-4">
                     <div class="flex items-center gap-3">
-                        <div class="movement-icon bg-bank-red/10" style="width:36px;height:36px;border-radius:10px">
-                            <span class="material-symbols-outlined text-bank-red text-[16px]">remove_circle</span>
+                        <div class="movement-icon bg-lm-red/10" style="width:36px;height:36px;border-radius:10px">
+                            <span class="material-symbols-outlined text-lm-red text-[16px]">remove_circle</span>
                         </div>
-                        <span class="text-sm text-gray-300">Descuentos / Anticipos</span>
+                        <span class="text-sm text-lm-primary">Descuentos / Anticipos</span>
                     </div>
-                    <b class="text-sm font-bold text-bank-red">-${formatMoney(tAnt+tDesc)}</b>
+                    <b class="text-sm font-bold text-lm-red">-${formatMoney(tAnt+tDesc)}</b>
                 </div>`;
 
             animateIn(document.getElementById('detallesContables'), '60ms');
@@ -1044,33 +1231,33 @@
             if(merged.length>0){
                 listaContainer.innerHTML=merged.map(a=>`
                 <div class="movement-row">
-                    <div class="movement-icon bg-bank-red/10">
-                        <span class="material-symbols-outlined text-bank-red text-[18px]">arrow_downward</span>
+                    <div class="movement-icon bg-lm-red/10">
+                        <span class="material-symbols-outlined text-lm-red text-[18px]">arrow_downward</span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-white truncate">${a.desc||a.tipo||'Anticipo'}</p>
-                        <p class="text-[11px] text-gray-500 mt-0.5">${cleanDateStr(a.fecha)}</p>
+                        <p class="text-sm font-semibold text-lm-primary truncate">${a.desc||a.tipo||'Anticipo'}</p>
+                        <p class="text-[11px] text-lm-muted mt-0.5">${cleanDateStr(a.fecha)}</p>
                     </div>
-                    <b class="text-bank-red text-sm font-bold shrink-0">-${formatMoney(a.cantidad||a.monto)}</b>
+                    <b class="text-lm-red text-sm font-bold shrink-0">-${formatMoney(a.cantidad||a.monto)}</b>
                 </div>`).join('');
             } else {
-                listaContainer.innerHTML=`<div class="text-center py-10 text-xs text-gray-600">Sin movimientos en este periodo</div>`;
+                listaContainer.innerHTML=`<div class="text-center py-10 text-xs text-lm-muted">Sin movimientos en este periodo</div>`;
             }
             animateIn(listaContainer, '120ms');
 
             // Historial
             document.getElementById('historyList').innerHTML=Object.entries(mapVP).sort((a,b)=>b[0].localeCompare(a[0])).map(([f,d])=>`
             <div class="movement-row">
-                <div class="movement-icon bg-bank-green/10">
-                    <span class="material-symbols-outlined text-bank-green text-[18px]">arrow_upward</span>
+                <div class="movement-icon bg-lm-green/10">
+                    <span class="material-symbols-outlined text-lm-green text-[18px]">arrow_upward</span>
                 </div>
                 <div class="flex-1">
-                    <p class="text-sm font-semibold text-white">${formatMoney(d.montoReal)}</p>
-                    <p class="text-[11px] text-gray-500 mt-0.5">${cleanDateStr(f)}</p>
+                    <p class="text-sm font-semibold text-lm-primary">${formatMoney(d.montoReal)}</p>
+                    <p class="text-[11px] text-lm-muted mt-0.5">${cleanDateStr(f)}</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] text-gray-600 mb-0.5">Valor Punto</p>
-                    <p class="text-bank-accent font-semibold text-sm">${formatMoney(d.totalVP)}</p>
+                    <p class="text-[10px] text-lm-muted mb-0.5">Valor Punto</p>
+                    <p class="text-lm-accent font-semibold text-sm">${formatMoney(d.totalVP)}</p>
                 </div>
             </div>`).join('');
 
@@ -1083,16 +1270,25 @@
         } catch(e) { console.error("Refresh Error", e); }
     }
 
-    // ── RENDER CHAT SILENT (no scroll jump, used by auto-polling) ──
+    // ── LINKIFY ───────────────────────────────────────────────
+    function linkify(text) {
+        // Detecta URLs con o sin http y las convierte en <a> clicables
+        return text.replace(
+            /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+)/gi,
+            url => {
+                const href = url.startsWith('http') ? url : 'https://' + url;
+                return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:#264b5f;text-decoration:underline;text-underline-offset:2px;word-break:break-all;">${url}</a>`;
+            }
+        );
+    }
     function renderChatSilent() {
         const container = document.getElementById('chatMessages');
         if (!container) return;
-        // Don't interrupt if user is typing
         const input = document.getElementById('chatInput');
         const userIsTyping = input && document.activeElement === input && (input.innerText || '').trim().length > 0;
         if (userIsTyping) return;
         const wasAtBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 80;
-        renderChat(false); // false = don't force scroll
+        renderChat(false);
         if (wasAtBottom) {
             container.scrollTop = container.scrollHeight;
         }
@@ -1136,15 +1332,15 @@
         if(list.length===0){
             container.innerHTML=`
             <div class="flex flex-col items-center justify-center h-full gap-3 opacity-40">
-                <span class="material-symbols-outlined text-5xl text-gray-500">chat_bubble_outline</span>
-                <p class="text-sm text-gray-500">No hay mensajes aún</p>
+                <span class="material-symbols-outlined text-5xl text-lm-muted">chat_bubble_outline</span>
+                <p class="text-sm text-lm-muted">No hay mensajes aún</p>
             </div>`;
             return;
         }
 
         const isScrolledToBottom=container.scrollHeight-container.clientHeight<=container.scrollTop+100;
 
-        // Group by date for WA-style date separators
+        const avatarPalette=['#001723','#264b5f','#006a62','#705d00','#ba1a1a','#3f6378'];
         let lastDate='', html='';
         list.forEach((n, idx) => {
             const isMine=String(n.socId)===String(currentUser.ID);
@@ -1154,7 +1350,6 @@
             const msgDate=cleanDateStr(n.fecha);
             const msgTime=String(n.fecha).substring(11,16);
 
-            // Date separator
             if(msgDate!==lastDate){
                 lastDate=msgDate;
                 html+=`<div class="wa-date-sep"><span>${msgDate}</span></div>`;
@@ -1168,25 +1363,24 @@
             let bubbleClass=isMine?'msg-mine':'msg-other';
             if(currentChatMode==='ADMIN'&&!isMine&&n.destinatario!=='ADMIN') bubbleClass='msg-admin';
 
-            // Avatar only on first message of group and only for others
             const showAvatar=!isMine&&isFirstInGroup;
-            const avatarColors=['#7c6af5','#00c896','#f5a623','#ff4d6d','#38bdf8','#a78bfa'];
-            const colorIdx=authorName.charCodeAt(0)%avatarColors.length;
+            const colorIdx=authorName.charCodeAt(0)%avatarPalette.length;
+            const avatarColor=avatarPalette[colorIdx];
 
             html+=`
             <div class="${rowClass}">
-                ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?`<div style="width:32px;height:32px;border-radius:50%;background:${avatarColors[colorIdx]};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${authorName.charAt(0).toUpperCase()}</div>`:''}</div>`:''}
+                ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?`<div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${authorName.charAt(0).toUpperCase()}</div>`:''}</div>`:''}
                 <div class="msg-bubble ${bubbleClass}">
-                    ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColors[colorIdx]}">${authorName}</div>`:''}
-                    <div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${msgContent}</div>
+                    ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${authorName}</div>`:''}
+                    <div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
                     <div class="wa-time">
                         <span>${msgTime}</span>
-                        ${isMine?'<span class="material-symbols-outlined" style="font-size:13px">done_all</span>':''}
+                        ${isMine?'<span class="material-symbols-outlined" style="font-size:13px;color:#006a62">done_all</span>':''}
                     </div>
                     ${isMine?`
-                    <div style="display:flex;gap:10px;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.08)">
-                        <button onclick="prepareEdit('${msgId}',\`${msgContent}\`)" style="opacity:0.5;color:inherit"><span class="material-symbols-outlined" style="font-size:14px">edit</span></button>
-                        <button onclick="deleteMsg('${msgId}')" style="opacity:0.5;color:#ff4d6d"><span class="material-symbols-outlined" style="font-size:14px">delete</span></button>
+                    <div style="display:flex;gap:10px;margin-top:5px;padding-top:5px;border-top:1px solid rgba(0,0,0,0.06)">
+                        <button onclick="prepareEdit('${msgId}',\`${msgContent}\`)" style="opacity:0.45;color:#191c1d"><span class="material-symbols-outlined" style="font-size:14px">edit</span></button>
+                        <button onclick="deleteMsg('${msgId}')" style="opacity:0.5;color:#ba1a1a"><span class="material-symbols-outlined" style="font-size:14px">delete</span></button>
                     </div>`:''}
                 </div>
             </div>`;
@@ -1221,7 +1415,7 @@
         setTimeout(()=>t.classList.remove('show'),4000);
     }
 
-    // ── CHAT INPUT BEHAVIOR (attached in initApp) ───────────────
+    // ── CHAT INPUT BEHAVIOR ────────────────────────────────────
     function getChatText() {
         const el = document.getElementById('chatInput');
         return el ? el.innerText.trim() : '';
@@ -1236,24 +1430,48 @@
         if (!tx || tx._init) return;
         tx._init = true;
 
-        // Send on Enter (Shift+Enter = new line)
-        tx.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-            }
-        });
+        // Enter = salto de línea normal (el envío es solo con el botón)
 
-        tx.addEventListener('focus', function(){
-            document.getElementById('bottomNav').classList.add('hidden');
-            document.getElementById('chatSpacer').classList.add('hidden');
-            setTimeout(()=>{ const c=document.getElementById('chatMessages'); if(c) c.scrollTop=c.scrollHeight; },300);
-        });
-        tx.addEventListener('blur', function(){
-            setTimeout(()=>{
-                document.getElementById('bottomNav').classList.remove('hidden');
-                document.getElementById('chatSpacer').classList.remove('hidden');
-            },150);
+        // ── TECLADO ANDROID ───────────────────────────────────
+        // Estrategia: el tab-chat es un flex column que ocupa el espacio
+        // entre header y nav. Cuando el teclado sube, achicamos tab-chat
+        // usando visualViewport.height. El nav NUNCA se oculta — solo
+        // el spacer (que es el hueco interno del chat).
+        const tabChat = document.getElementById('tab-chat');
+        const nav     = document.getElementById('bottomNav');
+        const spacer  = document.getElementById('chatSpacer');
+        const header  = document.querySelector('#appContainer header');
+
+        function onVVResize() {
+            const vv = window.visualViewport;
+            if (!vv) return;
+            const headerH = header ? header.offsetHeight : 56;
+            const navH    = nav ? nav.offsetHeight : 64;
+            const kbOpen  = vv.height < window.innerHeight - 80;
+
+            if (kbOpen) {
+                // Teclado abierto: tab-chat ocupa solo el espacio visible
+                // encima del teclado (sin el nav, que queda fuera del viewport)
+                spacer.style.display = 'none';
+                tabChat.style.height = (vv.height - headerH) + 'px';
+                const c = document.getElementById('chatMessages');
+                if (c) setTimeout(() => { c.scrollTop = c.scrollHeight; }, 80);
+            } else {
+                // Teclado cerrado: restaurar
+                spacer.style.display = '';
+                tabChat.style.height = '';
+            }
+        }
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', onVVResize);
+        }
+
+        tx.addEventListener('blur', function() {
+            setTimeout(() => {
+                spacer.style.display = '';
+                tabChat.style.height = '';
+            }, 200);
         });
     }
 
@@ -1262,7 +1480,6 @@
         editingMessageId=id;
         const input=document.getElementById('chatInput');
         input.innerText=text; input.focus();
-        // Move cursor to end
         const range=document.createRange(), sel=window.getSelection();
         range.selectNodeContents(input); range.collapse(false);
         sel.removeAllRanges(); sel.addRange(range);
@@ -1303,7 +1520,6 @@
                     noteId: editingMessageId
                 })
             });
-            // Igual que el original: refresh completo para traer mensajes con sus campos reales
             await refresh();
         } catch(err) {
             console.error('Error enviando:', err);
@@ -1313,10 +1529,9 @@
             document.getElementById('sendBtn').innerHTML = '<span class="material-symbols-outlined" style="color:white;font-size:22px">send</span>';
             btn.disabled = false;
             btn.style.opacity = '1';
-            // Scroll al final del chat
-            setTimeout(()=>{ 
-                const c = document.getElementById('chatMessages'); 
-                if(c) c.scrollTop = c.scrollHeight; 
+            setTimeout(()=>{
+                const c = document.getElementById('chatMessages');
+                if(c) c.scrollTop = c.scrollHeight;
             }, 300);
         }
     }
@@ -1338,16 +1553,16 @@
     function renderUsersList() {
         const term=document.getElementById('userSearch').value.toLowerCase();
         const list=allSocios.filter(u=>String(u.ID)!==String(currentUser.ID)&&(u.Nombre.toLowerCase().includes(term)||u.Apellido.toLowerCase().includes(term)));
-        const avatarColors=['#7c6af5','#00c896','#f5a623','#ff4d6d','#38bdf8'];
-        let html=`<button onclick="selectSocialTarget('TODOS','Chat General')" class="w-full text-left p-3.5 rounded-2xl hover:bg-white/5 flex items-center gap-3 transition-all mb-1">
-            <div class="w-10 h-10 rounded-full bg-bank-accent/15 text-bank-accent flex items-center justify-center font-bold text-sm border border-bank-accent/25 shrink-0">G</div>
-            <div><p class="text-sm font-semibold text-white">Chat General</p><p class="text-xs text-gray-500 mt-0.5">Público para todos</p></div>
+        const avatarColors=['#001723','#264b5f','#006a62','#705d00','#ba1a1a'];
+        let html=`<button onclick="selectSocialTarget('TODOS','Chat General')" class="w-full text-left p-3.5 rounded-2xl hover:bg-lm-subtle flex items-center gap-3 transition-all mb-1">
+            <div class="w-10 h-10 rounded-full bg-lm-primary/10 text-lm-primary flex items-center justify-center font-bold text-sm border border-lm-primary/20 shrink-0">G</div>
+            <div><p class="text-sm font-semibold text-lm-primary">Chat General</p><p class="text-xs text-lm-muted mt-0.5">Público para todos</p></div>
         </button>`;
         list.forEach((u,i)=>{
             const c=avatarColors[i%avatarColors.length];
-            html+=`<button onclick="selectSocialTarget('${u.ID}','${u.Nombre} ${u.Apellido}')" class="w-full text-left p-3.5 rounded-2xl hover:bg-white/5 flex items-center gap-3 transition-all">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-white" style="background:${c}20;border:1px solid ${c}40;color:${c}">${u.Nombre.charAt(0)}</div>
-                <div><p class="text-sm font-semibold text-white">${u.Nombre} ${u.Apellido}</p><p class="text-xs text-gray-500 mt-0.5">${u.Area}</p></div>
+            html+=`<button onclick="selectSocialTarget('${u.ID}','${u.Nombre} ${u.Apellido}')" class="w-full text-left p-3.5 rounded-2xl hover:bg-lm-subtle flex items-center gap-3 transition-all">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-white" style="background:${c}">${u.Nombre.charAt(0)}</div>
+                <div><p class="text-sm font-semibold text-lm-primary">${u.Nombre} ${u.Apellido}</p><p class="text-xs text-lm-muted mt-0.5">${u.Area}</p></div>
             </button>`;
         });
         document.getElementById('usersListContent').innerHTML=html;
@@ -1377,7 +1592,9 @@
     }
 
     function logout() {
-        // Solo vuelve al login, NO borra el usuario guardado
+        // Detener reloj de inactividad
+        if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
+        inactivityAccum = 0; inactivityStart = null;
         currentUser = null;
         document.getElementById('appContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('flex');
@@ -1403,20 +1620,337 @@
         for(let i=1;i<=daysInMonth;i++){
             const fKey=`${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
             const marked=globalDiasCalendar.find(d=>d.fecha===fKey);
-            grid.innerHTML+=`<div class="calendar-day ${marked?(userTypeGlobal==='PT'?'worked':'absent'):'bg-white/4'}">${i}</div>`;
+            grid.innerHTML+=`<div class="calendar-day ${marked?(userTypeGlobal==='PT'?'worked':'absent'):'bg-lm-subtle'}">${i}</div>`;
         }
         document.getElementById('calendarDetailsList').innerHTML=globalDiasCalendar.map(d=>`
-        <div class="flex justify-between items-center bg-bank-surface rounded-2xl p-4 border border-white/5">
+        <div class="flex justify-between items-center bg-lm-subtle rounded-2xl p-4 border border-lm-border">
             <div>
-                <p class="text-xs font-semibold text-gray-300 mb-0.5">${formatDateText(d.fecha)}</p>
-                <p class="text-[11px] text-bank-accent">VP: ${formatMoney(d.valorPunto)}</p>
+                <p class="text-xs font-semibold text-lm-primary mb-0.5">${formatDateText(d.fecha)}</p>
+                <p class="text-[11px] text-lm-accent">VP: ${formatMoney(d.valorPunto)}</p>
             </div>
-            <span class="${userTypeGlobal==='PT'?'text-bank-green':'text-bank-red'} font-bold text-base">${userTypeGlobal==='PT'?'+':'-'}${formatMoney(d.montoAsociado)}</span>
+            <span class="${userTypeGlobal==='PT'?'text-lm-green':'text-lm-red'} font-bold text-base">${userTypeGlobal==='PT'?'+':'-'}${formatMoney(d.montoAsociado)}</span>
         </div>`).join('');
         modal.classList.remove('hidden'); modal.classList.add('flex');
     }
 
+    function toggleAbout(show) {
+        const m = document.getElementById('aboutModal');
+        if (show) { m.classList.remove('hidden'); m.classList.add('flex'); }
+        else       { m.classList.add('hidden');    m.classList.remove('flex'); }
+    }
+
     function closeCalendar() { document.getElementById('calendarModal').classList.add('hidden'); }
+
+    // ── AYUDA / ONBOARDING ────────────────────────────────────
+    const helpSlides = [
+        {
+            icon: 'waving_hand',
+            color: '#001723',
+            title: '¡Bienvenido a tu App del Fondo!',
+            body: 'Esta aplicación es tu herramienta personal del <b>Fondo Solidario</b>. Aquí verás cuánto te corresponde cobrar, tus movimientos y podrás comunicarte con el equipo. Esta guía te mostrará cada sección paso a paso.',
+            preview: `
+              <div style="background:linear-gradient(135deg,#001723,#002d40,#264b5f);border-radius:18px;padding:18px;position:relative;overflow:hidden;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;">J</div>
+                    <div><div style="font-size:9px;color:rgba(255,255,255,0.45)">Bienvenido</div><div style="font-size:12px;color:#fff;font-weight:600">Juan Pérez</div></div>
+                  </div>
+                  <div style="display:flex;gap:6px;">
+                    <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.6)">help</span></div>
+                    <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.6)">logout</span></div>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:space-around;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;">
+                  <div style="text-align:center;"><span class="material-symbols-outlined" style="font-size:18px;color:#fff">account_balance_wallet</span><div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px">Balance</div></div>
+                  <div style="text-align:center;"><span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.35)">receipt_long</span><div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px">Historial</div></div>
+                  <div style="text-align:center;"><span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.35)">chat</span><div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px">Mensajes</div></div>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'account_balance_wallet',
+            color: '#001723',
+            title: 'Balance — Tu monto a cobrar',
+            body: 'El <b>número grande</b> en azul oscuro es lo que te corresponde cobrar este período.<br><br>🔹 <b>Remanente:</b> Lo que sobra si tu monto no es múltiplo de $1.000 — se guarda para el próximo período.<br><br>🔹 <b>Mis Puntos:</b> Tus puntos acumulados del período actual.',
+            preview: `
+              <div style="background:linear-gradient(135deg,#001723,#002d40,#264b5f);border-radius:18px;padding:18px;position:relative;overflow:hidden;">
+                <div style="font-size:9px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Balance a Recibir</div>
+                <div style="font-size:30px;font-weight:800;color:#fff;font-family:Manrope,sans-serif;margin-bottom:12px;">$148.000</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <div style="background:rgba(255,255,255,0.12);border-radius:20px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.75);display:flex;align-items:center;gap:4px;">
+                    <span class="material-symbols-outlined" style="font-size:12px">savings</span>
+                    <span>Remanente: <b style="color:#fff">$420</b></span>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.12);border-radius:20px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.75);display:flex;align-items:center;gap:4px;">
+                    <span class="material-symbols-outlined" style="font-size:12px">stars</span>
+                    <span>Mis Puntos: <b style="color:#fff">3.240</b></span>
+                  </div>
+                </div>
+                <div style="position:absolute;top:10px;right:12px;width:32px;height:32px;background:rgba(255,255,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                  <span class="material-symbols-outlined" style="font-size:16px;color:rgba(255,255,255,0.6)">account_balance_wallet</span>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'percent',
+            color: '#264b5f',
+            title: '¿Cómo se calcula tu balance?',
+            body: 'El monto se calcula sumando y restando estas tres partes que ves en el <b>Resumen Contable</b>:',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;overflow:hidden;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #f3f4f5;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:30px;height:30px;background:rgba(38,75,95,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:14px;color:#264b5f">percent</span></div>
+                    <div><div style="font-size:11px;color:#191c1d;font-weight:500">Total Bruto (10 pts)</div><div style="font-size:9px;color:#9ba3ab">Lo que generaste</div></div>
+                  </div>
+                  <b style="font-size:12px;color:#191c1d">$160.000</b>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #f3f4f5;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:30px;height:30px;background:rgba(0,106,98,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:14px;color:#006a62">account_balance</span></div>
+                    <div><div style="font-size:11px;color:#191c1d;font-weight:500">Saldo Anterior</div><div style="font-size:9px;color:#9ba3ab">De períodos pasados</div></div>
+                  </div>
+                  <b style="font-size:12px;color:#191c1d">+ $8.000</b>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:30px;height:30px;background:rgba(186,26,26,0.08);border-radius:8px;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:14px;color:#ba1a1a">remove_circle</span></div>
+                    <div><div style="font-size:11px;color:#191c1d;font-weight:500">Descuentos / Anticipos</div><div style="font-size:9px;color:#9ba3ab">Lo que ya retiraste</div></div>
+                  </div>
+                  <b style="font-size:12px;color:#ba1a1a">- $20.000</b>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'remove_circle',
+            color: '#ba1a1a',
+            title: 'Anticipos y Descuentos',
+            body: 'Más abajo en la pantalla Balance, en <b>Últimos Movimientos</b>, verás cada anticipo o descuento aplicado a tu cuenta.<br><br>🔸 <b>Anticipo:</b> Plata que retiraste antes de la liquidación.<br>🔸 <b>Descuento:</b> Algún cargo específico a tu cuenta.<br><br>Si hay algo que no reconoces, escríbele al equipo por el Chat.',
+            preview: `
+              <div>
+                <div style="font-size:9px;color:#9ba3ab;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Últimos Movimientos</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e7e8e9;border-radius:14px;padding:10px 12px;">
+                    <div style="width:34px;height:34px;background:rgba(186,26,26,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:16px;color:#ba1a1a">arrow_downward</span></div>
+                    <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#191c1d">Anticipo solicitado</div><div style="font-size:10px;color:#9ba3ab">25-03-2026</div></div>
+                    <b style="font-size:12px;color:#ba1a1a;white-space:nowrap">-$20.000</b>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e7e8e9;border-radius:14px;padding:10px 12px;">
+                    <div style="width:34px;height:34px;background:rgba(186,26,26,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:16px;color:#ba1a1a">arrow_downward</span></div>
+                    <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#191c1d">Descuento personal</div><div style="font-size:10px;color:#9ba3ab">18-03-2026</div></div>
+                    <b style="font-size:12px;color:#ba1a1a;white-space:nowrap">-$5.000</b>
+                  </div>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'receipt_long',
+            color: '#006a62',
+            title: 'Historial de Rendimientos',
+            body: 'Toca <b>Historial</b> en el menú de abajo para ver el detalle día a día de la recaudación.<br><br>🔹 <b>Monto recaudado:</b> Lo que entró ese día en total al casino.<br>🔹 <b>Valor Punto:</b> Cuánto valió cada punto ese día — cambia diariamente.',
+            preview: `
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                  <div style="background:#001723;border-radius:12px;padding:6px 12px;display:flex;align-items:center;gap:4px;">
+                    <span class="material-symbols-outlined" style="font-size:14px;color:#fff;font-variation-settings:'FILL' 1">receipt_long</span>
+                    <span style="font-size:10px;color:#fff;font-weight:700">Historial</span>
+                  </div>
+                  <div style="background:#f3f4f5;border-radius:12px;padding:6px 12px;display:flex;align-items:center;gap:4px;">
+                    <span class="material-symbols-outlined" style="font-size:14px;color:#9ba3ab">account_balance_wallet</span>
+                    <span style="font-size:10px;color:#9ba3ab;font-weight:700">Balance</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e7e8e9;border-radius:14px;padding:10px 12px;">
+                    <div style="width:34px;height:34px;background:rgba(0,106,98,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:16px;color:#006a62">arrow_upward</span></div>
+                    <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#191c1d">$4.200.000</div><div style="font-size:10px;color:#9ba3ab">28-03-2026</div></div>
+                    <div style="text-align:right;"><div style="font-size:9px;color:#9ba3ab">Valor Punto</div><div style="font-size:12px;font-weight:600;color:#264b5f">$1.050</div></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e7e8e9;border-radius:14px;padding:10px 12px;">
+                    <div style="width:34px;height:34px;background:rgba(0,106,98,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:16px;color:#006a62">arrow_upward</span></div>
+                    <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#191c1d">$3.850.000</div><div style="font-size:10px;color:#9ba3ab">27-03-2026</div></div>
+                    <div style="text-align:right;"><div style="font-size:9px;color:#9ba3ab">Valor Punto</div><div style="font-size:12px;font-weight:600;color:#264b5f">$962</div></div>
+                  </div>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'event_note',
+            color: '#705d00',
+            title: 'Calendario de Turnos',
+            body: 'Aparece el botón <b>"Ver Calendario"</b> en tu Balance solo si eres Part-Time o tienes ausencias. Al tocarlo se abre este calendario:<br><br>🟢 <b>Verde:</b> Días que trabajaste (Part-Time) → suman puntos.<br>🔴 <b>Rojo:</b> Días de ausencia (Planta) → restan puntos.',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:14px;">
+                <div style="font-size:9px;color:#705d00;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Calendario</div>
+                <div style="font-size:14px;font-weight:800;color:#191c1d;font-family:Manrope,sans-serif;margin-bottom:2px;">Turnos Realizados</div>
+                <div style="font-size:10px;color:#9ba3ab;margin-bottom:10px;">Marzo 2026</div>
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;">
+                  ${['Lu','Ma','Mi','Ju','Vi','Sa','Do'].map(d=>`<div style="text-align:center;font-size:8px;color:#9ba3ab;font-weight:700">${d}</div>`).join('')}
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+                  ${['',' ','','','','1','2'].map(d=>d?`<div style="aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;background:#f3f4f5;color:#9ba3ab">${d}</div>`:`<div></div>`).join('')}
+                  ${['3','4','5','6','7','8','9'].map((d,i)=>{
+                    const worked=[3,5,6].includes(parseInt(d));
+                    return `<div style="aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;${worked?'background:rgba(0,106,98,0.12);color:#006a62;border:1px solid rgba(0,106,98,0.2)':'background:#f3f4f5;color:#9ba3ab'}">${d}</div>`;
+                  }).join('')}
+                  ${['10','11','12','13','14','15','16'].map((d,i)=>{
+                    const worked=[10,12,13,15].includes(parseInt(d));
+                    return `<div style="aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;${worked?'background:rgba(0,106,98,0.12);color:#006a62;border:1px solid rgba(0,106,98,0.2)':'background:#f3f4f5;color:#9ba3ab'}">${d}</div>`;
+                  }).join('')}
+                </div>
+              </div>`
+        },
+        {
+            icon: 'chat',
+            color: '#001723',
+            title: 'Mensajes — Chat con el Equipo',
+            body: 'Toca <b>Mensajes</b> en el menú de abajo. Tiene dos modos:<br><br>💬 <b>Soporte:</b> Escríbele a la administración — dudas, reclamos, consultas.<br><br>👥 <b>Equipo:</b> Chat entre socios. Elige <b>Chat General</b> para que todos vean tu mensaje, o selecciona un compañero para un mensaje privado.<br><br>Si recibes un mensaje nuevo, aparece un punto rojo en el ícono.',
+            preview: `
+              <div style="border-radius:16px;overflow:hidden;border:1px solid #e1e3e4;">
+                <div style="background:#001723;padding:10px 12px;display:flex;gap:6px;">
+                  <div style="flex:1;background:rgba(255,255,255,0.18);border-radius:8px;padding:7px;text-align:center;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;gap:4px;"><span class="material-symbols-outlined" style="font-size:13px">support_agent</span>Soporte</div>
+                  <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:8px;padding:7px;text-align:center;font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);display:flex;align-items:center;justify-content:center;gap:4px;"><span class="material-symbols-outlined" style="font-size:13px">forum</span>Equipo</div>
+                </div>
+                <div style="background:#e5ddd5;padding:10px 10px 6px;">
+                  <div style="display:flex;justify-content:flex-start;margin-bottom:6px;">
+                    <div style="background:#fff;border-radius:8px;border-bottom-left-radius:2px;padding:7px 10px;max-width:75%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                      <div style="font-size:11px;font-weight:700;color:#001723;margin-bottom:2px;">Administración</div>
+                      <div style="font-size:12px;color:#191c1d;">Hola Juan, tu anticipo fue aprobado ✓</div>
+                      <div style="font-size:9px;color:rgba(0,0,0,0.35);text-align:right;margin-top:3px;">10:24</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end;">
+                    <div style="background:#d9fdd3;border-radius:8px;border-bottom-right-radius:2px;padding:7px 10px;max-width:75%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                      <div style="font-size:12px;color:#191c1d;">Muchas gracias!</div>
+                      <div style="font-size:9px;color:rgba(0,106,98,0.65);text-align:right;margin-top:3px;display:flex;align-items:center;justify-content:flex-end;gap:2px;">10:25 <span class="material-symbols-outlined" style="font-size:11px;color:#006a62">done_all</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'lock',
+            color: '#264b5f',
+            title: 'Tu PIN y Seguridad',
+            body: 'Tu cuenta se protege con un <b>PIN de 4 dígitos</b> que solo tú conoces.<br><br>⏱ <b>Cierre automático:</b> Si dejas de usar la app 15 minutos seguidos, se cierra sola.<br><br>🔁 <b>¿Olvidaste el PIN?</b> Toca "¿Olvidó su PIN?" e ingresa tu RUT para recuperarlo.<br><br>⚠️ Nunca compartas tu PIN — la administración jamás te lo pedirá.',
+            preview: `
+              <div style="background:#f8f9fa;border-radius:18px;padding:20px;text-align:center;border:1px solid #e1e3e4;">
+                <div style="width:56px;height:56px;border-radius:50%;background:#e7e8e9;border:2px solid rgba(38,75,95,0.2);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
+                  <span style="font-size:22px;font-weight:800;color:#264b5f;font-family:Manrope,sans-serif;">J</span>
+                </div>
+                <div style="font-size:15px;font-weight:700;color:#001723;font-family:Manrope,sans-serif;">Juan</div>
+                <div style="font-size:10px;color:#9ba3ab;margin-bottom:14px;">ID: SOC-001</div>
+                <div style="font-size:9px;color:#9ba3ab;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Ingrese su PIN</div>
+                <div style="background:#fff;border:1px solid #c2c7cc;border-radius:14px;padding:12px;font-size:22px;color:#191c1d;letter-spacing:0.5em;text-align:center;margin-bottom:12px;">••••</div>
+                <div style="background:#001723;border-radius:12px;padding:10px;font-size:13px;font-weight:600;color:#fff;">Ingresar</div>
+                <div style="margin-top:10px;font-size:10px;color:#264b5f;font-weight:600;">¿Olvidó su PIN?</div>
+              </div>`
+        },
+        {
+            icon: 'check_circle',
+            color: '#006a62',
+            title: '¡Ya estás listo!',
+            body: 'Ya conoces todo lo que necesitas. Recuerda que puedes volver a ver esta guía tocando el botón <b>?</b> en la esquina superior derecha, junto al botón de salir.<br><br>Si tienes dudas, escríbele al equipo por <b>Mensajes → Soporte</b>. ¡Bienvenido! 🎉',
+            preview: `
+              <div style="background:linear-gradient(135deg,#001723,#002d40);border-radius:18px;padding:20px;text-align:center;">
+                <div style="display:flex;justify-content:space-around;margin-bottom:16px;">
+                  <div style="text-align:center;opacity:0.9;">
+                    <div style="width:40px;height:40px;background:rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1">account_balance_wallet</span></div>
+                    <div style="font-size:9px;color:rgba(255,255,255,0.6)">Balance</div>
+                  </div>
+                  <div style="text-align:center;opacity:0.9;">
+                    <div style="width:40px;height:40px;background:rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1">receipt_long</span></div>
+                    <div style="font-size:9px;color:rgba(255,255,255,0.6)">Historial</div>
+                  </div>
+                  <div style="text-align:center;opacity:0.9;">
+                    <div style="width:40px;height:40px;background:rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1">chat</span></div>
+                    <div style="font-size:9px;color:rgba(255,255,255,0.6)">Mensajes</div>
+                  </div>
+                </div>
+                <div style="background:rgba(0,200,150,0.15);border:1px solid rgba(0,200,150,0.3);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                  <span class="material-symbols-outlined" style="font-size:20px;color:#3adccc;flex-shrink:0">check_circle</span>
+                  <div style="text-align:left;"><div style="font-size:11px;font-weight:700;color:#fff">Guía completada</div><div style="font-size:10px;color:rgba(255,255,255,0.5)">Toca ? para volver a verla</div></div>
+                </div>
+                <button onclick="closeHelp();toggleAbout(true)" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:10px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.7);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                  <span class="material-symbols-outlined" style="font-size:15px">code</span> Acerca del desarrollador
+                </button>
+              </div>`
+        }
+    ];
+
+    let helpCurrentSlide = 0;
+
+    function openHelp() {
+        helpCurrentSlide = 0;
+        renderHelpSlide();
+        const m = document.getElementById('helpModal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+
+    function closeHelp() {
+        document.getElementById('helpModal').classList.add('hidden');
+        document.getElementById('helpModal').classList.remove('flex');
+        localStorage.setItem('helpSeen_v1', '1');
+    }
+
+    function helpNext() {
+        if (helpCurrentSlide < helpSlides.length - 1) {
+            helpCurrentSlide++;
+            renderHelpSlide();
+        } else {
+            closeHelp();
+        }
+    }
+
+    function helpPrev() {
+        if (helpCurrentSlide > 0) {
+            helpCurrentSlide--;
+            renderHelpSlide();
+        }
+    }
+
+    function helpGoTo(idx) {
+        helpCurrentSlide = idx;
+        renderHelpSlide();
+    }
+
+    function renderHelpSlide() {
+        const s = helpSlides[helpCurrentSlide];
+        const total = helpSlides.length;
+        const isLast = helpCurrentSlide === total - 1;
+        const isFirst = helpCurrentSlide === 0;
+
+        document.getElementById('helpIcon').textContent = s.icon;
+        document.getElementById('helpIcon').style.color = s.color;
+        document.getElementById('helpIconWrap').style.background = s.color + '12';
+        document.getElementById('helpIconWrap').style.borderColor = s.color + '25';
+        document.getElementById('helpTitle').textContent = s.title;
+        document.getElementById('helpBody').innerHTML = s.body;
+        document.getElementById('helpPreview').innerHTML = s.preview || '';
+
+        // dots
+        let dots = '';
+        for (let i = 0; i < total; i++) {
+            dots += `<button onclick="helpGoTo(${i})" style="width:${i===helpCurrentSlide?'22px':'8px'};height:8px;border-radius:4px;background:${i===helpCurrentSlide?s.color:'#c2c7cc'};transition:all 0.3s;border:none;cursor:pointer;padding:0;"></button>`;
+        }
+        document.getElementById('helpDots').innerHTML = dots;
+
+        // botones
+        document.getElementById('helpBtnPrev').style.visibility = isFirst ? 'hidden' : 'visible';
+        const btnNext = document.getElementById('helpBtnNext');
+        btnNext.textContent = isLast ? 'Entendido ✓' : 'Siguiente';
+        btnNext.style.background = s.color;
+
+        // counter
+        document.getElementById('helpCounter').textContent = `${helpCurrentSlide + 1} / ${total}`;
+    }
+
+    function checkFirstTimeHelp() {
+        if (!localStorage.getItem('helpSeen_v1')) {
+            setTimeout(() => openHelp(), 600);
+        }
+    }
 </script>
 </body>
 </html>
