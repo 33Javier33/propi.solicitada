@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>App Socio V19 - Lumina</title>
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bóveda">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#001723">
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -675,6 +682,114 @@
             </div>
         </div>
 
+        <!-- ── TAB: ESTADÍSTICAS ── -->
+        <div id="tab-stats" class="tab-section overflow-y-auto pb-32 pt-4 bg-lm-bg">
+            <div class="px-4">
+
+                <!-- Header período -->
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-[10px] font-bold text-lm-muted uppercase tracking-widest">Período Activo</p>
+                        <p id="stats-periodo-label" class="text-sm font-bold text-lm-primary mt-0.5">Cargando...</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-lm-subtle border border-lm-border rounded-xl px-3 py-1.5">
+                        <span class="material-symbols-outlined text-lm-accent text-[14px]">trending_up</span>
+                        <span class="text-[11px] text-lm-primary font-semibold">Proyección</span>
+                    </div>
+                </div>
+
+                <!-- Tarjetas resumen -->
+                <div class="grid grid-cols-2 gap-3 mb-5">
+                    <div class="bg-lm-card border border-lm-border rounded-[20px] p-4">
+                        <p class="text-[10px] text-lm-muted font-bold uppercase tracking-widest mb-1">Ganado a hoy</p>
+                        <p id="stats-ganado-hoy" class="text-xl font-extrabold text-lm-primary font-headline">$0</p>
+                        <p id="stats-dias-transcurridos" class="text-[10px] text-lm-muted mt-1">0 días transcurridos</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-lm-primary to-lm-accent rounded-[20px] p-4">
+                        <p class="text-[10px] text-white/60 font-bold uppercase tracking-widest mb-1">Proyección al 14</p>
+                        <p id="stats-proyeccion" class="text-xl font-extrabold text-white font-headline">$0</p>
+                        <p id="stats-dias-restantes" class="text-[10px] text-white/60 mt-1">0 días restantes</p>
+                    </div>
+                </div>
+
+                <!-- Tarjetas secundarias -->
+                <div class="grid grid-cols-3 gap-2 mb-5">
+                    <div class="bg-lm-card border border-lm-border rounded-[16px] p-3 text-center">
+                        <p class="text-[9px] text-lm-muted font-bold uppercase tracking-widest mb-1">Prom. diario</p>
+                        <p id="stats-prom-dia" class="text-sm font-extrabold text-lm-primary">$0</p>
+                    </div>
+                    <div class="bg-lm-card border border-lm-border rounded-[16px] p-3 text-center">
+                        <p class="text-[9px] text-lm-muted font-bold uppercase tracking-widest mb-1">Prom. semanal</p>
+                        <p id="stats-prom-semana" class="text-sm font-extrabold text-lm-primary">$0</p>
+                    </div>
+                    <div class="bg-lm-card border border-lm-border rounded-[16px] p-3 text-center">
+                        <p class="text-[9px] text-lm-muted font-bold uppercase tracking-widest mb-1">Mis puntos</p>
+                        <p id="stats-pts-label" class="text-sm font-extrabold text-lm-accent">0 pts</p>
+                    </div>
+                </div>
+
+                <!-- Tarjetas Valor Punto General -->
+                <div class="bg-lm-card border border-lm-border rounded-[20px] p-4 mb-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-lm-tertiary text-[18px]">stars</span>
+                        <p class="text-[10px] font-bold text-lm-muted uppercase tracking-widest">Valor del Punto — General</p>
+                    </div>
+                    <p class="text-[11px] text-lm-muted mb-3 leading-relaxed">El valor acumulado de 1 punto en este período, independiente de cuántos puntos tenga cada socio.</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-lm-subtle rounded-[14px] p-3">
+                            <p class="text-[9px] text-lm-muted font-bold uppercase tracking-widest mb-1">Punto a hoy</p>
+                            <p id="stats-vp-hoy" class="text-lg font-extrabold text-lm-primary font-headline">$0</p>
+                            <p id="stats-vp-dias" class="text-[10px] text-lm-muted mt-0.5">0 días con rec.</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-lm-tertiary/10 to-lm-tertiary/5 border border-lm-tertiary/20 rounded-[14px] p-3">
+                            <p class="text-[9px] text-lm-tertiary font-bold uppercase tracking-widest mb-1">Punto proyectado</p>
+                            <p id="stats-vp-proy" class="text-lg font-extrabold text-lm-tertiary font-headline">$0</p>
+                            <p id="stats-vp-prom-dia" class="text-[10px] text-lm-tertiary/70 mt-0.5">Prom/día: $0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selector vista -->
+                <div class="flex gap-2 mb-4">
+                    <button onclick="setStatsView('dia')" id="stats-btn-dia"
+                        class="flex-1 py-2.5 rounded-2xl text-[11px] font-bold transition-all bg-lm-primary text-white">
+                        Por Día
+                    </button>
+                    <button onclick="setStatsView('semana')" id="stats-btn-semana"
+                        class="flex-1 py-2.5 rounded-2xl text-[11px] font-bold transition-all bg-lm-subtle text-lm-muted border border-lm-border">
+                        Por Semana
+                    </button>
+                    <button onclick="setStatsView('mes')" id="stats-btn-mes"
+                        class="flex-1 py-2.5 rounded-2xl text-[11px] font-bold transition-all bg-lm-subtle text-lm-muted border border-lm-border">
+                        Mes completo
+                    </button>
+                </div>
+
+                <!-- Gráfico -->
+                <div class="bg-lm-card border border-lm-border rounded-[20px] p-4 mb-5">
+                    <p id="stats-chart-title" class="text-[10px] font-bold text-lm-muted uppercase tracking-widest mb-3">Ganancia acumulada por día</p>
+                    <div style="position:relative; height:180px;">
+                        <canvas id="statsChart" style="width:100%; height:100%;"></canvas>
+                    </div>
+                    <!-- Leyenda -->
+                    <div class="flex gap-4 mt-3">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-lm-primary"></div>
+                            <span class="text-[10px] text-lm-muted font-semibold">Real</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-3 h-0.5 bg-lm-accent" style="border-top:2px dashed #264b5f;"></div>
+                            <span class="text-[10px] text-lm-muted font-semibold">Proyección</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de datos -->
+                <p class="text-[10px] font-bold text-lm-muted uppercase tracking-widest mb-3">Detalle del período</p>
+                <div id="stats-table" class="space-y-2 pb-6"></div>
+            </div>
+        </div>
+
         <!-- ── TAB: CHAT (WhatsApp style) ── -->
         <div id="tab-chat" class="tab-section" style="position:relative; height:100%; display:none; flex-direction:column;">
 
@@ -740,15 +855,19 @@
     <!-- BOTTOM NAV -->
     <nav id="bottomNav" class="fixed bottom-0 w-full z-[40] pb-safe-bottom">
         <div class="flex justify-around items-center px-4 pt-3 pb-2">
-            <button onclick="switchTab('tab-home')" class="nav-btn active flex flex-col items-center gap-1.5 w-20">
+            <button onclick="switchTab('tab-home')" class="nav-btn active flex flex-col items-center gap-1.5 w-16">
                 <span class="nav-icon material-symbols-outlined text-[24px]">account_balance_wallet</span>
                 <span class="text-[10px] font-semibold tracking-wide">Balance</span>
             </button>
-            <button onclick="switchTab('tab-history')" class="nav-btn flex flex-col items-center gap-1.5 w-20">
+            <button onclick="switchTab('tab-history')" class="nav-btn flex flex-col items-center gap-1.5 w-16">
                 <span class="nav-icon material-symbols-outlined text-[24px]">receipt_long</span>
                 <span class="text-[10px] font-semibold tracking-wide">Historial</span>
             </button>
-            <button onclick="switchTab('tab-chat')" class="nav-btn flex flex-col items-center gap-1.5 w-20 relative">
+            <button onclick="switchTab('tab-stats')" class="nav-btn flex flex-col items-center gap-1.5 w-16">
+                <span class="nav-icon material-symbols-outlined text-[24px]">bar_chart</span>
+                <span class="text-[10px] font-semibold tracking-wide">Stats</span>
+            </button>
+            <button onclick="switchTab('tab-chat')" class="nav-btn flex flex-col items-center gap-1.5 w-16 relative">
                 <div id="notifBadge" class="unread-dot hidden"></div>
                 <span class="nav-icon material-symbols-outlined text-[24px]">chat</span>
                 <span class="text-[10px] font-semibold tracking-wide">Mensajes</span>
@@ -772,6 +891,37 @@
         globalDiasCalendar=[], userTypeGlobal='', editingMessageId=null;
 
     // ── INIT ──────────────────────────────────────────────────
+    // ── CACHÉ DE SOCIOS (TTL 10 min) ─────────────────────────
+    const SOCIOS_CACHE_KEY = 'sociosCache_v1';
+    const SOCIOS_CACHE_TTL = 10 * 60 * 1000; // 10 minutos
+
+    function getSociosFromCache() {
+        try {
+            const c = JSON.parse(localStorage.getItem(SOCIOS_CACHE_KEY) || 'null');
+            if (c && c.ts && (Date.now() - c.ts) < SOCIOS_CACHE_TTL && Array.isArray(c.data) && c.data.length > 0) {
+                return c.data;
+            }
+        } catch(e) {}
+        return null;
+    }
+
+    function saveSociosToCache(data) {
+        try { localStorage.setItem(SOCIOS_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch(e) {}
+    }
+
+    async function fetchSociosFromNetwork(silent = false) {
+        try {
+            const res = await fetch(`${SCRIPT_URL_SOCIOS}?action=getSocios`);
+            const data = (await res.json()).data || [];
+            if (data.length > 0) {
+                allSocios = data;
+                saveSociosToCache(data);
+            }
+        } catch(e) {
+            if (!silent) console.error('Error cargando socios:', e);
+        }
+    }
+
     window.onload = async () => {
         const rutField = document.getElementById('setupRUT');
         if (rutField) {
@@ -787,12 +937,23 @@
 
         checkSecurity();
 
-        document.getElementById('loadingState').classList.remove('hidden');
-        try {
-            const res = await fetch(`${SCRIPT_URL_SOCIOS}?action=getSocios`);
-            allSocios = (await res.json()).data || [];
-        } catch(e) { console.error('Error cargando socios:', e); }
-        finally { document.getElementById('loadingState').classList.add('hidden'); }
+        // ── 1. Intentar desde caché primero (instantáneo) ────────
+        const cached = getSociosFromCache();
+        if (cached) {
+            allSocios = cached;
+            // Actualizar en background sin bloquear
+            fetchSociosFromNetwork(true);
+        } else {
+            // Sin caché: mostrar spinner y cargar
+            document.getElementById('loadingState').classList.remove('hidden');
+            await fetchSociosFromNetwork(false);
+            document.getElementById('loadingState').classList.add('hidden');
+        }
+
+        // ── 2. Warm-up: despertar el script de recaudaciones ─────
+        // Ping silencioso para que el cold start ocurra mientras el
+        // usuario escribe su PIN, no cuando aprieta Ingresar.
+        fetch(`${SCRIPT_URL_RECAUDACIONES}?action=ping`).catch(()=>{});
     };
 
     // ── SECURITY / LOGIN ──────────────────────────────────────
@@ -874,23 +1035,36 @@
             document.getElementById('fastPIN').value = '';
             return;
         }
+
+        // ── Si ya tenemos socios en memoria o caché → entrar ya ──
         if (allSocios.length === 0) {
-            const spinner = document.getElementById('loadingState');
-            spinner.classList.remove('hidden');
-            try {
-                const res = await fetch(`${SCRIPT_URL_SOCIOS}?action=getSocios`);
-                allSocios = (await res.json()).data || [];
-            } catch(e) {
-                alert("Error de conexión. Verifique su red e intente nuevamente.");
+            const cached = getSociosFromCache();
+            if (cached) {
+                allSocios = cached;
+                // Refrescar en background
+                fetchSociosFromNetwork(true);
+            } else {
+                // Sin caché: hay que esperar (primera vez)
+                const spinner = document.getElementById('loadingState');
+                spinner.classList.remove('hidden');
+                await fetchSociosFromNetwork(false);
                 spinner.classList.add('hidden');
-                return;
+                if (allSocios.length === 0) {
+                    alert("Error de conexión. Verifique su red e intente nuevamente.");
+                    return;
+                }
             }
-            spinner.classList.add('hidden');
         }
+
         currentUser = allSocios.find(s => String(s.ID) === String(auth.id));
         if (!currentUser) {
-            alert("No se encontró su cuenta. Intente nuevamente.");
-            return;
+            // Caché podría estar desactualizada — intentar red una vez
+            await fetchSociosFromNetwork(false);
+            currentUser = allSocios.find(s => String(s.ID) === String(auth.id));
+            if (!currentUser) {
+                alert("No se encontró su cuenta. Intente nuevamente.");
+                return;
+            }
         }
         initApp();
     }
@@ -1112,28 +1286,38 @@
         setTimeout(() => d.remove(), 15000);
     }
 
-    // ── REFRESH DATA (balance, historial) ──────────────────────
+    // ── REFRESH DATA — FASE 1: balance (crítico) + FASE 2: notas (background) ──
     async function refresh() {
         try {
-            const [recRes,dataRes,saldosRes,cierreRes,diasRes,adminNotesRes,socialNotesRes] = await Promise.all([
+            // ── FASE 1: Las 5 llamadas de balance en paralelo ────
+            // Las notas NO bloquean — se cargan en background
+            const [recRes, dataRes, saldosRes, cierreRes, diasRes] = await Promise.all([
                 fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get`),
-                fetch(SCRIPT_URL_SOCIOS,{method:'POST',body:JSON.stringify({action:'getAllDataDesdeSheets'})}),
+                fetch(SCRIPT_URL_SOCIOS, {method:'POST', body:JSON.stringify({action:'getAllDataDesdeSheets'})}),
                 fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosAnteriores`),
                 fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosCierre`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`),
-                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes`).catch(()=>({json:()=>({data:[]})}))
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`)
             ]);
 
-            const recData=(await recRes.json()).data||[];
-            const fullSheets=await dataRes.json();
-            const sheetsData=fullSheets.data||fullSheets;
-            const saldosData=(await saldosRes.json()).data||{};
-            const cierreData=(await cierreRes.json()).data||{};
-            const diasTrabajados=(await diasRes.json()).data||{};
-            messages.admin=(await adminNotesRes.json()).data||[];
-            try { messages.social=(await socialNotesRes.json()).data||[]; } catch(e){ messages.social=[]; }
+            const recData    = (await recRes.json()).data   || [];
+            const fullSheets = await dataRes.json();
+            const sheetsData = fullSheets.data || fullSheets;
+            const saldosData = (await saldosRes.json()).data || {};
+            const cierreData = (await cierreRes.json()).data || {};
+            const diasTrabajados = (await diasRes.json()).data || {};
 
+            // ── FASE 2: Notas en background (no bloquean el render) ─
+            Promise.all([
+                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes`).catch(()=>({json:()=>({data:[]})}))
+            ]).then(async ([adminNotesRes, socialNotesRes]) => {
+                messages.admin = (await adminNotesRes.json()).data || [];
+                try { messages.social = (await socialNotesRes.json()).data || []; } catch(e){ messages.social=[]; }
+                renderChat();
+                checkNotifications();
+            }).catch(e => console.error('Error cargando notas:', e));
+
+            // ── Cálculo del balance (igual que antes) ────────────
             let mapVP={};
             recData.forEach(r=>{
                 let f=String(r.fecha).substring(0,10);
@@ -1265,8 +1449,15 @@
             const btn=document.getElementById('calendarBtnContainer');
             if(globalDiasCalendar.length>0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
 
-            renderChat();
-            checkNotifications();
+            // Pasar datos a estadísticas
+            renderStats(mapVP, pts);
+
+            // Las notas se renderizan cuando llega la Fase 2 (background)
+            // Solo renderizamos chat si ya hay mensajes en memoria
+            if(messages.admin.length > 0 || messages.social.length > 0) {
+                renderChat();
+                checkNotifications();
+            }
         } catch(e) { console.error("Refresh Error", e); }
     }
 
@@ -1589,6 +1780,10 @@
             localStorage.setItem('lastMsgCountV19',lastMsgCount);
             setTimeout(()=>{ const c=document.getElementById('chatMessages'); c.scrollTop=c.scrollHeight; },50);
         }
+        if(id==='tab-stats'){
+            // Re-dibujar cuando el canvas ya tiene dimensiones reales
+            setTimeout(()=>renderStatsChart(), 80);
+        }
     }
 
     function logout() {
@@ -1640,6 +1835,421 @@
     }
 
     function closeCalendar() { document.getElementById('calendarModal').classList.add('hidden'); }
+
+    // ── ESTADÍSTICAS ──────────────────────────────────────────
+    let statsView = 'dia';
+    let statsMapVP = {};   // mapVP del período: { fecha: {totalVP, montoReal} }
+    let statsPts = 0;      // puntos del usuario
+    let statsChart = null; // instancia del canvas
+
+    function setStatsView(v) {
+        statsView = v;
+        ['dia','semana','mes'].forEach(k => {
+            const btn = document.getElementById(`stats-btn-${k}`);
+            if (k === v) {
+                btn.className = 'flex-1 py-2.5 rounded-2xl text-[11px] font-bold transition-all bg-lm-primary text-white';
+            } else {
+                btn.className = 'flex-1 py-2.5 rounded-2xl text-[11px] font-bold transition-all bg-lm-subtle text-lm-muted border border-lm-border';
+            }
+        });
+        renderStatsChart();
+        renderStatsTable();
+    }
+
+    function getPeriodo() {
+        // Período: del 15 del mes anterior (o actual) al 14 del mes siguiente
+        const hoy = new Date();
+        let inicio, fin;
+        if (hoy.getDate() >= 15) {
+            inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 15);
+            fin    = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 14);
+        } else {
+            inicio = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 15);
+            fin    = new Date(hoy.getFullYear(), hoy.getMonth(), 14);
+        }
+        return { inicio, fin };
+    }
+
+    function toDateStr(d) {
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function renderStats(mapVP, pts) {
+        // Guardar para re-render al cambiar vista
+        statsMapVP = mapVP;
+        statsPts   = pts;
+
+        const { inicio, fin } = getPeriodo();
+        const hoy = new Date(); hoy.setHours(0,0,0,0);
+
+        // Etiqueta del período
+        const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        document.getElementById('stats-periodo-label').textContent =
+            `${inicio.getDate()} ${meses[inicio.getMonth()]} → ${fin.getDate()} ${meses[fin.getMonth()]} ${fin.getFullYear()}`;
+
+        // Construir array de TODOS los días del período
+        const diasPeriodo = [];
+        let cur = new Date(inicio);
+        while (cur <= fin) {
+            diasPeriodo.push(toDateStr(cur));
+            cur.setDate(cur.getDate() + 1);
+        }
+        const totalDias = diasPeriodo.length; // 30 o 31
+
+        // Días reales (ya pasaron y tienen dato)
+        const diasReales = diasPeriodo.filter(f => {
+            const fd = new Date(f + 'T12:00:00');
+            return fd <= hoy && mapVP[f];
+        });
+
+        // Ganancia real acumulada hasta hoy
+        let gananciaReal = 0;
+        diasReales.forEach(f => { gananciaReal += (mapVP[f]?.totalVP || 0) * pts; });
+
+        // Días transcurridos (con o sin recaudación)
+        const diasTransc = diasPeriodo.filter(f => new Date(f+'T12:00:00') <= hoy).length;
+        const diasRest   = totalDias - diasTransc;
+
+        // Promedio diario basado en días CON recaudación
+        const promDia = diasReales.length > 0 ? gananciaReal / diasReales.length : 0;
+        const promSemana = promDia * 7;
+
+        // Proyección al final del período
+        const diasSinDato = diasPeriodo.filter(f => new Date(f+'T12:00:00') > hoy).length;
+        const proyeccion   = gananciaReal + (promDia * diasSinDato);
+
+        // Actualizar tarjetas
+        document.getElementById('stats-ganado-hoy').textContent       = formatMoney(Math.round(gananciaReal));
+        document.getElementById('stats-dias-transcurridos').textContent = `${diasTransc} día${diasTransc!==1?'s':''} transcurrido${diasTransc!==1?'s':''}`;
+        document.getElementById('stats-proyeccion').textContent        = formatMoney(Math.round(proyeccion));
+        document.getElementById('stats-dias-restantes').textContent    = `${diasSinDato} día${diasSinDato!==1?'s':''} restante${diasSinDato!==1?'s':''}`;
+        document.getElementById('stats-prom-dia').textContent          = formatMoney(Math.round(promDia));
+        document.getElementById('stats-prom-semana').textContent       = formatMoney(Math.round(promSemana));
+        document.getElementById('stats-pts-label').textContent         = `${pts} pts`;
+
+        // ── Valor del Punto general ──────────────────────────────
+        // vpAcumulado = suma de totalVP de los días del período hasta hoy
+        // (esto es "Mis Puntos" — el acumulado general de 1 punto)
+        let vpAcumHoy = 0, diasConVP = 0;
+        diasPeriodo.forEach(f => {
+            const fd = new Date(f + 'T12:00:00');
+            if (fd <= hoy && mapVP[f] && mapVP[f].totalVP > 0) {
+                vpAcumHoy += mapVP[f].totalVP;
+                diasConVP++;
+            }
+        });
+        const promVPDia   = diasConVP > 0 ? vpAcumHoy / diasConVP : 0;
+        const vpProyectado = vpAcumHoy + promVPDia * diasSinDato;
+
+        document.getElementById('stats-vp-hoy').textContent      = formatMoney(Math.round(vpAcumHoy));
+        document.getElementById('stats-vp-dias').textContent      = `${diasConVP} día${diasConVP!==1?'s':''} con rec.`;
+        document.getElementById('stats-vp-proy').textContent      = formatMoney(Math.round(vpProyectado));
+        document.getElementById('stats-vp-prom-dia').textContent  = `Prom/día: ${formatMoney(Math.round(promVPDia))}`;
+
+        renderStatsChart();
+        renderStatsTable();
+    }
+
+    function renderStatsChart() {
+        const canvas = document.getElementById('statsChart');
+        if (!canvas || !currentUser) return;
+        const ctx = canvas.getContext('2d');
+        const { inicio, fin } = getPeriodo();
+        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const pts = statsPts;
+
+        // Construir datos según vista
+        let labels = [], valoresReales = [], valoresProyectados = [];
+
+        if (statsView === 'dia') {
+            document.getElementById('stats-chart-title').textContent = 'Ganancia acumulada por día';
+            let cur = new Date(inicio), acum = 0;
+            while (cur <= fin) {
+                const f = toDateStr(cur);
+                const esPasado = cur <= hoy;
+                const ganDia   = (statsMapVP[f]?.totalVP || 0) * pts;
+                if (esPasado) {
+                    acum += ganDia;
+                    valoresReales.push(acum);
+                    valoresProyectados.push(null);
+                } else {
+                    valoresReales.push(null);
+                    valoresProyectados.push(acum); // mantiene el último real
+                }
+                labels.push(cur.getDate());
+                cur.setDate(cur.getDate() + 1);
+            }
+            // Rellenar proyección desde último real
+            let ultimoReal = 0;
+            valoresReales.forEach(v => { if (v !== null) ultimoReal = v; });
+            const diasSinDato = fin - hoy > 0 ? Math.ceil((fin - hoy) / 86400000) : 0;
+            const promDia = ultimoReal > 0 && hoy > inicio ? ultimoReal / Math.max(1, Math.ceil((hoy - inicio) / 86400000)) : 0;
+            let proyAcum = ultimoReal;
+            valoresProyectados = valoresProyectados.map((v, i) => {
+                if (v === null) return null;
+                proyAcum += promDia;
+                return Math.round(proyAcum);
+            });
+
+        } else if (statsView === 'semana') {
+            document.getElementById('stats-chart-title').textContent = 'Ganancia por semana del período';
+            let semana = 1, ganSem = 0, count = 0;
+            let cur = new Date(inicio);
+            while (cur <= fin) {
+                const f = toDateStr(cur);
+                const esPasado = cur <= hoy;
+                if (esPasado) ganSem += (statsMapVP[f]?.totalVP || 0) * pts;
+                count++;
+                if (count === 7 || cur.getTime() >= fin.getTime()) {
+                    labels.push(`Sem ${semana}`);
+                    if (esPasado || (new Date(inicio).getDate() + (semana-1)*7) <= hoy.getDate()) {
+                        valoresReales.push(Math.round(ganSem));
+                        valoresProyectados.push(null);
+                    } else {
+                        valoresReales.push(null);
+                        const prom = valoresReales.filter(x=>x!==null);
+                        const avg = prom.length ? prom.reduce((a,b)=>a+b,0)/prom.length : 0;
+                        valoresProyectados.push(Math.round(avg));
+                    }
+                    semana++; ganSem = 0; count = 0;
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+
+        } else { // mes completo — acumulado diario simple
+            document.getElementById('stats-chart-title').textContent = 'Proyección al cierre del período';
+            let cur = new Date(inicio), acum = 0, diasCon = 0;
+            const diasTotales = Math.ceil((fin - inicio) / 86400000) + 1;
+            while (cur <= hoy && cur <= fin) {
+                const f = toDateStr(cur);
+                const g = (statsMapVP[f]?.totalVP || 0) * pts;
+                if (g > 0) { acum += g; diasCon++; }
+                cur.setDate(cur.getDate() + 1);
+            }
+            const promDia = diasCon > 0 ? acum / diasCon : 0;
+            // Puntos mensuales: 4 valores — semana 1,2,3 y fin
+            [7,14,21,diasTotales].forEach((d,i) => {
+                labels.push(`Sem ${i+1}`);
+                const diasReal = Math.min(d, Math.ceil((hoy - inicio)/86400000)+1);
+                const diasProyect = d - diasReal;
+                const val = Math.round(acum * (diasReal/Math.max(diasCon,1)) + promDia * diasProyect);
+                if (diasReal >= d) { valoresReales.push(val); valoresProyectados.push(null); }
+                else { valoresReales.push(null); valoresProyectados.push(val); }
+            });
+        }
+
+        // ── Dibujar en Canvas ────────────────────────────────
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width  = canvas.offsetWidth  * dpr;
+        canvas.height = canvas.offsetHeight * dpr;
+        ctx.scale(dpr, dpr);
+        const W = canvas.offsetWidth, H = canvas.offsetHeight;
+        ctx.clearRect(0,0,W,H);
+
+        const allVals = [...valoresReales, ...valoresProyectados].filter(v => v !== null);
+        const maxVal  = Math.max(...allVals, 1);
+        const minVal  = 0;
+        const padL = 52, padR = 16, padT = 16, padB = 30;
+        const cW = W - padL - padR, cH = H - padT - padB;
+        const n  = labels.length;
+
+        const xPos = i => padL + (i / (n - 1)) * cW;
+        const yPos = v => padT + cH - ((v - minVal) / (maxVal - minVal)) * cH;
+
+        // Grid lines
+        ctx.strokeStyle = '#e7e8e9'; ctx.lineWidth = 1;
+        [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+            const y = padT + cH * (1 - t);
+            ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+            ctx.fillStyle = '#9ba3ab'; ctx.font = '9px Inter';
+            ctx.textAlign = 'right';
+            ctx.fillText(formatMoney(Math.round(maxVal * t)).replace('$','$'), padL - 4, y + 3);
+        });
+
+        // Línea real
+        const realesIdx = valoresReales.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
+        if (realesIdx.length > 1) {
+            // Área bajo la curva
+            ctx.beginPath();
+            ctx.moveTo(xPos(realesIdx[0]), yPos(valoresReales[realesIdx[0]]));
+            realesIdx.forEach(i => ctx.lineTo(xPos(i), yPos(valoresReales[i])));
+            ctx.lineTo(xPos(realesIdx[realesIdx.length-1]), padT + cH);
+            ctx.lineTo(xPos(realesIdx[0]), padT + cH);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(0,23,35,0.07)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(xPos(realesIdx[0]), yPos(valoresReales[realesIdx[0]]));
+            realesIdx.forEach(i => ctx.lineTo(xPos(i), yPos(valoresReales[i])));
+            ctx.strokeStyle = '#001723'; ctx.lineWidth = 2.5;
+            ctx.lineJoin = 'round'; ctx.stroke();
+
+            // Puntos
+            realesIdx.forEach(i => {
+                ctx.beginPath();
+                ctx.arc(xPos(i), yPos(valoresReales[i]), 3.5, 0, Math.PI*2);
+                ctx.fillStyle = '#001723'; ctx.fill();
+            });
+        }
+
+        // Línea proyección (punteada)
+        const proyIdx = valoresProyectados.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
+        // Empezar desde el último punto real
+        const startProyIdx = realesIdx.length > 0 ? realesIdx[realesIdx.length-1] : proyIdx[0];
+        if (proyIdx.length > 0) {
+            ctx.setLineDash([5, 4]);
+            ctx.beginPath();
+            if (realesIdx.length > 0 && valoresReales[startProyIdx] !== null) {
+                ctx.moveTo(xPos(startProyIdx), yPos(valoresReales[startProyIdx]));
+            } else {
+                ctx.moveTo(xPos(proyIdx[0]), yPos(valoresProyectados[proyIdx[0]]));
+            }
+            proyIdx.forEach(i => ctx.lineTo(xPos(i), yPos(valoresProyectados[i])));
+            ctx.strokeStyle = '#264b5f'; ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Punto final proyectado
+            const last = proyIdx[proyIdx.length-1];
+            ctx.beginPath();
+            ctx.arc(xPos(last), yPos(valoresProyectados[last]), 4, 0, Math.PI*2);
+            ctx.fillStyle = '#264b5f'; ctx.fill();
+        }
+
+        // Etiquetas eje X
+        ctx.fillStyle = '#9ba3ab'; ctx.font = '9px Inter'; ctx.textAlign = 'center';
+        const step = statsView === 'dia' ? Math.ceil(n / 8) : 1;
+        labels.forEach((l, i) => {
+            if (i % step === 0 || i === n-1) {
+                ctx.fillText(l, xPos(i), H - 6);
+            }
+        });
+    }
+
+    function renderStatsTable() {
+        const container = document.getElementById('stats-table');
+        if (!container) return;
+        const { inicio, fin } = getPeriodo();
+        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const pts = statsPts;
+        const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+        if (statsView === 'dia') {
+            const dias = [];
+            let cur = new Date(inicio);
+            while (cur <= fin) {
+                dias.push(new Date(cur));
+                cur.setDate(cur.getDate() + 1);
+            }
+            const promDia = (() => {
+                let ac = 0, cnt = 0;
+                dias.forEach(d => {
+                    const f = toDateStr(d);
+                    if (d <= hoy && statsMapVP[f]) { ac += (statsMapVP[f].totalVP || 0) * pts; cnt++; }
+                });
+                return cnt > 0 ? ac / cnt : 0;
+            })();
+
+            container.innerHTML = dias.map(d => {
+                const f = toDateStr(d);
+                const esPasado = d <= hoy;
+                const esHoy    = toDateStr(d) === toDateStr(hoy);
+                const ganancia = esPasado && statsMapVP[f] ? Math.round((statsMapVP[f].totalVP || 0) * pts) : null;
+                const esProy   = !esPasado;
+                const dia = d.getDate();
+                const mes = meses[d.getMonth()];
+                return `<div class="flex items-center justify-between bg-lm-card border ${esHoy?'border-lm-primary':'border-lm-border'} rounded-2xl px-4 py-3 ${esHoy?'ring-1 ring-lm-primary/20':''}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center ${esHoy?'bg-lm-primary text-white':esProy?'bg-lm-subtle text-lm-muted':'bg-lm-high text-lm-primary'} text-[11px] font-bold">${dia}</div>
+                        <div>
+                            <p class="text-sm font-semibold text-lm-primary">${dia} ${mes}</p>
+                            <p class="text-[10px] text-lm-muted">${esHoy?'Hoy':esProy?'Proyectado':'Real'}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        ${ganancia !== null
+                            ? `<p class="text-sm font-bold text-lm-green">+${formatMoney(ganancia)}</p>`
+                            : esProy
+                                ? `<p class="text-sm font-bold text-lm-muted">${formatMoney(Math.round(promDia))}</p>`
+                                : `<p class="text-xs text-lm-muted">Sin recaudación</p>`
+                        }
+                    </div>
+                </div>`;
+            }).join('');
+
+        } else if (statsView === 'semana') {
+            let semana = 1, rows = '';
+            let cur = new Date(inicio), ganSem = 0, diasSem = 0, esProySem = false;
+            while (cur <= fin) {
+                const f = toDateStr(cur);
+                const esPasado = cur <= hoy;
+                if (!esPasado) esProySem = true;
+                if (esPasado && statsMapVP[f]) ganSem += (statsMapVP[f].totalVP || 0) * pts;
+                diasSem++;
+                if (diasSem === 7 || cur.getTime() >= fin.getTime()) {
+                    rows += `<div class="flex items-center justify-between bg-lm-card border border-lm-border rounded-2xl px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center ${esProySem?'bg-lm-subtle text-lm-muted':'bg-lm-primary text-white'} text-[11px] font-bold">S${semana}</div>
+                            <div>
+                                <p class="text-sm font-semibold text-lm-primary">Semana ${semana}</p>
+                                <p class="text-[10px] text-lm-muted">${diasSem} día${diasSem!==1?'s':''} · ${esProySem?'Proyectado':'Real'}</p>
+                            </div>
+                        </div>
+                        <p class="text-sm font-bold ${esProySem?'text-lm-muted':'text-lm-green'}">${formatMoney(Math.round(ganSem))}</p>
+                    </div>`;
+                    semana++; ganSem = 0; diasSem = 0; esProySem = false;
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+            container.innerHTML = rows;
+
+        } else { // mes completo
+            let ganReal = 0, diasCon = 0;
+            let cur = new Date(inicio);
+            while (cur <= hoy && cur <= fin) {
+                const f = toDateStr(cur);
+                if (statsMapVP[f]) { ganReal += (statsMapVP[f].totalVP||0) * pts; diasCon++; }
+                cur.setDate(cur.getDate() + 1);
+            }
+            const diasTot = Math.ceil((fin - inicio)/86400000) + 1;
+            const diasRest = diasTot - Math.ceil((hoy - inicio)/86400000) - 1;
+            const promDia  = diasCon > 0 ? ganReal / diasCon : 0;
+            const proyFin  = ganReal + promDia * Math.max(0, diasRest);
+            const pct      = Math.round((ganReal / Math.max(proyFin, 1)) * 100);
+
+            container.innerHTML = `
+            <div class="bg-lm-card border border-lm-border rounded-[20px] p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <p class="text-[10px] text-lm-muted font-bold uppercase tracking-widest mb-1">Progreso del período</p>
+                        <p class="text-2xl font-extrabold text-lm-primary font-headline">${pct}%</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-lm-muted font-bold uppercase tracking-widest mb-1">Al cierre</p>
+                        <p class="text-xl font-extrabold text-lm-accent font-headline">${formatMoney(Math.round(proyFin))}</p>
+                    </div>
+                </div>
+                <div class="w-full h-2 bg-lm-high rounded-full overflow-hidden mb-5">
+                    <div class="h-full bg-lm-primary rounded-full transition-all" style="width:${pct}%"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-lm-subtle rounded-2xl p-3">
+                        <p class="text-[9px] text-lm-muted font-bold uppercase mb-1">Días con rec.</p>
+                        <p class="text-base font-extrabold text-lm-primary">${diasCon}</p>
+                    </div>
+                    <div class="bg-lm-subtle rounded-2xl p-3">
+                        <p class="text-[9px] text-lm-muted font-bold uppercase mb-1">Días restantes</p>
+                        <p class="text-base font-extrabold text-lm-primary">${Math.max(0,diasRest)}</p>
+                    </div>
+                    <div class="bg-lm-subtle rounded-2xl p-3">
+                        <p class="text-[9px] text-lm-muted font-bold uppercase mb-1">Prom. diario</p>
+                        <p class="text-base font-extrabold text-lm-primary">${formatMoney(Math.round(promDia))}</p>
+                    </div>
+                </div>
+            </div>`;
+        }
+    }
 
     // ── AYUDA / ONBOARDING ────────────────────────────────────
     const helpSlides = [
@@ -1952,5 +2562,16 @@
         }
     }
 </script>
+
+    <!-- PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(r => console.log('[SW] Registrado:', r.scope))
+                    .catch(e => console.warn('[SW] Error:', e));
+            });
+        }
+    </script>
 </body>
 </html>
