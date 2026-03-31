@@ -615,7 +615,7 @@
             <div id="userAvatar" class="w-10 h-10 rounded-2xl bg-gradient-to-br from-lm-primary to-lm-accent flex items-center justify-center text-white font-bold text-base shadow-lg font-headline">?</div>
             <div>
                 <p class="text-[10px] text-lm-muted font-medium">Bienvenido</p>
-                <h2 id="userNameLabel" class="text-sm font-semibold text-lm-primary leading-tight">...</h2>
+                <h2 id="userNameLabel" onclick="openEditNameModal()" class="text-sm font-semibold text-lm-primary leading-tight cursor-pointer flex items-center gap-1">...<span class="material-symbols-outlined text-[13px] text-lm-muted" style="font-size:13px;">edit</span></h2>
             </div>
         </div>
         <div class="flex items-center gap-2">
@@ -1173,13 +1173,51 @@
     window.addEventListener('beforeunload', () => { if (currentUser) logoutConexion(); });
     window.addEventListener('pagehide', () => { if (currentUser) logoutConexion(); });
 
+    // ── NOMBRE PERSONALIZADO ─────────────────────────────────
+    function getDisplayName() {
+        const key = `displayName_${currentUser.ID}`;
+        return localStorage.getItem(key) || `${currentUser.Nombre} ${currentUser.Apellido}`;
+    }
+    function saveDisplayName(nombre) {
+        const key = `displayName_${currentUser.ID}`;
+        if (nombre && nombre.trim()) {
+            localStorage.setItem(key, nombre.trim());
+        } else {
+            localStorage.removeItem(key);
+        }
+    }
+    function applyDisplayName() {
+        const nombre = getDisplayName();
+        document.getElementById('userNameLabel').textContent = nombre;
+        document.getElementById('userAvatar').textContent = nombre.charAt(0).toUpperCase();
+    }
+    function openEditNameModal() {
+        document.getElementById('editNameInput').value = getDisplayName();
+        const m = document.getElementById('editNameModal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        setTimeout(() => document.getElementById('editNameInput').focus(), 100);
+    }
+    function saveEditName() {
+        const val = document.getElementById('editNameInput').value.trim();
+        saveDisplayName(val);
+        applyDisplayName();
+        document.getElementById('editNameModal').classList.add('hidden');
+        document.getElementById('editNameModal').classList.remove('flex');
+    }
+    function resetDisplayName() {
+        localStorage.removeItem(`displayName_${currentUser.ID}`);
+        applyDisplayName();
+        document.getElementById('editNameModal').classList.add('hidden');
+        document.getElementById('editNameModal').classList.remove('flex');
+    }
+
     function initApp() {
         document.getElementById('loginOverlay').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('hidden');
         document.getElementById('appContainer').classList.add('flex');
-        document.getElementById('userNameLabel').textContent = `${currentUser.Nombre} ${currentUser.Apellido}`;
+        applyDisplayName();
         document.getElementById('userAreaLabel').textContent = currentUser.Area;
-        document.getElementById('userAvatar').textContent = currentUser.Nombre.charAt(0);
         initChatInput();
         showSkeletons();
         pingConexion();
@@ -2585,5 +2623,24 @@
             });
         }
     </script>
+
+<!-- MODAL EDITAR NOMBRE -->
+<div id="editNameModal" class="hidden fixed inset-0 z-[300] bg-black/50 backdrop-blur-sm items-end justify-center" onclick="if(event.target===this){this.classList.add('hidden');this.classList.remove('flex');}">
+    <div class="bg-white w-full max-w-sm rounded-t-[28px] p-6 shadow-2xl" style="background:var(--color-card,#fff)">
+        <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5"></div>
+        <h3 class="font-headline text-lg font-bold text-lm-primary mb-1 text-center">Tu Nombre en la App</h3>
+        <p class="text-xs text-lm-muted text-center mb-5">Se guarda solo en este dispositivo</p>
+        <input id="editNameInput" type="text" maxlength="30"
+            class="w-full rounded-2xl py-4 px-5 font-medium text-base text-center mb-4"
+            placeholder="Ej: Javier"
+            onkeydown="if(event.key==='Enter') saveEditName()" />
+        <button onclick="saveEditName()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20 mb-3">
+            Guardar
+        </button>
+        <button onclick="resetDisplayName()" class="w-full py-3 rounded-2xl font-medium text-lm-muted text-sm transition-colors hover:text-lm-primary">
+            Restablecer nombre original
+        </button>
+    </div>
+</div>
 </body>
 </html>
