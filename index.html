@@ -865,6 +865,96 @@
     </main>
 
     <!-- BOTTOM NAV -->
+        <!-- ── TAB: PERFIL ── -->
+        <div id="tab-perfil" class="tab-section overflow-y-auto pb-32 pt-4 bg-lm-bg">
+            <div class="px-4">
+
+                <!-- Avatar y nombre -->
+                <div style="text-align:center;margin-bottom:24px;padding-top:8px;">
+                    <div id="perfilAvatar" style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#001723,#006a62);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 8px 20px rgba(0,23,35,0.2);">
+                        <span id="perfilLetra" style="font-size:28px;font-weight:700;color:#fff;font-family:inherit">?</span>
+                    </div>
+                    <h2 id="perfilNombre" style="font-size:18px;font-weight:700;color:#001723;margin:0 0 4px">...</h2>
+                    <span id="perfilID" style="font-size:11px;font-weight:600;color:#94a3b8;letter-spacing:0.05em"></span>
+                </div>
+
+                <!-- Tarjetas de datos -->
+                <div style="display:flex;flex-direction:column;gap:10px;">
+
+                    <div style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+                        <p style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Información Laboral</p>
+                        <div style="display:flex;flex-direction:column;gap:0">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:32px;height:32px;border-radius:9px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <span class="material-symbols-outlined" style="font-size:16px;color:#6366f1">location_on</span>
+                                    </div>
+                                    <span style="font-size:13px;color:#64748b;font-weight:500">Área</span>
+                                </div>
+                                <span id="perfilArea" style="font-size:13px;font-weight:700;color:#001723">—</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:32px;height:32px;border-radius:9px;background:rgba(16,185,129,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <span class="material-symbols-outlined" style="font-size:16px;color:#10b981">work</span>
+                                    </div>
+                                    <span style="font-size:13px;color:#64748b;font-weight:500">Contrato</span>
+                                </div>
+                                <span id="perfilContrato" style="font-size:13px;font-weight:700;color:#001723">—</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:32px;height:32px;border-radius:9px;background:rgba(245,158,11,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <span class="material-symbols-outlined" style="font-size:16px;color:#f59e0b">calendar_today</span>
+                                    </div>
+                                    <span style="font-size:13px;color:#64748b;font-weight:500">Fecha Ingreso</span>
+                                </div>
+                                <span id="perfilFechaIngreso" style="font-size:13px;font-weight:700;color:#001723">—</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:32px;height:32px;border-radius:9px;background:rgba(0,23,35,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <span class="material-symbols-outlined" style="font-size:16px;color:#001723">badge</span>
+                                    </div>
+                                    <span style="font-size:13px;color:#64748b;font-weight:500">ID Socio</span>
+                                </div>
+                                <span id="perfilIDCard" style="font-size:13px;font-weight:700;color:#001723;font-family:monospace">—</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta antigüedad y puntos -->
+                    <div style="background:linear-gradient(135deg,#001723,#006a62);border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(0,23,35,0.2);">
+                        <p style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px">Antigüedad y Puntos</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;text-align:center">
+                                <p style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase;margin-bottom:4px">Años en Casino</p>
+                                <p id="perfilAnios" style="font-size:24px;font-weight:700;color:#fff">—</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;text-align:center">
+                                <p style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase;margin-bottom:4px">Mis Puntos</p>
+                                <p id="perfilPuntos" style="font-size:24px;font-weight:700;color:#4ade80">—</p>
+                            </div>
+                        </div>
+                        <p id="perfilAntigMsg" style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:12px;text-align:center;line-height:1.5"></p>
+                    </div>
+
+                    <!-- Botón editar nombre -->
+                    <button onclick="openEditNameModal()" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                            <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">edit</span>
+                        </div>
+                        <div style="text-align:left">
+                            <p style="font-size:13px;font-weight:700;color:#001723;margin:0">Cambiar mi nombre</p>
+                            <p style="font-size:11px;color:#94a3b8;margin:2px 0 0">Solo cambia en este dispositivo</p>
+                        </div>
+                        <span class="material-symbols-outlined" style="font-size:18px;color:#cbd5e1;margin-left:auto">chevron_right</span>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
     <nav id="bottomNav" class="fixed bottom-0 w-full z-[40] pb-safe-bottom">
         <div class="flex justify-around items-center px-4 pt-3 pb-2">
             <button onclick="switchTab('tab-home')" class="nav-btn active flex flex-col items-center gap-1.5 w-16">
@@ -883,6 +973,10 @@
                 <div id="notifBadge" class="unread-dot hidden"></div>
                 <span class="nav-icon material-symbols-outlined text-[24px]">chat</span>
                 <span class="text-[10px] font-semibold tracking-wide">Mensajes</span>
+            </button>
+            <button onclick="switchTab('tab-perfil')" class="nav-btn flex flex-col items-center gap-1.5 w-16">
+                <span class="nav-icon material-symbols-outlined text-[24px]">badge</span>
+                <span class="text-[10px] font-semibold tracking-wide">Perfil</span>
             </button>
         </div>
         <!-- Crédito -->
@@ -1173,6 +1267,31 @@
     window.addEventListener('beforeunload', () => { if (currentUser) logoutConexion(); });
     window.addEventListener('pagehide', () => { if (currentUser) logoutConexion(); });
 
+    // ── PERFIL DEL SOCIO ─────────────────────────────────────
+    function renderPerfil() {
+        if (!currentUser) return;
+        const nombre = getDisplayName();
+        const dIng = new Date(currentUser.FechaIngreso);
+        const hoy = new Date();
+        let anos = hoy.getFullYear() - dIng.getFullYear();
+        if (hoy.getMonth() < dIng.getMonth() || (hoy.getMonth() === dIng.getMonth() && hoy.getDate() < dIng.getDate())) anos--;
+        anos = Math.max(0, anos);
+        const pts = Math.min(4 + (anos * 2), (currentUser.Area.includes('Mesa') ? 20 : currentUser.Area.includes('Cambista') ? 8 : currentUser.Area.includes('Boveda') ? 10 : 12));
+
+        document.getElementById('perfilLetra').textContent = nombre.charAt(0).toUpperCase();
+        document.getElementById('perfilNombre').textContent = nombre;
+        document.getElementById('perfilID').textContent = 'ID: ' + currentUser.ID;
+        document.getElementById('perfilIDCard').textContent = currentUser.ID;
+        document.getElementById('perfilArea').textContent = currentUser.Area || '—';
+        document.getElementById('perfilContrato').textContent = currentUser.TipoContrato || '—';
+        document.getElementById('perfilFechaIngreso').textContent = dIng.toLocaleDateString('es-CL', {day:'2-digit', month:'long', year:'numeric'});
+        document.getElementById('perfilAnios').textContent = anos;
+        document.getElementById('perfilPuntos').textContent = pts;
+        document.getElementById('perfilAntigMsg').textContent = anos < 1
+            ? 'Primer año — bienvenido al equipo 👋'
+            : 'Con ' + anos + ' año' + (anos === 1 ? '' : 's') + ' en el casino, tienes ' + pts + ' puntos asignados en el reparto.';
+    }
+
     // ── NOMBRE PERSONALIZADO ─────────────────────────────────
     function getDisplayName() {
         const key = `displayName_${currentUser.ID}`;
@@ -1218,6 +1337,7 @@
         document.getElementById('appContainer').classList.add('flex');
         applyDisplayName();
         document.getElementById('userAreaLabel').textContent = currentUser.Area;
+        renderPerfil();
         initChatInput();
         showSkeletons();
         pingConexion();
@@ -1479,22 +1599,103 @@
             }
             animateIn(listaContainer, '120ms');
 
-            // Historial
-            document.getElementById('historyList').innerHTML=Object.entries(mapVP).sort((a,b)=>b[0].localeCompare(a[0])).map(([f,d])=>`
-            <div class="movement-row">
-                <div class="movement-icon bg-lm-green/10">
-                    <span class="material-symbols-outlined text-lm-green text-[18px]">arrow_upward</span>
-                </div>
-                <div class="flex-1">
-                    <p class="text-sm font-semibold text-lm-primary">${formatMoney(d.montoReal)}</p>
-                    <p class="text-[11px] text-lm-muted mt-0.5">${cleanDateStr(f)}</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[10px] text-lm-muted mb-0.5">Valor Punto</p>
-                    <p class="text-lm-accent font-semibold text-sm">${formatMoney(d.totalVP)}</p>
-                </div>
-            </div>`).join('');
+            // Historial — agrupado por fecha, con desglose de tipos dentro de cada día
+            const ausenciasSet = new Set(
+                userExtras.filter(e=>String(e.tipo).toUpperCase()==='AUSENCIA').map(a=>String(a.fecha).substring(0,10))
+            );
+            const diasTrabajadosSet = esPT
+                ? new Set((diasTrabajados[sID]||diasTrabajados[currentUser.ID]||[]).map(d=>String(d).substring(0,10)))
+                : null;
 
+            // Agrupar recData por fecha manteniendo cada tipo individual
+            const porFecha = {};
+            recData.forEach(r => {
+                const f = String(r.fecha).substring(0,10);
+                if (!porFecha[f]) porFecha[f] = [];
+                porFecha[f].push(r);
+            });
+
+            // Ordenar fechas de más reciente a más antigua
+            const fechasOrdenadas = Object.keys(porFecha).sort((a,b) => b.localeCompare(a));
+
+            document.getElementById('historyList').innerHTML = fechasOrdenadas.map(f => {
+                const entradas = porFecha[f];
+                const esAusencia = !esPT && ausenciasSet.has(f);
+                const esDiaTrabajado = esPT && diasTrabajadosSet && diasTrabajadosSet.has(f);
+                const contaParaMi = esPT ? esDiaTrabajado : !esAusencia;
+
+                // Totales del día
+                const totalDia = entradas.reduce((s, r) => s + (parseFloat(r.monto) || 0), 0);
+                const vpDia = entradas.reduce((s, r) => {
+                    const m = parseFloat(r.monto) || 0;
+                    const d = parseFloat(r.divisor) || 1;
+                    return s + (m / d);
+                }, 0);
+                const gananciaDia = vpDia * pts;
+
+                const gananciaColor = contaParaMi ? '#10b981' : '#ef4444';
+                const gananciaStr = contaParaMi ? formatMoney(gananciaDia) : ('-' + formatMoney(gananciaDia));
+                const gananciaBg = contaParaMi ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.06)';
+                const headerBg = contaParaMi ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.04)';
+                const headerBorder = contaParaMi ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.15)';
+
+                let badge = '';
+                if (esAusencia) {
+                    badge = '<span style="font-size:9px;font-weight:700;background:rgba(239,68,68,0.1);color:#ef4444;padding:2px 8px;border-radius:20px">AUSENCIA</span>';
+                } else if (esPT && !esDiaTrabajado) {
+                    badge = '<span style="font-size:9px;font-weight:700;background:rgba(148,163,184,0.15);color:#94a3b8;padding:2px 8px;border-radius:20px">NO TRABAJADO</span>';
+                } else if (esPT && esDiaTrabajado) {
+                    badge = '<span style="font-size:9px;font-weight:700;background:rgba(16,185,129,0.1);color:#10b981;padding:2px 8px;border-radius:20px">TRABAJADO</span>';
+                }
+
+                // Filas de tipos individuales
+                const tiposHTML = entradas.map(r => {
+                    const m = parseFloat(r.monto) || 0;
+                    const tipo = (r.tipo || 'Sin tipo').toString().trim();
+                    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.04);">'
+                        + '<div style="display:flex;align-items:center;gap:8px;">'
+                            + '<div style="width:7px;height:7px;border-radius:50%;background:#6366f1;flex-shrink:0"></div>'
+                            + '<span style="font-size:12px;font-weight:500;color:#334155">' + tipo + '</span>'
+                        + '</div>'
+                        + '<span style="font-size:12px;font-weight:700;color:#001723">' + formatMoney(m) + '</span>'
+                    + '</div>';
+                }).join('');
+
+                return '<div style="background:var(--color-card,#fff);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:12px;overflow:hidden;">'
+                    // Cabecera de fecha
+                    + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:' + headerBg + ';border-bottom:1px solid ' + headerBorder + ';">'
+                        + '<div style="display:flex;align-items:center;gap:10px;">'
+                            + '<div style="width:36px;height:36px;border-radius:10px;background:' + (contaParaMi ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.1)') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+                                + '<span class="material-symbols-outlined" style="font-size:18px;color:' + gananciaColor + '">' + (contaParaMi ? 'trending_up' : 'trending_flat') + '</span>'
+                            + '</div>'
+                            + '<div>'
+                                + '<p style="font-size:13px;font-weight:700;color:#001723">' + cleanDateStr(f) + '</p>'
+                                + '<p style="font-size:10px;color:#94a3b8;margin-top:1px">' + entradas.length + (entradas.length === 1 ? ' entrada' : ' entradas') + ' · Total: ' + formatMoney(totalDia) + '</p>'
+                            + '</div>'
+                        + '</div>'
+                        + badge
+                    + '</div>'
+                    // Desglose de tipos
+                    + '<div style="padding:4px 14px 8px;">'
+                        + tiposHTML
+                    + '</div>'
+                    // Grilla de puntos y ganancia
+                    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:8px 14px 12px;">'
+                        + '<div style="background:var(--color-subtle,#f1f5f9);border-radius:10px;padding:7px 8px;text-align:center">'
+                            + '<p style="font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:2px">Valor Punto</p>'
+                            + '<p style="font-size:12px;font-weight:700;color:#6366f1">' + formatMoney(vpDia) + '</p>'
+                        + '</div>'
+                        + '<div style="background:var(--color-subtle,#f1f5f9);border-radius:10px;padding:7px 8px;text-align:center">'
+                            + '<p style="font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:2px">Mis Pts</p>'
+                            + '<p style="font-size:12px;font-weight:700;color:#001723">' + pts + '</p>'
+                        + '</div>'
+                        + '<div style="background:' + gananciaBg + ';border-radius:10px;padding:7px 8px;text-align:center">'
+                            + '<p style="font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:2px">Mi Ganancia</p>'
+                            + '<p style="font-size:12px;font-weight:700;color:' + gananciaColor + '">' + gananciaStr + '</p>'
+                        + '</div>'
+                    + '</div>'
+                + '</div>';
+            }).join('');
             animateIn(document.getElementById('historyList'), '60ms');
             const btn=document.getElementById('calendarBtnContainer');
             if(globalDiasCalendar.length>0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
@@ -2307,7 +2508,7 @@
             icon: 'waving_hand',
             color: '#001723',
             title: '¡Bienvenido a tu App del Fondo!',
-            body: 'Esta aplicación es tu herramienta personal del <b>Fondo Solidario</b>. Aquí verás cuánto te corresponde cobrar, tus movimientos y podrás comunicarte con el equipo. Esta guía te mostrará cada sección paso a paso.',
+            body: 'Esta aplicación es <b>tu herramienta personal</b> del Fondo Solidario de Propina del Casino de Puerto Varas.<br><br>Acá podrás ver en todo momento <b>cuánto dinero te corresponde cobrar</b>, revisar el detalle de las recaudaciones, ver tus datos como socio y comunicarte con el equipo.<br><br>Esta guía te explicará cada sección paso a paso. No te preocupes si nunca has usado una app así — es muy sencillo.',
             preview: `
               <div style="background:linear-gradient(135deg,#001723,#002d40,#264b5f);border-radius:18px;padding:18px;position:relative;overflow:hidden;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -2323,15 +2524,17 @@
                 <div style="display:flex;justify-content:space-around;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;">
                   <div style="text-align:center;"><span class="material-symbols-outlined" style="font-size:18px;color:#fff">account_balance_wallet</span><div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px">Balance</div></div>
                   <div style="text-align:center;"><span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.35)">receipt_long</span><div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px">Historial</div></div>
+                  <div style="text-align:center;"><span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.35)">bar_chart</span><div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px">Stats</div></div>
                   <div style="text-align:center;"><span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.35)">chat</span><div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px">Mensajes</div></div>
+                  <div style="text-align:center;"><span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.35)">badge</span><div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px">Perfil</div></div>
                 </div>
               </div>`
         },
         {
             icon: 'account_balance_wallet',
             color: '#001723',
-            title: 'Balance — Tu monto a cobrar',
-            body: 'El <b>número grande</b> en azul oscuro es lo que te corresponde cobrar este período.<br><br>🔹 <b>Remanente:</b> Lo que sobra si tu monto no es múltiplo de $1.000 — se guarda para el próximo período.<br><br>🔹 <b>Mis Puntos:</b> Tus puntos acumulados del período actual.',
+            title: 'Balance — ¿Cuánto me toca cobrar?',
+            body: 'Esta es la primera pantalla que verás al entrar. El <b>número grande</b> es el dinero que te corresponde cobrar en este período.<br><br>💰 <b>Remanente:</b> Es el sobrante que queda si tu monto no termina en número redondo — ese dinero pasa al próximo período, no se pierde.<br><br>⭐ <b>Mis Puntos:</b> Muestra el total de puntos que generaste en el período actual. A más puntos, más propina te corresponde.',
             preview: `
               <div style="background:linear-gradient(135deg,#001723,#002d40,#264b5f);border-radius:18px;padding:18px;position:relative;overflow:hidden;">
                 <div style="font-size:9px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Balance a Recibir</div>
@@ -2346,16 +2549,13 @@
                     <span>Mis Puntos: <b style="color:#fff">3.240</b></span>
                   </div>
                 </div>
-                <div style="position:absolute;top:10px;right:12px;width:32px;height:32px;background:rgba(255,255,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                  <span class="material-symbols-outlined" style="font-size:16px;color:rgba(255,255,255,0.6)">account_balance_wallet</span>
-                </div>
               </div>`
         },
         {
             icon: 'percent',
             color: '#264b5f',
-            title: '¿Cómo se calcula tu balance?',
-            body: 'El monto se calcula sumando y restando estas tres partes que ves en el <b>Resumen Contable</b>:',
+            title: '¿Cómo se calcula ese monto?',
+            body: 'Tu balance se calcula sumando y restando tres cosas que ves en el <b>Resumen Contable</b>:<br><br>✅ <b>Total Bruto:</b> Lo que generaste según tus puntos y lo recaudado.<br>✅ <b>Saldo Anterior:</b> Si quedó algo pendiente del mes pasado, se suma aquí.<br>❌ <b>Descuentos / Anticipos:</b> Lo que ya retiraste o se descontó — se resta del total.<br><br>El resultado de esa operación es tu monto final a cobrar.',
             preview: `
               <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;overflow:hidden;">
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #f3f4f5;">
@@ -2368,7 +2568,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #f3f4f5;">
                   <div style="display:flex;align-items:center;gap:8px;">
                     <div style="width:30px;height:30px;background:rgba(0,106,98,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:14px;color:#006a62">account_balance</span></div>
-                    <div><div style="font-size:11px;color:#191c1d;font-weight:500">Saldo Anterior</div><div style="font-size:9px;color:#9ba3ab">De períodos pasados</div></div>
+                    <div><div style="font-size:11px;color:#191c1d;font-weight:500">Saldo Anterior</div><div style="font-size:9px;color:#9ba3ab">Del período pasado</div></div>
                   </div>
                   <b style="font-size:12px;color:#191c1d">+ $8.000</b>
                 </div>
@@ -2385,7 +2585,7 @@
             icon: 'remove_circle',
             color: '#ba1a1a',
             title: 'Anticipos y Descuentos',
-            body: 'Más abajo en la pantalla Balance, en <b>Últimos Movimientos</b>, verás cada anticipo o descuento aplicado a tu cuenta.<br><br>🔸 <b>Anticipo:</b> Plata que retiraste antes de la liquidación.<br>🔸 <b>Descuento:</b> Algún cargo específico a tu cuenta.<br><br>Si hay algo que no reconoces, escríbele al equipo por el Chat.',
+            body: 'En la parte de abajo del Balance, en <b>Últimos Movimientos</b>, verás una lista de cada anticipo o descuento aplicado a tu cuenta en este período.<br><br>🔸 <b>Anticipo:</b> Es plata que retiraste antes de la liquidación oficial del mes. Se descuenta de tu total.<br>🔸 <b>Descuento personal:</b> Algún cargo específico registrado a tu nombre.<br><br>Si ves algo que no reconoces o crees que es un error, escríbele al equipo por Mensajes.',
             preview: `
               <div>
                 <div style="font-size:9px;color:#9ba3ab;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Últimos Movimientos</div>
@@ -2406,65 +2606,76 @@
         {
             icon: 'receipt_long',
             color: '#006a62',
-            title: 'Historial de Rendimientos',
-            body: 'Toca <b>Historial</b> en el menú de abajo para ver el detalle día a día de la recaudación.<br><br>🔹 <b>Monto recaudado:</b> Lo que entró ese día en total al casino.<br>🔹 <b>Valor Punto:</b> Cuánto valió cada punto ese día — cambia diariamente.',
+            title: 'Historial — El detalle día a día',
+            body: 'En la sección <b>Historial</b> puedes ver exactamente lo que entró al casino cada día, desglosado por tipo de recaudación.<br><br>Cada fecha muestra una <b>tarjeta con todas las entradas de ese día</b> — por ejemplo, Sala de Juegos, Tarjeta MDA, Efectivo MDA, Bóveda, etc., cada una con su monto.<br><br>🟢 <b>Verde (flecha arriba):</b> Ese día cuenta para tu propina.<br>🔴 <b>Rojo / Plano:</b> Ese día no te suma — tuviste ausencia o no trabajaste (Part-Time).<br><br>Abajo de cada fecha ves tu <b>Valor Punto</b>, <b>Mis Puntos</b> y <b>Mi Ganancia</b> de ese día específico.',
             preview: `
-              <div>
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                  <div style="background:#001723;border-radius:12px;padding:6px 12px;display:flex;align-items:center;gap:4px;">
-                    <span class="material-symbols-outlined" style="font-size:14px;color:#fff;font-variation-settings:'FILL' 1">receipt_long</span>
-                    <span style="font-size:10px;color:#fff;font-weight:700">Historial</span>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,0.08);overflow:hidden;">
+                  <div style="background:rgba(16,185,129,0.06);border-bottom:1px solid rgba(16,185,129,0.15);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <div style="width:30px;height:30px;border-radius:8px;background:rgba(16,185,129,0.12);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:15px;color:#10b981">trending_up</span></div>
+                      <div><div style="font-size:12px;font-weight:700;color:#001723">Vie 28 Mar 2026</div><div style="font-size:9px;color:#94a3b8">3 entradas · Total: $6.400.000</div></div>
+                    </div>
                   </div>
-                  <div style="background:#f3f4f5;border-radius:12px;padding:6px 12px;display:flex;align-items:center;gap:4px;">
-                    <span class="material-symbols-outlined" style="font-size:14px;color:#9ba3ab">account_balance_wallet</span>
-                    <span style="font-size:10px;color:#9ba3ab;font-weight:700">Balance</span>
+                  <div style="padding:6px 12px 8px;">
+                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f8fafc;"><div style="display:flex;align-items:center;gap:6px;"><div style="width:6px;height:6px;border-radius:50%;background:#6366f1"></div><span style="font-size:11px;color:#334155">SalaDeJuegos</span></div><span style="font-size:11px;font-weight:700;color:#001723">$3.200.000</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f8fafc;"><div style="display:flex;align-items:center;gap:6px;"><div style="width:6px;height:6px;border-radius:50%;background:#6366f1"></div><span style="font-size:11px;color:#334155">TarjetaMDA</span></div><span style="font-size:11px;font-weight:700;color:#001723">$1.800.000</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:5px 0;"><div style="display:flex;align-items:center;gap:6px;"><div style="width:6px;height:6px;border-radius:50%;background:#6366f1"></div><span style="font-size:11px;color:#334155">EfectivoMDA</span></div><span style="font-size:11px;font-weight:700;color:#001723">$1.400.000</span></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 12px 10px;">
+                    <div style="background:#f1f5f9;border-radius:8px;padding:5px;text-align:center;"><div style="font-size:8px;color:#94a3b8;font-weight:700">VALOR PTO</div><div style="font-size:11px;font-weight:700;color:#6366f1">$1.600</div></div>
+                    <div style="background:#f1f5f9;border-radius:8px;padding:5px;text-align:center;"><div style="font-size:8px;color:#94a3b8;font-weight:700">MIS PTS</div><div style="font-size:11px;font-weight:700;color:#001723">10</div></div>
+                    <div style="background:rgba(16,185,129,0.08);border-radius:8px;padding:5px;text-align:center;"><div style="font-size:8px;color:#94a3b8;font-weight:700">GANANCIA</div><div style="font-size:11px;font-weight:700;color:#10b981">$16.000</div></div>
                   </div>
                 </div>
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                  <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e7e8e9;border-radius:14px;padding:10px 12px;">
-                    <div style="width:34px;height:34px;background:rgba(0,106,98,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:16px;color:#006a62">arrow_upward</span></div>
-                    <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#191c1d">$4.200.000</div><div style="font-size:10px;color:#9ba3ab">28-03-2026</div></div>
-                    <div style="text-align:right;"><div style="font-size:9px;color:#9ba3ab">Valor Punto</div><div style="font-size:12px;font-weight:600;color:#264b5f">$1.050</div></div>
+              </div>`
+        },
+        {
+            icon: 'bar_chart',
+            color: '#264b5f',
+            title: 'Estadísticas — Tu resumen del período',
+            body: 'En la sección <b>Stats</b> puedes ver gráficos y resúmenes de tu rendimiento en el período actual.<br><br>📊 Muestra la evolución de la recaudación y cómo han variado tus ganancias día a día.<br><br>Es útil para tener una visión rápida de cómo va el mes sin necesidad de revisar el historial entrada por entrada.',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:14px;">
+                <div style="font-size:9px;color:#264b5f;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Período Activo</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+                  <div style="background:#f8f9fa;border-radius:12px;padding:10px;text-align:center;">
+                    <div style="font-size:9px;color:#9ba3ab;font-weight:700;margin-bottom:3px;">DÍAS CON DATO</div>
+                    <div style="font-size:20px;font-weight:800;color:#001723">18</div>
                   </div>
-                  <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e7e8e9;border-radius:14px;padding:10px 12px;">
-                    <div style="width:34px;height:34px;background:rgba(0,106,98,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:16px;color:#006a62">arrow_upward</span></div>
-                    <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#191c1d">$3.850.000</div><div style="font-size:10px;color:#9ba3ab">27-03-2026</div></div>
-                    <div style="text-align:right;"><div style="font-size:9px;color:#9ba3ab">Valor Punto</div><div style="font-size:12px;font-weight:600;color:#264b5f">$962</div></div>
+                  <div style="background:#f8f9fa;border-radius:12px;padding:10px;text-align:center;">
+                    <div style="font-size:9px;color:#9ba3ab;font-weight:700;margin-bottom:3px;">VALOR PUNTO HOY</div>
+                    <div style="font-size:20px;font-weight:800;color:#006a62">$1.050</div>
                   </div>
+                </div>
+                <div style="height:50px;background:linear-gradient(180deg,rgba(38,75,95,0.08) 0%,rgba(38,75,95,0.02) 100%);border-radius:8px;display:flex;align-items:flex-end;gap:3px;padding:4px 6px;">
+                  ${[40,55,35,70,60,80,50,75,65,90,45,85,70,95,60,80,75,88].map(h=>`<div style="flex:1;background:#264b5f;border-radius:3px 3px 0 0;opacity:0.7;height:${h}%"></div>`).join('')}
                 </div>
               </div>`
         },
         {
             icon: 'event_note',
             color: '#705d00',
-            title: 'Calendario de Turnos',
-            body: 'Aparece el botón <b>"Ver Calendario"</b> en tu Balance solo si eres Part-Time o tienes ausencias. Al tocarlo se abre este calendario:<br><br>🟢 <b>Verde:</b> Días que trabajaste (Part-Time) → suman puntos.<br>🔴 <b>Rojo:</b> Días de ausencia (Planta) → restan puntos.',
+            title: 'Calendario de Ausencias y Turnos',
+            body: 'El botón <b>"Ver Calendario"</b> aparece en tu Balance si eres <b>Part-Time</b> o si tienes <b>ausencias</b> registradas.<br><br>🟢 <b>Verde (Part-Time):</b> Los días que trabajaste — esos suman puntos a tu propina.<br>🔴 <b>Rojo (Planta):</b> Los días que faltaste — esos restan puntos de tu propina.<br><br>Si ves un día marcado incorrectamente, avísale a la administración por Mensajes.',
             preview: `
               <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:14px;">
-                <div style="font-size:9px;color:#705d00;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Calendario</div>
-                <div style="font-size:14px;font-weight:800;color:#191c1d;font-family:Manrope,sans-serif;margin-bottom:2px;">Turnos Realizados</div>
-                <div style="font-size:10px;color:#9ba3ab;margin-bottom:10px;">Marzo 2026</div>
-                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;">
+                <div style="font-size:14px;font-weight:800;color:#191c1d;font-family:Manrope,sans-serif;margin-bottom:2px;">Calendario Marzo 2026</div>
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:8px 0 4px;">
                   ${['Lu','Ma','Mi','Ju','Vi','Sa','Do'].map(d=>`<div style="text-align:center;font-size:8px;color:#9ba3ab;font-weight:700">${d}</div>`).join('')}
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
                   ${['',' ','','','','1','2'].map(d=>d?`<div style="aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;background:#f3f4f5;color:#9ba3ab">${d}</div>`:`<div></div>`).join('')}
-                  ${['3','4','5','6','7','8','9'].map((d,i)=>{
-                    const worked=[3,5,6].includes(parseInt(d));
-                    return `<div style="aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;${worked?'background:rgba(0,106,98,0.12);color:#006a62;border:1px solid rgba(0,106,98,0.2)':'background:#f3f4f5;color:#9ba3ab'}">${d}</div>`;
-                  }).join('')}
-                  ${['10','11','12','13','14','15','16'].map((d,i)=>{
-                    const worked=[10,12,13,15].includes(parseInt(d));
-                    return `<div style="aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;${worked?'background:rgba(0,106,98,0.12);color:#006a62;border:1px solid rgba(0,106,98,0.2)':'background:#f3f4f5;color:#9ba3ab'}">${d}</div>`;
-                  }).join('')}
+                  ${['3','4','5','6','7','8','9'].map((d,i)=>{const worked=[3,5,6].includes(parseInt(d));return `<div style="aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;${worked?'background:rgba(0,106,98,0.12);color:#006a62;border:1px solid rgba(0,106,98,0.2)':'background:#f3f4f5;color:#9ba3ab'}">${d}</div>`;}).join('')}
+                  ${['10','11','12','13','14','15','16'].map((d,i)=>{const worked=[10,12,13,15].includes(parseInt(d));return `<div style="aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;${worked?'background:rgba(0,106,98,0.12);color:#006a62;border:1px solid rgba(0,106,98,0.2)':'background:#f3f4f5;color:#9ba3ab'}">${d}</div>`;}).join('')}
                 </div>
               </div>`
         },
         {
             icon: 'chat',
             color: '#001723',
-            title: 'Mensajes — Chat con el Equipo',
-            body: 'Toca <b>Mensajes</b> en el menú de abajo. Tiene dos modos:<br><br>💬 <b>Soporte:</b> Escríbele a la administración — dudas, reclamos, consultas.<br><br>👥 <b>Equipo:</b> Chat entre socios. Elige <b>Chat General</b> para que todos vean tu mensaje, o selecciona un compañero para un mensaje privado.<br><br>Si recibes un mensaje nuevo, aparece un punto rojo en el ícono.',
+            title: 'Mensajes — Habla con el Equipo',
+            body: 'En la sección <b>Mensajes</b> puedes comunicarte directamente con la administración o con tus compañeros.<br><br>🎧 <b>Soporte:</b> Escríbele a la administración — para dudas, consultas o si algo no cuadra en tus datos.<br><br>👥 <b>Equipo:</b> Chat entre socios. Puedes escribir al <b>Chat General</b> para que todos lo vean, o elegir a un compañero específico para un mensaje privado.<br><br>🔴 Si ves un <b>punto rojo</b> en el ícono de Mensajes, significa que tienes un mensaje nuevo sin leer.',
             preview: `
               <div style="border-radius:16px;overflow:hidden;border:1px solid #e1e3e4;">
                 <div style="background:#001723;padding:10px 12px;display:flex;gap:6px;">
@@ -2489,10 +2700,33 @@
               </div>`
         },
         {
+            icon: 'badge',
+            color: '#6366f1',
+            title: 'Perfil — Tus datos como Socio',
+            body: 'En la sección <b>Perfil</b> puedes ver toda tu información como socio del Fondo:<br><br>🏢 <b>Área</b> donde trabajas<br>📋 <b>Tipo de contrato</b> (Planta o Part-Time)<br>📅 <b>Fecha de ingreso</b> al casino<br>🪪 <b>ID de Socio</b><br>⭐ <b>Años en el casino</b> y los <b>puntos</b> que te corresponden según tu antigüedad<br><br>También puedes cambiar el <b>nombre que aparece en la app</b> — solo cambia en este celular, no afecta tus datos reales.',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;overflow:hidden;">
+                <div style="text-align:center;padding:16px 16px 12px;border-bottom:1px solid #f1f5f9;">
+                  <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#001723,#006a62);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;"><span style="font-size:22px;font-weight:700;color:#fff">J</span></div>
+                  <div style="font-size:14px;font-weight:700;color:#001723">Juan Pérez</div>
+                  <div style="font-size:10px;color:#94a3b8;margin-top:2px">ID: SOC-001</div>
+                </div>
+                <div style="padding:8px 14px;">
+                  <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:11px;color:#64748b">Área</span><span style="font-size:11px;font-weight:700;color:#001723">Mesas</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:11px;color:#64748b">Contrato</span><span style="font-size:11px;font-weight:700;color:#001723">Planta</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:7px 0;"><span style="font-size:11px;color:#64748b">Ingreso</span><span style="font-size:11px;font-weight:700;color:#001723">marzo de 2013</span></div>
+                </div>
+                <div style="background:linear-gradient(135deg,#001723,#006a62);margin:0 12px 12px;border-radius:12px;padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div style="text-align:center;"><div style="font-size:8px;color:rgba(255,255,255,0.5);font-weight:700;margin-bottom:2px">AÑOS</div><div style="font-size:18px;font-weight:700;color:#fff">13</div></div>
+                  <div style="text-align:center;"><div style="font-size:8px;color:rgba(255,255,255,0.5);font-weight:700;margin-bottom:2px">PUNTOS</div><div style="font-size:18px;font-weight:700;color:#4ade80">20</div></div>
+                </div>
+              </div>`
+        },
+        {
             icon: 'lock',
             color: '#264b5f',
-            title: 'Tu PIN y Seguridad',
-            body: 'Tu cuenta se protege con un <b>PIN de 4 dígitos</b> que solo tú conoces.<br><br>⏱ <b>Cierre automático:</b> Si dejas de usar la app 15 minutos seguidos, se cierra sola.<br><br>🔁 <b>¿Olvidaste el PIN?</b> Toca "¿Olvidó su PIN?" e ingresa tu RUT para recuperarlo.<br><br>⚠️ Nunca compartas tu PIN — la administración jamás te lo pedirá.',
+            title: 'Seguridad — Tu PIN',
+            body: 'Tu cuenta está protegida con un <b>PIN de 4 dígitos</b> que solo tú conoces. Nadie más puede ver tu información.<br><br>⏱ <b>Cierre automático:</b> Si dejas de usar la app por 15 minutos seguidos, se cierra sola por seguridad. Solo vuelve a poner tu PIN para entrar de nuevo.<br><br>🔁 <b>¿Olvidaste el PIN?</b> Toca "¿Olvidó su PIN?" en la pantalla de inicio y usa tu RUT para recuperarlo.<br><br>⚠️ <b>Nunca compartas tu PIN</b> — la administración jamás te lo pedirá.',
             preview: `
               <div style="background:#f8f9fa;border-radius:18px;padding:20px;text-align:center;border:1px solid #e1e3e4;">
                 <div style="width:56px;height:56px;border-radius:50%;background:#e7e8e9;border:2px solid rgba(38,75,95,0.2);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
@@ -2509,23 +2743,16 @@
         {
             icon: 'check_circle',
             color: '#006a62',
-            title: '¡Ya estás listo!',
-            body: 'Ya conoces todo lo que necesitas. Recuerda que puedes volver a ver esta guía tocando el botón <b>?</b> en la esquina superior derecha, junto al botón de salir.<br><br>Si tienes dudas, escríbele al equipo por <b>Mensajes → Soporte</b>. ¡Bienvenido! 🎉',
+            title: '¡Ya estás listo para usar la app!',
+            body: 'Eso es todo. Ya conoces cada sección de tu app del Fondo Solidario.<br><br>📌 Recuerda que puedes <b>volver a ver esta guía</b> en cualquier momento tocando el botón <b>?</b> que está arriba a la derecha.<br><br>💬 Si tienes una duda o algo no cuadra, escríbele al equipo en <b>Mensajes → Soporte</b>.<br><br>¡Bienvenido! 🎉',
             preview: `
               <div style="background:linear-gradient(135deg,#001723,#002d40);border-radius:18px;padding:20px;text-align:center;">
                 <div style="display:flex;justify-content:space-around;margin-bottom:16px;">
-                  <div style="text-align:center;opacity:0.9;">
-                    <div style="width:40px;height:40px;background:rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1">account_balance_wallet</span></div>
-                    <div style="font-size:9px;color:rgba(255,255,255,0.6)">Balance</div>
-                  </div>
-                  <div style="text-align:center;opacity:0.9;">
-                    <div style="width:40px;height:40px;background:rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1">receipt_long</span></div>
-                    <div style="font-size:9px;color:rgba(255,255,255,0.6)">Historial</div>
-                  </div>
-                  <div style="text-align:center;opacity:0.9;">
-                    <div style="width:40px;height:40px;background:rgba(255,255,255,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1">chat</span></div>
-                    <div style="font-size:9px;color:rgba(255,255,255,0.6)">Mensajes</div>
-                  </div>
+                  <div style="text-align:center;opacity:0.9;"><div style="width:38px;height:38px;background:rgba(255,255,255,0.12);border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:17px;color:#fff">account_balance_wallet</span></div><div style="font-size:8px;color:rgba(255,255,255,0.5)">Balance</div></div>
+                  <div style="text-align:center;opacity:0.9;"><div style="width:38px;height:38px;background:rgba(255,255,255,0.12);border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:17px;color:#fff">receipt_long</span></div><div style="font-size:8px;color:rgba(255,255,255,0.5)">Historial</div></div>
+                  <div style="text-align:center;opacity:0.9;"><div style="width:38px;height:38px;background:rgba(255,255,255,0.12);border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:17px;color:#fff">bar_chart</span></div><div style="font-size:8px;color:rgba(255,255,255,0.5)">Stats</div></div>
+                  <div style="text-align:center;opacity:0.9;"><div style="width:38px;height:38px;background:rgba(255,255,255,0.12);border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:17px;color:#fff">chat</span></div><div style="font-size:8px;color:rgba(255,255,255,0.5)">Mensajes</div></div>
+                  <div style="text-align:center;opacity:0.9;"><div style="width:38px;height:38px;background:rgba(255,255,255,0.12);border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;"><span class="material-symbols-outlined" style="font-size:17px;color:#fff">badge</span></div><div style="font-size:8px;color:rgba(255,255,255,0.5)">Perfil</div></div>
                 </div>
                 <div style="background:rgba(0,200,150,0.15);border:1px solid rgba(0,200,150,0.3);border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;margin-bottom:10px;">
                   <span class="material-symbols-outlined" style="font-size:20px;color:#3adccc;flex-shrink:0">check_circle</span>
@@ -2551,7 +2778,7 @@
     function closeHelp() {
         document.getElementById('helpModal').classList.add('hidden');
         document.getElementById('helpModal').classList.remove('flex');
-        localStorage.setItem('helpSeen_v1', '1');
+        localStorage.setItem('helpSeen_v2', '1');
     }
 
     function helpNext() {
@@ -2607,7 +2834,7 @@
     }
 
     function checkFirstTimeHelp() {
-        if (!localStorage.getItem('helpSeen_v1')) {
+        if (!localStorage.getItem('helpSeen_v2')) {
             setTimeout(() => openHelp(), 600);
         }
     }
