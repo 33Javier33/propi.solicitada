@@ -1,68 +1,61 @@
-// sw.js — Bóveda Personal PWA Service Worker
-// CarlosPN Interactive® — Casino de Puerto Varas
+const CACHE_NAME = 'boveda-personal-v2';
 
-const CACHE_NAME = 'boveda-v1';
-
-// Recursos a cachear al instalar
-const PRECACHE = [
-  './',
-  './index.html',
+const urlsToCache = [
+    'index.html',
+    'manifest.json',
+    'img/icon-192x192.png',
+    'img/icon-512x512.png'
 ];
 
-// ── INSTALL ──
+// 1. Install — cachear solo archivos estáticos
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE))
-  );
-  self.skipWaiting();
-});
-
-// ── ACTIVATE ──
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
-
-// ── FETCH: Network-first con fallback a caché ──
-self.addEventListener('fetch', event => {
-  // Solo interceptar GET
-  if (event.request.method !== 'GET') return;
-
-  const url = new URL(event.request.url);
-
-  // Recursos externos (fonts, CDN) → solo caché si ya existe, sin bloquear
-  const isExternal = url.origin !== self.location.origin;
-
-  if (isExternal) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        if (cached) return cached;
-        return fetch(event.request).then(response => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
-          }
-          return response;
-        }).catch(() => cached || new Response('', { status: 503 }));
-      })
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
     );
-    return;
-  }
+    self.skipWaiting();
+});
 
-  // Recursos locales → Network-first
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
-        }
-        return response;
-      })
-      .catch(() => caches.match(event.request))
-  );
+// 2. Activate — limpiar cachés viejos
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(keys =>
+            Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+        )
+    );
+    self.clients.claim();
+});
+
+// 3. Fetch — estrategia según el tipo de request
+self.addEventListener('fetch', event => {
+    const url = event.request.url;
+
+    // Llamadas al GAS → siempre red, nunca caché
+    if (url.includes('script.google.com')) {
+        event.respondWith(
+            fetch(event.request).catch(() =>
+                new Response(JSON.stringify({ status: 'error', message: 'Sin conexión' }),
+                    { headers: { 'Content-Type': 'application/json' } })
+            )
+        );
+        return;
+    }
+
+    // Peticiones externas (CDNs, fonts) → solo red, sin interceptar
+    if (!url.startsWith(self.location.origin)) {
+        return;
+    }
+
+    // Archivos estáticos propios → cache-first
+    event.respondWith(
+        caches.match(event.request).then(cached => {
+            return cached || fetch(event.request).then(response => {
+                // Guardar en caché solo respuestas válidas
+                if (response && response.status === 200) {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                }
+                return response;
+            });
+        })
+    );
 });
