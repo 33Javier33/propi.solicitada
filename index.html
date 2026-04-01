@@ -647,6 +647,12 @@
         <!-- ── TAB: HOME (BALANCE) ── -->
         <div id="tab-home" class="tab-section active overflow-y-auto pb-32 pt-1 bg-lm-bg">
 
+            <!-- Indicador última actualización -->
+            <div id="lastUpdateBar" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;padding:0 16px 6px;opacity:0.6;">
+                <span class="material-symbols-outlined" style="font-size:12px;color:#94a3b8">sync</span>
+                <span id="lastUpdateLabel" style="font-size:10px;color:#94a3b8;font-weight:500">Actualizando...</span>
+            </div>
+
             <!-- HERO BALANCE CARD -->
             <div class="mx-4 mt-4 mb-5 card-shine rounded-[28px] p-6 shadow-2xl relative overflow-hidden" style="min-height:180px">
                 <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5 blur-2xl pointer-events-none"></div>
@@ -1353,8 +1359,8 @@
         resetInactivity();
         startInactivityClock();
         checkFirstTimeHelp();
-        refresh();
-        setInterval(refresh, 60000);
+        refresh(true); // primer load con animaciones
+        setInterval(()=>refresh(false), 20000); // silencioso cada 20s
         setInterval(()=>refreshChat(false), 8000);
         setInterval(pingConexion, 120000);
     }
@@ -1466,7 +1472,7 @@
     }
 
     // ── REFRESH DATA — FASE 1: balance (crítico) + FASE 2: notas (background) ──
-    async function refresh() {
+    async function refresh(isFirstLoad=false) {
         try {
             // ── FASE 1: Las 5 llamadas de balance en paralelo ────
             // Las notas NO bloquean — se cargan en background
@@ -1551,8 +1557,14 @@
             let liquido=saldoBruto>0?saldoBruto-remanente:0;
 
             const montoEl = document.getElementById('montoRecibirLabel');
-            montoEl.textContent = formatMoney(liquido);
-            animateIn(montoEl, '0ms');
+            // Solo animar si el valor cambió o es primer load
+            const prevMonto = montoEl.getAttribute('data-value');
+            const newMonto = String(liquido);
+            if (prevMonto !== newMonto) {
+                montoEl.textContent = formatMoney(liquido);
+                montoEl.setAttribute('data-value', newMonto);
+                if (isFirstLoad) animateIn(montoEl, '0ms');
+            }
             document.getElementById('remateTag').innerHTML=`<span class="material-symbols-outlined text-[13px]">savings</span> Remanente: ${formatMoney(remanente)}`;
             document.getElementById('globalPtsTag').innerHTML=`<span class="material-symbols-outlined text-[13px]">stars</span> Mis Puntos: ${Math.round(puntoGlobalTotal).toLocaleString('es-CL')}`;
 
@@ -1586,7 +1598,7 @@
                     <b class="text-sm font-bold text-lm-red">-${formatMoney(tAnt+tDesc)}</b>
                 </div>`;
 
-            animateIn(document.getElementById('detallesContables'), '60ms');
+            if (isFirstLoad) animateIn(document.getElementById('detallesContables'), '60ms');
 
             // Últimos movimientos
             const listaContainer=document.getElementById('anticiposList');
@@ -1606,7 +1618,7 @@
             } else {
                 listaContainer.innerHTML=`<div class="text-center py-10 text-xs text-lm-muted">Sin movimientos en este periodo</div>`;
             }
-            animateIn(listaContainer, '120ms');
+            if (isFirstLoad) animateIn(listaContainer, '120ms');
 
             // Historial — agrupado por fecha, con desglose de tipos dentro de cada día
             const ausenciasSet = new Set(
@@ -1705,12 +1717,20 @@
                     + '</div>'
                 + '</div>';
             }).join('');
-            animateIn(document.getElementById('historyList'), '60ms');
+            if (isFirstLoad) animateIn(document.getElementById('historyList'), '60ms');
             const btn=document.getElementById('calendarBtnContainer');
             if(globalDiasCalendar.length>0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
 
             // Pasar datos a estadísticas
             renderStats(mapVP, pts);
+
+            // Actualizar indicador de última sync
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2,'0');
+            const mm = String(now.getMinutes()).padStart(2,'0');
+            const ss = String(now.getSeconds()).padStart(2,'0');
+            const lbl = document.getElementById('lastUpdateLabel');
+            if (lbl) lbl.textContent = 'Actualizado ' + hh + ':' + mm + ':' + ss;
 
             // Las notas se renderizan cuando llega la Fase 2 (background)
             // Solo renderizamos chat si ya hay mensajes en memoria
