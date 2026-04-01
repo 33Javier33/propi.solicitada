@@ -374,7 +374,16 @@
             </button>
             <p class="text-[10px] text-lm-accent font-semibold tracking-widest uppercase mb-1">Calendario</p>
             <h3 id="calendarTitle" class="text-xl font-bold text-lm-primary mb-0.5">...</h3>
-            <p id="calendarMonthLabel" class="text-sm text-lm-muted font-medium mb-5">...</p>
+            <!-- Navegación de meses -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;margin-top:4px;">
+                <button onclick="calNavMes(-1)" style="width:36px;height:36px;border-radius:50%;background:var(--color-subtle,#f1f5f9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <span class="material-symbols-outlined" style="font-size:20px;color:#64748b">chevron_left</span>
+                </button>
+                <p id="calendarMonthLabel" style="font-size:15px;font-weight:700;color:#001723;text-align:center;flex:1;margin:0;text-transform:capitalize;">...</p>
+                <button onclick="calNavMes(1)" style="width:36px;height:36px;border-radius:50%;background:var(--color-subtle,#f1f5f9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <span class="material-symbols-outlined" style="font-size:20px;color:#64748b">chevron_right</span>
+                </button>
+            </div>
             <div class="grid grid-cols-2 gap-3 mb-5">
                 <div class="bg-lm-subtle rounded-2xl p-4 border border-lm-border">
                     <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider mb-1">Días</p>
@@ -538,13 +547,7 @@
         <div class="space-y-3">
             <div>
                 <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">ID Socio</label>
-                <input type="text" id="setupID" placeholder="Ej: SOC-001"
-                    autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
-                    oninput="this.value=this.value.toUpperCase().trim()"
-                    onpaste="setTimeout(()=>{this.value=this.value.toUpperCase().trim();buscarSocioEnTiempoReal()},0)"
-                    onkeyup="buscarSocioEnTiempoReal()"
-                    class="w-full rounded-2xl py-4 px-5 font-medium text-base tracking-wider text-center">
-                <div id="setupIDFeedback" style="min-height:22px;margin-top:4px;font-size:12px;font-weight:600;text-align:center;transition:all 0.2s;"></div>
+                <input type="text" id="setupID" placeholder="Ej: SOC-001" class="w-full rounded-2xl py-4 px-5 font-medium text-base">
             </div>
             <div>
                 <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">RUT</label>
@@ -1005,7 +1008,7 @@
     // ── INIT ──────────────────────────────────────────────────
     // ── CACHÉ DE SOCIOS (TTL 10 min) ─────────────────────────
     const SOCIOS_CACHE_KEY = 'sociosCache_v1';
-    const SOCIOS_CACHE_TTL = 2 * 60 * 1000; // 2 minutos — para que datos de socios se actualicen rápido
+    const SOCIOS_CACHE_TTL = 10 * 60 * 1000; // 10 minutos
 
     function getSociosFromCache() {
         try {
@@ -1023,7 +1026,7 @@
 
     async function fetchSociosFromNetwork(silent = false) {
         try {
-            const res = await fetch(`${SCRIPT_URL_SOCIOS}?action=getSocios&_t=${Date.now()}`);
+            const res = await fetch(`${SCRIPT_URL_SOCIOS}?action=getSocios`);
             const data = (await res.json()).data || [];
             if (data.length > 0) {
                 allSocios = data;
@@ -1122,21 +1125,6 @@
     }
 
     // ── HANDLE SETUP ──────────────────────────────────────────
-    function buscarSocioEnTiempoReal() {
-        const id = document.getElementById('setupID').value.trim().toUpperCase();
-        const fb = document.getElementById('setupIDFeedback');
-        if (!id || id.length < 3) { fb.textContent = ''; fb.style.color = ''; return; }
-        const u = allSocios.find(s => String(s.ID).toUpperCase() === id);
-        if (u) {
-            fb.textContent = '✓ ' + u.Nombre + ' ' + u.Apellido + ' · ' + u.Area;
-            fb.style.color = '#10b981';
-            document.getElementById('setupRUT').focus();
-        } else {
-            fb.textContent = '✗ ID no encontrado';
-            fb.style.color = '#ef4444';
-        }
-    }
-
     function handleSetup() {
         const id = document.getElementById('setupID').value.trim().toUpperCase();
         const rutRaw = document.getElementById('setupRUT').value.trim();
@@ -1151,14 +1139,7 @@
         if (u && pin.length === 4) {
             localStorage.setItem('visor_secure_auth', JSON.stringify({id:u.ID,rut:rutNormalizado,pin,name:u.Nombre}));
             location.reload();
-        } else if (!u) {
-            const fb = document.getElementById('setupIDFeedback');
-            fb.textContent = '✗ ID no encontrado en el sistema';
-            fb.style.color = '#ef4444';
-            document.getElementById('setupID').focus();
-        } else {
-            alert("PIN inválido — debe tener 4 dígitos.");
-        }
+        } else { alert("Datos incorrectos. Verifique su ID y PIN."); }
     }
 
     async function handleFastLogin() {
@@ -1442,8 +1423,8 @@
         chatRefreshing = true;
         try {
             const [adminRes, socialRes] = await Promise.all([
-                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes&_t=${Date.now()}`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes&_t=${Date.now()}`).catch(()=>({json:()=>({data:[]})}))
+                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes`).catch(()=>({json:()=>({data:[]})}))
             ]);
             const newAdmin = (await adminRes.json()).data || [];
             let newSocial = [];
@@ -1489,13 +1470,12 @@
         try {
             // ── FASE 1: Las 5 llamadas de balance en paralelo ────
             // Las notas NO bloquean — se cargan en background
-            const _t = Date.now(); // cache-busting
             const [recRes, dataRes, saldosRes, cierreRes, diasRes] = await Promise.all([
-                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get&_t=${_t}`),
-                fetch(`${SCRIPT_URL_SOCIOS}?_t=${_t}`, {method:'POST', body:JSON.stringify({action:'getAllDataDesdeSheets'})}),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosAnteriores&_t=${_t}`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosCierre&_t=${_t}`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime&_t=${_t}`)
+                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get`),
+                fetch(SCRIPT_URL_SOCIOS, {method:'POST', body:JSON.stringify({action:'getAllDataDesdeSheets'})}),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosAnteriores`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosCierre`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`)
             ]);
 
             const recData    = (await recRes.json()).data   || [];
@@ -1507,8 +1487,8 @@
 
             // ── FASE 2: Notas en background (no bloquean el render) ─
             Promise.all([
-                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes&_t=${Date.now()}`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes&_t=${Date.now()}`).catch(()=>({json:()=>({data:[]})}))
+                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes`).catch(()=>({json:()=>({data:[]})}))
             ]).then(async ([adminNotesRes, socialNotesRes]) => {
                 messages.admin = (await adminNotesRes.json()).data || [];
                 try { messages.social = (await socialNotesRes.json()).data || []; } catch(e){ messages.social=[]; }
@@ -2079,42 +2059,94 @@
     }
 
     // ── CALENDAR ─────────────────────────────────────────────
+    let calCurrentYear = null, calCurrentMonth = null;
+    const calMeses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
     function openCalendar() {
-        const modal=document.getElementById('calendarModal');
-        const now=new Date(), year=now.getFullYear(), month=now.getMonth();
-        const meses=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-        document.getElementById('calendarMonthLabel').textContent=`${meses[month]} ${year}`;
-        document.getElementById('calendarTitle').textContent=userTypeGlobal==='PT'?"Turnos Realizados":"Mis Ausencias";
-        let totalMonto=globalDiasCalendar.reduce((a,b)=>a+b.montoAsociado,0);
-        document.getElementById('modalTotalDias').textContent=globalDiasCalendar.length;
-        document.getElementById('modalTotalGenerado').textContent=formatMoney(totalMonto);
-        const grid=document.getElementById('calendarGrid'); grid.innerHTML='';
-        let firstDay=new Date(year,month,1).getDay(); firstDay=firstDay===0?6:firstDay-1;
-        for(let i=0;i<firstDay;i++) grid.innerHTML+=`<div class="calendar-day"></div>`;
-        const daysInMonth=new Date(year,month+1,0).getDate();
-        for(let i=1;i<=daysInMonth;i++){
-            const fKey=`${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-            const marked=globalDiasCalendar.find(d=>d.fecha===fKey);
-            grid.innerHTML+=`<div class="calendar-day ${marked?(userTypeGlobal==='PT'?'worked':'absent'):'bg-lm-subtle'}">${i}</div>`;
-        }
-        document.getElementById('calendarDetailsList').innerHTML=globalDiasCalendar.map(d=>`
-        <div class="flex justify-between items-center bg-lm-subtle rounded-2xl p-4 border border-lm-border">
-            <div>
-                <p class="text-xs font-semibold text-lm-primary mb-0.5">${formatDateText(d.fecha)}</p>
-                <p class="text-[11px] text-lm-accent">VP: ${formatMoney(d.valorPunto)}</p>
-            </div>
-            <span class="${userTypeGlobal==='PT'?'text-lm-green':'text-lm-red'} font-bold text-base">${userTypeGlobal==='PT'?'+':'-'}${formatMoney(d.montoAsociado)}</span>
-        </div>`).join('');
-        modal.classList.remove('hidden'); modal.classList.add('flex');
+        const now = new Date();
+        calCurrentYear  = now.getFullYear();
+        calCurrentMonth = now.getMonth();
+        document.getElementById('calendarTitle').textContent = userTypeGlobal==='PT' ? "Turnos Realizados" : "Mis Ausencias";
+        renderCalendarGrid();
+        const modal = document.getElementById('calendarModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
 
-    function toggleAbout(show) {
-        const m = document.getElementById('aboutModal');
-        if (show) { m.classList.remove('hidden'); m.classList.add('flex'); }
-        else       { m.classList.add('hidden');    m.classList.remove('flex'); }
+    function calNavMes(dir) {
+        calCurrentMonth += dir;
+        if (calCurrentMonth > 11) { calCurrentMonth = 0;  calCurrentYear++; }
+        if (calCurrentMonth < 0)  { calCurrentMonth = 11; calCurrentYear--; }
+        renderCalendarGrid();
+    }
+
+    function renderCalendarGrid() {
+        const year  = calCurrentYear;
+        const month = calCurrentMonth;
+        document.getElementById('calendarMonthLabel').textContent = calMeses[month] + ' ' + year;
+
+        // Grid: solo marca días del mes visible
+        const prefix = year + '-' + String(month+1).padStart(2,'0');
+        const diasDelMes = globalDiasCalendar.filter(d =>
+            String(d.fecha).split('T')[0].substring(0,10).startsWith(prefix)
+        );
+
+        // Totales: siempre del período completo (todos los meses)
+        const totalPeriodo = globalDiasCalendar.reduce((a,b) => a + b.montoAsociado, 0);
+        document.getElementById('modalTotalDias').textContent     = globalDiasCalendar.length;
+        document.getElementById('modalTotalGenerado').textContent = formatMoney(totalPeriodo);
+
+        // Dibujar grid del mes visible
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+        let firstDay = new Date(year, month, 1).getDay();
+        firstDay = firstDay === 0 ? 6 : firstDay - 1;
+        for (let i = 0; i < firstDay; i++) grid.innerHTML += '<div class="calendar-day"></div>';
+        const daysInMonth = new Date(year, month+1, 0).getDate();
+        for (let i = 1; i <= daysInMonth; i++) {
+            const fKey = year + '-' + String(month+1).padStart(2,'0') + '-' + String(i).padStart(2,'0');
+            const marked = globalDiasCalendar.find(d => String(d.fecha).split('T')[0].substring(0,10) === fKey);
+            const cls = marked ? (userTypeGlobal==='PT' ? 'worked' : 'absent') : 'bg-lm-subtle';
+            grid.innerHTML += '<div class="calendar-day ' + cls + '">' + i + '</div>';
+        }
+
+        // Detalle: SIEMPRE muestra todos los registros del período completo
+        const sortedTodos = [...globalDiasCalendar].sort((a,b) => String(a.fecha).localeCompare(String(b.fecha)));
+        const label = userTypeGlobal === 'PT' ? 'Días trabajados del período' : 'Ausencias del período';
+        const colorLabel = userTypeGlobal === 'PT' ? '#10b981' : '#ba1a1a';
+
+        let detalleHTML = '<p style="font-size:9px;font-weight:700;color:' + colorLabel + ';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">' + label + ' (' + sortedTodos.length + ')</p>';
+
+        if (diasDelMes.length === 0 && sortedTodos.length > 0) {
+            // Aviso: este mes no tiene registros pero sí hay en otros meses del período
+            detalleHTML += '<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">'
+                + '<span class="material-symbols-outlined" style="font-size:16px;color:#f59e0b;flex-shrink:0">info</span>'
+                + '<p style="font-size:11px;color:#92400e;margin:0;">Este mes no tiene registros, pero el período tiene ' + sortedTodos.length + ' registro' + (sortedTodos.length>1?'s':'') + ' en otros meses. Navega para verlos.</p>'
+                + '</div>';
+        }
+
+        if (sortedTodos.length === 0) {
+            detalleHTML += '<p style="text-align:center;font-size:12px;color:#94a3b8;padding:16px 0;">Sin registros en el período actual</p>';
+        } else {
+            detalleHTML += sortedTodos.map(function(d) {
+                const esMesActual = String(d.fecha).split('T')[0].substring(0,10).startsWith(prefix);
+                const bgExtra = esMesActual ? '' : 'opacity:0.6;';
+                return '<div class="flex justify-between items-center bg-lm-subtle rounded-2xl p-4 border border-lm-border" style="' + bgExtra + '">'
+                    + '<div>'
+                    + '<p class="text-xs font-semibold text-lm-primary mb-0.5">' + formatDateText(d.fecha) + '</p>'
+                    + '<p class="text-[11px] text-lm-accent">VP: ' + formatMoney(d.valorPunto) + '</p>'
+                    + '</div>'
+                    + '<span class="' + (userTypeGlobal==='PT'?'text-lm-green':'text-lm-red') + ' font-bold text-base">'
+                    + (userTypeGlobal==='PT'?'+':'-') + formatMoney(d.montoAsociado)
+                    + '</span></div>';
+            }).join('');
+        }
+
+        document.getElementById('calendarDetailsList').innerHTML = detalleHTML;
     }
 
     function closeCalendar() { document.getElementById('calendarModal').classList.add('hidden'); }
+
 
     // ── ESTADÍSTICAS ──────────────────────────────────────────
     let statsView = 'dia';
