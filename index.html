@@ -538,7 +538,13 @@
         <div class="space-y-3">
             <div>
                 <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">ID Socio</label>
-                <input type="text" id="setupID" placeholder="Ej: SOC-001" class="w-full rounded-2xl py-4 px-5 font-medium text-base">
+                <input type="text" id="setupID" placeholder="Ej: SOC-001"
+                    autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                    oninput="this.value=this.value.toUpperCase().trim()"
+                    onpaste="setTimeout(()=>{this.value=this.value.toUpperCase().trim();buscarSocioEnTiempoReal()},0)"
+                    onkeyup="buscarSocioEnTiempoReal()"
+                    class="w-full rounded-2xl py-4 px-5 font-medium text-base tracking-wider text-center">
+                <div id="setupIDFeedback" style="min-height:22px;margin-top:4px;font-size:12px;font-weight:600;text-align:center;transition:all 0.2s;"></div>
             </div>
             <div>
                 <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">RUT</label>
@@ -999,7 +1005,7 @@
     // ── INIT ──────────────────────────────────────────────────
     // ── CACHÉ DE SOCIOS (TTL 10 min) ─────────────────────────
     const SOCIOS_CACHE_KEY = 'sociosCache_v1';
-    const SOCIOS_CACHE_TTL = 10 * 60 * 1000; // 10 minutos
+    const SOCIOS_CACHE_TTL = 2 * 60 * 1000; // 2 minutos — para que datos de socios se actualicen rápido
 
     function getSociosFromCache() {
         try {
@@ -1017,7 +1023,7 @@
 
     async function fetchSociosFromNetwork(silent = false) {
         try {
-            const res = await fetch(`${SCRIPT_URL_SOCIOS}?action=getSocios`);
+            const res = await fetch(`${SCRIPT_URL_SOCIOS}?action=getSocios&_t=${Date.now()}`);
             const data = (await res.json()).data || [];
             if (data.length > 0) {
                 allSocios = data;
@@ -1116,6 +1122,21 @@
     }
 
     // ── HANDLE SETUP ──────────────────────────────────────────
+    function buscarSocioEnTiempoReal() {
+        const id = document.getElementById('setupID').value.trim().toUpperCase();
+        const fb = document.getElementById('setupIDFeedback');
+        if (!id || id.length < 3) { fb.textContent = ''; fb.style.color = ''; return; }
+        const u = allSocios.find(s => String(s.ID).toUpperCase() === id);
+        if (u) {
+            fb.textContent = '✓ ' + u.Nombre + ' ' + u.Apellido + ' · ' + u.Area;
+            fb.style.color = '#10b981';
+            document.getElementById('setupRUT').focus();
+        } else {
+            fb.textContent = '✗ ID no encontrado';
+            fb.style.color = '#ef4444';
+        }
+    }
+
     function handleSetup() {
         const id = document.getElementById('setupID').value.trim().toUpperCase();
         const rutRaw = document.getElementById('setupRUT').value.trim();
@@ -1130,7 +1151,14 @@
         if (u && pin.length === 4) {
             localStorage.setItem('visor_secure_auth', JSON.stringify({id:u.ID,rut:rutNormalizado,pin,name:u.Nombre}));
             location.reload();
-        } else { alert("Datos incorrectos. Verifique su ID y PIN."); }
+        } else if (!u) {
+            const fb = document.getElementById('setupIDFeedback');
+            fb.textContent = '✗ ID no encontrado en el sistema';
+            fb.style.color = '#ef4444';
+            document.getElementById('setupID').focus();
+        } else {
+            alert("PIN inválido — debe tener 4 dígitos.");
+        }
     }
 
     async function handleFastLogin() {
@@ -1414,8 +1442,8 @@
         chatRefreshing = true;
         try {
             const [adminRes, socialRes] = await Promise.all([
-                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes`).catch(()=>({json:()=>({data:[]})}))
+                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes&_t=${Date.now()}`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes&_t=${Date.now()}`).catch(()=>({json:()=>({data:[]})}))
             ]);
             const newAdmin = (await adminRes.json()).data || [];
             let newSocial = [];
@@ -1461,12 +1489,13 @@
         try {
             // ── FASE 1: Las 5 llamadas de balance en paralelo ────
             // Las notas NO bloquean — se cargan en background
+            const _t = Date.now(); // cache-busting
             const [recRes, dataRes, saldosRes, cierreRes, diasRes] = await Promise.all([
-                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get`),
-                fetch(SCRIPT_URL_SOCIOS, {method:'POST', body:JSON.stringify({action:'getAllDataDesdeSheets'})}),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosAnteriores`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosCierre`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`)
+                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get&_t=${_t}`),
+                fetch(`${SCRIPT_URL_SOCIOS}?_t=${_t}`, {method:'POST', body:JSON.stringify({action:'getAllDataDesdeSheets'})}),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosAnteriores&_t=${_t}`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosCierre&_t=${_t}`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime&_t=${_t}`)
             ]);
 
             const recData    = (await recRes.json()).data   || [];
@@ -1478,8 +1507,8 @@
 
             // ── FASE 2: Notas en background (no bloquean el render) ─
             Promise.all([
-                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes`).catch(()=>({json:()=>({data:[]})}))
+                fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes&_t=${Date.now()}`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes&_t=${Date.now()}`).catch(()=>({json:()=>({data:[]})}))
             ]).then(async ([adminNotesRes, socialNotesRes]) => {
                 messages.admin = (await adminNotesRes.json()).data || [];
                 try { messages.social = (await socialNotesRes.json()).data || []; } catch(e){ messages.social=[]; }
