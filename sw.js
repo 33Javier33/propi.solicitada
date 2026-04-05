@@ -7,15 +7,16 @@ const urlsToCache = [
     'img/icon-512x512.png'
 ];
 
-// 1. Install — cachear solo archivos estáticos
+// 1. Install — cachear archivos estáticos y activar inmediatamente
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+            .then(() => self.skipWaiting()) // activar sin esperar cierre de pestañas
     );
-    self.skipWaiting();
 });
 
-// 2. Activate — limpiar cachés viejos
+// 2. Activate — limpiar cachés viejos y tomar control inmediato
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(keys =>
@@ -40,7 +41,7 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Peticiones externas (CDNs, fonts) → solo red, sin interceptar
+    // Peticiones externas (CDNs, fonts, APIs) → no interceptar
     if (!url.startsWith(self.location.origin)) {
         return;
     }
