@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boveda-personal-v3';
+const CACHE_NAME = 'boveda-personal-v4';
 
 const urlsToCache = [
     'index.html',
@@ -7,12 +7,12 @@ const urlsToCache = [
     'img/icon-512x512.png'
 ];
 
-// 1. Install — cachear archivos estáticos y activar inmediatamente
+// 1. Install — cachear archivos estáticos y esperar confirmación del usuario
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(urlsToCache))
-            .then(() => self.skipWaiting()) // activar sin esperar cierre de pestañas
+        // SIN skipWaiting aquí — el SW nuevo espera hasta que el usuario toque "Actualizar"
     );
 });
 
