@@ -481,14 +481,15 @@
                 <div>
                     <div style="font-family:Manrope,sans-serif;font-size:16px;font-weight:800;color:#001723;">Carlos</div>
                     <div style="font-size:12px;color:#006a62;font-weight:600;margin-top:1px;">Croupier · Casino de Puerto Varas</div>
-                    <div style="font-size:11px;color:#9ba3ab;margin-top:1px;">Encargado — La Comisión Propina</div>
+                    <div style="font-size:11px;color:#9ba3ab;margin-top:1px;">Encargado Fondo Solidario · Desde 15/11/2025</div>
                 </div>
             </div>
 
             <!-- Bio -->
             <div style="background:#f8f9fa;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #f0f1f2;">
+                <div style="font-size:10px;font-weight:700;color:#006a62;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">👤 El desarrollador</div>
                 <p style="font-size:13px;line-height:1.75;color:#42484c;margin:0;">
-                    Colaborador del Casino de Puerto Varas desde <b style="color:#001723;">2013</b>, actualmente a cargo de la gestión del <b style="color:#001723;">Fondo Solidario de Propina</b> como parte de La Comisión Propina — el equipo que vela por los derechos y el bienestar económico de los socios.
+                    Colaborador del Casino de Puerto Varas desde <b style="color:#001723;">2013</b>, actualmente ejerce como <b style="color:#001723;">Croupier</b> y desde el <b style="color:#001723;">15 de noviembre de 2025</b> cumple el rol de <b style="color:#001723;">Encargado del Fondo Solidario de Propina</b> — velando por los derechos económicos de todos los socios.
                 </p>
             </div>
 
@@ -2163,6 +2164,12 @@
     }
 
     function closeCalendar() { document.getElementById('calendarModal').classList.add('hidden'); }
+
+    function toggleAbout(show) {
+        const m = document.getElementById('aboutModal');
+        if (show) { m.classList.remove('hidden'); m.classList.add('flex'); }
+        else       { m.classList.add('hidden');    m.classList.remove('flex'); }
+    }
 
 
     // ── ESTADÍSTICAS ──────────────────────────────────────────
