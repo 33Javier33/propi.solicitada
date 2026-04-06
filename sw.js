@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boveda-personal-v2';
+const CACHE_NAME = 'boveda-personal-v3';
 
 const urlsToCache = [
     'index.html',
@@ -26,7 +26,14 @@ self.addEventListener('activate', event => {
     self.clients.claim();
 });
 
-// 3. Fetch — estrategia según el tipo de request
+// 3. Escuchar mensaje del HTML para activarse cuando el usuario toca "Actualizar"
+self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+});
+
+// 4. Fetch — estrategia según el tipo de request
 self.addEventListener('fetch', event => {
     const url = event.request.url;
 
