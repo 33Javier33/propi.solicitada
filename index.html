@@ -1438,6 +1438,15 @@
         if (chatRefreshing) return;
         chatRefreshing = true;
         try {
+            // Caché de mensajes: no re-fetch si fue hace menos de 5s
+            const now5 = Date.now();
+            if (!refreshChat._lastFetch || now5 - refreshChat._lastFetch > 5000) {
+                refreshChat._lastFetch = now5;
+            } else if (!forceRender) {
+                renderChat(false);
+                return;
+            }
+
             const [adminRes, socialRes] = await Promise.all([
                 fetch(`${SCRIPT_URL_RECAUDACIONES}?action=getNotes`),
                 fetch(`${SCRIPT_URL_SOCIOS}?action=getNotes`).catch(()=>({json:()=>({data:[]})}))
@@ -1483,10 +1492,15 @@
     }
 
     // ── REFRESH DATA — FASE 1: balance (crítico) + FASE 2: notas (background) ──
+    let _balanceCache = null;
+    let _balanceCacheTs = 0;
+    const BALANCE_CACHE_TTL = 15000; // 15 segundos
+
     async function refresh(isFirstLoad=false) {
         try {
             // ── FASE 1: Las 5 llamadas de balance en paralelo ────
             // Las notas NO bloquean — se cargan en background
+            // 5 llamadas en paralelo — cambiar a getAllSocioData una vez agregado al GAS
             const [recRes, dataRes, saldosRes, cierreRes, diasRes] = await Promise.all([
                 fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get`),
                 fetch(SCRIPT_URL_SOCIOS, {method:'POST', body:JSON.stringify({action:'getAllDataDesdeSheets'})}),
@@ -3055,19 +3069,34 @@
                 navigator.serviceWorker.register('./sw.js').then(reg => {
                     console.log('[SW] Registrado:', reg.scope);
 
-                    // Escuchar cuando hay un nuevo SW esperando
+                    // Si ya hay un SW esperando al cargar (ej: venía de otra pestaña)
+                    if (reg.waiting) {
+                        showUpdateBanner(reg.waiting);
+                    }
+
+                    // Escuchar cuando hay un nuevo SW instalándose
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
-                            // Nuevo SW instalado y esperando activarse
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                 showUpdateBanner(newWorker);
                             }
                         });
                     });
+
+                    // Forzar chequeo de actualización cada vez que la app vuelve al frente
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') {
+                            reg.update().catch(() => {});
+                        }
+                    });
+
+                    // También chequear al cargar por primera vez
+                    reg.update().catch(() => {});
+
                 }).catch(e => console.warn('[SW] Error:', e));
 
-                // Si el SW fue activado en otra pestaña, recargar esta
+                // Si el SW fue activado, recargar para aplicar cambios
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
                     window.location.reload();
                 });
