@@ -230,6 +230,7 @@
             flex-shrink: 0; transition: background 0.2s, transform 0.1s;
         }
         .wa-send-btn:active { transform: scale(0.92); background: #002d40; }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 
         .wa-date-sep {
             text-align: center; margin: 12px 0 6px;
@@ -819,7 +820,10 @@
         </div>
 
         <!-- ── TAB: CHAT (WhatsApp style) ── -->
-        <div id="tab-chat" class="tab-section" style="position:relative; height:100%; display:none; flex-direction:column;">
+        <div id="tab-chat" class="tab-section" style="position:fixed; display:none; flex-direction:column; top:0; left:0; right:0; bottom:0; z-index:40;">
+
+            <!-- App header (duplicado para el chat) -->
+            <div style="height:70px; flex-shrink:0;"></div>
 
             <!-- WA Header -->
             <div class="wa-header shrink-0 px-4 py-3">
@@ -848,37 +852,35 @@
             <!-- Messages -->
             <div id="chatMessages" style="flex:1; overflow-y:auto; padding:12px 0;"></div>
 
-            <!-- INPUT BAR -->
-            <div id="chatInputContainer" style="background:#f0f2f5; padding:10px 12px 10px 12px; flex-shrink:0; border-top:1px solid rgba(0,0,0,0.06);">
-                <!-- Edit indicator -->
-                <div id="editModeIndicator" class="hidden" style="background:#e8f5e9;border-left:3px solid #006a62;border-radius:4px;padding:6px 10px;margin-bottom:8px;font-size:12px;color:#72787d;display:flex;justify-content:space-between;align-items:center;">
+            <!-- INPUT BAR — siempre visible sobre el teclado -->
+            <div id="chatInputContainer" style="background:#f0f2f5; padding:10px 12px; flex-shrink:0; border-top:1px solid rgba(0,0,0,0.06);">
+                <div id="editModeIndicator" style="display:none;background:#e8f5e9;border-left:3px solid #006a62;border-radius:4px;padding:6px 10px;margin-bottom:6px;font-size:12px;color:#72787d;justify-content:space-between;align-items:center;">
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span class="material-symbols-outlined" style="font-size:14px;color:#006a62">edit</span>
                         <span>Editando mensaje...</span>
                     </div>
-                    <button onclick="cancelEdit()" style="color:#9ba3ab">
+                    <button onclick="cancelEdit()" style="color:#9ba3ab;background:none;border:none;cursor:pointer;padding:4px;">
                         <span class="material-symbols-outlined" style="font-size:16px">close</span>
                     </button>
                 </div>
-                <!-- Input row -->
-                <div style="display:flex; align-items:flex-end; gap:10px;">
-                    <div style="flex:1; background:#ffffff; border-radius:22px; padding:11px 16px; min-height:46px; display:flex; align-items:center; border:1px solid #e1e3e4;">
+                <div style="display:flex; align-items:flex-end; gap:8px;">
+                    <div style="flex:1; background:#ffffff; border-radius:22px; padding:10px 16px; display:flex; align-items:center; border:1px solid #e1e3e4; min-height:44px;">
                         <div id="chatInput"
                             contenteditable="true"
                             data-placeholder="Escribe un mensaje..."
                             style="flex:1; outline:none; color:#191c1d; font-size:15px; line-height:1.5; font-family:Inter,sans-serif; max-height:100px; overflow-y:auto; word-break:break-word; white-space:pre-wrap; min-height:22px; width:100%;">
                         </div>
                     </div>
-                    <button id="sendBtn" onclick="handleSend()" style="width:46px;height:46px;border-radius:50%;background:#001723;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;">
+                    <button id="sendBtn" onclick="handleSend()" style="width:44px;height:44px;border-radius:50%;background:#001723;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;">
                         <span class="material-symbols-outlined" style="color:white;font-size:22px">send</span>
                     </button>
                 </div>
             </div>
-            <!-- Spacer for bottom nav -->
-            <div id="chatSpacer" style="height:80px; flex-shrink:0; background:#f0f2f5;"></div>
+            <!-- Espacio para nav bar -->
+            <div id="chatSpacer" style="flex-shrink:0; background:#f0f2f5;"></div>
         </div>
 
-    </main>
+        </main>
 
     <!-- BOTTOM NAV -->
         <!-- ── TAB: PERFIL ── -->
@@ -971,7 +973,7 @@
             </div>
         </div>
 
-    <nav id="bottomNav" class="fixed bottom-0 w-full z-[40] pb-safe-bottom">
+    <nav id="bottomNav" class="fixed bottom-0 w-full z-[60] pb-safe-bottom">
         <div class="flex justify-around items-center px-4 pt-3 pb-2">
             <button onclick="switchTab('tab-home')" class="nav-btn active flex flex-col items-center gap-1.5 w-16">
                 <span class="nav-icon material-symbols-outlined text-[24px]">account_balance_wallet</span>
@@ -1422,6 +1424,16 @@
 
     // ── REFRESH CHAT ONLY (polling ligero) ───────────────────
     let chatRefreshing = false;
+    function mergeOptimistas(newList, oldList) {
+        // Si hay mensajes optimistas (_sending), no re-renderizar si el contenido ya existe
+        const hasSending = oldList.some(m => m._sending);
+        if (!hasSending) return newList; // sin optimistas, devolver normal
+        // Mantener los optimistas que aún no llegaron del servidor
+        const serverUuids = new Set(newList.map(m => m.uuid));
+        const pendientes  = oldList.filter(m => m._sending && !serverUuids.has(m.uuid));
+        return [...newList, ...pendientes];
+    }
+
     async function refreshChat(forceRender=false) {
         if (chatRefreshing) return;
         chatRefreshing = true;
@@ -1443,8 +1455,9 @@
             }
 
             const prevTotal = messages.admin.length + messages.social.length;
-            messages.admin = newAdmin;
-            messages.social = newSocial;
+            // Preservar optimistas pendientes para evitar parpadeo
+            messages.admin  = mergeOptimistas(newAdmin,  messages.admin);
+            messages.social = mergeOptimistas(newSocial, messages.social);
             const newTotal = messages.admin.length + messages.social.length;
 
             renderChat(forceRender);
@@ -1774,6 +1787,8 @@
     }
 
     // ── RENDER CHAT (WhatsApp style) ──────────────────────────
+    let _lastChatSignature = '';
+
     function renderChat(forceScroll=true) {
         const container=document.getElementById('chatMessages');
         let list=[];
@@ -1797,6 +1812,13 @@
                 return sent||received;
             });
         }
+
+        // Firma del contenido — si no cambió nada, no tocar el DOM
+        const signature = list.map(n =>
+            (n.uuid||n.fecha) + '|' + (n._sending?'s':n._failed?'f':'ok')
+        ).join(',');
+        if (signature === _lastChatSignature && !forceScroll) return;
+        _lastChatSignature = signature;
 
         if(list.length===0){
             container.innerHTML=`
@@ -1837,14 +1859,20 @@
             const avatarColor=avatarPalette[colorIdx];
 
             html+=`
-            <div class="${rowClass}">
+            <div class="${rowClass}" data-msg-id="${msgId}" style="${n._sending ? 'opacity:0.75' : ''}">
                 ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?`<div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${authorName.charAt(0).toUpperCase()}</div>`:''}</div>`:''}
                 <div class="msg-bubble ${bubbleClass}">
                     ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${authorName}</div>`:''}
                     <div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
                     <div class="wa-time">
                         <span>${msgTime}</span>
-                        ${isMine?'<span class="material-symbols-outlined" style="font-size:13px;color:#006a62">done_all</span>':''}
+                        ${isMine
+                            ? (n._failed
+                                ? '<span class="material-symbols-outlined" style="font-size:13px;color:#ef4444" title="Error al enviar">error</span>'
+                                : n._sending
+                                    ? '<span class="material-symbols-outlined" style="font-size:13px;color:rgba(0,0,0,0.3)">schedule</span>'
+                                    : '<span class="material-symbols-outlined" style="font-size:13px;color:#006a62">done_all</span>')
+                            : ''}
                     </div>
                     ${isMine?`
                     <div style="display:flex;gap:10px;margin-top:5px;padding-top:5px;border-top:1px solid rgba(0,0,0,0.06)">
@@ -1857,7 +1885,11 @@
 
         container.innerHTML=html;
         if(forceScroll || isScrolledToBottom || container.scrollTop===0){
-            setTimeout(()=>{ container.scrollTop=container.scrollHeight; },50);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    container.scrollTop = container.scrollHeight;
+                });
+            });
         }
     }
 
@@ -1895,54 +1927,45 @@
     }
 
     function initChatInput() {
-        const tx = document.getElementById('chatInput');
+        const tx   = document.getElementById('chatInput');
         if (!tx || tx._init) return;
         tx._init = true;
 
-        // Enter = salto de línea normal (el envío es solo con el botón)
+        const msgs = document.getElementById('chatMessages');
+        const nav  = document.getElementById('bottomNav');
+        const spc  = document.getElementById('chatSpacer');
 
-        // ── TECLADO ANDROID ───────────────────────────────────
-        // Estrategia: el tab-chat es un flex column que ocupa el espacio
-        // entre header y nav. Cuando el teclado sube, achicamos tab-chat
-        // usando visualViewport.height. El nav NUNCA se oculta — solo
-        // el spacer (que es el hueco interno del chat).
-        const tabChat = document.getElementById('tab-chat');
-        const nav     = document.getElementById('bottomNav');
-        const spacer  = document.getElementById('chatSpacer');
-        const header  = document.querySelector('#appContainer header');
+        spc.style.height = (nav ? nav.offsetHeight : 72) + 'px';
 
-        function onVVResize() {
-            const vv = window.visualViewport;
-            if (!vv) return;
-            const headerH = header ? header.offsetHeight : 56;
-            const navH    = nav ? nav.offsetHeight : 64;
-            const kbOpen  = vv.height < window.innerHeight - 80;
+        function scrollEnd() {
+            if (msgs) msgs.scrollTop = msgs.scrollHeight;
+        }
 
-            if (kbOpen) {
-                // Teclado abierto: tab-chat ocupa solo el espacio visible
-                // encima del teclado (sin el nav, que queda fuera del viewport)
-                spacer.style.display = 'none';
-                tabChat.style.height = (vv.height - headerH) + 'px';
-                const c = document.getElementById('chatMessages');
-                if (c) setTimeout(() => { c.scrollTop = c.scrollHeight; }, 80);
-            } else {
-                // Teclado cerrado: restaurar
-                spacer.style.display = '';
-                tabChat.style.height = '';
-            }
+        function kbOpen() {
+            if (nav) nav.style.display = 'none';
+            spc.style.height = '0px';
+            setTimeout(scrollEnd, 80);
+        }
+
+        function kbClose() {
+            if (nav) nav.style.display = '';
+            spc.style.height = (nav ? nav.offsetHeight : 72) + 'px';
+            setTimeout(scrollEnd, 80);
         }
 
         if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', onVVResize);
+            window.visualViewport.addEventListener('resize', () => {
+                const kbH = Math.max(0, Math.round(
+                    window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop
+                ));
+                kbH > 100 ? kbOpen() : kbClose();
+            });
         }
 
-        tx.addEventListener('blur', function() {
-            setTimeout(() => {
-                spacer.style.display = '';
-                tabChat.style.height = '';
-            }, 200);
-        });
+        tx.addEventListener('focus', () => { setTimeout(kbOpen, 300); });
+        tx.addEventListener('blur',  () => { setTimeout(kbClose, 200); });
     }
+
 
     // ── EDIT MESSAGE ──────────────────────────────────────────
     function prepareEdit(id, text) {
@@ -1952,14 +1975,14 @@
         const range=document.createRange(), sel=window.getSelection();
         range.selectNodeContents(input); range.collapse(false);
         sel.removeAllRanges(); sel.addRange(range);
-        document.getElementById('editModeIndicator').classList.remove('hidden');
+        document.getElementById('editModeIndicator').style.display='flex';
         document.getElementById('sendBtn').innerHTML='<span class="material-symbols-outlined text-white text-xl">check</span>';
     }
 
     function cancelEdit() {
         editingMessageId=null;
         clearChatInput();
-        document.getElementById('editModeIndicator').classList.add('hidden');
+        document.getElementById('editModeIndicator').style.display='none';
         document.getElementById('sendBtn').innerHTML='<span class="material-symbols-outlined text-white text-xl">send</span>';
     }
 
@@ -1970,12 +1993,29 @@
 
         const btn = document.getElementById('sendBtn');
         btn.disabled = true;
-        btn.style.opacity = '0.6';
         clearChatInput();
 
-        const url = currentChatMode === 'ADMIN' ? SCRIPT_URL_RECAUDACIONES : SCRIPT_URL_SOCIOS;
-        const dest = currentChatMode === 'ADMIN' ? 'ADMIN' : currentSocialTarget.id;
+        const url    = currentChatMode === 'ADMIN' ? SCRIPT_URL_RECAUDACIONES : SCRIPT_URL_SOCIOS;
+        const dest   = currentChatMode === 'ADMIN' ? 'ADMIN' : currentSocialTarget.id;
         const action = editingMessageId ? 'editNote' : 'addNote';
+        const tempId = 'tmp_' + Date.now();
+
+        // ── Mostrar mensaje al instante (optimista) ──
+        if (!editingMessageId) {
+            const optimista = {
+                uuid: tempId,
+                fecha: new Date().toISOString(),
+                autor: currentUser.Nombre,
+                socId: currentUser.ID,
+                mensaje: texto,
+                nota: texto,
+                destinatario: dest,
+                _sending: true
+            };
+            if (currentChatMode === 'ADMIN') messages.admin.push(optimista);
+            else messages.social.push(optimista);
+            renderChat(true);
+        }
 
         try {
             await fetch(url, {
@@ -1989,27 +2029,98 @@
                     noteId: editingMessageId
                 })
             });
-            await refresh();
+
+            // Confirmar optimista: solo actualizar el DOM sin re-renderizar nada
+            if (!editingMessageId) {
+                const list = currentChatMode === 'ADMIN' ? messages.admin : messages.social;
+                const idx  = list.findIndex(m => m.uuid === tempId);
+                if (idx !== -1) list[idx]._sending = false;
+
+                // Cambiar solo el ícono del reloj → doble check, sin tocar el resto
+                const bubble = document.querySelector(`[data-msg-id="${tempId}"] .wa-time span.material-symbols-outlined`);
+                if (bubble) {
+                    bubble.textContent = 'done_all';
+                    bubble.style.color = '#006a62';
+                }
+                const row = document.querySelector(`[data-msg-id="${tempId}"]`);
+                if (row) row.style.opacity = '1';
+
+                // NO llamar refreshChat — el ciclo de 8s lo actualizará solo
+            } else {
+                await refreshChat(true);
+            }
+
         } catch(err) {
+            // Marcar como fallido
+            const list = currentChatMode === 'ADMIN' ? messages.admin : messages.social;
+            const m = list.find(x => x.uuid === tempId);
+            if (m) { m._sending = false; m._failed = true; }
+            renderChat(false);
             console.error('Error enviando:', err);
         } finally {
             editingMessageId = null;
-            document.getElementById('editModeIndicator').classList.add('hidden');
-            document.getElementById('sendBtn').innerHTML = '<span class="material-symbols-outlined" style="color:white;font-size:22px">send</span>';
+            document.getElementById('editModeIndicator').style.display='none';
+            btn.innerHTML = '<span class="material-symbols-outlined" style="color:white;font-size:22px">send</span>';
             btn.disabled = false;
-            btn.style.opacity = '1';
-            setTimeout(()=>{
-                const c = document.getElementById('chatMessages');
-                if(c) c.scrollTop = c.scrollHeight;
-            }, 300);
         }
     }
 
     async function deleteMsg(id) {
-        if(!confirm("¿Desea eliminar este mensaje?")) return;
-        const url=currentChatMode==='ADMIN'?SCRIPT_URL_RECAUDACIONES:SCRIPT_URL_SOCIOS;
-        await fetch(url,{method:'POST',body:JSON.stringify({action:'deleteNote',noteId:id,autor:currentUser.Nombre})});
-        refresh();
+        // 1. Atenuar el mensaje inmediatamente — feedback visual al instante
+        const row = document.querySelector(`[data-msg-id="${id}"]`);
+        if (row) {
+            row.style.transition = 'opacity 0.2s';
+            row.style.opacity    = '0.35';
+            row.style.pointerEvents = 'none';
+            // Agregar spinner sobre la burbuja
+            const bubble = row.querySelector('.msg-bubble');
+            if (bubble) {
+                const spinner = document.createElement('div');
+                spinner.id = 'del-spinner-' + id;
+                spinner.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.5);border-radius:inherit;display:flex;align-items:center;justify-content:center;';
+                spinner.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;color:#ba1a1a;animation:spin 0.8s linear infinite">autorenew</span>';
+                bubble.style.position = 'relative';
+                bubble.appendChild(spinner);
+            }
+        }
+
+        try {
+            const url = currentChatMode==='ADMIN' ? SCRIPT_URL_RECAUDACIONES : SCRIPT_URL_SOCIOS;
+            await fetch(url, {
+                method: 'POST',
+                body: JSON.stringify({action:'deleteNote', noteId:id, autor:currentUser.Nombre})
+            });
+            // 2. Animar salida suave
+            if (row) {
+                row.style.transition = 'opacity 0.25s, max-height 0.3s, margin 0.3s';
+                row.style.opacity    = '0';
+                row.style.maxHeight  = row.offsetHeight + 'px';
+                setTimeout(() => {
+                    row.style.maxHeight = '0';
+                    row.style.margin    = '0';
+                    row.style.padding   = '0';
+                    row.style.overflow  = 'hidden';
+                }, 50);
+                setTimeout(() => {
+                    // Quitar de la lista local y limpiar firma para permitir re-render
+                    if (currentChatMode === 'ADMIN')
+                        messages.admin  = messages.admin.filter(m => String(m.uuid||m.fecha) !== String(id));
+                    else
+                        messages.social = messages.social.filter(m => String(m.uuid||m.fecha) !== String(id));
+                    _lastChatSignature = '';
+                    renderChat(false);
+                }, 350);
+            }
+        } catch(e) {
+            // Si falla, restaurar el mensaje
+            if (row) {
+                row.style.opacity = '1';
+                row.style.pointerEvents = '';
+                const sp = document.getElementById('del-spinner-' + id);
+                if (sp) sp.remove();
+            }
+            console.error('Error borrando:', e);
+        }
     }
 
     // ── MODAL HELPERS ─────────────────────────────────────────
@@ -2047,20 +2158,32 @@
 
     // ── TAB SWITCHING ─────────────────────────────────────────
     function switchTab(id) {
-        document.querySelectorAll('.tab-section').forEach(t=>t.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        const btn=document.querySelector(`button[onclick="switchTab('${id}')"]`);
-        if(btn) btn.classList.add('active');
-        if(id==='tab-chat'){
+        document.querySelectorAll('.tab-section').forEach(t => {
+            t.classList.remove('active');
+            // Si es tab-chat (fixed), ocultarlo explícitamente
+            if (t.id === 'tab-chat') t.style.display = 'none';
+        });
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+        const tab = document.getElementById(id);
+        tab.classList.add('active');
+
+        if (id === 'tab-chat') {
+            tab.style.display = 'flex';
             document.getElementById('notifBadge').classList.add('hidden');
-            lastMsgCount=messages.admin.length+messages.social.length;
-            localStorage.setItem('lastMsgCountV19',lastMsgCount);
-            setTimeout(()=>{ const c=document.getElementById('chatMessages'); c.scrollTop=c.scrollHeight; },50);
+            lastMsgCount = messages.admin.length + messages.social.length;
+            localStorage.setItem('lastMsgCountV19', lastMsgCount);
+            setTimeout(() => {
+                const c = document.getElementById('chatMessages');
+                if (c) c.scrollTop = c.scrollHeight;
+            }, 80);
         }
-        if(id==='tab-stats'){
-            // Re-dibujar cuando el canvas ya tiene dimensiones reales
-            setTimeout(()=>renderStatsChart(), 80);
+
+        const btn = document.querySelector(`button[onclick="switchTab('${id}')"]`);
+        if (btn) btn.classList.add('active');
+
+        if (id === 'tab-stats') {
+            setTimeout(() => renderStatsChart(), 80);
         }
     }
 
