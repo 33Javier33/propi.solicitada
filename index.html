@@ -700,6 +700,11 @@
                 <div id="anticiposList" class="space-y-2 pb-6 min-h-[80px]">
                     <p class="text-center text-xs text-lm-muted py-8">Cargando movimientos...</p>
                 </div>
+                <!-- BOTÓN COMPROBANTE -->
+                <button onclick="descargarComprobante()" style="width:100%;background:linear-gradient(135deg,#001723,#264b5f);color:white;border:none;border-radius:16px;padding:14px 20px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;margin-bottom:24px;font-family:inherit;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,23,35,0.2);transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                    <span class="material-symbols-outlined" style="font-size:20px">receipt_long</span>
+                    Descargar Comprobante
+                </button>
             </div>
         </div>
 
@@ -1013,6 +1018,13 @@
         currentChatMode='ADMIN', currentSocialTarget={id:'TODOS',name:'Chat General'},
         lastMsgCount=parseInt(localStorage.getItem('lastMsgCountV19')||0),
         globalDiasCalendar=[], userTypeGlobal='', editingMessageId=null;
+
+    // Datos de balance guardados globalmente para el comprobante
+    let _lastBalance = {
+        liquido:0, remanente:0, propinaBruta:0, sAnt:0,
+        tAnt:0, pts:0, anos:0, puntoGlobalTotal:0,
+        userAnticipos:[], vpPromedio:0
+    };
 
     // ── INIT ──────────────────────────────────────────────────
     // ── CACHÉ DE SOCIOS (TTL 10 min) ─────────────────────────
@@ -1746,6 +1758,15 @@
             const btn=document.getElementById('calendarBtnContainer');
             if(globalDiasCalendar.length>0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
 
+            // Guardar datos para el comprobante PDF
+            const vpVals = Object.values(mapVP);
+            _lastBalance = {
+                liquido, remanente, propinaBruta, sAnt, tAnt,
+                pts, anos, puntoGlobalTotal,
+                userAnticipos: [...userAnticipos],
+                vpPromedio: vpVals.length ? vpVals.reduce((a,v)=>a+v.totalVP,0)/vpVals.length : 0
+            };
+
             // Pasar datos a estadísticas
             renderStats(mapVP, pts);
 
@@ -2301,6 +2322,125 @@
     }
 
     function closeCalendar() { document.getElementById('calendarModal').classList.add('hidden'); }
+
+    function descargarComprobante() {
+        if (!currentUser || _lastBalance.liquido === 0 && _lastBalance.propinaBruta === 0) {
+            alert('Los datos aún no han cargado. Espera un momento e intenta nuevamente.');
+            return;
+        }
+
+        const u = currentUser;
+        const b = _lastBalance;
+        const hoy = new Date();
+        const fechaEmision = hoy.toLocaleDateString('es-CL', {day:'2-digit',month:'2-digit',year:'numeric'});
+
+        // Período: 15 del mes anterior al 14 del mes actual
+        const mesActual = hoy.getMonth();
+        const anioActual = hoy.getFullYear();
+        const inicio = new Date(anioActual, mesActual - 1, 15);
+        const fin    = new Date(anioActual, mesActual, 14);
+        const fmtFecha = d => d.toLocaleDateString('es-CL', {day:'2-digit',month:'2-digit',year:'numeric'});
+        const periodoStr = fmtFecha(inicio) + ' AL ' + fmtFecha(fin);
+
+        // Próximo aumento de puntos
+        const dIng = new Date(u.FechaIngreso);
+        const proxAnio = new Date(dIng);
+        proxAnio.setFullYear(hoy.getFullYear() + (hoy >= new Date(hoy.getFullYear(), dIng.getMonth(), dIng.getDate()) ? 1 : 0));
+        const proxAumentoStr = proxAnio.toLocaleDateString('es-CL', {day:'2-digit', month:'short'}).toUpperCase();
+
+        // Valor punto promedio
+        const vpStr = b.vpPromedio > 0 ? formatMoney(b.vpPromedio) : '—';
+
+        // Filas de anticipos
+        const anticipoRows = b.userAnticipos.length > 0
+            ? b.userAnticipos.map((a, i) => {
+                const fecha = new Date(a.fecha + 'T12:00:00').toLocaleDateString('es-CL', {day:'2-digit',month:'2-digit',year:'numeric'});
+                return `<tr>
+                    <td style="padding:3px 5px;border-bottom:1px solid #eee;text-align:center;color:#aaa;font-size:9px;">${i+1}</td>
+                    <td style="padding:3px 5px;border-bottom:1px solid #eee;color:#2980b9;font-weight:700;font-size:9px;">Anticipo</td>
+                    <td style="padding:3px 5px;border-bottom:1px solid #eee;font-size:9px;">${fecha}<br><span style='color:#999;font-size:8px;'>${a.responsable||'Adelanto'}</span></td>
+                    <td style="padding:3px 5px;border-bottom:1px solid #eee;text-align:right;font-weight:bold;font-size:9px;">-${formatMoney(a.cantidad)}</td>
+                </tr>`;
+            }).join('')
+            : `<tr><td colspan="4" style="text-align:center;padding:6px;color:#aaa;font-size:9px;">Sin anticipos en este período</td></tr>`;
+
+        const html = `<!DOCTYPE html>
+<html><head><title>Comprobante ${u.Nombre} ${u.Apellido} - ${fechaEmision}</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: Arial, sans-serif; font-size: 10px; color:#000; background:white; }
+.page { width:80mm; margin:0 auto; padding:8px; }
+.header { text-align:center; border:2px solid #000; padding:8px; margin-bottom:10px; }
+.header h1 { font-size:12px; font-weight:bold; letter-spacing:1px; }
+.section-title { text-align:center; font-weight:bold; font-size:10px; border-bottom:1px solid #000; padding-bottom:2px; margin:8px 0 5px; letter-spacing:1px; }
+.row { display:flex; justify-content:space-between; padding:2px 0; border-bottom:1px solid #eee; }
+.row.big { font-size:18px; font-weight:900; border-top:2px solid #000; border-bottom:2px solid #000; margin:5px 0; padding:5px 0; justify-content:center; }
+table { width:100%; border-collapse:collapse; font-size:8px; }
+th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
+.divider { border-top:1px solid #000; margin:5px 0; }
+.copy-label { text-align:center; font-size:8px; font-weight:bold; background:#000; color:white; padding:2px; margin-bottom:5px; }
+.firmas { display:flex; gap:10px; margin-top:20px; }
+.firma-box { flex:1; text-align:center; }
+.firma-linea { border-top:1px solid #000; margin-bottom:4px; margin-top:15px; }
+.firma-label { font-size:7px; color:#555; }
+.footer { text-align:center; font-size:7px; color:#888; margin-top:5px; }
+@media print { @page { margin:2mm; size:80mm auto; } }
+</style>
+<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>
+</head><body><div class='page'>
+    <div class='copy-label'>★ COMPROBANTE SOCIO ★</div>
+    <div class='header'>
+        <h1>FONDO DE SOLIDARIDAD</h1>
+        <p>CASINO DE PTO. VARAS</p>
+        <p>LEY 17312 DEL 29/07/70</p>
+        <p><strong>PUERTO VARAS</strong></p>
+    </div>
+    <div class='section-title'>DATOS</div>
+    <div class='row'><label>NOMBRE</label><strong>${(u.Nombre+' '+u.Apellido).toUpperCase()}</strong></div>
+    <div class='row'><label>ÁREA</label><span>${u.Area.toUpperCase()}</span></div>
+    <div class='row'><label>CONTRATO</label><span>${u.TipoContrato.toUpperCase()}</span></div>
+    <div class='row'><label>AÑO INGRESO</label><span>${new Date(u.FechaIngreso).getFullYear()}</span></div>
+    <div class='row'><label>PUNTOS</label><span>${b.pts}</span></div>
+    <div class='row'><label>SUBE PUNTOS</label><span>${proxAumentoStr}</span></div>
+    <div class='divider'></div>
+    <div class='section-title'>CIERRE PUNTO</div>
+    <div class='row'><label>MIS PUNTOS</label><span>${Math.round(b.puntoGlobalTotal).toLocaleString('es-CL')}</span></div>
+    <div class='divider'></div>
+    <div class='section-title'>DETALLE</div>
+    <div class='row'><label>BRUTO (Alcance)</label><span>${formatMoney(b.propinaBruta)}</span></div>
+    <div class='row'><label>ANTICIPOS</label><span>${formatMoney(b.tAnt)}</span></div>
+    <div class='row'><label>SALDO ANTERIOR</label><span>${formatMoney(b.sAnt)}</span></div>
+    <div class='row'><label>SALDO REAL</label><strong>${formatMoney(b.propinaBruta + b.sAnt - b.tAnt)}</strong></div>
+    <div class='divider'></div>
+    <div style='text-align:center;font-size:9px;font-weight:bold;margin-top:6px;letter-spacing:1px;'>TOTAL A COBRAR</div>
+    <div class='row big'><span>${formatMoney(b.liquido)}</span></div>
+    <div class='row'><label>REMANENTE</label><span>${formatMoney(b.remanente)}</span></div>
+    <div class='divider'></div>
+    <div class='section-title'>MOVIMIENTOS / RESPONSABLES</div>
+    <table><thead><tr><th>#</th><th>Tipo</th><th>Detalle</th><th>Monto</th></tr></thead>
+    <tbody>${anticipoRows}</tbody></table>
+    <div class='divider'></div>
+    <div style='text-align:center;font-weight:bold;font-size:10px;margin:4px 0;'>PERÍODO ${periodoStr}</div>
+    <div class='firmas'>
+        <div class='firma-box'><div class='firma-linea'></div><div class='firma-nombre'>${(u.Nombre+' '+u.Apellido).toUpperCase()}</div><div class='firma-label'>FIRMA SOCIO</div></div>
+    </div>
+    <div class='footer'>Emitido: ${fechaEmision} | Sistema Fondo Solidario | CarlosPN Interactive®</div>
+</div></body></html>`;
+
+        // Abrir en nueva ventana e imprimir/guardar
+        const win = window.open('', '_blank');
+        if (win) {
+            win.document.write(html);
+            win.document.close();
+        } else {
+            // Fallback: descarga directa como archivo HTML
+            const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Comprobante_' + u.Nombre + '_' + u.Apellido + '_' + fechaEmision.replace(/\//g,'-') + '.html';
+            a.click();
+        }
+    }
 
     function toggleAbout(show) {
         const m = document.getElementById('aboutModal');
