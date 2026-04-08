@@ -664,8 +664,15 @@
                         <p class="text-[10px] font-semibold text-white/50 uppercase tracking-widest mb-1">Balance a Recibir</p>
                         <h2 id="montoRecibirLabel" class="font-headline text-4xl font-bold text-white tracking-tight">$0</h2>
                     </div>
-                    <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white/80 text-xl">account_balance_wallet</span>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button onclick="descargarComprobante()" title="Descargar Comprobante"
+                            style="width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                            <span class="material-symbols-outlined" style="font-size:20px;color:rgba(255,255,255,0.85)">receipt</span>
+                        </button>
+                        <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-white/80 text-xl">account_balance_wallet</span>
+                        </div>
                     </div>
                 </div>
                 <div class="flex gap-2 relative z-10 flex-wrap">
@@ -700,11 +707,7 @@
                 <div id="anticiposList" class="space-y-2 pb-6 min-h-[80px]">
                     <p class="text-center text-xs text-lm-muted py-8">Cargando movimientos...</p>
                 </div>
-                <!-- BOTÓN COMPROBANTE -->
-                <button onclick="descargarComprobante()" style="width:100%;background:linear-gradient(135deg,#001723,#264b5f);color:white;border:none;border-radius:16px;padding:14px 20px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;margin-bottom:24px;font-family:inherit;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,23,35,0.2);transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                    <span class="material-symbols-outlined" style="font-size:20px">receipt_long</span>
-                    Descargar Comprobante
-                </button>
+
             </div>
         </div>
 
