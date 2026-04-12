@@ -1306,7 +1306,8 @@
         let anos = hoy.getFullYear() - dIng.getFullYear();
         if (hoy.getMonth() < dIng.getMonth() || (hoy.getMonth() === dIng.getMonth() && hoy.getDate() < dIng.getDate())) anos--;
         anos = Math.max(0, anos);
-        const pts = Math.min(4 + (anos * 2), (currentUser.Area.includes('Mesa') ? 20 : currentUser.Area.includes('Cambista') ? 8 : currentUser.Area.includes('Boveda') ? 10 : 12));
+        const areaN = String(currentUser.Area || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        const pts = Math.min(4 + (anos * 2), (areaN.includes('mesa') ? 20 : areaN.includes('cambist') ? 8 : areaN.includes('boveda') ? 10 : 12));
 
         document.getElementById('perfilLetra').textContent = nombre.charAt(0).toUpperCase();
         document.getElementById('perfilNombre').textContent = nombre;
@@ -1555,7 +1556,8 @@
             const dIng=new Date(currentUser.FechaIngreso), hoy=new Date();
             let anos=hoy.getFullYear()-dIng.getFullYear();
             if(hoy.getMonth()<dIng.getMonth()||(hoy.getMonth()===dIng.getMonth()&&hoy.getDate()<dIng.getDate())) anos--;
-            const pts=Math.min(4+(Math.max(0,anos)*2),(currentUser.Area.includes('Mesa')?20:currentUser.Area.includes('Cambista')?8:currentUser.Area.includes('Boveda')?10:12));
+            const areaN=String(currentUser.Area||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+            const pts=Math.min(4+(Math.max(0,anos)*2),(areaN.includes('mesa')?20:areaN.includes('cambist')?8:areaN.includes('boveda')?10:12));
 
             let puntoGlobalTotal=0;
             const esPT=String(currentUser.TipoContrato).toLowerCase().includes('part');
@@ -3208,50 +3210,38 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     <!-- PWA Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
-            let _swReg = null;
-
-            function mostrarBannerSiHayActualizacion(reg) {
-                if (reg.waiting) {
-                    showUpdateBanner(reg.waiting);
-                    return;
-                }
-                reg.addEventListener('updatefound', () => {
-                    const newWorker = reg.installing;
-                    if (!newWorker) return;
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            showUpdateBanner(newWorker);
-                        }
-                    });
-                });
-            }
-
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then(reg => {
-                    _swReg = reg;
                     console.log('[SW] Registrado:', reg.scope);
-                    mostrarBannerSiHayActualizacion(reg);
 
-                    // Chequear al volver al frente
+                    // Si ya hay un SW esperando al cargar (ej: venía de otra pestaña)
+                    if (reg.waiting) {
+                        showUpdateBanner(reg.waiting);
+                    }
+
+                    // Escuchar cuando hay un nuevo SW instalándose
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateBanner(newWorker);
+                            }
+                        });
+                    });
+
+                    // Forzar chequeo de actualización cada vez que la app vuelve al frente
                     document.addEventListener('visibilitychange', () => {
-                        if (document.visibilityState === 'visible' && _swReg) {
-                            _swReg.update().then(() => {
-                                mostrarBannerSiHayActualizacion(_swReg);
-                            }).catch(() => {});
+                        if (document.visibilityState === 'visible') {
+                            reg.update().catch(() => {});
                         }
                     });
 
-                    // Chequear cada 30 minutos
-                    setInterval(() => {
-                        if (_swReg) _swReg.update().then(() => {
-                            mostrarBannerSiHayActualizacion(_swReg);
-                        }).catch(() => {});
-                    }, 30 * 60 * 1000);
-
+                    // También chequear al cargar por primera vez
                     reg.update().catch(() => {});
 
                 }).catch(e => console.warn('[SW] Error:', e));
 
+                // Si el SW fue activado, recargar para aplicar cambios
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
                     window.location.reload();
                 });
@@ -3261,15 +3251,13 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         function showUpdateBanner(worker) {
             const banner = document.getElementById('updateBanner');
             if (!banner) return;
-            // Asegurar que sea visible sobre todo
-            banner.style.display = 'flex';
             banner.classList.remove('hidden');
             banner.classList.add('flex');
 
             document.getElementById('updateBannerBtn').onclick = () => {
-                banner.style.display = 'none';
                 banner.classList.add('hidden');
                 banner.classList.remove('flex');
+                // Decirle al SW que se active ya
                 worker.postMessage({ type: 'SKIP_WAITING' });
             };
         }
@@ -3294,8 +3282,8 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     </div>
 </div>
 <!-- BANNER NUEVA VERSIÓN -->
-<div id="updateBanner" class="fixed bottom-0 left-0 right-0 z-[9999] items-center justify-between gap-3"
-     style="display:none;background:#001723;padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,0.3);">
+<div id="updateBanner" class="hidden fixed bottom-0 left-0 right-0 z-[500] items-center justify-between gap-3"
+     style="background:#001723;padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,0.3);">
     <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
         <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <span class="material-symbols-outlined" style="font-size:18px;color:#4ade80">system_update</span>
