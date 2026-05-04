@@ -675,13 +675,23 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-2 relative z-10 flex-wrap">
-                    <span id="remateTag" class="chip bg-white/10 text-white/70 border border-white/10">
-                        <span class="material-symbols-outlined text-[13px]">savings</span> Remanente: $0
-                    </span>
-                    <span id="globalPtsTag" class="chip bg-white/10 text-white/80 border border-white/15">
-                        <span class="material-symbols-outlined text-[13px]">stars</span> Puntos: 0
-                    </span>
+            </div>
+
+            <!-- REMANENTE + VALOR PUNTO POR NOCHE CARDS -->
+            <div class="px-4 mb-5 flex gap-3">
+                <div class="flex-1 rounded-[20px] bg-lm-card border border-lm-border p-4 shadow-sm">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-lm-accent text-[16px]">savings</span>
+                        <p class="text-[9px] font-bold text-lm-muted uppercase tracking-widest">Remanente</p>
+                    </div>
+                    <p id="remateTag" class="text-xl font-bold text-lm-primary">$0</p>
+                </div>
+                <div class="flex-1 rounded-[20px] bg-lm-card border border-lm-border p-4 shadow-sm">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-lm-accent text-[16px]">stars</span>
+                        <p class="text-[9px] font-bold text-lm-muted uppercase tracking-widest">Valor punto por noche</p>
+                    </div>
+                    <p id="globalPtsTag" class="text-xl font-bold text-lm-primary">0</p>
                 </div>
             </div>
 
@@ -1607,8 +1617,8 @@
                 montoEl.setAttribute('data-value', newMonto);
                 if (isFirstLoad) animateIn(montoEl, '0ms');
             }
-            document.getElementById('remateTag').innerHTML=`<span class="material-symbols-outlined text-[13px]">savings</span> Remanente: ${formatMoney(remanente)}`;
-            document.getElementById('globalPtsTag').innerHTML=`<span class="material-symbols-outlined text-[13px]">stars</span> Mis Puntos: ${Math.round(puntoGlobalTotal).toLocaleString('es-CL')}`;
+            document.getElementById('remateTag').textContent = formatMoney(remanente);
+            document.getElementById('globalPtsTag').textContent = Math.round(puntoGlobalTotal).toLocaleString('es-CL');
 
             // Resumen contable - Lumina style
             document.getElementById('detallesContables').innerHTML = `
