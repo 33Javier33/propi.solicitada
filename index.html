@@ -724,8 +724,32 @@
         <!-- ── TAB: HISTORIAL ── -->
         <div id="tab-history" class="tab-section overflow-y-auto pb-32 pt-4 bg-lm-bg">
             <div class="px-4">
-                <p class="text-[10px] font-bold text-lm-muted uppercase tracking-widest mb-4">Historial de Rendimientos</p>
-                <div id="historyList" class="space-y-2.5 pb-6"></div>
+                <!-- Toggle Rendimientos / Anticipos -->
+                <div class="flex gap-2 mb-4 bg-lm-subtle border border-lm-border rounded-[16px] p-1">
+                    <button id="histToggleRendimientos" onclick="switchHistView('rendimientos')"
+                        class="flex-1 py-2 rounded-[12px] text-[11px] font-bold transition-all bg-lm-card text-lm-primary shadow-sm border border-lm-border">
+                        Rendimientos
+                    </button>
+                    <button id="histToggleAnticipos" onclick="switchHistView('anticipos')"
+                        class="flex-1 py-2 rounded-[12px] text-[11px] font-bold transition-all text-lm-muted">
+                        Anticipos Anteriores
+                    </button>
+                </div>
+
+                <!-- Vista: Rendimientos (existente) -->
+                <div id="histViewRendimientos">
+                    <div id="historyList" class="space-y-2.5 pb-6"></div>
+                </div>
+
+                <!-- Vista: Anticipos Anteriores (nueva) -->
+                <div id="histViewAnticipos" class="hidden pb-6">
+                    <div id="historialAnticiposContainer">
+                        <div class="flex flex-col items-center justify-center py-16 gap-3 text-lm-muted">
+                            <span class="material-symbols-outlined text-[40px] opacity-30">history</span>
+                            <p class="text-sm">Toca para cargar el historial</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -2207,6 +2231,95 @@
     }
 
     // ── TAB SWITCHING ─────────────────────────────────────────
+    // ── HISTORIAL DE ANTICIPOS ANTERIORES ────────────────────────────────────
+    let _histAnticiposLoaded = false;
+
+    function switchHistView(view) {
+        const elRend = document.getElementById('histViewRendimientos');
+        const elAnts = document.getElementById('histViewAnticipos');
+        const btnRend = document.getElementById('histToggleRendimientos');
+        const btnAnts = document.getElementById('histToggleAnticipos');
+        if (view === 'rendimientos') {
+            elRend.classList.remove('hidden');
+            elAnts.classList.add('hidden');
+            btnRend.classList.add('bg-lm-card', 'text-lm-primary', 'shadow-sm', 'border', 'border-lm-border');
+            btnRend.classList.remove('text-lm-muted');
+            btnAnts.classList.remove('bg-lm-card', 'text-lm-primary', 'shadow-sm', 'border', 'border-lm-border');
+            btnAnts.classList.add('text-lm-muted');
+        } else {
+            elRend.classList.add('hidden');
+            elAnts.classList.remove('hidden');
+            btnAnts.classList.add('bg-lm-card', 'text-lm-primary', 'shadow-sm', 'border', 'border-lm-border');
+            btnAnts.classList.remove('text-lm-muted');
+            btnRend.classList.remove('bg-lm-card', 'text-lm-primary', 'shadow-sm', 'border', 'border-lm-border');
+            btnRend.classList.add('text-lm-muted');
+            if (!_histAnticiposLoaded) loadHistorialAnticipos();
+        }
+    }
+
+    async function loadHistorialAnticipos() {
+        if (!currentUser) return;
+        const container = document.getElementById('historialAnticiposContainer');
+        container.innerHTML = `
+            <div class="flex flex-col gap-3">
+                ${[1,2,3].map(() => `<div class="bg-lm-card border border-lm-border rounded-[20px] h-24 animate-pulse"></div>`).join('')}
+            </div>`;
+        try {
+            const res = await fetch(SCRIPT_URL_SOCIOS, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getHistorialCompletoSocio', idSocio: currentUser.ID })
+            });
+            const json = await res.json();
+            _histAnticiposLoaded = true;
+            renderHistorialAnticipos(json.data || []);
+        } catch(e) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center gap-3 py-10 text-lm-muted">
+                    <span class="material-symbols-outlined text-[36px] opacity-40">error_outline</span>
+                    <p class="text-sm">Error al cargar. Intenta nuevamente.</p>
+                    <button onclick="_histAnticiposLoaded=false;loadHistorialAnticipos()"
+                        class="text-xs font-semibold text-lm-accent border border-lm-accent/30 rounded-xl px-4 py-2">
+                        Reintentar
+                    </button>
+                </div>`;
+        }
+    }
+
+    function renderHistorialAnticipos(data) {
+        const container = document.getElementById('historialAnticiposContainer');
+        if (!data || data.length === 0) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center gap-3 py-16 text-lm-muted">
+                    <span class="material-symbols-outlined text-[40px] opacity-30">receipt_long</span>
+                    <p class="text-sm">Sin anticipos en períodos anteriores.</p>
+                </div>`;
+            return;
+        }
+        container.innerHTML = data.map(periodo => {
+            const total = periodo.registros.reduce((s, r) => s + (Number(r.monto) || 0), 0);
+            const rows = periodo.registros.map(r => `
+                <div class="flex justify-between items-center px-4 py-3 border-b border-lm-border last:border-0">
+                    <div>
+                        <p class="text-sm font-medium text-lm-primary">${r.fecha}</p>
+                        ${r.responsable ? `<p class="text-[10px] text-lm-muted mt-0.5">${r.responsable}</p>` : ''}
+                    </div>
+                    <span class="text-sm font-semibold" style="color:var(--color-red,#ef4444)">-${formatMoney(r.monto)}</span>
+                </div>`).join('');
+            return `
+                <div class="bg-lm-card border border-lm-border rounded-[20px] overflow-hidden mb-3 shadow-sm">
+                    <div class="flex justify-between items-center px-4 py-3 border-b border-lm-border">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lm-accent text-[16px]">folder_open</span>
+                            <span class="text-sm font-bold text-lm-primary">${periodo.periodo}</span>
+                            <span class="text-[10px] text-lm-muted">${periodo.registros.length} anticipo${periodo.registros.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        <span class="text-sm font-bold" style="color:var(--color-red,#ef4444)">-${formatMoney(total)}</span>
+                    </div>
+                    ${rows}
+                </div>`;
+        }).join('');
+    }
+
     function switchTab(id) {
         document.querySelectorAll('.tab-section').forEach(t => {
             t.classList.remove('active');
