@@ -744,7 +744,9 @@
                 <!-- Vista: Anticipos Anteriores (nueva) -->
                 <div id="histViewAnticipos" class="hidden pb-6">
                     <!-- Filtro por año -->
-                    <div id="antFiltroAnios" class="hidden flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar"></div>
+                    <div id="antFiltroAnios" class="hidden flex gap-2 mb-2 overflow-x-auto pb-1 no-scrollbar"></div>
+                    <!-- Filtro por mes (aparece al seleccionar un año) -->
+                    <div id="antFiltroMeses" class="hidden flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar"></div>
                     <div id="historialAnticiposContainer">
                         <div class="flex flex-col items-center justify-center py-16 gap-3 text-lm-muted">
                             <span class="material-symbols-outlined text-[40px] opacity-30">history</span>
@@ -2237,6 +2239,8 @@
     let _histAnticiposLoaded = false;
     let _histAnticiposData   = [];
     let _histAnticiposFiltro = 'Todos';
+    let _histAnticiposMesFiltro = 'Todos';
+    const MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
     function switchHistView(view) {
         const elRend = document.getElementById('histViewRendimientos');
@@ -2277,7 +2281,9 @@
             _histAnticiposLoaded = true;
             _histAnticiposData   = json.data || [];
             _histAnticiposFiltro = 'Todos';
+            _histAnticiposMesFiltro = 'Todos';
             buildFiltroAnios(_histAnticiposData);
+            buildFiltroMeses('Todos', _histAnticiposData);
             renderHistorialAnticipos(_histAnticiposData);
         } catch(e) {
             container.innerHTML = `
@@ -2297,6 +2303,51 @@
         return m ? m[1] : null;
     }
 
+    function _extraerMes(periodo) {
+        const str = String(periodo);
+        const numMatch = str.match(/\b20\d{2}[-\/](\d{1,2})\b/);
+        if (numMatch) {
+            const n = parseInt(numMatch[1], 10);
+            if (n >= 1 && n <= 12) return MESES_ES[n - 1];
+        }
+        for (const mes of MESES_ES) {
+            if (str.toLowerCase().includes(mes.toLowerCase())) return mes;
+        }
+        return null;
+    }
+
+    function buildFiltroMeses(anio, data) {
+        const bar = document.getElementById('antFiltroMeses');
+        const filtered = anio === 'Todos' ? data : data.filter(p => _extraerAnio(p.periodo) === anio);
+        const mesesSet = new Set(filtered.map(p => _extraerMes(p.periodo)).filter(Boolean));
+        const meses = MESES_ES.filter(m => mesesSet.has(m));
+        if (meses.length <= 1) { bar.classList.add('hidden'); return; }
+        _histAnticiposMesFiltro = 'Todos';
+        bar.classList.remove('hidden');
+        bar.innerHTML = ['Todos', ...meses].map(m => `
+            <button onclick="filtrarAnticiposMes('${m}')" id="antFiltroMes-${m}"
+                class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold border transition-all
+                       ${m === 'Todos' ? 'bg-lm-primary text-white border-lm-primary' : 'bg-lm-card text-lm-muted border-lm-border'}">
+                ${m}
+            </button>`).join('');
+    }
+
+    function filtrarAnticiposMes(mes) {
+        _histAnticiposMesFiltro = mes;
+        document.querySelectorAll('[id^="antFiltroMes-"]').forEach(b => {
+            const activo = b.id === 'antFiltroMes-' + mes;
+            b.className = b.className.replace(/bg-lm-primary text-white border-lm-primary|bg-lm-card text-lm-muted border-lm-border/g, '').trim()
+                + (activo ? ' bg-lm-primary text-white border-lm-primary' : ' bg-lm-card text-lm-muted border-lm-border');
+        });
+        const porAnio = _histAnticiposFiltro === 'Todos'
+            ? _histAnticiposData
+            : _histAnticiposData.filter(p => _extraerAnio(p.periodo) === _histAnticiposFiltro);
+        const filtrado = mes === 'Todos'
+            ? porAnio
+            : porAnio.filter(p => _extraerMes(p.periodo) === mes);
+        renderHistorialAnticipos(filtrado);
+    }
+
     function buildFiltroAnios(data) {
         const bar = document.getElementById('antFiltroAnios');
         const anios = [...new Set(data.map(p => _extraerAnio(p.periodo)).filter(Boolean))].sort((a,b) => b-a);
@@ -2312,7 +2363,6 @@
 
     function filtrarAnticipos(anio) {
         _histAnticiposFiltro = anio;
-        // actualizar estilos de botones
         document.querySelectorAll('[id^="antFiltro-"]').forEach(b => {
             const activo = b.id === 'antFiltro-' + anio;
             b.className = b.className.replace(/bg-lm-primary text-white border-lm-primary|bg-lm-card text-lm-muted border-lm-border/g, '').trim()
@@ -2321,6 +2371,7 @@
         const filtrado = anio === 'Todos'
             ? _histAnticiposData
             : _histAnticiposData.filter(p => _extraerAnio(p.periodo) === anio);
+        buildFiltroMeses(anio, _histAnticiposData);
         renderHistorialAnticipos(filtrado);
     }
 
@@ -3078,19 +3129,25 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'account_balance_wallet',
             color: '#001723',
             title: 'Balance — ¿Cuánto me toca cobrar?',
-            body: 'Esta es la primera pantalla que verás al entrar. El <b>número grande</b> es el dinero que te corresponde cobrar en este período.<br><br>💰 <b>Remanente:</b> Es el sobrante que queda si tu monto no termina en número redondo — ese dinero pasa al próximo período, no se pierde.<br><br>⭐ <b>Mis Puntos:</b> Muestra el total de puntos que generaste en el período actual. A más puntos, más propina te corresponde.',
+            body: 'Esta es la primera pantalla que verás al entrar. El <b>número grande</b> es el dinero que te corresponde cobrar en este período.<br><br>Debajo del monto principal encontrarás <b>dos tarjetas</b>:<br><br>💰 <b>Remanente:</b> El sobrante si tu monto no termina en número redondo — ese dinero pasa al próximo período y no se pierde.<br><br>⭐ <b>Valor punto por noche:</b> Cuánto vale cada punto de propina en el período actual. A mayor recaudación del casino, mayor será este valor.',
             preview: `
-              <div style="background:linear-gradient(135deg,#001723,#002d40,#264b5f);border-radius:18px;padding:18px;position:relative;overflow:hidden;">
+              <div style="background:linear-gradient(135deg,#001723,#002d40,#264b5f);border-radius:18px;padding:18px;">
                 <div style="font-size:9px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Balance a Recibir</div>
-                <div style="font-size:30px;font-weight:800;color:#fff;font-family:Manrope,sans-serif;margin-bottom:12px;">$148.000</div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                  <div style="background:rgba(255,255,255,0.12);border-radius:20px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.75);display:flex;align-items:center;gap:4px;">
-                    <span class="material-symbols-outlined" style="font-size:12px">savings</span>
-                    <span>Remanente: <b style="color:#fff">$420</b></span>
+                <div style="font-size:30px;font-weight:800;color:#fff;font-family:Manrope,sans-serif;margin-bottom:14px;">$148.000</div>
+                <div style="display:flex;gap:8px;">
+                  <div style="flex:1;background:rgba(255,255,255,0.1);border-radius:14px;padding:10px 12px;border:1px solid rgba(255,255,255,0.12);">
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+                      <span class="material-symbols-outlined" style="font-size:13px;color:rgba(255,255,255,0.6)">savings</span>
+                      <span style="font-size:8px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em">Remanente</span>
+                    </div>
+                    <div style="font-size:17px;font-weight:700;color:#fff">$420</div>
                   </div>
-                  <div style="background:rgba(255,255,255,0.12);border-radius:20px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.75);display:flex;align-items:center;gap:4px;">
-                    <span class="material-symbols-outlined" style="font-size:12px">stars</span>
-                    <span>Mis Puntos: <b style="color:#fff">3.240</b></span>
+                  <div style="flex:1;background:rgba(255,255,255,0.1);border-radius:14px;padding:10px 12px;border:1px solid rgba(255,255,255,0.12);">
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+                      <span class="material-symbols-outlined" style="font-size:13px;color:rgba(255,255,255,0.6)">stars</span>
+                      <span style="font-size:8px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em">Valor punto</span>
+                    </div>
+                    <div style="font-size:17px;font-weight:700;color:#fff">$1.600</div>
                   </div>
                 </div>
               </div>`
@@ -3151,25 +3208,73 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'receipt_long',
             color: '#006a62',
             title: 'Historial — El detalle día a día',
-            body: 'En la sección <b>Historial</b> puedes ver exactamente lo que entró al casino cada día, desglosado por tipo de recaudación.<br><br>Cada fecha muestra una <b>tarjeta con todas las entradas de ese día</b> — por ejemplo, Sala de Juegos, Tarjeta MDA, Efectivo MDA, Bóveda, etc., cada una con su monto.<br><br>🟢 <b>Verde (flecha arriba):</b> Ese día cuenta para tu propina.<br>🔴 <b>Rojo / Plano:</b> Ese día no te suma — tuviste ausencia o no trabajaste (Part-Time).<br><br>Abajo de cada fecha ves tu <b>Valor Punto</b>, <b>Mis Puntos</b> y <b>Mi Ganancia</b> de ese día específico.',
+            body: 'En la sección <b>Historial</b> tienes dos vistas que cambias con los botones de arriba:<br><br>📋 <b>Rendimientos:</b> El detalle día a día — cada fecha muestra lo que entró al casino, y abajo ves tu <b>Valor Punto</b>, <b>Mis Puntos</b> y <b>Ganancia</b> de ese día.<br><br>🗂 <b>Anticipos Anteriores:</b> Todos los anticipos de períodos pasados, con filtros por año y mes.<br><br>🟢 Verde (flecha arriba) = ese día suma a tu propina · Sin color = ese día no suma (ausencia o Part-Time).',
             preview: `
-              <div style="display:flex;flex-direction:column;gap:8px;">
+              <div>
+                <div style="background:#f1f5f9;border-radius:14px;padding:3px;display:flex;gap:3px;margin-bottom:10px;">
+                  <div style="flex:1;background:#001723;color:#fff;border-radius:11px;padding:7px;font-size:11px;font-weight:700;text-align:center;">Rendimientos</div>
+                  <div style="flex:1;color:#94a3b8;border-radius:11px;padding:7px;font-size:11px;font-weight:600;text-align:center;">Anticipos Ant.</div>
+                </div>
                 <div style="background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,0.08);overflow:hidden;">
-                  <div style="background:rgba(16,185,129,0.06);border-bottom:1px solid rgba(16,185,129,0.15);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
-                    <div style="display:flex;align-items:center;gap:8px;">
-                      <div style="width:30px;height:30px;border-radius:8px;background:rgba(16,185,129,0.12);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:15px;color:#10b981">trending_up</span></div>
-                      <div><div style="font-size:12px;font-weight:700;color:#001723">Vie 28 Mar 2026</div><div style="font-size:9px;color:#94a3b8">3 entradas · Total: $6.400.000</div></div>
+                  <div style="background:rgba(16,185,129,0.06);border-bottom:1px solid rgba(16,185,129,0.15);padding:10px 12px;display:flex;align-items:center;gap:8px;">
+                    <div style="width:28px;height:28px;border-radius:8px;background:rgba(16,185,129,0.12);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:14px;color:#10b981">trending_up</span></div>
+                    <div><div style="font-size:11px;font-weight:700;color:#001723">Vie 28 Mar 2026</div><div style="font-size:9px;color:#94a3b8">3 entradas · $6.400.000</div></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;">
+                    <div style="background:#f1f5f9;border-radius:8px;padding:5px;text-align:center;"><div style="font-size:7px;color:#94a3b8;font-weight:700">VALOR PTO</div><div style="font-size:11px;font-weight:700;color:#6366f1">$1.600</div></div>
+                    <div style="background:#f1f5f9;border-radius:8px;padding:5px;text-align:center;"><div style="font-size:7px;color:#94a3b8;font-weight:700">MIS PTS</div><div style="font-size:11px;font-weight:700;color:#001723">10</div></div>
+                    <div style="background:rgba(16,185,129,0.08);border-radius:8px;padding:5px;text-align:center;"><div style="font-size:7px;color:#94a3b8;font-weight:700">GANANCIA</div><div style="font-size:11px;font-weight:700;color:#10b981">$16.000</div></div>
+                  </div>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'folder_open',
+            color: '#264b5f',
+            title: 'Anticipos Anteriores — Historial de períodos pasados',
+            body: 'En <b>Historial → Anticipos Anteriores</b> puedes revisar todos los anticipos que solicitaste en meses y años pasados, todo en un solo lugar.<br><br>📅 <b>Filtro por año:</b> Si tienes anticipos de varios años aparecen botones para filtrar. Toca un año para ver solo ese período.<br><br>📆 <b>Filtro por mes:</b> Al seleccionar un año específico aparecen los meses disponibles para acotar aún más la búsqueda.<br><br>📂 <b>Acordeón por período:</b> Cada período aparece como una tarjeta que puedes expandir tocándola para ver el detalle: fecha, monto y responsable de cada anticipo.',
+            preview: `
+              <div>
+                <div style="display:flex;gap:5px;margin-bottom:6px;">
+                  <div style="background:#001723;color:#fff;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:700;white-space:nowrap">Todos</div>
+                  <div style="background:#fff;border:1px solid #e1e3e4;color:#94a3b8;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;white-space:nowrap">2025</div>
+                  <div style="background:#fff;border:1px solid #e1e3e4;color:#94a3b8;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;white-space:nowrap">2024</div>
+                </div>
+                <div style="display:flex;gap:5px;margin-bottom:10px;">
+                  <div style="background:#001723;color:#fff;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:700;white-space:nowrap">Todos</div>
+                  <div style="background:#fff;border:1px solid #e1e3e4;color:#94a3b8;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;white-space:nowrap">Enero</div>
+                  <div style="background:#fff;border:1px solid #e1e3e4;color:#94a3b8;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;white-space:nowrap">Marzo</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="background:#fff;border:1px solid #e1e3e4;border-radius:14px;overflow:hidden;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
+                      <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="material-symbols-outlined" style="font-size:14px;color:#264b5f">folder_open</span>
+                        <span style="font-size:12px;font-weight:700;color:#001723">Cierre 2025-03</span>
+                        <span style="font-size:9px;color:#94a3b8">2 anticipos</span>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:4px;">
+                        <span style="font-size:11px;font-weight:700;color:#ba1a1a">-$45.000</span>
+                        <span class="material-symbols-outlined" style="font-size:15px;color:#94a3b8">expand_less</span>
+                      </div>
+                    </div>
+                    <div style="border-top:1px solid #f1f5f9;padding:0 12px;">
+                      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f8fafc;"><span style="font-size:11px;color:#001723">15/03/2025</span><span style="font-size:11px;font-weight:700;color:#ba1a1a">-$25.000</span></div>
+                      <div style="display:flex;justify-content:space-between;padding:7px 0;"><span style="font-size:11px;color:#001723">28/03/2025</span><span style="font-size:11px;font-weight:700;color:#ba1a1a">-$20.000</span></div>
                     </div>
                   </div>
-                  <div style="padding:6px 12px 8px;">
-                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f8fafc;"><div style="display:flex;align-items:center;gap:6px;"><div style="width:6px;height:6px;border-radius:50%;background:#6366f1"></div><span style="font-size:11px;color:#334155">SalaDeJuegos</span></div><span style="font-size:11px;font-weight:700;color:#001723">$3.200.000</span></div>
-                    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f8fafc;"><div style="display:flex;align-items:center;gap:6px;"><div style="width:6px;height:6px;border-radius:50%;background:#6366f1"></div><span style="font-size:11px;color:#334155">TarjetaMDA</span></div><span style="font-size:11px;font-weight:700;color:#001723">$1.800.000</span></div>
-                    <div style="display:flex;justify-content:space-between;padding:5px 0;"><div style="display:flex;align-items:center;gap:6px;"><div style="width:6px;height:6px;border-radius:50%;background:#6366f1"></div><span style="font-size:11px;color:#334155">EfectivoMDA</span></div><span style="font-size:11px;font-weight:700;color:#001723">$1.400.000</span></div>
-                  </div>
-                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 12px 10px;">
-                    <div style="background:#f1f5f9;border-radius:8px;padding:5px;text-align:center;"><div style="font-size:8px;color:#94a3b8;font-weight:700">VALOR PTO</div><div style="font-size:11px;font-weight:700;color:#6366f1">$1.600</div></div>
-                    <div style="background:#f1f5f9;border-radius:8px;padding:5px;text-align:center;"><div style="font-size:8px;color:#94a3b8;font-weight:700">MIS PTS</div><div style="font-size:11px;font-weight:700;color:#001723">10</div></div>
-                    <div style="background:rgba(16,185,129,0.08);border-radius:8px;padding:5px;text-align:center;"><div style="font-size:8px;color:#94a3b8;font-weight:700">GANANCIA</div><div style="font-size:11px;font-weight:700;color:#10b981">$16.000</div></div>
+                  <div style="background:#fff;border:1px solid #e1e3e4;border-radius:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;">
+                      <div style="display:flex;align-items:center;gap:6px;">
+                        <span class="material-symbols-outlined" style="font-size:14px;color:#264b5f">folder_open</span>
+                        <span style="font-size:12px;font-weight:700;color:#001723">Cierre 2025-01</span>
+                        <span style="font-size:9px;color:#94a3b8">1 anticipo</span>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:4px;">
+                        <span style="font-size:11px;font-weight:700;color:#ba1a1a">-$30.000</span>
+                        <span class="material-symbols-outlined" style="font-size:15px;color:#94a3b8">expand_more</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>`
