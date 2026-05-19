@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // .tool_response.filePath'); base=$(basename \"$f\"); if [[ \"$base\" == \"index.html\" || \"$base\" == \"app.css\" || \"$base\" == \"app.js\" ]]; then cd /home/user/propi.solicitada && ./build.sh; fi",
+            "timeout": 15,
+            "statusMessage": "Actualizando originalindex.html..."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,7 +1,9 @@
-const CACHE_NAME = 'boveda-personal-v5';
+const CACHE_NAME = 'boveda-personal-v6';
 
 const urlsToCache = [
     'index.html',
+    'app.css',
+    'app.js',
     'manifest.json',
     'img/icon-192x192.png',
     'img/icon-512x512.png'
