@@ -47,31 +47,24 @@ PWA (Progressive Web App) para socios del Fondo Solidario de Propina del Casino 
 │  PWA instalada (standalone, portrait)                │
 │  ┌──────────────────────────────────────────────┐   │
 │  │  index.html  →  app.css  +  app.js           │   │
-│  │  Service Worker (sw.js) — cache v6           │   │
+│  │  Service Worker (sw.js) — cache v7           │   │
 │  └────────────────┬─────────────────────────────┘   │
 └───────────────────┼─────────────────────────────────┘
-                    │ fetch POST/GET
+                    │ fetch (interceptado por supabase-api.js)
          ┌──────────┴──────────┐
          │                     │
   ┌──────▼──────┐       ┌──────▼──────┐
-  │  GAS Socios │       │  GAS Recaud │
-  │  (doPost)   │       │  (doGet)    │
-  └──────┬──────┘       └──────┬──────┘
-         │                     │
-  ┌──────▼─────────────────────▼──────┐
-  │         Google Sheets             │
-  │  Socios · Anticipos · Recaud...   │
-  └───────────────────────────────────┘
-         │
-  ┌──────▼──────┐
-  │  Telegram   │  ← notificaciones login/logout/admin
-  │  Bot API    │
-  └─────────────┘
+  │  Supabase   │       │  Supabase   │
+  │  Socios     │       │  Recaud.    │
+  │  (teemahk…) │       │  (lpulmj…)  │
+  └─────────────┘       └─────────────┘
 ```
 
-**Dos scripts GAS independientes:**
-- **SCRIPT_URL_SOCIOS** — gestión de socios, anticipos, mensajería, conexiones
-- **SCRIPT_URL_RECAUDACIONES** — datos de recaudación diaria, estadísticas, notas
+**Dos proyectos Supabase independientes:**
+- **Proyecto socios** (`teemahksasdougehrcly`) — socios, anticipos, extras, saldos, chat, conexiones
+- **Proyecto recaudaciones** (`lpulmjzboogixbdxxayo`) — recaudaciones diarias, divisores, notas
+
+> La integración usa un interceptor `window.fetch` en `supabase-api.js` que redirige transparentemente las llamadas GAS hacia Supabase sin modificar `app.js`.
 
 ---
 
@@ -82,13 +75,16 @@ propi.solicitada/
 ├── index.html          # HTML puro (878 líneas) — estructura de la app
 ├── app.css             # CSS + configuración de estilos (270 líneas)
 ├── app.js              # JavaScript completo de la app (2435 líneas)
+├── supabase-api.js     # Interceptor fetch → Supabase (nuevo)
 ├── originalindex.html  # Copia completa en un solo archivo (auto-generada)
 ├── build.sh            # Script que reconstruye originalindex.html
-├── sw.js               # Service Worker — caché v6, network-first
+├── sw.js               # Service Worker — caché v7, network-first
 ├── manifest.json       # Manifiesto PWA
 ├── vercel.json         # Cabeceras HTTP para despliegue en Vercel
 ├── gas/
-│   └── code.gs         # Google Apps Script completo (referencia)
+│   └── code.gs         # Google Apps Script completo (referencia histórica)
+├── migration/
+│   └── migrate_to_supabase.gs  # Instrucciones de migración (referencia)
 ├── img/
 │   ├── icon-192x192.png
 │   └── icon-512x512.png
@@ -275,7 +271,7 @@ El bot de Telegram se gestiona enteramente en `gas/code.gs`:
 
 ## Service Worker y Caché PWA
 
-**Archivo:** `sw.js` — versión `boveda-personal-v6`
+**Archivo:** `sw.js` — versión `boveda-personal-v7`
 
 **Estrategia:**
 - Archivos propios (`index.html`, `app.css`, `app.js`, `manifest.json`, imágenes) → **Network-first** (siempre intenta red, fallback a caché)
@@ -305,7 +301,7 @@ img/icon-192x192.png · img/icon-512x512.png
 La app se despliega en **Vercel** directamente desde este repositorio GitHub (`33Javier33/propi.solicitada`), rama `main`.
 
 **Rama principal:** `main`  
-**Rama de desarrollo Claude Code:** `claude/enlarge-data-cards-H9Was` (mergeada a main)
+**Rama de desarrollo Claude Code:** `claude/sheets-to-supabase-migration-i1dlcm` (migración Supabase)
 
 Para actualizar la app en producción: hacer push a `main`. Vercel detecta el push y redistribuye automáticamente.
 
@@ -323,7 +319,8 @@ El service worker usa network-first, por lo que los cambios se aplican en la sig
 | Estructura HTML, modales, layout | `index.html` |
 | Estilos, CSS variables, clases custom | `app.css` |
 | Lógica JS, funciones, llamadas GAS | `app.js` |
-| Backend / lógica Google Sheets | `gas/code.gs` (copiar al GAS real en Google) |
+| Adaptador Supabase / interceptor fetch | `supabase-api.js` |
+| Backend / lógica Google Sheets (referencia) | `gas/code.gs` |
 | Caché PWA | `sw.js` (incrementar `CACHE_NAME` al cambiar archivos) |
 
 ### Build automático
@@ -339,7 +336,7 @@ Para ejecutar manualmente:
 
 Cada vez que se publican cambios en archivos del front-end, incrementar el número de versión en `sw.js`:
 ```javascript
-const CACHE_NAME = 'boveda-personal-v7'; // ← incrementar
+const CACHE_NAME = 'boveda-personal-v8'; // ← incrementar
 ```
 
 ### Commit y push
@@ -357,6 +354,15 @@ git push -u origin main
 ## Historial de Cambios
 
 ### v19 — Junio 2026
+
+#### 2026-06-13 — Migración backend Google Sheets → Supabase
+- Reemplazado el backend de Google Apps Script (GAS) por Supabase como base de datos.
+- Nuevo archivo `supabase-api.js`: interceptor de `window.fetch` y `navigator.sendBeacon` que redirige transparentemente todas las llamadas a las URLs GAS hacia dos proyectos Supabase sin modificar `app.js`.
+  - Proyecto socios (`teemahksasdougehrcly`): tablas `socios`, `anticipos`, `extras`, `saldos_socio`, `dias_pt`, `chat_mensajes`, `historial_conexiones`, `anticipos_historial`.
+  - Proyecto recaudaciones (`lpulmjzboogixbdxxayo`): tablas `recaudaciones`, `divisores`, `notas_recaudacion`.
+- `index.html` actualizado para cargar `@supabase/supabase-js@2` (CDN jsdelivr) y `supabase-api.js` antes de `app.js`.
+- Service Worker actualizado a `boveda-personal-v7` para forzar recarga del `index.html` modificado.
+- Los scripts GAS originales se mantienen en `gas/code.gs` como referencia histórica.
 
 #### 2026-06-01 — Corrección Safe Area iPhone
 - **Problema:** En iPhone con notch/Dynamic Island, el header quedaba detrás de la barra de estado.
