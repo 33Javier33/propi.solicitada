@@ -144,18 +144,44 @@ async function _sociosHandler(url, options) {
         case 'logoutConexion':
             return _mockRes({ success: true });
 
-        // Historial completo de anticipos de un socio (activos + archivados)
+        // Historial completo de anticipos de un socio — agrupado por período
         case 'getHistorialCompletoSocio': {
             const idSocio = b.idSocio;
+            const _MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
+                            'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+            const _periodoFromFecha = fecha => {
+                const d = new Date(String(fecha).replace(' ','T'));
+                if (isNaN(d)) return 'SIN PERÍODO';
+                return `${_MESES[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+            };
+            const _sortKey = p => {
+                const yr = String(p).match(/\b(20\d{2})\b/)?.[1] || '0000';
+                const mi = _MESES.findIndex(m => String(p).toUpperCase().includes(m));
+                return `${yr}-${String(mi + 1).padStart(2,'0')}`;
+            };
+
             const [actRes, histRes] = await Promise.all([
                 dbSV.from('anticipos').select('*').eq('socio_id', idSocio),
                 dbSV.from('anticipos_historial').select('*').eq('socio_id', idSocio)
             ]);
-            const all = [
-                ...(actRes.data  || []).map(a => ({ ...a, cantidad: a.monto, estado: 'ACTUAL' })),
-                ...(histRes.data || []).map(a => ({ ...a, cantidad: a.monto }))
-            ].sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
-            return _mockRes({ data: all });
+
+            const grouped = {};
+            const add = (periodo, row) => {
+                if (!grouped[periodo]) grouped[periodo] = [];
+                grouped[periodo].push({ fecha: row.fecha, monto: Number(row.monto || 0), responsable: row.responsable || '' });
+            };
+
+            for (const a of (actRes.data || []))  add(_periodoFromFecha(a.fecha), a);
+            for (const a of (histRes.data || [])) add(a.periodo || _periodoFromFecha(a.fecha), a);
+
+            const data = Object.entries(grouped)
+                .map(([periodo, registros]) => ({
+                    periodo,
+                    registros: registros.sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)))
+                }))
+                .sort((a, b) => _sortKey(b.periodo).localeCompare(_sortKey(a.periodo)));
+
+            return _mockRes({ data });
         }
 
         case 'ping':

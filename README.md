@@ -355,6 +355,12 @@ git push -u origin main
 
 ### v19 — Junio 2026
 
+#### 2026-06-13 — Fix anticipos anteriores: agrupación por período en Supabase
+- **Problema:** La sección "Anticipos Anteriores" no mostraba datos.
+- **Causa:** El handler `getHistorialCompletoSocio` en `supabase-api.js` devolvía un array plano, pero `renderHistorialAnticipos` espera un array agrupado por período (`{ periodo, registros }` ).
+- **Fix:** El handler ahora agrupa los anticipos por período (derivado del campo `periodo` en `anticipos_historial`, o calculado desde `fecha` para anticipos actuales), ordenado de más reciente a más antiguo.
+- Service Worker actualizado a `boveda-personal-v8`.
+
 #### 2026-06-13 — Migración backend Google Sheets → Supabase
 - Reemplazado el backend de Google Apps Script (GAS) por Supabase como base de datos.
 - Nuevo archivo `supabase-api.js`: interceptor de `window.fetch` y `navigator.sendBeacon` que redirige transparentemente todas las llamadas a las URLs GAS hacia dos proyectos Supabase sin modificar `app.js`.
