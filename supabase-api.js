@@ -265,27 +265,23 @@ window.fetch = async function(url, options = {}) {
     return _origFetch(url, options);
 };
 
-// ── Realtime: chat y datos se actualizan al instante ──────────────────────────
+// ── Realtime broadcast: actualizar al instante cuando otra app cambia datos ────
 window.addEventListener('load', () => {
-    let _rtChat = null, _rtData = null;
+    let _rtRec = null, _rtChat = null;
 
-    // Notas admin (recaudaciones project)
-    dbRV.channel('propi-rec-rt')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'notas_recaudacion' }, () => {
-            clearTimeout(_rtChat);
-            _rtChat = setTimeout(() => { if (typeof refreshChat === 'function') refreshChat(true); }, 400);
+    // Recaudaciones y notas (broadcast desde diario.propi / socios-comicion)
+    dbRV.channel('rec-data-sync')
+        .on('broadcast', { event: 'changed' }, () => {
+            clearTimeout(_rtRec);
+            _rtRec = setTimeout(() => { if (typeof refresh === 'function') refresh(); }, 500);
         })
         .subscribe();
 
-    // Chat socios y anticipos (socios project)
+    // Chat socios — postgres_changes (ya habilitado en Realtime)
     dbSV.channel('propi-sv-rt')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_mensajes' }, () => {
             clearTimeout(_rtChat);
             _rtChat = setTimeout(() => { if (typeof refreshChat === 'function') refreshChat(true); }, 400);
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'anticipos' }, () => {
-            clearTimeout(_rtData);
-            _rtData = setTimeout(() => { if (typeof refresh === 'function') refresh(); }, 700);
         })
         .subscribe();
 });
