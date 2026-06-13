@@ -265,6 +265,31 @@ window.fetch = async function(url, options = {}) {
     return _origFetch(url, options);
 };
 
+// ── Realtime: chat y datos se actualizan al instante ──────────────────────────
+window.addEventListener('load', () => {
+    let _rtChat = null, _rtData = null;
+
+    // Notas admin (recaudaciones project)
+    dbRV.channel('propi-rec-rt')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'notas_recaudacion' }, () => {
+            clearTimeout(_rtChat);
+            _rtChat = setTimeout(() => { if (typeof refreshChat === 'function') refreshChat(true); }, 400);
+        })
+        .subscribe();
+
+    // Chat socios y anticipos (socios project)
+    dbSV.channel('propi-sv-rt')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_mensajes' }, () => {
+            clearTimeout(_rtChat);
+            _rtChat = setTimeout(() => { if (typeof refreshChat === 'function') refreshChat(true); }, 400);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'anticipos' }, () => {
+            clearTimeout(_rtData);
+            _rtData = setTimeout(() => { if (typeof refresh === 'function') refresh(); }, 700);
+        })
+        .subscribe();
+});
+
 // ── Interceptor de sendBeacon (logoutConexion al cerrar tab) ───────────────────
 const _origBeacon = navigator.sendBeacon.bind(navigator);
 navigator.sendBeacon = function(url, data) {
