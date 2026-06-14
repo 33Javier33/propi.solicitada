@@ -770,7 +770,7 @@
             // Las notas se renderizan cuando llega la Fase 2 (background)
             // Solo renderizamos chat si ya hay mensajes en memoria
             if(messages.admin.length > 0 || messages.social.length > 0) {
-                renderChat();
+                renderChat(false);
                 checkNotifications();
             }
         } catch(e) { console.error("Refresh Error", e); }
@@ -957,7 +957,7 @@
             }
         }
 
-        if(forceScroll || isScrolledToBottom || container.scrollTop===0){
+        if(forceScroll || isScrolledToBottom){
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     container.scrollTop = container.scrollHeight;
