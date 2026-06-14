@@ -273,17 +273,14 @@ async function _recHandler(url, options) {
         }
 
         case 'addRecaudacion': {
-            const { error } = await dbRV.from('recaudaciones').insert({
-                id: crypto.randomUUID(),
-                fecha: b.fecha,
-                tipo: b.tipo || 'Sin Tipo',
-                monto: Number(b.monto) || 0,
-                registrado_por_id: b.registrado_por_id || null,
-                registrado_por_nombre: b.registrado_por_nombre || null
-            });
-            // Notificar a diario.propi y socios-comicion
+            const base = { id: crypto.randomUUID(), fecha: b.fecha, tipo: b.tipo || 'Sin Tipo', monto: Number(b.monto) || 0 };
+            let res = await dbRV.from('recaudaciones').insert({ ...base, registrado_por_id: b.registrado_por_id || null, registrado_por_nombre: b.registrado_por_nombre || null });
+            // Si las columnas aún no existen en Supabase, reintentar sin ellas
+            if (res.error && res.error.message && res.error.message.includes('registrado_por')) {
+                res = await dbRV.from('recaudaciones').insert(base);
+            }
             dbRV.channel('rec-data-sync').send({ type: 'broadcast', event: 'changed', payload: {} }).catch(() => {});
-            return _mockRes({ success: !error, error: error?.message });
+            return _mockRes({ success: !res.error, error: res.error?.message });
         }
 
         case 'ping':
