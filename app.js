@@ -1007,14 +1007,17 @@
 
     function initChatInput() {
         const tx   = document.getElementById('chatInput');
+        const nav  = document.getElementById('bottomNav');
+        const spc  = document.getElementById('chatSpacer');
+
+        // Siempre restaurar el spacer y el nav (puede quedar en estado roto tras logout)
+        if (spc) spc.style.height = (nav ? nav.offsetHeight || 72 : 72) + 'px';
+        if (nav) nav.style.display = '';
+
         if (!tx || tx._init) return;
         tx._init = true;
 
         const msgs = document.getElementById('chatMessages');
-        const nav  = document.getElementById('bottomNav');
-        const spc  = document.getElementById('chatSpacer');
-
-        spc.style.height = (nav ? nav.offsetHeight : 72) + 'px';
 
         function scrollEnd() {
             if (msgs) msgs.scrollTop = msgs.scrollHeight;
