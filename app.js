@@ -942,10 +942,10 @@
             if (pinnedMsg) {
                 const preview = (pinnedMsg.mensaje || pinnedMsg.nota || '').substring(0, 70);
                 const pid = pinnedMsg.uuid || pinnedMsg.fecha;
+                window._pinnedId = pid;
                 pinnedBanner.innerHTML =
                     `<span style="color:#f59e0b;font-size:18px;flex-shrink:0">📌</span>` +
-                    `<div onclick="(function(){const el=document.querySelector('[data-msg-id=\\"${pid}\\"]');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.transition='background 0.4s';el.style.background='rgba(245,158,11,0.18)';setTimeout(()=>el.style.background='',1200);}})();" ` +
-                    `style="flex:1;cursor:pointer;overflow:hidden;min-width:0">` +
+                    `<div onclick="window._goToPinned()" style="flex:1;cursor:pointer;overflow:hidden;min-width:0">` +
                     `<div style="font-size:0.68em;color:#b45309;font-weight:700;letter-spacing:0.03em">Mensaje fijado</div>` +
                     `<div style="font-size:0.82em;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${preview}</div>` +
                     `</div>`;
@@ -953,6 +953,7 @@
             } else {
                 pinnedBanner.style.display = 'none';
                 pinnedBanner.innerHTML = '';
+                window._pinnedId = null;
             }
         }
 
@@ -1196,6 +1197,19 @@
     }
 
     // ── PIN & REACTIONS (ADMIN chat) ──────────────────────────
+    window._goToPinned = () => {
+        const pid = window._pinnedId;
+        if (!pid) return;
+        const el = document.querySelector(`[data-msg-id="${pid}"]`);
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const bubble = el.querySelector('.msg-bubble') || el;
+        bubble.style.transition = 'background 0.3s';
+        const orig = bubble.style.background;
+        bubble.style.background = 'rgba(245,158,11,0.25)';
+        setTimeout(() => { bubble.style.background = orig; }, 1400);
+    };
+
     window._chatPin = async (id, pinned) => {
         // Si se va a fijar, desfijar cualquier otro primero (un solo pin a la vez)
         if (pinned) {
