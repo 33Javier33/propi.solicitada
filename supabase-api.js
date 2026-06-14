@@ -53,9 +53,29 @@ async function _sociosHandler(url, options) {
             return _mockRes({ data: mapped });
         }
 
-        // Anticipos + extras — GAS es la fuente de verdad (Supabase write en progreso)
-        case 'getAllDataDesdeSheets':
-            return _origFetch(url, options);
+        // Anticipos + extras desde Supabase (GAS escribe en Supabase en cada registro)
+        case 'getAllDataDesdeSheets': {
+            const [antRes, extRes] = await Promise.all([
+                dbSV.from('anticipos').select('socio_id, fecha, monto, responsable'),
+                dbSV.from('extras').select('socio_id, fecha, tipo, monto, detalle')
+            ]);
+            const anticipos = {};
+            for (const a of (antRes.data || [])) {
+                if (!anticipos[a.socio_id]) anticipos[a.socio_id] = [];
+                anticipos[a.socio_id].push({
+                    cantidad: Number(a.monto), monto: Number(a.monto),
+                    fecha: a.fecha, desc: 'Anticipo', responsable: a.responsable || ''
+                });
+            }
+            const extras = {};
+            for (const e of (extRes.data || [])) {
+                if (!extras[e.socio_id]) extras[e.socio_id] = [];
+                extras[e.socio_id].push({
+                    tipo: e.tipo, monto: Number(e.monto), fecha: e.fecha, detalle: e.detalle || ''
+                });
+            }
+            return _mockRes({ data: { anticipos, extras } });
+        }
 
         // Saldos anteriores { socioId: monto }
         case 'getSaldosAnteriores': {
@@ -134,9 +154,29 @@ async function _sociosHandler(url, options) {
             _origFetch(url, options).catch(() => {});
             return _mockRes({ success: true });
 
-        // Historial anticipos — GAS es la fuente de verdad (Supabase write en progreso)
-        case 'getHistorialCompletoSocio':
-            return _origFetch(url, options);
+        // Historial anticipos desde Supabase (activos + histórico)
+        case 'getHistorialCompletoSocio': {
+            const idSocio = b.idSocio || b.socioId;
+            const [actRes, histRes] = await Promise.all([
+                dbSV.from('anticipos').select('fecha, monto, responsable, periodo').eq('socio_id', String(idSocio)).order('fecha'),
+                dbSV.from('anticipos_historial').select('fecha, monto, responsable, periodo').eq('socio_id', String(idSocio)).order('fecha')
+            ]);
+            const byPeriod = {};
+            for (const a of (actRes.data || [])) {
+                const p = a.periodo || 'Activo';
+                if (!byPeriod[p]) byPeriod[p] = [];
+                byPeriod[p].push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
+            }
+            for (const a of (histRes.data || [])) {
+                const p = a.periodo || 'Histórico';
+                if (!byPeriod[p]) byPeriod[p] = [];
+                byPeriod[p].push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
+            }
+            const data = Object.entries(byPeriod)
+                .map(([periodo, registros]) => ({ periodo, registros }))
+                .sort((a, b) => String(b.periodo).localeCompare(String(a.periodo)));
+            return _mockRes({ data });
+        }
 
         case 'ping':
             return _mockRes({ ok: true });
