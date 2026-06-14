@@ -862,22 +862,26 @@
         const isScrolledToBottom=container.scrollHeight-container.clientHeight<=container.scrollTop+100;
 
         const avatarPalette=['#001723','#264b5f','#006a62','#705d00','#ba1a1a','#3f6378'];
+        const _TZ = 'America/Santiago';
+        const _clKey  = f => new Date(f).toLocaleDateString('es-CL', { timeZone: _TZ });
+        const _clLabel = f => new Date(f).toLocaleDateString('es-ES', { timeZone: _TZ, weekday: 'long', day: 'numeric', month: 'long' }).replace('.','');
+        const _clTime  = f => new Date(f).toLocaleTimeString('es-CL', { timeZone: _TZ, hour: '2-digit', minute: '2-digit', hour12: false });
         let lastDate='', html='';
         list.forEach((n, idx) => {
             const isMine=String(n.socId)===String(currentUser.ID);
             const msgContent=n.mensaje||n.nota;
             const authorName=isMine?'Yo':(n.autor||'Anónimo');
             const msgId=n.uuid||n.fecha;
-            const msgDate=cleanDateStr(n.fecha);
-            const msgTime=String(n.fecha).substring(11,16);
+            const msgDate=_clKey(n.fecha);
+            const msgTime=_clTime(n.fecha);
 
             if(msgDate!==lastDate){
                 lastDate=msgDate;
-                html+=`<div class="wa-date-sep"><span>${msgDate}</span></div>`;
+                html+=`<div class="wa-date-sep"><span>${_clLabel(n.fecha)}</span></div>`;
             }
 
             const prevN=list[idx-1];
-            const isFirstInGroup=!prevN||String(prevN.socId)!==String(n.socId)||cleanDateStr(prevN.fecha)!==msgDate;
+            const isFirstInGroup=!prevN||String(prevN.socId)!==String(n.socId)||_clKey(prevN.fecha)!==msgDate;
 
             let rowClass=isMine?'msg-row mine':'msg-row other';
             if(isFirstInGroup) rowClass+=' first-in-group';
