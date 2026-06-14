@@ -1243,11 +1243,20 @@
     window._chatReaccion = async (id, emoji) => {
         const myRx = JSON.parse(localStorage.getItem('_rec_my_reactions') || '{}');
         const alreadyReacted = myRx[id]?.[emoji];
-        await fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'toggleReaction', id, emoji, add: !alreadyReacted }) });
+        // 1. Actualizar estado local y contador en memoria — respuesta inmediata
         if (!myRx[id]) myRx[id] = {};
         if (alreadyReacted) delete myRx[id][emoji]; else myRx[id][emoji] = true;
         localStorage.setItem('_rec_my_reactions', JSON.stringify(myRx));
-        await refreshChat(false);
+        const msg = messages.admin.find(m => (m.uuid||m.fecha) === id);
+        if (msg) {
+            if (!msg.reactions) msg.reactions = {};
+            msg.reactions[emoji] = Math.max(0, (msg.reactions[emoji] || 0) + (alreadyReacted ? -1 : 1));
+            if (msg.reactions[emoji] === 0) delete msg.reactions[emoji];
+        }
+        _lastChatSignature = '';
+        renderChat(false);
+        // 2. Persistir en Supabase (funciona cuando existan las columnas)
+        fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'toggleReaction', id, emoji, add: !alreadyReacted }) }).catch(()=>{});
     };
 
     // ── MODAL HELPERS ─────────────────────────────────────────
