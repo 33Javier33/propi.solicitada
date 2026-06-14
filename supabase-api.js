@@ -175,8 +175,12 @@ async function _sociosHandler(url, options) {
                 grouped[periodo].push({ fecha: row.fecha, monto: Number(row.monto || 0), responsable: row.responsable || '' });
             };
 
+            // Primero añadir anticipos activos; luego solo los del historial que no dupliquen fecha+monto
+            const antSet = new Set((actRes.data || []).map(a => `${a.fecha}|${a.monto}`));
             for (const a of (actRes.data || []))  add(_periodoFromFecha(a.fecha), a);
-            for (const a of (histRes.data || [])) add(a.periodo || _periodoFromFecha(a.fecha), a);
+            for (const a of (histRes.data || [])) {
+                if (!antSet.has(`${a.fecha}|${a.monto}`)) add(a.periodo || _periodoFromFecha(a.fecha), a);
+            }
 
             const data = Object.entries(grouped)
                 .map(([periodo, registros]) => ({
@@ -313,11 +317,16 @@ window.addEventListener('load', () => {
         })
         .subscribe();
 
-    // Chat socios — postgres_changes (ya habilitado en Realtime)
+    let _rtAnts = null;
+    // Chat socios + anticipos — postgres_changes (ambas tablas en un solo canal)
     dbSV.channel('propi-sv-rt')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_mensajes' }, () => {
             clearTimeout(_rtChat);
             _rtChat = setTimeout(() => { if (typeof refreshChat === 'function') refreshChat(false); }, 400);
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'anticipos' }, () => {
+            clearTimeout(_rtAnts);
+            _rtAnts = setTimeout(() => { if (typeof refresh === 'function') refresh(); }, 600);
         })
         .subscribe();
 });
