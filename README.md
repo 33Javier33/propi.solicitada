@@ -355,6 +355,12 @@ git push -u origin main
 
 ### v19 — Junio 2026
 
+#### 2026-06-14 — Anticipos y extras leen desde Supabase; GAS escribe en Supabase server-side
+- **Problema raíz:** Los anticipos registrados en socios-comicion nunca llegaban a Supabase porque el interceptor browser-side fallaba silenciosamente.
+- **Solución:** `backend.gs` en socios-comicion ahora escribe en Supabase via `UrlFetchApp` (server-side) después de escribir en Sheets. Funciones afectadas: `registrarBatchAnticipos`, `registrarBatchExtras`, `borrarMovimientoGlobal`, `actualizarAnticipo`.
+- `supabase-api.js` en propi.solicitada: `getAllDataDesdeSheets` y `getHistorialCompletoSocio` ahora leen de Supabase (tablas `anticipos`, `extras`, `anticipos_historial`) en lugar de pasar a GAS.
+- Realtime listener activo para INSERT en tabla `anticipos` — actualiza la UI automáticamente cuando llega un nuevo anticipo.
+
 #### 2026-06-13 — Fix anticipos anteriores: agrupación por período en Supabase
 - **Problema:** La sección "Anticipos Anteriores" no mostraba datos.
 - **Causa:** El handler `getHistorialCompletoSocio` en `supabase-api.js` devolvía un array plano, pero `renderHistorialAnticipos` espera un array agrupado por período (`{ periodo, registros }` ).
