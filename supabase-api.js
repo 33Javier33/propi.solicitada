@@ -262,8 +262,12 @@ async function _recHandler(url, options) {
         case 'toggleReaction': {
             const { data: rd } = await dbRV.from('notas_recaudacion').select('reactions').eq('id', b.id).maybeSingle();
             const r = rd?.reactions || {};
-            if (b.add) r[b.emoji] = (r[b.emoji] || 0) + 1;
-            else { r[b.emoji] = Math.max(0, (r[b.emoji] || 0) - 1); if (r[b.emoji] === 0) delete r[b.emoji]; }
+            const arr = Array.isArray(r[b.emoji]) ? [...r[b.emoji]] : [];
+            const user = b.user || 'Admin';
+            const pos = arr.indexOf(user);
+            if (b.add && pos === -1) arr.push(user);
+            else if (!b.add && pos !== -1) arr.splice(pos, 1);
+            if (arr.length === 0) delete r[b.emoji]; else r[b.emoji] = arr;
             await dbRV.from('notas_recaudacion').update({ reactions: r }).eq('id', b.id);
             return _mockRes({ success: true });
         }

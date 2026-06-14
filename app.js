@@ -909,9 +909,11 @@
                 rxHtml = `<div style="display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap">
                     <button onclick="_chatPin('${msgId}',${!n.pinned})" style="background:none;border:none;cursor:pointer;font-size:0.85em;padding:0;opacity:0.65">${n.pinned?'📌':'📍'}</button>
                     ${EMOJIS.map(e => {
-                        const cnt = reactions[e]||0;
+                        const arr = Array.isArray(reactions[e]) ? reactions[e] : [];
+                        const cnt = arr.length;
                         const mine = myRx[msgId]?.[e];
-                        return `<button onclick="_chatReaccion('${msgId}','${e}')" style="background:${mine?'rgba(59,130,246,0.15)':'rgba(0,0,0,0.06)'};border:1px solid ${mine?'#93c5fd':'rgba(0,0,0,0.1)'};border-radius:20px;padding:1px 7px;cursor:pointer;font-size:0.78em">${e}${cnt?' '+cnt:''}</button>`;
+                        const names = arr.filter(u => u !== 'Admin').join(', ') || arr.join(', ');
+                        return `<button onclick="_chatReaccion('${msgId}','${e}')" title="${names}" style="background:${mine?'rgba(59,130,246,0.15)':'rgba(0,0,0,0.06)'};border:1px solid ${mine?'#93c5fd':'rgba(0,0,0,0.1)'};border-radius:20px;padding:1px 7px;cursor:pointer;font-size:0.78em">${e}${cnt?' '+cnt:''}</button>`;
                     }).join('')}
                 </div>`;
             }
@@ -1242,21 +1244,21 @@
     };
     window._chatReaccion = async (id, emoji) => {
         const myRx = JSON.parse(localStorage.getItem('_rec_my_reactions') || '{}');
-        const alreadyReacted = myRx[id]?.[emoji];
-        // 1. Actualizar estado local y contador en memoria — respuesta inmediata
-        if (!myRx[id]) myRx[id] = {};
-        if (alreadyReacted) delete myRx[id][emoji]; else myRx[id][emoji] = true;
-        localStorage.setItem('_rec_my_reactions', JSON.stringify(myRx));
         const msg = messages.admin.find(m => (m.uuid||m.fecha) === id);
-        if (msg) {
-            if (!msg.reactions) msg.reactions = {};
-            msg.reactions[emoji] = Math.max(0, (msg.reactions[emoji] || 0) + (alreadyReacted ? -1 : 1));
-            if (msg.reactions[emoji] === 0) delete msg.reactions[emoji];
-        }
+        if (!msg) return;
+        if (!msg.reactions) msg.reactions = {};
+        const arr = Array.isArray(msg.reactions[emoji]) ? [...msg.reactions[emoji]] : [];
+        const pos = arr.indexOf('Admin');
+        const adding = pos === -1;
+        if (adding) arr.push('Admin'); else arr.splice(pos, 1);
+        if (arr.length === 0) delete msg.reactions[emoji]; else msg.reactions[emoji] = arr;
+        // Mantener localStorage para highlight visual
+        if (!myRx[id]) myRx[id] = {};
+        if (adding) myRx[id][emoji] = true; else delete myRx[id][emoji];
+        localStorage.setItem('_rec_my_reactions', JSON.stringify(myRx));
         _lastChatSignature = '';
         renderChat(false);
-        // 2. Persistir en Supabase (funciona cuando existan las columnas)
-        fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'toggleReaction', id, emoji, add: !alreadyReacted }) }).catch(()=>{});
+        fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'toggleReaction', id, emoji, user: 'Admin', add: adding }) }).catch(()=>{});
     };
 
     // ── MODAL HELPERS ─────────────────────────────────────────
