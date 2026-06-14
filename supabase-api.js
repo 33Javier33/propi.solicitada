@@ -130,18 +130,22 @@ async function _sociosHandler(url, options) {
             return _mockRes({ success: true });
         }
 
-        // Conexión activa del socio (fire-and-forget)
+        // Conexión activa del socio — escribe en Supabase Y notifica GAS (Telegram)
         case 'pingConexion': {
             dbSV.from('historial_conexiones').insert({
                 id: crypto.randomUUID(),
                 usuario: String(b.socioId || ''),
                 area: 'app', ip: null, device_id: null
             }).then(() => {}).catch(() => {});
+            // Pasar al GAS para que envíe la notificación Telegram
+            _origFetch(url, options).catch(() => {});
             return _mockRes({ success: true });
         }
 
         // Logout (también manejado por sendBeacon)
         case 'logoutConexion':
+            // Pasar al GAS para notificación Telegram de desconexión
+            _origFetch(url, options).catch(() => {});
             return _mockRes({ success: true });
 
         // Historial completo de anticipos de un socio — agrupado por período
@@ -317,6 +321,8 @@ navigator.sendBeacon = function(url, data) {
                 }).then(() => {}).catch(() => {});
             }
         } catch(e) {}
+        // También dejar pasar al GAS para la notificación Telegram
+        _origBeacon(url, data);
         return true;
     }
     return _origBeacon(url, data);
