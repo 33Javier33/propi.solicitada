@@ -218,12 +218,15 @@ async function _recHandler(url, options) {
         // Notas del tablero ADMIN (notas_recaudacion)
         case 'getNotes': {
             const { data } = await dbRV.from('notas_recaudacion')
-                .select('*').order('created_at', { ascending: true });
+                .select('*').neq('estado', 'DELETED')
+                .order('pinned', { ascending: false })
+                .order('created_at', { ascending: true });
             const mapped = (data || []).map(m => ({
                 uuid: m.id, fecha: m.created_at,
                 autor: m.autor, socId: null,
                 mensaje: m.mensaje, nota: m.mensaje,
-                destinatario: 'ADMIN', editado: false
+                destinatario: 'ADMIN', editado: false,
+                pinned: m.pinned || false, reactions: m.reactions || {}
             }));
             return _mockRes({ data: mapped });
         }
@@ -244,6 +247,21 @@ async function _recHandler(url, options) {
 
         case 'deleteNote': {
             await dbRV.from('notas_recaudacion').delete().eq('id', b.noteId);
+            return _mockRes({ success: true });
+        }
+
+        case 'togglePin': {
+            const { error } = await dbRV.from('notas_recaudacion').update({ pinned: b.pinned }).eq('id', b.id);
+            if (error) console.error(error);
+            return _mockRes({ success: true });
+        }
+
+        case 'toggleReaction': {
+            const { data: rd } = await dbRV.from('notas_recaudacion').select('reactions').eq('id', b.id).maybeSingle();
+            const r = rd?.reactions || {};
+            if (b.add) r[b.emoji] = (r[b.emoji] || 0) + 1;
+            else { r[b.emoji] = Math.max(0, (r[b.emoji] || 0) - 1); if (r[b.emoji] === 0) delete r[b.emoji]; }
+            await dbRV.from('notas_recaudacion').update({ reactions: r }).eq('id', b.id);
             return _mockRes({ success: true });
         }
 

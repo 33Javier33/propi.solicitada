@@ -807,6 +807,7 @@
         document.getElementById('btnChatSocial').className=mode==='SOCIAL'?'wa-mode-btn active':'wa-mode-btn';
         if(mode==='SOCIAL') document.getElementById('socialBar').classList.remove('hidden');
         else document.getElementById('socialBar').classList.add('hidden');
+        if(mode==='ADMIN') localStorage.setItem('_rec_last_seen', Date.now());
         renderChat();
     }
 
@@ -882,12 +883,32 @@
             const colorIdx=authorName.charCodeAt(0)%avatarPalette.length;
             const avatarColor=avatarPalette[colorIdx];
 
+            let pinHtml = '', rxHtml = '';
+            if(currentChatMode === 'ADMIN') {
+                const myRx = JSON.parse(localStorage.getItem('_rec_my_reactions') || '{}');
+                const EMOJIS = ['👍','❤️','😂'];
+                const reactions = n.reactions || {};
+                const lastSeen = parseInt(localStorage.getItem('_rec_last_seen')) || 0;
+                const isNewMsg = lastSeen > 0 && new Date(n.fecha).getTime() > lastSeen;
+                if(n.pinned) pinHtml = '<span style="font-size:0.7em;background:#f59e0b;color:#fff;padding:1px 6px;border-radius:10px;margin-bottom:3px;display:inline-block">📌 FIJADA</span><br>';
+                if(isNewMsg) pinHtml += '<span style="font-size:0.7em;background:#3b82f6;color:#fff;padding:1px 6px;border-radius:10px;margin-bottom:3px;display:inline-block">NUEVO</span><br>';
+                rxHtml = `<div style="display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap">
+                    <button onclick="_chatPin('${msgId}',${!n.pinned})" style="background:none;border:none;cursor:pointer;font-size:0.85em;padding:0;opacity:0.65">${n.pinned?'📌':'📍'}</button>
+                    ${EMOJIS.map(e => {
+                        const cnt = reactions[e]||0;
+                        const mine = myRx[msgId]?.[e];
+                        return `<button onclick="_chatReaccion('${msgId}','${e}')" style="background:${mine?'rgba(59,130,246,0.15)':'rgba(0,0,0,0.06)'};border:1px solid ${mine?'#93c5fd':'rgba(0,0,0,0.1)'};border-radius:20px;padding:1px 7px;cursor:pointer;font-size:0.78em">${e}${cnt?' '+cnt:''}</button>`;
+                    }).join('')}
+                </div>`;
+            }
+
             html+=`
-            <div class="${rowClass}" data-msg-id="${msgId}" style="${n._sending ? 'opacity:0.75' : ''}">
+            <div class="${rowClass}" data-msg-id="${msgId}" style="${n._sending ? 'opacity:0.75' : ''}${n.pinned&&currentChatMode==='ADMIN'?' border-left:3px solid #f59e0b;':''}">
                 ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?`<div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${authorName.charAt(0).toUpperCase()}</div>`:''}</div>`:''}
                 <div class="msg-bubble ${bubbleClass}">
                     ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${authorName}</div>`:''}
-                    <div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
+                    ${pinHtml}<div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
+                    ${rxHtml}
                     <div class="wa-time">
                         <span>${msgTime}</span>
                         ${isMine
@@ -1146,6 +1167,21 @@
             console.error('Error borrando:', e);
         }
     }
+
+    // ── PIN & REACTIONS (ADMIN chat) ──────────────────────────
+    window._chatPin = async (id, pinned) => {
+        await fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'togglePin', id, pinned }) });
+        await refreshChat(true);
+    };
+    window._chatReaccion = async (id, emoji) => {
+        const myRx = JSON.parse(localStorage.getItem('_rec_my_reactions') || '{}');
+        const alreadyReacted = myRx[id]?.[emoji];
+        await fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'toggleReaction', id, emoji, add: !alreadyReacted }) });
+        if (!myRx[id]) myRx[id] = {};
+        if (alreadyReacted) delete myRx[id][emoji]; else myRx[id][emoji] = true;
+        localStorage.setItem('_rec_my_reactions', JSON.stringify(myRx));
+        await refreshChat(true);
+    };
 
     // ── MODAL HELPERS ─────────────────────────────────────────
     function toggleModal(id, show) {
