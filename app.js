@@ -282,10 +282,13 @@
     window.addEventListener('pagehide', () => { if (currentUser) logoutConexion(); });
 
     // ── PERFIL DEL SOCIO ─────────────────────────────────────
+    // Parsear fecha YYYY-MM-DD como fecha LOCAL (evita UTC midnight = día anterior en Chile)
+    const _parseLocalDate = s => { const [y,m,d] = String(s).substring(0,10).split('-').map(Number); return new Date(y, m-1, d); };
+
     function renderPerfil() {
         if (!currentUser) return;
         const nombre = getDisplayName();
-        const dIng = new Date(currentUser.FechaIngreso);
+        const dIng = _parseLocalDate(currentUser.FechaIngreso);
         const hoy = new Date();
         let anos = hoy.getFullYear() - dIng.getFullYear();
         if (hoy.getMonth() < dIng.getMonth() || (hoy.getMonth() === dIng.getMonth() && hoy.getDate() < dIng.getDate())) anos--;
@@ -539,7 +542,7 @@
                 mapVP[f].totalVP+=(m/d); mapVP[f].montoReal+=m;
             });
 
-            const dIng=new Date(currentUser.FechaIngreso), hoy=new Date();
+            const dIng=_parseLocalDate(currentUser.FechaIngreso), hoy=new Date();
             let anos=hoy.getFullYear()-dIng.getFullYear();
             if(hoy.getMonth()<dIng.getMonth()||(hoy.getMonth()===dIng.getMonth()&&hoy.getDate()<dIng.getDate())) anos--;
             const areaN=String(currentUser.Area||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -1622,7 +1625,7 @@
         const periodoStr = fmtFecha(inicio) + ' AL ' + fmtFecha(fin);
 
         // Próximo aumento de puntos
-        const dIng = new Date(u.FechaIngreso);
+        const dIng = _parseLocalDate(u.FechaIngreso);
         const proxAnio = new Date(dIng);
         proxAnio.setFullYear(hoy.getFullYear() + (hoy >= new Date(hoy.getFullYear(), dIng.getMonth(), dIng.getDate()) ? 1 : 0));
         const proxAumentoStr = proxAnio.toLocaleDateString('es-CL', {day:'2-digit', month:'short'}).toUpperCase();
@@ -1678,7 +1681,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     <div class='row'><label>NOMBRE</label><strong>${(u.Nombre+' '+u.Apellido).toUpperCase()}</strong></div>
     <div class='row'><label>ÁREA</label><span>${u.Area.toUpperCase()}</span></div>
     <div class='row'><label>CONTRATO</label><span>${u.TipoContrato.toUpperCase()}</span></div>
-    <div class='row'><label>AÑO INGRESO</label><span>${new Date(u.FechaIngreso).getFullYear()}</span></div>
+    <div class='row'><label>AÑO INGRESO</label><span>${_parseLocalDate(u.FechaIngreso).getFullYear()}</span></div>
     <div class='row'><label>PUNTOS</label><span>${b.pts}</span></div>
     <div class='row'><label>SUBE PUNTOS</label><span>${proxAumentoStr}</span></div>
     <div class='divider'></div>
