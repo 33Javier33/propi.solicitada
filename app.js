@@ -840,10 +840,15 @@
 
         // Firma del contenido — si no cambió nada, no tocar el DOM
         const signature = list.map(n =>
-            (n.uuid||n.fecha) + '|' + (n._sending?'s':n._failed?'f':'ok')
+            (n.uuid||n.fecha) + '|' + (n._sending?'s':n._failed?'f':'ok') + (n.pinned?'p':'')
         ).join(',');
         if (signature === _lastChatSignature && !forceScroll) return;
         _lastChatSignature = signature;
+
+        // En modo ADMIN: pinned messages al tope
+        if (currentChatMode === 'ADMIN') {
+            list = [...list].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+        }
 
         if(list.length===0){
             container.innerHTML=`
@@ -929,6 +934,28 @@
         });
 
         container.innerHTML=html;
+
+        // Banner estilo WhatsApp para mensaje fijado (solo modo ADMIN)
+        const pinnedBanner = document.getElementById('pinnedBanner');
+        if (pinnedBanner) {
+            const pinnedMsg = currentChatMode === 'ADMIN' ? list.find(n => n.pinned) : null;
+            if (pinnedMsg) {
+                const preview = (pinnedMsg.mensaje || pinnedMsg.nota || '').substring(0, 70);
+                const pid = pinnedMsg.uuid || pinnedMsg.fecha;
+                pinnedBanner.innerHTML =
+                    `<span style="color:#f59e0b;font-size:18px;flex-shrink:0">📌</span>` +
+                    `<div onclick="(function(){const el=document.querySelector('[data-msg-id=\\"${pid}\\"]');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.transition='background 0.4s';el.style.background='rgba(245,158,11,0.18)';setTimeout(()=>el.style.background='',1200);}})();" ` +
+                    `style="flex:1;cursor:pointer;overflow:hidden;min-width:0">` +
+                    `<div style="font-size:0.68em;color:#b45309;font-weight:700;letter-spacing:0.03em">Mensaje fijado</div>` +
+                    `<div style="font-size:0.82em;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${preview}</div>` +
+                    `</div>`;
+                pinnedBanner.style.display = 'flex';
+            } else {
+                pinnedBanner.style.display = 'none';
+                pinnedBanner.innerHTML = '';
+            }
+        }
+
         if(forceScroll || isScrolledToBottom || container.scrollTop===0){
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
@@ -1170,8 +1197,22 @@
 
     // ── PIN & REACTIONS (ADMIN chat) ──────────────────────────
     window._chatPin = async (id, pinned) => {
+        // Si se va a fijar, desfijar cualquier otro primero (un solo pin a la vez)
+        if (pinned) {
+            const others = messages.admin.filter(m => m.pinned && (m.uuid||m.fecha) !== id);
+            for (const o of others) {
+                const oid = o.uuid || o.fecha;
+                await fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'togglePin', id: oid, pinned: false }) });
+                o.pinned = false;
+            }
+        }
+        // Actualizar localmente para respuesta inmediata
+        const msg = messages.admin.find(m => (m.uuid||m.fecha) === id);
+        if (msg) msg.pinned = pinned;
+        _lastChatSignature = '';
+        renderChat(false);
+        // Sincronizar con Supabase
         await fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'togglePin', id, pinned }) });
-        await refreshChat(true);
     };
     window._chatReaccion = async (id, emoji) => {
         const myRx = JSON.parse(localStorage.getItem('_rec_my_reactions') || '{}');
