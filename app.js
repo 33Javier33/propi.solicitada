@@ -1263,6 +1263,67 @@
         fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'toggleReaction', id, emoji, user: meId, add: adding }) }).catch(()=>{});
     };
 
+    // ── INGRESAR RECAUDACION ──────────────────────────────────
+    let _recTipoSelected = 'TarjetaMDA';
+
+    window.selRecTipo = (tipo) => {
+        _recTipoSelected = tipo;
+        document.querySelectorAll('.rec-tipo-btn').forEach(b => {
+            if (b.dataset.tipo === tipo) b.classList.add('active');
+            else b.classList.remove('active');
+        });
+    };
+
+    window.abrirModalRec = () => {
+        if (!currentUser) return;
+        document.getElementById('recFecha').value = new Date().toISOString().split('T')[0];
+        document.getElementById('recMonto').value = '';
+        selRecTipo('TarjetaMDA');
+        document.getElementById('modalRecaudacion').style.display = 'flex';
+    };
+
+    window.cerrarModalRec = () => {
+        document.getElementById('modalRecaudacion').style.display = 'none';
+    };
+
+    window.fmtRecMonto = (inp) => {
+        const v = inp.value.replace(/\D/g, '');
+        inp.value = v ? '$' + parseInt(v).toLocaleString('es-ES') : '';
+    };
+
+    window.enviarRec = async () => {
+        if (!currentUser) return;
+        if (!_recTipoSelected) return showToast('Selecciona una categoría', 'error');
+        const fecha = document.getElementById('recFecha').value;
+        const monto = parseInt((document.getElementById('recMonto').value || '').replace(/\D/g, '')) || 0;
+        if (!fecha) return showToast('Selecciona una fecha', 'error');
+        if (!monto) return showToast('Ingresa un monto válido', 'error');
+        const btn = document.getElementById('btnEnviarRec');
+        btn.disabled = true; btn.textContent = 'Registrando...';
+        try {
+            const res = await fetch(SCRIPT_URL_RECAUDACIONES, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'addRecaudacion',
+                    tipo: _recTipoSelected,
+                    fecha,
+                    monto,
+                    registrado_por_id: String(currentUser.ID),
+                    registrado_por_nombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim()
+                })
+            });
+            const json = await res.json();
+            if (json.success) {
+                showToast('Recaudación registrada ✓', 'success');
+                cerrarModalRec();
+            } else {
+                showToast('Error: ' + (json.error || 'No se pudo guardar'), 'error');
+            }
+        } catch(e) { showToast('Error al registrar', 'error'); }
+        finally { btn.disabled = false; btn.textContent = 'Registrar Recaudación'; }
+    };
+
     // ── MODAL HELPERS ─────────────────────────────────────────
     function toggleModal(id, show) {
         const m=document.getElementById(id);

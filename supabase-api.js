@@ -272,6 +272,20 @@ async function _recHandler(url, options) {
             return _mockRes({ success: true });
         }
 
+        case 'addRecaudacion': {
+            const { error } = await dbRV.from('recaudaciones').insert({
+                id: crypto.randomUUID(),
+                fecha: b.fecha,
+                tipo: b.tipo || 'Sin Tipo',
+                monto: Number(b.monto) || 0,
+                registrado_por_id: b.registrado_por_id || null,
+                registrado_por_nombre: b.registrado_por_nombre || null
+            });
+            // Notificar a diario.propi y socios-comicion
+            dbRV.channel('rec-data-sync').send({ type: 'broadcast', event: 'changed', payload: {} }).catch(() => {});
+            return _mockRes({ success: !error, error: error?.message });
+        }
+
         case 'ping':
             return _mockRes({ ok: true });
 
