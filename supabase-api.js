@@ -218,9 +218,7 @@ async function _recHandler(url, options) {
         // Notas del tablero ADMIN (notas_recaudacion)
         case 'getNotes': {
             const { data } = await dbRV.from('notas_recaudacion')
-                .select('*').neq('estado', 'DELETED')
-                .order('pinned', { ascending: false })
-                .order('created_at', { ascending: true });
+                .select('*').order('created_at', { ascending: true });
             const mapped = (data || []).map(m => ({
                 uuid: m.id, fecha: m.created_at,
                 autor: m.autor, socId: null,
@@ -228,6 +226,7 @@ async function _recHandler(url, options) {
                 destinatario: 'ADMIN', editado: false,
                 pinned: m.pinned || false, reactions: m.reactions || {}
             }));
+            mapped.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
             return _mockRes({ data: mapped });
         }
 
