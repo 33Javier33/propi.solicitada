@@ -906,13 +906,14 @@
                 const isNewMsg = lastSeen > 0 && new Date(n.fecha).getTime() > lastSeen;
                 if(n.pinned) pinHtml = '<span style="font-size:0.7em;background:#f59e0b;color:#fff;padding:1px 6px;border-radius:10px;margin-bottom:3px;display:inline-block">📌 FIJADA</span><br>';
                 if(isNewMsg) pinHtml += '<span style="font-size:0.7em;background:#3b82f6;color:#fff;padding:1px 6px;border-radius:10px;margin-bottom:3px;display:inline-block">NUEVO</span><br>';
+                const meIdRx = currentUser ? (currentUser.Nombre + ' ' + currentUser.Apellido).trim() : '';
                 rxHtml = `<div style="display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap">
                     <button onclick="_chatPin('${msgId}',${!n.pinned})" style="background:none;border:none;cursor:pointer;font-size:0.85em;padding:0;opacity:0.65">${n.pinned?'📌':'📍'}</button>
                     ${EMOJIS.map(e => {
                         const arr = Array.isArray(reactions[e]) ? reactions[e] : [];
                         const cnt = arr.length;
-                        const mine = myRx[msgId]?.[e];
-                        const names = arr.filter(u => u !== 'Admin').join(', ') || arr.join(', ');
+                        const mine = meIdRx ? arr.includes(meIdRx) : myRx[msgId]?.[e];
+                        const names = arr.join(', ');
                         return `<button onclick="_chatReaccion('${msgId}','${e}')" title="${names}" style="background:${mine?'rgba(59,130,246,0.15)':'rgba(0,0,0,0.06)'};border:1px solid ${mine?'#93c5fd':'rgba(0,0,0,0.1)'};border-radius:20px;padding:1px 7px;cursor:pointer;font-size:0.78em">${e}${cnt?' '+cnt:''}</button>`;
                     }).join('')}
                 </div>`;
@@ -1244,13 +1245,14 @@
     };
     window._chatReaccion = async (id, emoji) => {
         const myRx = JSON.parse(localStorage.getItem('_rec_my_reactions') || '{}');
+        const meId = currentUser ? (currentUser.Nombre + ' ' + currentUser.Apellido).trim() : 'Socio';
         const msg = messages.admin.find(m => (m.uuid||m.fecha) === id);
         if (!msg) return;
         if (!msg.reactions) msg.reactions = {};
         const arr = Array.isArray(msg.reactions[emoji]) ? [...msg.reactions[emoji]] : [];
-        const pos = arr.indexOf('Admin');
+        const pos = arr.indexOf(meId);
         const adding = pos === -1;
-        if (adding) arr.push('Admin'); else arr.splice(pos, 1);
+        if (adding) arr.push(meId); else arr.splice(pos, 1);
         if (arr.length === 0) delete msg.reactions[emoji]; else msg.reactions[emoji] = arr;
         // Mantener localStorage para highlight visual
         if (!myRx[id]) myRx[id] = {};
@@ -1258,7 +1260,7 @@
         localStorage.setItem('_rec_my_reactions', JSON.stringify(myRx));
         _lastChatSignature = '';
         renderChat(false);
-        fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'toggleReaction', id, emoji, user: 'Admin', add: adding }) }).catch(()=>{});
+        fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'toggleReaction', id, emoji, user: meId, add: adding }) }).catch(()=>{});
     };
 
     // ── MODAL HELPERS ─────────────────────────────────────────
