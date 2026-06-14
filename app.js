@@ -367,7 +367,9 @@
 
     // ── SKELETON LOADERS ──────────────────────────────────────
     function showSkeletons() {
-        document.getElementById('montoRecibirLabel').innerHTML =
+        const _mrl = document.getElementById('montoRecibirLabel');
+        _mrl.removeAttribute('data-value'); // forzar re-render aunque el valor sea el mismo
+        _mrl.innerHTML =
             '<div class="skeleton h-9 w-36 rounded-xl" style="background:linear-gradient(90deg,rgba(255,255,255,0.15) 25%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0.15) 75%);background-size:600px 100%;animation:shimmer 1.6s infinite linear;border-radius:10px;"></div>';
         document.getElementById('detallesContables').innerHTML = [1,2,3].map(()=>`
             <div class="flex justify-between items-center px-5 py-4">
