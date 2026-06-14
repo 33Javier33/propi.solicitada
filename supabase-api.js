@@ -302,7 +302,7 @@ window.addEventListener('load', () => {
     dbSV.channel('propi-sv-rt')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_mensajes' }, () => {
             clearTimeout(_rtChat);
-            _rtChat = setTimeout(() => { if (typeof refreshChat === 'function') refreshChat(true); }, 400);
+            _rtChat = setTimeout(() => { if (typeof refreshChat === 'function') refreshChat(false); }, 400);
         })
         .subscribe();
 });

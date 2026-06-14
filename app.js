@@ -523,7 +523,7 @@
             ]).then(async ([adminNotesRes, socialNotesRes]) => {
                 messages.admin = (await adminNotesRes.json()).data || [];
                 try { messages.social = (await socialNotesRes.json()).data || []; } catch(e){ messages.social=[]; }
-                renderChat();
+                renderChat(false);
                 checkNotifications();
             }).catch(e => console.error('Error cargando notas:', e));
 
@@ -1235,7 +1235,7 @@
         if (!myRx[id]) myRx[id] = {};
         if (alreadyReacted) delete myRx[id][emoji]; else myRx[id][emoji] = true;
         localStorage.setItem('_rec_my_reactions', JSON.stringify(myRx));
-        await refreshChat(true);
+        await refreshChat(false);
     };
 
     // ── MODAL HELPERS ─────────────────────────────────────────
