@@ -290,7 +290,8 @@
         anos = Math.max(0, anos);
         const areaN = String(currentUser.Area || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         const ptsFormula = Math.min(4 + (anos * 2), (areaN.includes('mesa') ? 20 : areaN.includes('cambist') ? 8 : areaN.includes('boveda') ? 10 : 12));
-        const pts = (currentUser.Puntos !== undefined && currentUser.Puntos !== null && currentUser.Puntos !== '') ? Number(currentUser.Puntos) : ptsFormula;
+        const ptsSB = Number(currentUser.Puntos);
+        const pts = (Number.isFinite(ptsSB) && ptsSB > 0) ? ptsSB : ptsFormula;
 
         document.getElementById('perfilLetra').textContent = nombre.charAt(0).toUpperCase();
         document.getElementById('perfilNombre').textContent = nombre;
@@ -542,7 +543,9 @@
             let anos=hoy.getFullYear()-dIng.getFullYear();
             if(hoy.getMonth()<dIng.getMonth()||(hoy.getMonth()===dIng.getMonth()&&hoy.getDate()<dIng.getDate())) anos--;
             const areaN=String(currentUser.Area||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-            const pts=Math.min(4+(Math.max(0,anos)*2),(areaN.includes('mesa')?20:areaN.includes('cambist')?8:areaN.includes('boveda')?10:12));
+            const ptsF=Math.min(4+(Math.max(0,anos)*2),(areaN.includes('mesa')?20:areaN.includes('cambist')?8:areaN.includes('boveda')?10:12));
+            const ptsSBb=Number(currentUser.Puntos);
+            const pts=(Number.isFinite(ptsSBb)&&ptsSBb>0)?ptsSBb:ptsF;
 
             let puntoGlobalTotal=0;
             const esPT=String(currentUser.TipoContrato).toLowerCase().includes('part');
