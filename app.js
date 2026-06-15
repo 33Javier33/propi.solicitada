@@ -227,53 +227,48 @@
         navigator.sendBeacon(SCRIPT_URL_SOCIOS, blob);
     }
 
-    // ── INACTIVIDAD (15 min acumulados solo en primer plano) ──
-    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos en segundo plano
-    let backgroundStart = null; // momento en que la app se fue a segundo plano
+    // ── INACTIVIDAD (15 min sin interacción — primer y segundo plano) ──
+    // Usa timestamp en localStorage: funciona aunque el SO pause los timers en móvil.
+    const INACTIVITY_LIMIT = 15 * 60 * 1000;
+    const _INACT_KEY = 'propi_last_active';
     let inactivityTimer = null;
 
-    function resetInactivity() {
-        // Se llama cuando el usuario vuelve a la app — cancela el conteo
-        backgroundStart = null;
-        if (inactivityTimer) {
-            clearInterval(inactivityTimer);
-            inactivityTimer = null;
+    function _updateLastActive() {
+        try { localStorage.setItem(_INACT_KEY, String(Date.now())); } catch(e) {}
+    }
+
+    function _checkInactivity() {
+        if (!currentUser) return;
+        const last = Number(localStorage.getItem(_INACT_KEY) || 0);
+        if (last && (Date.now() - last) >= INACTIVITY_LIMIT) {
+            if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
+            showToast('Sesión cerrada por inactividad (15 min)', 'warning');
+            setTimeout(logout, 1200);
         }
     }
 
     function startInactivityClock() {
-        // No hace nada al iniciar — el conteo empieza solo cuando la app se oculta
+        _updateLastActive();
+        // Verificar cada 60 s — detecta inactividad en primer plano
+        inactivityTimer = setInterval(_checkInactivity, 60 * 1000);
+        // Resetear timestamp en cada interacción del usuario
+        ['click', 'touchstart', 'keydown', 'scroll'].forEach(ev =>
+            document.addEventListener(ev, _updateLastActive, { passive: true })
+        );
     }
 
-    function pauseInactivityClock() {
-        // Compatibilidad — no usado en la nueva lógica
-    }
-
-    function resumeInactivityClock() {
-        // Compatibilidad — no usado en la nueva lógica
-    }
+    function resetInactivity() { _updateLastActive(); }
+    function pauseInactivityClock() {}
+    function resumeInactivityClock() {}
 
     document.addEventListener('visibilitychange', () => {
         if (!currentUser) return;
-
         if (document.visibilityState === 'hidden') {
-            // App va a segundo plano → guardar momento y arrancar el temporizador
             logoutConexion();
-            backgroundStart = Date.now();
-            inactivityTimer = setTimeout(() => {
-                // Pasaron 15 min en segundo plano → cerrar sesión
-                logout();
-            }, INACTIVITY_LIMIT);
-
         } else {
-            // Usuario vuelve a la app → resetear todo
+            // Al volver a la app: verificar si ya pasaron 15 min desde la última interacción
             pingConexion();
-            if (inactivityTimer) {
-                clearTimeout(inactivityTimer);
-                inactivityTimer = null;
-            }
-            backgroundStart = null;
-            // Refrescar datos al volver
+            _checkInactivity();
             if (currentUser) refresh(false);
         }
     });
@@ -1579,9 +1574,8 @@
     }
 
     function logout() {
-        // Detener reloj de inactividad
         if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
-        inactivityAccum = 0; inactivityStart = null;
+        try { localStorage.removeItem(_INACT_KEY); } catch(e) {}
         currentUser = null;
         document.getElementById('appContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('flex');
