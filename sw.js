@@ -1,9 +1,10 @@
-const CACHE_NAME = 'boveda-personal-v9';
+const CACHE_NAME = 'boveda-personal-v10';
 
 const urlsToCache = [
     'index.html',
     'app.css',
     'app.js',
+    'supabase-api.js',
     'manifest.json',
     'img/icon-192x192.png',
     'img/icon-512x512.png'

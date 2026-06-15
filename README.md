@@ -355,6 +355,11 @@ git push -u origin main
 
 ### v19 — Junio 2026
 
+#### 2026-06-15 — Service Worker v10 + supabase-api.js en caché
+- SW actualizado a `boveda-personal-v10`.
+- `supabase-api.js` agregado a la lista de precaché del SW (era el único archivo clave sin cobertura offline).
+- CLAUDE.md actualizado para reflejar versión actual del SW.
+
 #### 2026-06-14 — Anticipos y extras leen desde Supabase; GAS escribe en Supabase server-side
 - **Problema raíz:** Los anticipos registrados en socios-comicion nunca llegaban a Supabase porque el interceptor browser-side fallaba silenciosamente.
 - **Solución:** `backend.gs` en socios-comicion ahora escribe en Supabase via `UrlFetchApp` (server-side) después de escribir en Sheets. Funciones afectadas: `registrarBatchAnticipos`, `registrarBatchExtras`, `borrarMovimientoGlobal`, `actualizarAnticipo`.

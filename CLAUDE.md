@@ -52,8 +52,8 @@
 
 ### Comportamiento del Service Worker
 
-- Versión actual: `boveda-personal-v6`
-- Archivos cacheados: `index.html`, `app.css`, `app.js`, `manifest.json`, iconos
+- Versión actual: `boveda-personal-v10`
+- Archivos cacheados: `index.html`, `app.css`, `app.js`, `supabase-api.js`, `manifest.json`, iconos
 - Estrategia: network-first para archivos propios; GAS siempre por red
 - Al cambiar archivos del front → incrementar versión en `sw.js`
 
