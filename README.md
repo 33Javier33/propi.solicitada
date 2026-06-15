@@ -47,7 +47,7 @@ PWA (Progressive Web App) para socios del Fondo Solidario de Propina del Casino 
 │  PWA instalada (standalone, portrait)                │
 │  ┌──────────────────────────────────────────────┐   │
 │  │  index.html  →  app.css  +  app.js           │   │
-│  │  Service Worker (sw.js) — cache v7           │   │
+│  │  Service Worker (sw.js) — cache v12          │   │
 │  └────────────────┬─────────────────────────────┘   │
 └───────────────────┼─────────────────────────────────┘
                     │ fetch (interceptado por supabase-api.js)
@@ -78,7 +78,7 @@ propi.solicitada/
 ├── supabase-api.js     # Interceptor fetch → Supabase (nuevo)
 ├── originalindex.html  # Copia completa en un solo archivo (auto-generada)
 ├── build.sh            # Script que reconstruye originalindex.html
-├── sw.js               # Service Worker — caché v7, network-first
+├── sw.js               # Service Worker — caché v12, network-first
 ├── manifest.json       # Manifiesto PWA
 ├── vercel.json         # Cabeceras HTTP para despliegue en Vercel
 ├── gas/
@@ -271,7 +271,7 @@ El bot de Telegram se gestiona enteramente en `gas/code.gs`:
 
 ## Service Worker y Caché PWA
 
-**Archivo:** `sw.js` — versión `boveda-personal-v7`
+**Archivo:** `sw.js` — versión `boveda-personal-v12`
 
 **Estrategia:**
 - Archivos propios (`index.html`, `app.css`, `app.js`, `manifest.json`, imágenes) → **Network-first** (siempre intenta red, fallback a caché)
@@ -336,7 +336,7 @@ Para ejecutar manualmente:
 
 Cada vez que se publican cambios en archivos del front-end, incrementar el número de versión en `sw.js`:
 ```javascript
-const CACHE_NAME = 'boveda-personal-v8'; // ← incrementar
+const CACHE_NAME = 'boveda-personal-v12'; // ← incrementar
 ```
 
 ### Commit y push
