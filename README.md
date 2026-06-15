@@ -271,7 +271,7 @@ El bot de Telegram se gestiona enteramente en `gas/code.gs`:
 
 ## Service Worker y Caché PWA
 
-**Archivo:** `sw.js` — versión `boveda-personal-v12`
+**Archivo:** `sw.js` — versión `boveda-personal-v13`
 
 **Estrategia:**
 - Archivos propios (`index.html`, `app.css`, `app.js`, `manifest.json`, imágenes) → **Network-first** (siempre intenta red, fallback a caché)
@@ -336,7 +336,7 @@ Para ejecutar manualmente:
 
 Cada vez que se publican cambios en archivos del front-end, incrementar el número de versión en `sw.js`:
 ```javascript
-const CACHE_NAME = 'boveda-personal-v12'; // ← incrementar
+const CACHE_NAME = 'boveda-personal-v13'; // ← incrementar
 ```
 
 ### Commit y push
@@ -355,10 +355,15 @@ git push -u origin main
 
 ### v19 — Junio 2026
 
+#### 2026-06-15 — Perfil muestra puntos desde Supabase, no recalculados por fórmula
+- Bug: el perfil calculaba `pts = 4 + (años × 2)` localmente, ignorando `currentUser.Puntos` de Supabase.
+- Fix: usa `currentUser.Puntos` si está definido; solo cae a fórmula si el campo viene vacío (socios sin dato en Supabase).
+- SW actualizado a `boveda-personal-v13`.
+
 #### 2026-06-15 — Cierre por inactividad corregido (primer y segundo plano)
 - Bug: el timer solo se activaba al ir al segundo plano; si la app quedaba abierta e inactiva en primer plano nunca cerraba.
 - Fix: reemplazado por sistema de timestamp en localStorage (`propi_last_active`), actualizado en cada click/touch/scroll/key. Un `setInterval` de 60 s verifica si pasaron 15 min desde la última interacción → cierra sesión. Al volver de segundo plano también verifica inmediatamente.
-- SW actualizado a `boveda-personal-v12`.
+- SW actualizado a `boveda-personal-v13`.
 
 #### 2026-06-15 — Estadísticas muestran período anterior si el actual está vacío
 - `getActivePeriodo(mapVP)`: nuevo helper que detecta si el período actual (15→14) tiene datos; si no, usa el período anterior.

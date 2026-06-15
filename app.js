@@ -289,7 +289,8 @@
         if (hoy.getMonth() < dIng.getMonth() || (hoy.getMonth() === dIng.getMonth() && hoy.getDate() < dIng.getDate())) anos--;
         anos = Math.max(0, anos);
         const areaN = String(currentUser.Area || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-        const pts = Math.min(4 + (anos * 2), (areaN.includes('mesa') ? 20 : areaN.includes('cambist') ? 8 : areaN.includes('boveda') ? 10 : 12));
+        const ptsFormula = Math.min(4 + (anos * 2), (areaN.includes('mesa') ? 20 : areaN.includes('cambist') ? 8 : areaN.includes('boveda') ? 10 : 12));
+        const pts = (currentUser.Puntos !== undefined && currentUser.Puntos !== null && currentUser.Puntos !== '') ? Number(currentUser.Puntos) : ptsFormula;
 
         document.getElementById('perfilLetra').textContent = nombre.charAt(0).toUpperCase();
         document.getElementById('perfilNombre').textContent = nombre;
