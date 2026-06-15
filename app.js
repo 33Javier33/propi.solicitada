@@ -1839,6 +1839,22 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         return { inicio, fin };
     }
 
+    // Si el período actual no tiene datos, retrocede al período anterior
+    function getActivePeriodo(mapVP) {
+        const { inicio, fin } = getPeriodo();
+        const hoyReal = new Date(); hoyReal.setHours(0,0,0,0);
+        if (!mapVP || Object.keys(mapVP).length === 0) return { inicio, fin, hoy: hoyReal };
+        const hayDatos = Object.keys(mapVP).some(f => {
+            const fd = new Date(f + 'T12:00:00');
+            return fd >= inicio && fd <= fin;
+        });
+        if (hayDatos) return { inicio, fin, hoy: hoyReal };
+        // Período anterior
+        const pInicio = new Date(inicio.getFullYear(), inicio.getMonth() - 1, 15);
+        const pFin    = new Date(fin.getFullYear(),   fin.getMonth() - 1,   14);
+        return { inicio: pInicio, fin: pFin, hoy: new Date(pFin) };
+    }
+
     function toDateStr(d) {
         return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
@@ -1848,13 +1864,15 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         statsMapVP = mapVP;
         statsPts   = pts;
 
-        const { inicio, fin } = getPeriodo();
-        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const { inicio, fin, hoy } = getActivePeriodo(mapVP);
 
         // Etiqueta del período
         const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        const { inicio: inicioCal } = getPeriodo();
+        const esPeriodoAnterior = inicio < inicioCal;
         document.getElementById('stats-periodo-label').textContent =
-            `${inicio.getDate()} ${meses[inicio.getMonth()]} → ${fin.getDate()} ${meses[fin.getMonth()]} ${fin.getFullYear()}`;
+            `${inicio.getDate()} ${meses[inicio.getMonth()]} → ${fin.getDate()} ${meses[fin.getMonth()]} ${fin.getFullYear()}` +
+            (esPeriodoAnterior ? ' (período cerrado)' : '');
 
         // Construir array de TODOS los días del período
         const diasPeriodo = [];
@@ -1923,8 +1941,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         const canvas = document.getElementById('statsChart');
         if (!canvas || !currentUser) return;
         const ctx = canvas.getContext('2d');
-        const { inicio, fin } = getPeriodo();
-        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const { inicio, fin, hoy } = getActivePeriodo(statsMapVP);
         const pts = statsPts;
 
         // Construir datos según vista
@@ -2099,8 +2116,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     function renderStatsTable() {
         const container = document.getElementById('stats-table');
         if (!container) return;
-        const { inicio, fin } = getPeriodo();
-        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const { inicio, fin, hoy } = getActivePeriodo(statsMapVP);
         const pts = statsPts;
         const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 

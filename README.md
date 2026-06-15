@@ -355,6 +355,12 @@ git push -u origin main
 
 ### v19 — Junio 2026
 
+#### 2026-06-15 — Estadísticas muestran período anterior si el actual está vacío
+- `getActivePeriodo(mapVP)`: nuevo helper que detecta si el período actual (15→14) tiene datos; si no, usa el período anterior.
+- `renderStats`, `renderStatsChart`, `renderStatsTable`: todas usan `getActivePeriodo` en lugar de `getPeriodo` directo.
+- La etiqueta del período muestra "(período cerrado)" cuando se está mostrando datos históricos.
+- SW actualizado a `boveda-personal-v11`.
+
 #### 2026-06-15 — Service Worker v10 + supabase-api.js en caché
 - SW actualizado a `boveda-personal-v10`.
 - `supabase-api.js` agregado a la lista de precaché del SW (era el único archivo clave sin cobertura offline).
