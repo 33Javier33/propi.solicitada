@@ -77,13 +77,37 @@ async function _sociosHandler(url, options) {
             return _mockRes({ data: { anticipos, extras } });
         }
 
-        // Saldos anteriores — leer desde GAS (misma fuente que socios-comicion)
-        case 'getSaldosAnteriores':
-            return _origFetch(url, options);
+        // Saldos anteriores — caché local, GAS en background para mantener sincronía
+        case 'getSaldosAnteriores': {
+            const CK = 'propi_cache_saldos_ant', TTL = 24 * 60 * 60 * 1000;
+            let cached = null;
+            try { const c = JSON.parse(localStorage.getItem(CK) || 'null'); if (c && Date.now() - c.ts < TTL) cached = c.d; } catch(e) {}
+            // Siempre refrescar desde GAS en background
+            _origFetch(url, options).then(r => r.json()).then(d => {
+                try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
+            }).catch(() => {});
+            if (cached) return _mockRes(cached);
+            // Sin caché: esperar GAS
+            const res = await _origFetch(url, options);
+            const d = await res.json();
+            try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
+            return _mockRes(d);
+        }
 
-        // Saldo de cierre — leer desde GAS (misma fuente que socios-comicion)
-        case 'getSaldosCierre':
-            return _origFetch(url, options);
+        // Saldo de cierre — caché local, GAS en background
+        case 'getSaldosCierre': {
+            const CK = 'propi_cache_saldos_cierre', TTL = 24 * 60 * 60 * 1000;
+            let cached = null;
+            try { const c = JSON.parse(localStorage.getItem(CK) || 'null'); if (c && Date.now() - c.ts < TTL) cached = c.d; } catch(e) {}
+            _origFetch(url, options).then(r => r.json()).then(d => {
+                try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
+            }).catch(() => {});
+            if (cached) return _mockRes(cached);
+            const res = await _origFetch(url, options);
+            const d = await res.json();
+            try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
+            return _mockRes(d);
+        }
 
         // Días trabajados Part-Time: { socioId: [fecha1, fecha2, ...] }
         case 'getDiasPartTime': {

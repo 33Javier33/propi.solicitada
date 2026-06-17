@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-17 — Saldo Anterior: caché local + GAS en background (SW v15)
+- Fix de rendimiento: getSaldosAnteriores y getSaldosCierre ahora usan caché localStorage (TTL 24h).
+- Primera carga: espera el GAS una sola vez. Cargas siguientes: instantáneas desde caché.
+- El GAS se refresca en background en cada visita para mantener el dato actualizado.
+- SW actualizado a v15 para distribuir el nuevo supabase-api.js.
+
 #### 2026-06-17 — Saldo Anterior sincronizado con socios-comicion
 - Bug: `getSaldosAnteriores` leía de Supabase (`saldos_socio`) que podía estar desactualizado; `getSaldosCierre` retornaba vacío.
 - Fix: ambas acciones ahora pasan directamente al GAS real (misma fuente que socios-comicion), que lee las hojas "SaldosAnteriores" + "SaldosCierreMes".
