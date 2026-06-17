@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-17 — Historial anticipos: GAS único para archivados, elimina duplicados (SW v19)
+- Bug: combinar GAS + Supabase duplicaba meses porque GAS usa "MAYO_2026" y Supabase "MAYO 2026".
+- Fix: histórico archivado viene solo del GAS (cacheado 1h); Supabase solo provee anticipos activos del mes actual.
+- Una sola fuente por tipo de dato → sin conflictos de naming ni duplicados.
+- SW v19.
+
 #### 2026-06-17 — Historial anticipos: combinar Supabase + GAS para cubrir meses faltantes (SW v18)
 - Bug: Supabase solo tenía meses migrados inicialmente; meses posteriores estaban solo en Sheets.
 - El fallback a GAS solo activaba si data.length === 0, así que meses parcialmente migrados quedaban incompletos.
