@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-17 — Anticipos Anteriores: historial desde Google Sheets vía GAS (SW v16)
+- Bug: la sección "Anticipos Anteriores" siempre aparecía vacía porque leía de `anticipos_historial` en Supabase, que nunca se pobla (el archivado va a Google Sheets).
+- Fix: `getHistorialCompletoSocio` en `supabase-api.js` ahora llama al GAS (`getHistorialCompletoSocio`), que lee todas las hojas `Anticipos_*` y `AnticiposGuardados` en Google Sheets.
+- Los anticipos activos del período actual siguen leyéndose de Supabase; ambas fuentes se combinan.
+- Caché localStorage con TTL 1 hora para el GAS; en cargas posteriores es instantáneo y se refresca en background.
+- SW actualizado a v16.
+
 #### 2026-06-17 — Saldo Anterior: caché local + GAS en background (SW v15)
 - Fix de rendimiento: getSaldosAnteriores y getSaldosCierre ahora usan caché localStorage (TTL 24h).
 - Primera carga: espera el GAS una sola vez. Cargas siguientes: instantáneas desde caché.

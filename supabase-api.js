@@ -174,26 +174,59 @@ async function _sociosHandler(url, options) {
             _origFetch(url, options).catch(() => {});
             return _mockRes({ success: true });
 
-        // Historial anticipos desde Supabase (activos + histórico)
+        // Historial anticipos: activos desde Supabase + histórico desde GAS (Sheets)
         case 'getHistorialCompletoSocio': {
             const idSocio = b.idSocio || b.socioId;
-            const [actRes, histRes] = await Promise.all([
-                dbSV.from('anticipos').select('fecha, monto, responsable, periodo').eq('socio_id', String(idSocio)).order('fecha'),
-                dbSV.from('anticipos_historial').select('fecha, monto, responsable, periodo').eq('socio_id', String(idSocio)).order('fecha')
-            ]);
+            const CK = `propi_cache_hist_anticipos_${idSocio}`;
+            const TTL = 60 * 60 * 1000; // 1 hora
+
+            // Anticipos activos desde Supabase (rápido)
+            const actPromise = dbSV.from('anticipos')
+                .select('fecha, monto, responsable, periodo')
+                .eq('socio_id', String(idSocio))
+                .order('fecha');
+
+            // Histórico desde GAS (Google Sheets) con caché local
+            let gasData = null;
+            try {
+                const c = JSON.parse(localStorage.getItem(CK) || 'null');
+                if (c && Date.now() - c.ts < TTL) gasData = c.d;
+            } catch(e) {}
+
+            let historico;
+            if (gasData !== null) {
+                historico = gasData;
+                // Refresco en background sin bloquear
+                _origFetch(url, options).then(r => r.json()).then(d => {
+                    if (Array.isArray(d.data)) {
+                        try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d: d.data })); } catch(e) {}
+                    }
+                }).catch(() => {});
+            } else {
+                try {
+                    const r = await _origFetch(url, options);
+                    const d = await r.json();
+                    historico = Array.isArray(d.data) ? d.data : [];
+                    try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d: historico })); } catch(e) {}
+                } catch(e) {
+                    historico = [];
+                }
+            }
+
+            const actRes = await actPromise;
+
+            // Combinar: histórico del GAS + activos de Supabase
             const byPeriod = {};
+            for (const p of historico) {
+                byPeriod[p.periodo] = { periodo: p.periodo, registros: [...(p.registros || [])] };
+            }
             for (const a of (actRes.data || [])) {
                 const p = a.periodo || 'Activo';
-                if (!byPeriod[p]) byPeriod[p] = [];
-                byPeriod[p].push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
+                if (!byPeriod[p]) byPeriod[p] = { periodo: p, registros: [] };
+                byPeriod[p].registros.push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
             }
-            for (const a of (histRes.data || [])) {
-                const p = a.periodo || 'Histórico';
-                if (!byPeriod[p]) byPeriod[p] = [];
-                byPeriod[p].push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
-            }
-            const data = Object.entries(byPeriod)
-                .map(([periodo, registros]) => ({ periodo, registros }))
+
+            const data = Object.values(byPeriod)
                 .sort((a, b) => String(b.periodo).localeCompare(String(a.periodo)));
             return _mockRes({ data });
         }
