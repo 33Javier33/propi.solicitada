@@ -177,12 +177,21 @@
             // Misma sesión: comparación directa
             pinOk = (pin === sessPin);
         } else if (auth.pinHash) {
-            // Nueva sesión: verificar contra hash almacenado
+            // Nueva sesión con hash: verificar y restaurar sesión
             const entered = await hashPin(pin, auth.id);
             pinOk = (entered === auth.pinHash);
-            if (pinOk) sessionStorage.setItem('visor_secure_auth_sess', pin); // restaurar sesión
+            if (pinOk) sessionStorage.setItem('visor_secure_auth_sess', pin);
+        } else if (auth.pin) {
+            // Formato anterior (PIN en plano): comparar y migrar automáticamente al nuevo formato
+            pinOk = (pin === auth.pin);
+            if (pinOk) {
+                const pinHash = await hashPin(pin, auth.id);
+                const { pin: _removed, ...rest } = auth;
+                localStorage.setItem('visor_secure_auth', JSON.stringify({ ...rest, pinHash }));
+                sessionStorage.setItem('visor_secure_auth_sess', pin);
+            }
         } else {
-            // Sin datos de sesión ni hash (instalación antigua) → login completo
+            // Sin credenciales → login completo
             switchToSetup();
             document.getElementById('fastPIN').value = '';
             return;
