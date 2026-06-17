@@ -353,6 +353,16 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-17 — Hardening de seguridad: XSS, autenticación y SRI (SW v20)
+- C-1 (CRÍTICA): PIN eliminado de localStorage. Ahora se guarda solo el hash SHA-256 del PIN; el PIN plano va a sessionStorage (se borra al cerrar el navegador). Compatibilidad backward: instalaciones antiguas piden login completo en nueva sesión.
+- C-2 (CRÍTICA): Chat renderizado — `linkify()` ahora escapa HTML entities antes de convertir URLs, bloqueando inyección de HTML/JS en mensajes del chat.
+- C-3 (CRÍTICA): onclick del botón editar ya no embebe `msgContent` en el atributo. Se usa `window._chatMsgMap` para lookup por ID, eliminando template injection.
+- C-4 (CRÍTICA): `showDebugToast` escapa todos los valores del objeto API antes de insertarlos en innerHTML.
+- A-4 (ALTA): `linkify()` bloquea protocolos `javascript:` y `data:` en URLs.
+- A-5 (ALTA): `document.write()` del comprobante PDF escapa nombre, área y contrato del usuario.
+- A-1 (ALTA): Supabase JS anclado a versión 2.49.4 con atributo `integrity` SHA-512 (SRI).
+- SW v20.
+
 #### 2026-06-17 — Historial anticipos: GAS único para archivados, elimina duplicados (SW v19)
 - Bug: combinar GAS + Supabase duplicaba meses porque GAS usa "MAYO_2026" y Supabase "MAYO 2026".
 - Fix: histórico archivado viene solo del GAS (cacheado 1h); Supabase solo provee anticipos activos del mes actual.

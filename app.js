@@ -13,6 +13,18 @@
         userAnticipos:[], vpPromedio:0
     };
 
+    // ── SECURITY HELPERS ──────────────────────────────────────────────────────
+    function escHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+    async function hashPin(pin, salt) {
+        const enc = new TextEncoder();
+        const buf = await crypto.subtle.digest('SHA-256', enc.encode(pin + String(salt)));
+        return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
     // ── INIT ──────────────────────────────────────────────────
     // ── CACHÉ DE SOCIOS (TTL 10 min) ─────────────────────────
     const SOCIOS_CACHE_KEY = 'sociosCache_v1';
@@ -102,6 +114,7 @@
     function cambiarUsuario() {
         if (!confirm('¿Desea cambiar de usuario? Se eliminará la cuenta vinculada en este dispositivo.')) return;
         localStorage.removeItem('visor_secure_auth');
+        sessionStorage.removeItem('visor_secure_auth_sess');
         location.reload();
     }
 
@@ -133,7 +146,7 @@
     }
 
     // ── HANDLE SETUP ──────────────────────────────────────────
-    function handleSetup() {
+    async function handleSetup() {
         const id = document.getElementById('setupID').value.trim().toUpperCase();
         const rutRaw = document.getElementById('setupRUT').value.trim();
         const pin = document.getElementById('setupPIN').value.trim();
@@ -145,15 +158,36 @@
         const rutNormalizado = formatRUT(rutRaw);
         const u = allSocios.find(s => String(s.ID).toUpperCase() === id);
         if (u && pin.length === 4) {
-            localStorage.setItem('visor_secure_auth', JSON.stringify({id:u.ID,rut:rutNormalizado,pin,name:u.Nombre}));
+            const pinHash = await hashPin(pin, u.ID);
+            // PIN nunca en localStorage — solo hash para verificación en nueva sesión
+            localStorage.setItem('visor_secure_auth', JSON.stringify({id:u.ID, rut:rutNormalizado, name:u.Nombre, pinHash}));
+            // PIN plano en sessionStorage (se borra al cerrar el navegador)
+            sessionStorage.setItem('visor_secure_auth_sess', pin);
             location.reload();
         } else { alert("Datos incorrectos. Verifique su ID y PIN."); }
     }
 
     async function handleFastLogin() {
         const pin = document.getElementById('fastPIN').value;
-        const auth = JSON.parse(localStorage.getItem('visor_secure_auth'));
-        if (pin !== auth.pin) {
+        const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
+        const sessPin = sessionStorage.getItem('visor_secure_auth_sess');
+
+        let pinOk = false;
+        if (sessPin) {
+            // Misma sesión: comparación directa
+            pinOk = (pin === sessPin);
+        } else if (auth.pinHash) {
+            // Nueva sesión: verificar contra hash almacenado
+            const entered = await hashPin(pin, auth.id);
+            pinOk = (entered === auth.pinHash);
+            if (pinOk) sessionStorage.setItem('visor_secure_auth_sess', pin); // restaurar sesión
+        } else {
+            // Sin datos de sesión ni hash (instalación antigua) → login completo
+            switchToSetup();
+            document.getElementById('fastPIN').value = '';
+            return;
+        }
+        if (!pinOk) {
             alert("PIN incorrecto");
             document.getElementById('fastPIN').value = '';
             return;
@@ -485,9 +519,9 @@
         d.id = 'debugToast';
         d.style.cssText = 'position:fixed;bottom:120px;left:10px;right:10px;background:#fff;border:1px solid #001723;border-radius:12px;padding:12px;z-index:999;font-size:11px;color:#191c1d;word-break:break-all;box-shadow:0 8px 24px rgba(0,0,0,0.1);';
         d.innerHTML = '<b style="color:#001723">Campos del mensaje (debug):</b><br>' +
-            Object.entries(msg).map(([k,v])=>`<span style="color:#006a62">${k}</span>: ${v}`).join('<br>') +
-            '<br><br><b>Mi ID:</b> ' + currentUser.ID +
-            '<br><b>Target ID:</b> ' + currentSocialTarget.id +
+            Object.entries(msg).map(([k,v])=>`<span style="color:#006a62">${escHtml(k)}</span>: ${escHtml(String(v))}`).join('<br>') +
+            '<br><br><b>Mi ID:</b> ' + escHtml(String(currentUser.ID)) +
+            '<br><b>Target ID:</b> ' + escHtml(String(currentSocialTarget.id)) +
             '<button onclick="this.parentElement.remove()" style="float:right;color:#ba1a1a;font-size:14px;margin-top:4px">✕</button>';
         document.body.appendChild(d);
         setTimeout(() => d.remove(), 15000);
@@ -782,12 +816,17 @@
 
     // ── LINKIFY ───────────────────────────────────────────────
     function linkify(text) {
-        // Detecta URLs con o sin http y las convierte en <a> clicables
-        return text.replace(
-            /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+)/gi,
+        // Escapar HTML primero para neutralizar cualquier payload en el texto
+        const safe = escHtml(text);
+        return safe.replace(
+            /(https?:\/\/[^\s<>"&]+|www\.[^\s<>"&]+)/gi,
             url => {
-                const href = url.startsWith('http') ? url : 'https://' + url;
-                return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:#264b5f;text-decoration:underline;text-underline-offset:2px;word-break:break-all;">${url}</a>`;
+                // Reconstruir la URL real (sin entidades HTML)
+                const rawUrl = url.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+                // Bloquear protocolos peligrosos
+                if (/^javascript:/i.test(rawUrl) || /^data:/i.test(rawUrl)) return escHtml(rawUrl);
+                const href = rawUrl.startsWith('http') ? rawUrl : 'https://' + rawUrl;
+                return `<a href="${escHtml(href)}" target="_blank" rel="noopener noreferrer" style="color:#264b5f;text-decoration:underline;text-underline-offset:2px;word-break:break-all;">${url}</a>`;
             }
         );
     }
@@ -871,11 +910,13 @@
         const _clLabel = f => new Date(f).toLocaleDateString('es-ES', { timeZone: _TZ, weekday: 'long', day: 'numeric', month: 'long' }).replace('.','');
         const _clTime  = f => new Date(f).toLocaleTimeString('es-CL', { timeZone: _TZ, hour: '2-digit', minute: '2-digit', hour12: false });
         let lastDate='', html='';
+        window._chatMsgMap = {}; // mapa id→contenido para prepareEdit sin pasar texto en onclick
         list.forEach((n, idx) => {
             const isMine=String(n.socId)===String(currentUser.ID);
             const msgContent=n.mensaje||n.nota;
             const authorName=isMine?'Yo':(n.autor||'Anónimo');
             const msgId=n.uuid||n.fecha;
+            window._chatMsgMap[msgId] = msgContent;
             const msgDate=_clKey(n.fecha);
             const msgTime=_clTime(n.fecha);
 
@@ -922,7 +963,7 @@
             <div class="${rowClass}" data-msg-id="${msgId}" style="${n._sending ? 'opacity:0.75' : ''}${n.pinned&&currentChatMode==='ADMIN'?' border-left:3px solid #f59e0b;':''}">
                 ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?`<div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${authorName.charAt(0).toUpperCase()}</div>`:''}</div>`:''}
                 <div class="msg-bubble ${bubbleClass}">
-                    ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${authorName}</div>`:''}
+                    ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${escHtml(authorName)}</div>`:''}
                     ${pinHtml}<div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
                     ${rxHtml}
                     <div class="wa-time">
@@ -937,7 +978,7 @@
                     </div>
                     ${isMine?`
                     <div style="display:flex;gap:10px;margin-top:5px;padding-top:5px;border-top:1px solid rgba(0,0,0,0.06)">
-                        <button onclick="prepareEdit('${msgId}',\`${msgContent}\`)" style="opacity:0.45;color:#191c1d"><span class="material-symbols-outlined" style="font-size:14px">edit</span></button>
+                        <button onclick="prepareEdit('${escHtml(msgId)}')" style="opacity:0.45;color:#191c1d"><span class="material-symbols-outlined" style="font-size:14px">edit</span></button>
                         <button onclick="deleteMsg('${msgId}')" style="opacity:0.5;color:#ba1a1a"><span class="material-symbols-outlined" style="font-size:14px">delete</span></button>
                     </div>`:''}
                 </div>
@@ -1055,8 +1096,9 @@
 
 
     // ── EDIT MESSAGE ──────────────────────────────────────────
-    function prepareEdit(id, text) {
+    function prepareEdit(id) {
         editingMessageId=id;
+        const text = (window._chatMsgMap && window._chatMsgMap[id]) || '';
         const input=document.getElementById('chatInput');
         input.innerText=text; input.focus();
         const range=document.createRange(), sel=window.getSelection();
@@ -1750,9 +1792,9 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         <p><strong>PUERTO VARAS</strong></p>
     </div>
     <div class='section-title'>DATOS</div>
-    <div class='row'><label>NOMBRE</label><strong>${(u.Nombre+' '+u.Apellido).toUpperCase()}</strong></div>
-    <div class='row'><label>ÁREA</label><span>${u.Area.toUpperCase()}</span></div>
-    <div class='row'><label>CONTRATO</label><span>${u.TipoContrato.toUpperCase()}</span></div>
+    <div class='row'><label>NOMBRE</label><strong>${escHtml((u.Nombre+' '+u.Apellido).toUpperCase())}</strong></div>
+    <div class='row'><label>ÁREA</label><span>${escHtml(u.Area.toUpperCase())}</span></div>
+    <div class='row'><label>CONTRATO</label><span>${escHtml(u.TipoContrato.toUpperCase())}</span></div>
     <div class='row'><label>AÑO INGRESO</label><span>${_parseLocalDate(u.FechaIngreso).getFullYear()}</span></div>
     <div class='row'><label>PUNTOS</label><span>${b.pts}</span></div>
     <div class='row'><label>SUBE PUNTOS</label><span>${proxAumentoStr}</span></div>
@@ -1776,7 +1818,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     <div class='divider'></div>
     <div style='text-align:center;font-weight:bold;font-size:10px;margin:4px 0;'>PERÍODO ${periodoStr}</div>
     <div class='firmas'>
-        <div class='firma-box'><div class='firma-linea'></div><div class='firma-nombre'>${(u.Nombre+' '+u.Apellido).toUpperCase()}</div><div class='firma-label'>FIRMA SOCIO</div></div>
+        <div class='firma-box'><div class='firma-linea'></div><div class='firma-nombre'>${escHtml((u.Nombre+' '+u.Apellido).toUpperCase())}</div><div class='firma-label'>FIRMA SOCIO</div></div>
     </div>
     <div class='footer'>Emitido: ${fechaEmision} | Sistema Fondo Solidario | CarlosPN Interactive®</div>
 </div></body></html>`;
