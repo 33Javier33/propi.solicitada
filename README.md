@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-17 — Migración completa a Supabase: saldos e historial anticipos (SW v17)
+- `getSaldosAnteriores` ahora lee de `saldos_socio` en Supabase (67 filas, fuente de verdad); GAS solo como fallback si Supabase está vacío.
+- `getHistorialCompletoSocio` ahora lee de `anticipos_historial` en Supabase (256 filas) + `anticipos` activos; GAS solo como fallback si no hay datos para el socio.
+- Políticas RLS SELECT/INSERT creadas en Supabase para anon key sobre `anticipos_historial` y `saldos_socio`.
+- SW actualizado a v17.
+
 #### 2026-06-17 — Anticipos Anteriores: historial desde Google Sheets vía GAS (SW v16)
 - Bug: la sección "Anticipos Anteriores" siempre aparecía vacía porque leía de `anticipos_historial` en Supabase, que nunca se pobla (el archivado va a Google Sheets).
 - Fix: `getHistorialCompletoSocio` en `supabase-api.js` ahora llama al GAS (`getHistorialCompletoSocio`), que lee todas las hojas `Anticipos_*` y `AnticiposGuardados` en Google Sheets.

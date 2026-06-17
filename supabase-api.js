@@ -77,24 +77,29 @@ async function _sociosHandler(url, options) {
             return _mockRes({ data: { anticipos, extras } });
         }
 
-        // Saldos anteriores — caché local, GAS en background para mantener sincronía
+        // Saldos anteriores — Supabase primero (fast), GAS como fallback
         case 'getSaldosAnteriores': {
+            const { data: sbSaldos, error: sbErr } = await dbSV.from('saldos_socio').select('id, monto');
+            if (!sbErr && sbSaldos && sbSaldos.length > 0) {
+                const dataMap = {};
+                for (const s of sbSaldos) dataMap[s.id] = Number(s.monto);
+                return _mockRes({ status: 'success', data: dataMap });
+            }
+            // Fallback: GAS con caché local
             const CK = 'propi_cache_saldos_ant', TTL = 24 * 60 * 60 * 1000;
             let cached = null;
             try { const c = JSON.parse(localStorage.getItem(CK) || 'null'); if (c && Date.now() - c.ts < TTL) cached = c.d; } catch(e) {}
-            // Siempre refrescar desde GAS en background
             _origFetch(url, options).then(r => r.json()).then(d => {
                 try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
             }).catch(() => {});
             if (cached) return _mockRes(cached);
-            // Sin caché: esperar GAS
             const res = await _origFetch(url, options);
             const d = await res.json();
             try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
             return _mockRes(d);
         }
 
-        // Saldo de cierre — caché local, GAS en background
+        // Saldo de cierre — GAS con caché (saldos_cierre_mes está vacío, se puebla en cierre mensual)
         case 'getSaldosCierre': {
             const CK = 'propi_cache_saldos_cierre', TTL = 24 * 60 * 60 * 1000;
             let cached = null;
@@ -174,52 +179,30 @@ async function _sociosHandler(url, options) {
             _origFetch(url, options).catch(() => {});
             return _mockRes({ success: true });
 
-        // Historial anticipos: activos desde Supabase + histórico desde GAS (Sheets)
+        // Historial anticipos: 100% desde Supabase (historial + activos), GAS solo como fallback
         case 'getHistorialCompletoSocio': {
             const idSocio = b.idSocio || b.socioId;
-            const CK = `propi_cache_hist_anticipos_${idSocio}`;
-            const TTL = 60 * 60 * 1000; // 1 hora
 
-            // Anticipos activos desde Supabase (rápido)
-            const actPromise = dbSV.from('anticipos')
-                .select('fecha, monto, responsable, periodo')
-                .eq('socio_id', String(idSocio))
-                .order('fecha');
+            const [histRes, actRes] = await Promise.all([
+                dbSV.from('anticipos_historial')
+                    .select('fecha, monto, responsable, periodo, fecha_archivo')
+                    .eq('socio_id', String(idSocio))
+                    .order('fecha'),
+                dbSV.from('anticipos')
+                    .select('fecha, monto, responsable, periodo')
+                    .eq('socio_id', String(idSocio))
+                    .order('fecha')
+            ]);
 
-            // Histórico desde GAS (Google Sheets) con caché local
-            let gasData = null;
-            try {
-                const c = JSON.parse(localStorage.getItem(CK) || 'null');
-                if (c && Date.now() - c.ts < TTL) gasData = c.d;
-            } catch(e) {}
-
-            let historico;
-            if (gasData !== null) {
-                historico = gasData;
-                // Refresco en background sin bloquear
-                _origFetch(url, options).then(r => r.json()).then(d => {
-                    if (Array.isArray(d.data)) {
-                        try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d: d.data })); } catch(e) {}
-                    }
-                }).catch(() => {});
-            } else {
-                try {
-                    const r = await _origFetch(url, options);
-                    const d = await r.json();
-                    historico = Array.isArray(d.data) ? d.data : [];
-                    try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d: historico })); } catch(e) {}
-                } catch(e) {
-                    historico = [];
-                }
-            }
-
-            const actRes = await actPromise;
-
-            // Combinar: histórico del GAS + activos de Supabase
             const byPeriod = {};
-            for (const p of historico) {
-                byPeriod[p.periodo] = { periodo: p.periodo, registros: [...(p.registros || [])] };
+
+            for (const a of (histRes.data || [])) {
+                const p = a.periodo
+                    || (a.fecha_archivo ? `Cierre ${String(a.fecha_archivo).substring(0, 7)}` : 'Histórico');
+                if (!byPeriod[p]) byPeriod[p] = { periodo: p, registros: [] };
+                byPeriod[p].registros.push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
             }
+
             for (const a of (actRes.data || [])) {
                 const p = a.periodo || 'Activo';
                 if (!byPeriod[p]) byPeriod[p] = { periodo: p, registros: [] };
@@ -228,6 +211,22 @@ async function _sociosHandler(url, options) {
 
             const data = Object.values(byPeriod)
                 .sort((a, b) => String(b.periodo).localeCompare(String(a.periodo)));
+
+            // Fallback a GAS si Supabase no tiene nada para este socio
+            if (data.length === 0) {
+                const CK = `propi_cache_hist_anticipos_${idSocio}`, TTL = 60 * 60 * 1000;
+                let gasData = null;
+                try { const c = JSON.parse(localStorage.getItem(CK) || 'null'); if (c && Date.now() - c.ts < TTL) gasData = c.d; } catch(e) {}
+                if (gasData) return _mockRes({ data: gasData });
+                try {
+                    const r = await _origFetch(url, options);
+                    const d = await r.json();
+                    const hd = Array.isArray(d.data) ? d.data : [];
+                    try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d: hd })); } catch(e) {}
+                    return _mockRes({ data: hd });
+                } catch(e) { return _mockRes({ data: [] }); }
+            }
+
             return _mockRes({ data });
         }
 
