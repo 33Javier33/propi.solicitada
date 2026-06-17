@@ -179,11 +179,35 @@ async function _sociosHandler(url, options) {
             _origFetch(url, options).catch(() => {});
             return _mockRes({ success: true });
 
-        // Historial anticipos: 100% desde Supabase (historial + activos), GAS solo como fallback
+        // Historial anticipos: combinar Supabase + GAS (con caché) para no perder meses
+        // Supabase puede tener gaps (meses archivados antes de la migración completa)
+        // GAS tiene TODO — se usa siempre pero cacheado 1h para no bloquear
         case 'getHistorialCompletoSocio': {
             const idSocio = b.idSocio || b.socioId;
+            const CK = `propi_cache_hist_anticipos_${idSocio}`, TTL = 60 * 60 * 1000;
 
-            const [histRes, actRes] = await Promise.all([
+            // Leer en paralelo: Supabase (historial + activos) + GAS cacheado
+            let gasData = null;
+            try { const c = JSON.parse(localStorage.getItem(CK) || 'null'); if (c && Date.now() - c.ts < TTL) gasData = c.d; } catch(e) {}
+
+            const gasPromise = gasData !== null
+                ? Promise.resolve(gasData)
+                : _origFetch(url, options).then(r => r.json()).then(d => {
+                    const hd = Array.isArray(d.data) ? d.data : [];
+                    try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d: hd })); } catch(e) {}
+                    return hd;
+                }).catch(() => []);
+
+            // Siempre refrescar GAS en background si veníamos de caché
+            if (gasData !== null) {
+                _origFetch(url, options).then(r => r.json()).then(d => {
+                    if (Array.isArray(d.data)) {
+                        try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d: d.data })); } catch(e) {}
+                    }
+                }).catch(() => {});
+            }
+
+            const [histRes, actRes, historico] = await Promise.all([
                 dbSV.from('anticipos_historial')
                     .select('fecha, monto, responsable, periodo, fecha_archivo')
                     .eq('socio_id', String(idSocio))
@@ -191,18 +215,32 @@ async function _sociosHandler(url, options) {
                 dbSV.from('anticipos')
                     .select('fecha, monto, responsable, periodo')
                     .eq('socio_id', String(idSocio))
-                    .order('fecha')
+                    .order('fecha'),
+                gasPromise
             ]);
 
+            // Combinar: GAS como base (tiene todos los meses), Supabase completa con datos más recientes
             const byPeriod = {};
 
+            // 1. GAS: todos los meses archivados
+            for (const p of (Array.isArray(historico) ? historico : [])) {
+                byPeriod[p.periodo] = { periodo: p.periodo, registros: [...(p.registros || [])] };
+            }
+
+            // 2. Supabase historial: agrega/sobreescribe periodos que ya están en Supabase
+            //    (más confiable que GAS para meses recientes archivados tras la migración)
+            const sbPeriodos = {};
             for (const a of (histRes.data || [])) {
                 const p = a.periodo
                     || (a.fecha_archivo ? `Cierre ${String(a.fecha_archivo).substring(0, 7)}` : 'Histórico');
-                if (!byPeriod[p]) byPeriod[p] = { periodo: p, registros: [] };
-                byPeriod[p].registros.push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
+                if (!sbPeriodos[p]) sbPeriodos[p] = [];
+                sbPeriodos[p].push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
+            }
+            for (const [p, regs] of Object.entries(sbPeriodos)) {
+                byPeriod[p] = { periodo: p, registros: regs };
             }
 
+            // 3. Anticipos activos de Supabase (período actual)
             for (const a of (actRes.data || [])) {
                 const p = a.periodo || 'Activo';
                 if (!byPeriod[p]) byPeriod[p] = { periodo: p, registros: [] };
@@ -211,22 +249,6 @@ async function _sociosHandler(url, options) {
 
             const data = Object.values(byPeriod)
                 .sort((a, b) => String(b.periodo).localeCompare(String(a.periodo)));
-
-            // Fallback a GAS si Supabase no tiene nada para este socio
-            if (data.length === 0) {
-                const CK = `propi_cache_hist_anticipos_${idSocio}`, TTL = 60 * 60 * 1000;
-                let gasData = null;
-                try { const c = JSON.parse(localStorage.getItem(CK) || 'null'); if (c && Date.now() - c.ts < TTL) gasData = c.d; } catch(e) {}
-                if (gasData) return _mockRes({ data: gasData });
-                try {
-                    const r = await _origFetch(url, options);
-                    const d = await r.json();
-                    const hd = Array.isArray(d.data) ? d.data : [];
-                    try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d: hd })); } catch(e) {}
-                    return _mockRes({ data: hd });
-                } catch(e) { return _mockRes({ data: [] }); }
-            }
-
             return _mockRes({ data });
         }
 

@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-17 — Historial anticipos: combinar Supabase + GAS para cubrir meses faltantes (SW v18)
+- Bug: Supabase solo tenía meses migrados inicialmente; meses posteriores estaban solo en Sheets.
+- El fallback a GAS solo activaba si data.length === 0, así que meses parcialmente migrados quedaban incompletos.
+- Fix: getHistorialCompletoSocio ahora combina SIEMPRE Supabase + GAS (cacheado 1h). GAS es la base completa; Supabase sobreescribe los períodos que ya tiene.
+- Para completar la migración: correr backfillAnticiposFaltantes() en el GAS editor (migrate_to_supabase.gs).
+- SW v18.
+
 #### 2026-06-17 — Migración completa a Supabase: saldos e historial anticipos (SW v17)
 - `getSaldosAnteriores` ahora lee de `saldos_socio` en Supabase (67 filas, fuente de verdad); GAS solo como fallback si Supabase está vacío.
 - `getHistorialCompletoSocio` ahora lee de `anticipos_historial` en Supabase (256 filas) + `anticipos` activos; GAS solo como fallback si no hay datos para el socio.
