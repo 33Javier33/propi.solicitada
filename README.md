@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-17 — Saldo Anterior sincronizado con socios-comicion
+- Bug: `getSaldosAnteriores` leía de Supabase (`saldos_socio`) que podía estar desactualizado; `getSaldosCierre` retornaba vacío.
+- Fix: ambas acciones ahora pasan directamente al GAS real (misma fuente que socios-comicion), que lee las hojas "SaldosAnteriores" + "SaldosCierreMes".
+- Resultado: "Saldo Anterior" en propi.solicitada = "Saldo Mes Ant." en socios-comicion para el mismo socio.
+
 ### v19 — Junio 2026
 
 #### 2026-06-15 — Puntos consistentes entre perfil y balance; fallback a fórmula si Supabase tiene 0

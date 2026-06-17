@@ -77,17 +77,13 @@ async function _sociosHandler(url, options) {
             return _mockRes({ data: { anticipos, extras } });
         }
 
-        // Saldos anteriores { socioId: monto }
-        case 'getSaldosAnteriores': {
-            const { data } = await dbSV.from('saldos_socio').select('id, monto');
-            const r = {};
-            for (const s of (data || [])) r[s.id] = Number(s.monto || 0);
-            return _mockRes({ data: r });
-        }
+        // Saldos anteriores — leer desde GAS (misma fuente que socios-comicion)
+        case 'getSaldosAnteriores':
+            return _origFetch(url, options);
 
-        // Saldo de cierre — no implementado aún, retorna vacío
+        // Saldo de cierre — leer desde GAS (misma fuente que socios-comicion)
         case 'getSaldosCierre':
-            return _mockRes({ data: {} });
+            return _origFetch(url, options);
 
         // Días trabajados Part-Time: { socioId: [fecha1, fecha2, ...] }
         case 'getDiasPartTime': {
