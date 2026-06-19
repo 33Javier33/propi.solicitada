@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-19 — Fix: anticipos aparecen en Últimos Movimientos (SW v21)
+- Bug: `supabase-api.js` no tenía fallback a GAS cuando la tabla `anticipos` de Supabase está vacía (anticipos aún en Google Sheets). `getAllDataDesdeSheets` devolvía datos vacíos y la sección "Últimos Movimientos" quedaba en blanco.
+- Fix: si Supabase devuelve 0 anticipos y 0 extras, se llama al GAS original como respaldo. Cuando los anticipos migren a Supabase se usará esa fuente automáticamente.
+- SW v21: incrementado por cambio en `supabase-api.js`.
+
 #### 2026-06-17 — Hardening de seguridad: XSS, autenticación y SRI (SW v20)
 - C-1 (CRÍTICA): PIN eliminado de localStorage. Ahora se guarda solo el hash SHA-256 del PIN; el PIN plano va a sessionStorage (se borra al cerrar el navegador). Compatibilidad backward: instalaciones antiguas piden login completo en nueva sesión.
 - C-2 (CRÍTICA): Chat renderizado — `linkify()` ahora escapa HTML entities antes de convertir URLs, bloqueando inyección de HTML/JS en mensajes del chat.

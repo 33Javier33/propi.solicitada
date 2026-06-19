@@ -74,6 +74,10 @@ async function _sociosHandler(url, options) {
                     tipo: e.tipo, monto: Number(e.monto), fecha: e.fecha, detalle: e.detalle || ''
                 });
             }
+            // Fallback a GAS si Supabase no tiene datos (anticipos aún en Sheets)
+            if (Object.keys(anticipos).length === 0 && Object.keys(extras).length === 0) {
+                return _origFetch(url, options);
+            }
             return _mockRes({ data: { anticipos, extras } });
         }
 
