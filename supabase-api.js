@@ -33,6 +33,49 @@ function _action(url, body) {
     } catch(e) { return body.action || ''; }
 }
 
+// ── Migración automática Sheets → Supabase (se ejecuta una vez cuando Supabase está vacío) ──
+let _migrEnProceso = false;
+async function _migrarASupabase(gasJson) {
+    if (_migrEnProceso) return;
+    _migrEnProceso = true;
+    try {
+        const rawAnts = gasJson.anticipos || {};
+        const rawExt  = gasJson.extras   || {};
+        const antRows = [];
+        Object.entries(rawAnts).forEach(([socioId, lista]) => {
+            (Array.isArray(lista) ? lista : []).forEach(a => {
+                const monto = Number(a.cantidad || a.monto || 0);
+                const fecha = String(a.fecha || '').substring(0, 10);
+                if (!fecha || monto <= 0) return;
+                antRows.push({ socio_id: String(socioId), fecha, monto, responsable: a.responsable || '' });
+            });
+        });
+        const extRows = [];
+        Object.entries(rawExt).forEach(([socioId, lista]) => {
+            (Array.isArray(lista) ? lista : []).forEach(e => {
+                const fecha = String(e.fecha || '').substring(0, 10);
+                if (!fecha || !e.tipo) return;
+                extRows.push({ socio_id: String(socioId), fecha, tipo: e.tipo, monto: Number(e.monto || 0), detalle: e.detalle || '' });
+            });
+        });
+        if (antRows.length === 0 && extRows.length === 0) return;
+        console.log('[SB-V-MIGR] Migrando', antRows.length, 'anticipos,', extRows.length, 'extras a Supabase...');
+        for (let i = 0; i < antRows.length; i += 500) {
+            const { error } = await dbSV.from('anticipos').insert(antRows.slice(i, i + 500));
+            if (error) { console.warn('[SB-V-MIGR] Error anticipos:', error.message); return; }
+        }
+        for (let i = 0; i < extRows.length; i += 500) {
+            const { error } = await dbSV.from('extras').insert(extRows.slice(i, i + 500));
+            if (error) { console.warn('[SB-V-MIGR] Error extras:', error.message); }
+        }
+        console.log('[SB-V-MIGR] ✅ Migración completa:', antRows.length, 'anticipos,', extRows.length, 'extras');
+    } catch(e) {
+        console.warn('[SB-V-MIGR]', e.message);
+    } finally {
+        _migrEnProceso = false;
+    }
+}
+
 // ── HANDLER: SOCIOS ────────────────────────────────────────────────────────────
 async function _sociosHandler(url, options) {
     const b = await _body(options);
@@ -74,9 +117,17 @@ async function _sociosHandler(url, options) {
                     tipo: e.tipo, monto: Number(e.monto), fecha: e.fecha, detalle: e.detalle || ''
                 });
             }
-            // Fallback a GAS si Supabase no tiene datos (anticipos aún en Sheets)
+            // Supabase vacío → GAS + migración automática en segundo plano
             if (Object.keys(anticipos).length === 0 && Object.keys(extras).length === 0) {
-                return _origFetch(url, options);
+                let gasJson = null;
+                try {
+                    const gasResp = await _origFetch(url, options);
+                    gasJson = await gasResp.json();
+                } catch(e) { console.warn('[SB-V] GAS error:', e.message); }
+                if (gasJson && gasJson.status === 'success') {
+                    _migrarASupabase(gasJson); // no-await: segundo plano
+                }
+                return _mockRes(gasJson || { status: 'error', anticipos: {}, extras: {} });
             }
             return _mockRes({ data: { anticipos, extras } });
         }
@@ -103,19 +154,19 @@ async function _sociosHandler(url, options) {
             return _mockRes(d);
         }
 
-        // Saldo de cierre — GAS con caché (saldos_cierre_mes está vacío, se puebla en cierre mensual)
+        // Saldo de cierre — caché 24h + no-await para no bloquear el Promise.all del balance
         case 'getSaldosCierre': {
             const CK = 'propi_cache_saldos_cierre', TTL = 24 * 60 * 60 * 1000;
             let cached = null;
             try { const c = JSON.parse(localStorage.getItem(CK) || 'null'); if (c && Date.now() - c.ts < TTL) cached = c.d; } catch(e) {}
+            // Una sola llamada al GAS, siempre en background
             _origFetch(url, options).then(r => r.json()).then(d => {
                 try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
+                // Si no había caché, re-calcular balance cuando lleguen los datos de cierre
+                if (!cached) setTimeout(() => { if (typeof refresh === 'function') refresh(); }, 100);
             }).catch(() => {});
-            if (cached) return _mockRes(cached);
-            const res = await _origFetch(url, options);
-            const d = await res.json();
-            try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
-            return _mockRes(d);
+            // Retornar inmediatamente — caché si existe, vacío si no
+            return _mockRes(cached || { status: 'success', data: {} });
         }
 
         // Días trabajados Part-Time: { socioId: [fecha1, fecha2, ...] }

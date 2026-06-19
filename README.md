@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-19 — Rendimiento: balance instantáneo, migración automática anticipos a Supabase (SW v22)
+- `getSaldosCierre` ya no bloquea el `Promise.all` del balance: retorna `{}` inmediato (o caché 24h) y recalcula el balance en background cuando llegan los datos de GAS.
+- `getAllDataDesdeSheets` ahora migra anticipos/extras desde Sheets a Supabase la primera vez que detecta Supabase vacío (`_migrarASupabase`). A partir de entonces, Supabase es la fuente primaria.
+- SW incrementado a v22 para forzar recarga del interceptor actualizado.
+
 #### 2026-06-19 — Fix: anticipos aparecen en Últimos Movimientos (SW v21)
 - Bug: `supabase-api.js` no tenía fallback a GAS cuando la tabla `anticipos` de Supabase está vacía (anticipos aún en Google Sheets). `getAllDataDesdeSheets` devolvía datos vacíos y la sección "Últimos Movimientos" quedaba en blanco.
 - Fix: si Supabase devuelve 0 anticipos y 0 extras, se llama al GAS original como respaldo. Cuando los anticipos migren a Supabase se usará esa fuente automáticamente.
