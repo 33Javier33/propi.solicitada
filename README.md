@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-20 — Fix: balance lento — getDiasPartTime dejó de bloquear el Promise.all (SW v24)
+- Bug: el fix anterior de días PT hacía `Promise.allSettled([Supabase, GAS])` bloqueante. El `Promise.all` del balance en `app.js` esperaba al más lento (GAS: 2-5 s) antes de mostrar cualquier dato.
+- Fix: `getDiasPartTime` ahora responde inmediatamente con datos de Supabase. GAS va en background solo en la primera carga de sesión; si detecta socios PT faltantes en Supabase, los guarda en un cache de sesión y dispara un refresh único para actualizar el balance. En cargas posteriores del mismo sesión usa el cache sin volver a llamar GAS.
+- SW incrementado a v24 por cambio en `supabase-api.js`.
+
 #### 2026-06-20 — Fix: socios Part-Time sin días trabajados en el calendario (SW v23)
 - Bug: `getDiasPartTime` en `supabase-api.js` leía SOLO Supabase. Si la tabla `dias_pt` no tenía todos los socios PT (porque no habían guardado días desde la nueva app), aparecían con 0 días → sin calendario ni alcance.
 - Fix: fetch paralelo GAS + Supabase. GAS es la base (cubre todos los socios PT con su historial completo); Supabase anula GAS solo para socios que actualizaron días desde la app (datos más recientes). El resultado es la unión correcta de ambas fuentes.

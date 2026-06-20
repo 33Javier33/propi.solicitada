@@ -76,6 +76,9 @@ async function _migrarASupabase(gasJson) {
     }
 }
 
+// Cache de sesión para días PT desde GAS (evita re-fetch en cada refresh)
+let _diasPtGasCache = null;
+
 // ── HANDLER: SOCIOS ────────────────────────────────────────────────────────────
 async function _sociosHandler(url, options) {
     const b = await _body(options);
@@ -169,28 +172,32 @@ async function _sociosHandler(url, options) {
             return _mockRes(cached || { status: 'success', data: {} });
         }
 
-        // Días trabajados Part-Time: { socioId: [fecha1, fecha2, ...] }
-        // GAS es base (cubre todos los socios PT); Supabase anula para socios con datos recientes.
+        // Días trabajados Part-Time — Supabase responde inmediatamente (no bloquea balance)
+        // GAS va en background: si encuentra socios faltantes los cachea y dispara un refresh.
         case 'getDiasPartTime': {
-            try {
-                const [sbResult, gasResult] = await Promise.allSettled([
-                    dbSV.from('dias_pt').select('socio_id, dias'),
-                    _origFetch(url, options).then(r2 => r2.json())
-                ]);
-                const r = {};
-                const gasData = gasResult.status === 'fulfilled' ? gasResult.value : null;
-                if (gasData && gasData.status === 'success' && gasData.data) {
-                    Object.entries(gasData.data).forEach(([sid, dias]) => {
-                        r[String(sid)] = Array.isArray(dias) ? [...new Set(dias)].sort() : [];
-                    });
-                }
-                const sbData = sbResult.status === 'fulfilled' ? (sbResult.value.data || []) : [];
-                for (const d of sbData) {
-                    if (Array.isArray(d.dias)) r[d.socio_id] = [...new Set(d.dias)].sort();
-                }
-                return _mockRes({ data: r });
-            } catch(e) { console.warn('[SB-DIAS-PT-V] error:', e.message); }
-            return _mockRes({ data: {} });
+            const { data: sbData } = await dbSV.from('dias_pt').select('socio_id, dias');
+            const r = {};
+            const sbIds = new Set();
+            for (const d of (sbData || [])) {
+                if (Array.isArray(d.dias)) { r[d.socio_id] = [...new Set(d.dias)].sort(); sbIds.add(d.socio_id); }
+            }
+            // Completar con cache de sesión GAS (socios que aún no están en Supabase)
+            if (_diasPtGasCache) {
+                Object.entries(_diasPtGasCache).forEach(([sid, dias]) => {
+                    if (!sbIds.has(sid) && Array.isArray(dias) && dias.length > 0) r[sid] = dias;
+                });
+            } else {
+                // Primera carga: pedir GAS en background y refrescar solo si hay socios faltantes
+                _origFetch(url, options).then(r2 => r2.json()).then(gasData => {
+                    if (!gasData || gasData.status !== 'success' || !gasData.data) return;
+                    _diasPtGasCache = gasData.data;
+                    const falta = Object.entries(gasData.data).some(([sid, dias]) =>
+                        !sbIds.has(String(sid)) && Array.isArray(dias) && dias.length > 0
+                    );
+                    if (falta) setTimeout(() => { if (typeof refresh === 'function') refresh(); }, 200);
+                }).catch(() => {});
+            }
+            return _mockRes({ data: r });
         }
 
         // Mensajes del chat social (socios entre sí)
