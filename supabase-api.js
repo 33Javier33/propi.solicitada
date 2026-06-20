@@ -170,14 +170,27 @@ async function _sociosHandler(url, options) {
         }
 
         // Días trabajados Part-Time: { socioId: [fecha1, fecha2, ...] }
+        // GAS es base (cubre todos los socios PT); Supabase anula para socios con datos recientes.
         case 'getDiasPartTime': {
-            const { data } = await dbSV.from('dias_pt').select('socio_id, dias');
-            const r = {};
-            for (const d of (data || [])) {
-                if (!r[d.socio_id]) r[d.socio_id] = [];
-                if (Array.isArray(d.dias)) r[d.socio_id].push(...d.dias);
-            }
-            return _mockRes({ data: r });
+            try {
+                const [sbResult, gasResult] = await Promise.allSettled([
+                    dbSV.from('dias_pt').select('socio_id, dias'),
+                    _origFetch(url, options).then(r2 => r2.json())
+                ]);
+                const r = {};
+                const gasData = gasResult.status === 'fulfilled' ? gasResult.value : null;
+                if (gasData && gasData.status === 'success' && gasData.data) {
+                    Object.entries(gasData.data).forEach(([sid, dias]) => {
+                        r[String(sid)] = Array.isArray(dias) ? [...new Set(dias)].sort() : [];
+                    });
+                }
+                const sbData = sbResult.status === 'fulfilled' ? (sbResult.value.data || []) : [];
+                for (const d of sbData) {
+                    if (Array.isArray(d.dias)) r[d.socio_id] = [...new Set(d.dias)].sort();
+                }
+                return _mockRes({ data: r });
+            } catch(e) { console.warn('[SB-DIAS-PT-V] error:', e.message); }
+            return _mockRes({ data: {} });
         }
 
         // Mensajes del chat social (socios entre sí)

@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-20 — Fix: socios Part-Time sin días trabajados en el calendario (SW v23)
+- Bug: `getDiasPartTime` en `supabase-api.js` leía SOLO Supabase. Si la tabla `dias_pt` no tenía todos los socios PT (porque no habían guardado días desde la nueva app), aparecían con 0 días → sin calendario ni alcance.
+- Fix: fetch paralelo GAS + Supabase. GAS es la base (cubre todos los socios PT con su historial completo); Supabase anula GAS solo para socios que actualizaron días desde la app (datos más recientes). El resultado es la unión correcta de ambas fuentes.
+- SW incrementado a v23 por cambio en `supabase-api.js`.
+
 #### 2026-06-19 — Rendimiento: balance instantáneo, migración automática anticipos a Supabase (SW v22)
 - `getSaldosCierre` ya no bloquea el `Promise.all` del balance: retorna `{}` inmediato (o caché 24h) y recalcula el balance en background cuando llegan los datos de GAS.
 - `getAllDataDesdeSheets` ahora migra anticipos/extras desde Sheets a Supabase la primera vez que detecta Supabase vacío (`_migrarASupabase`). A partir de entonces, Supabase es la fuente primaria.
