@@ -461,6 +461,11 @@ git push -u origin main
 - **Fix:** El handler ahora agrupa los anticipos por período (derivado del campo `periodo` en `anticipos_historial`, o calculado desde `fecha` para anticipos actuales), ordenado de más reciente a más antiguo.
 - Service Worker actualizado a `boveda-personal-v8`.
 
+#### 2026-06-23 — Campo divisor opcional en modal Ingresar Recaudación
+- Agregado campo numérico "Divisor (opcional)" al modal de ingreso de recaudación del día.
+- Si se deja en blanco no se envía al GAS; si se completa, se incluye en el payload `addRecaudacion`.
+- Se limpia automáticamente al abrir el modal.
+
 #### 2026-06-13 — Migración backend Google Sheets → Supabase
 - Reemplazado el backend de Google Apps Script (GAS) por Supabase como base de datos.
 - Nuevo archivo `supabase-api.js`: interceptor de `window.fetch` y `navigator.sendBeacon` que redirige transparentemente todas las llamadas a las URLs GAS hacia dos proyectos Supabase sin modificar `app.js`.

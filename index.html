@@ -779,7 +779,11 @@
             <input type="date" id="recFecha" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
 
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Monto</p>
-            <input type="tel" id="recMonto" placeholder="$0" oninput="fmtRecMonto(this)" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:1.1rem;font-weight:700;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:22px">
+            <input type="tel" id="recMonto" placeholder="$0" oninput="fmtRecMonto(this)" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:1.1rem;font-weight:700;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
+
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Divisor <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
+            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px">Si no sabes el divisor de hoy, déjalo en blanco.</p>
+            <input type="number" id="recDivisor" placeholder="Ej: 52" min="1" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:22px">
 
             <button id="btnEnviarRec" onclick="enviarRec()" style="width:100%;padding:15px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
                 Registrar Recaudación

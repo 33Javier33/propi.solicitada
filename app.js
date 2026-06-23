@@ -1328,6 +1328,7 @@
         if (!currentUser) return;
         document.getElementById('recFecha').value = new Date().toISOString().split('T')[0];
         document.getElementById('recMonto').value = '';
+        document.getElementById('recDivisor').value = '';
         selRecTipo('TarjetaMDA');
         document.getElementById('modalRecaudacion').style.display = 'flex';
     };
@@ -1346,22 +1347,25 @@
         if (!_recTipoSelected) return showToast('Selecciona una categoría', 'error');
         const fecha = document.getElementById('recFecha').value;
         const monto = parseInt((document.getElementById('recMonto').value || '').replace(/\D/g, '')) || 0;
+        const divisorRaw = parseFloat(document.getElementById('recDivisor').value) || 0;
         if (!fecha) return showToast('Selecciona una fecha', 'error');
         if (!monto) return showToast('Ingresa un monto válido', 'error');
         const btn = document.getElementById('btnEnviarRec');
         btn.disabled = true; btn.textContent = 'Registrando...';
         try {
+            const payload = {
+                action: 'addRecaudacion',
+                tipo: _recTipoSelected,
+                fecha,
+                monto,
+                registrado_por_id: String(currentUser.ID),
+                registrado_por_nombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim()
+            };
+            if (divisorRaw > 1) payload.divisor = divisorRaw;
             const res = await fetch(SCRIPT_URL_RECAUDACIONES, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    action: 'addRecaudacion',
-                    tipo: _recTipoSelected,
-                    fecha,
-                    monto,
-                    registrado_por_id: String(currentUser.ID),
-                    registrado_por_nombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim()
-                })
+                body: JSON.stringify(payload)
             });
             const json = await res.json();
             if (json.success) {
