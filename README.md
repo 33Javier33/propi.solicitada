@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-06-24 — Fix: sin divisor no infla el VP (valor punto) (SW v26)
+- Bug: al registrar una recaudación sin divisor, el código usaba `|| 1` como fallback, dividiendo el monto por 1 y sumando el total completo al VP acumulado del socio, dando cifras elevadas e incorrectas.
+- Fix: cambiado `|| 1` → `|| 0` con guarda `if(d > 0)` en los dos lugares donde se calcula VP (balance histórico y detalle de ganancias). Sin divisor, el día no contribuye al VP.
+- Fix: condición de envío del divisor al GAS cambiada de `> 1` a `> 0`, permitiendo guardar divisores válidos como 1 ó 1.5 que antes se descartaban.
+- SW incrementado a v26 por cambio en `app.js`.
+
 #### 2026-06-20 — Fix: balance lento — getDiasPartTime dejó de bloquear el Promise.all (SW v24)
 - Bug: el fix anterior de días PT hacía `Promise.allSettled([Supabase, GAS])` bloqueante. El `Promise.all` del balance en `app.js` esperaba al más lento (GAS: 2-5 s) antes de mostrar cualquier dato.
 - Fix: `getDiasPartTime` ahora responde inmediatamente con datos de Supabase. GAS va en background solo en la primera carga de sesión; si detecta socios PT faltantes en Supabase, los guarda en un cache de sesión y dispara un refresh único para actualizar el balance. En cargas posteriores del mismo sesión usa el cache sin volver a llamar GAS.

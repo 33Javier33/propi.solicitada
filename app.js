@@ -577,9 +577,9 @@
             recData.forEach(r=>{
                 let f=String(r.fecha).substring(0,10);
                 let m=parseFloat(String(r.monto).replace(/\./g,''))||0;
-                let d=parseFloat(r.divisor)||1;
+                let d=parseFloat(r.divisor)||0;
                 if(!mapVP[f]) mapVP[f]={totalVP:0,montoReal:0};
-                mapVP[f].totalVP+=(m/d); mapVP[f].montoReal+=m;
+                if(d>0) mapVP[f].totalVP+=(m/d); mapVP[f].montoReal+=m;
             });
 
             const dIng=_parseLocalDate(currentUser.FechaIngreso), hoy=new Date();
@@ -722,8 +722,8 @@
                 const totalDia = entradas.reduce((s, r) => s + (parseFloat(r.monto) || 0), 0);
                 const vpDia = entradas.reduce((s, r) => {
                     const m = parseFloat(r.monto) || 0;
-                    const d = parseFloat(r.divisor) || 1;
-                    return s + (m / d);
+                    const d = parseFloat(r.divisor) || 0;
+                    return s + (d > 0 ? m / d : 0);
                 }, 0);
                 const gananciaDia = vpDia * pts;
 
@@ -1361,7 +1361,7 @@
                 registrado_por_id: String(currentUser.ID),
                 registrado_por_nombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim()
             };
-            if (divisorRaw > 1) payload.divisor = divisorRaw;
+            if (divisorRaw > 0) payload.divisor = divisorRaw;
             const res = await fetch(SCRIPT_URL_RECAUDACIONES, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
