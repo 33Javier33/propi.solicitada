@@ -395,6 +395,15 @@ async function _recHandler(url, options) {
             if (res.error && res.error.message && res.error.message.includes('registrado_por')) {
                 res = await dbRV.from('recaudaciones').insert(base);
             }
+            // Guardar el divisor del día en la tabla `divisores` (una fila por fecha, upsert).
+            // Sin esto el divisor nunca llegaba a Supabase y no aparecía en las otras apps
+            // (diario.propi, socios-comicion) que leen de la misma tabla.
+            const divVal = Number(b.divisor) || 0;
+            if (divVal > 0 && b.fecha) {
+                const { error: divErr } = await dbRV.from('divisores')
+                    .upsert({ fecha: b.fecha, valor: divVal, updated_at: new Date().toISOString() }, { onConflict: 'fecha' });
+                if (divErr) console.warn('[supabase-api] divisor upsert error:', divErr.message);
+            }
             dbRV.channel('rec-data-sync').send({ type: 'broadcast', event: 'changed', payload: {} }).catch(() => {});
             return _mockRes({ success: !res.error, error: res.error?.message });
         }

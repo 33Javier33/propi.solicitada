@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-02 — Fix: el divisor no se guardaba en Supabase al registrar recaudación (SW v27)
+- Bug: al ingresar una recaudación del día con divisor, el handler `addRecaudacion` de `supabase-api.js` insertaba solo `id, fecha, tipo, monto` en la tabla `recaudaciones` e **ignoraba por completo `b.divisor`**. El divisor vive en una tabla aparte (`divisores`, una fila por fecha) que el handler `get` mergea por fecha, pero nunca se escribía ahí. Por eso el divisor no subía a Supabase ni aparecía en las otras apps (diario.propi, socios-comicion) que leen de la misma tabla.
+- Fix: `addRecaudacion` ahora hace `upsert` en `divisores` (`{ fecha, valor }`, on conflict `fecha`) cuando llega `b.divisor > 0`. Las tres apps comparten el mismo proyecto Supabase de recaudaciones, así que el divisor ahora se propaga a todas.
+- SW incrementado a v27 por cambio en `supabase-api.js`.
+
 #### 2026-06-24 — Fix: sin divisor no infla el VP (valor punto) (SW v26)
 - Bug: al registrar una recaudación sin divisor, el código usaba `|| 1` como fallback, dividiendo el monto por 1 y sumando el total completo al VP acumulado del socio, dando cifras elevadas e incorrectas.
 - Fix: cambiado `|| 1` → `|| 0` con guarda `if(d > 0)` en los dos lugares donde se calcula VP (balance histórico y detalle de ganancias). Sin divisor, el día no contribuye al VP.
