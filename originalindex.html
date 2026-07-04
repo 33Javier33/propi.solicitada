@@ -325,6 +325,27 @@
         .fade-up-3 { animation: fadeUp 0.4s 0.20s ease both; }
         .fade-up-4 { animation: fadeUp 0.4s 0.28s ease both; }
 
+        /* ── MODAL RECAUDACION TIPO BUTTONS ── */
+        .rec-tipo-btn {
+            padding: 12px 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            background: #fff;
+            color: #1e293b;
+            font-size: 0.82em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .rec-tipo-btn.active {
+            background: linear-gradient(135deg,#6366f1,#8b5cf6);
+            color: #fff;
+            border-color: transparent;
+            font-weight: 700;
+            box-shadow: 0 3px 10px rgba(99,102,241,0.3);
+        }
+
         /* ── NAV BOTTOM ── */
         #bottomNav {
             background: rgba(248,249,250,0.92);
@@ -713,6 +734,14 @@
                 <div id="detallesContables" class="bg-lm-card border border-lm-border rounded-[20px] overflow-hidden divide-y divide-lm-border shadow-sm"></div>
             </div>
 
+            <!-- INGRESAR RECAUDACION -->
+            <div class="px-4 mb-5">
+                <button onclick="abrirModalRec()" class="w-full py-3.5 rounded-[18px] flex items-center justify-center gap-3 font-semibold text-sm border transition-all active:scale-[0.98]" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
+                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                    Ingresar Recaudación del Día
+                </button>
+            </div>
+
             <!-- CALENDARIO BTN -->
             <div id="calendarBtnContainer" class="hidden px-4 mb-5">
                 <button onclick="openCalendar()" class="w-full py-3.5 rounded-[18px] flex items-center justify-center gap-3 font-semibold text-sm bg-lm-subtle border border-lm-border text-lm-primary hover:bg-lm-high active:scale-[0.98] transition-all">
@@ -905,6 +934,9 @@
                 </button>
             </div>
 
+            <!-- Pinned message banner (WhatsApp style) -->
+            <div id="pinnedBanner" style="display:none;align-items:center;background:#fff8e1;border-bottom:2px solid #f59e0b;padding:8px 12px;gap:8px;flex-shrink:0"></div>
+
             <!-- Messages -->
             <div id="chatMessages" style="flex:1; overflow-y:auto; padding:12px 0;"></div>
 
@@ -1029,6 +1061,51 @@
             </div>
         </div>
 
+    <!-- MODAL INGRESAR RECAUDACION -->
+    <div id="modalRecaudacion" onclick="if(event.target===this)cerrarModalRec()" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-end">
+        <div style="background:#f8fafc;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;box-shadow:0 -8px 32px rgba(0,0,0,0.18);max-height:90vh;overflow-y:auto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h3 style="font-size:1.05rem;font-weight:800;color:#1e293b">Ingresar Recaudación</h3>
+                <button onclick="cerrarModalRec()" style="background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>
+
+            <!-- Dato informativo: total de puntos del reparto (referencia, no editable) -->
+            <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:14px;padding:12px 14px;margin-bottom:18px;display:flex;justify-content:space-between;gap:10px;align-items:center">
+                <div style="text-align:center;flex:1">
+                    <div style="font-size:0.6em;font-weight:800;color:#6366f1;text-transform:uppercase;letter-spacing:0.06em">Total Puntos</div>
+                    <div id="recInfoTotalPuntos" style="font-size:1.15rem;font-weight:900;color:#4338ca;margin-top:2px">— pts</div>
+                </div>
+                <div style="width:1px;align-self:stretch;background:#c7d2fe"></div>
+                <div style="text-align:center;flex:1">
+                    <div style="font-size:0.6em;font-weight:800;color:#6366f1;text-transform:uppercase;letter-spacing:0.06em">Pts Planta</div>
+                    <div id="recInfoPtsPlanta" style="font-size:1.15rem;font-weight:900;color:#4338ca;margin-top:2px">— pts</div>
+                </div>
+            </div>
+
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Categoría</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+                <button class="rec-tipo-btn" data-tipo="TarjetaMDA" onclick="selRecTipo('TarjetaMDA')">💳 TarjetaMDA</button>
+                <button class="rec-tipo-btn" data-tipo="EfectivoMDA" onclick="selRecTipo('EfectivoMDA')">💵 EfectivoMDA</button>
+                <button class="rec-tipo-btn" data-tipo="SalaDeJuegos" onclick="selRecTipo('SalaDeJuegos')">🎰 SalaDeJuegos</button>
+                <button class="rec-tipo-btn" data-tipo="Boveda" onclick="selRecTipo('Boveda')">🏦 Bóveda</button>
+            </div>
+
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Fecha</p>
+            <input type="date" id="recFecha" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
+
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Monto</p>
+            <input type="tel" id="recMonto" placeholder="$0" oninput="fmtRecMonto(this)" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:1.1rem;font-weight:700;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
+
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Divisor <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
+            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px">Si no sabes el divisor de hoy, déjalo en blanco.</p>
+            <input type="number" id="recDivisor" placeholder="Ej: 52" min="1" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:22px">
+
+            <button id="btnEnviarRec" onclick="enviarRec()" style="width:100%;padding:15px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
+                Registrar Recaudación
+            </button>
+        </div>
+    </div>
+
     <nav id="bottomNav" class="fixed bottom-0 w-full z-[60] pb-safe-bottom">
         <div class="flex justify-around items-center px-4 pt-3 pb-2">
             <button onclick="switchTab('tab-home')" class="nav-btn active flex flex-col items-center gap-1.5 w-16">
@@ -1061,6 +1138,8 @@
 
 </div><!-- /appContainer -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
+<script src="supabase-api.js"></script>
 <script>
     const SCRIPT_URL_SOCIOS = 'https://script.google.com/macros/s/AKfycbyr447pMQtsKoBfp8qTcB1uyE3rORhgPPmZM6Fgia3BgmIvtlZ_h04uGZrmx_HwubHQ/exec';
     const SCRIPT_URL_RECAUDACIONES = 'https://script.google.com/macros/s/AKfycbz_kCb4aEe437zHGbRqnjCibw1NtAqfCbTNmsVPn9jaZOPBFaZ6-FwmiTLqVxq39X1P/exec';
@@ -1076,6 +1155,18 @@
         tAnt:0, pts:0, anos:0, puntoGlobalTotal:0,
         userAnticipos:[], vpPromedio:0
     };
+
+    // ── SECURITY HELPERS ──────────────────────────────────────────────────────
+    function escHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+    async function hashPin(pin, salt) {
+        const enc = new TextEncoder();
+        const buf = await crypto.subtle.digest('SHA-256', enc.encode(pin + String(salt)));
+        return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
 
     // ── INIT ──────────────────────────────────────────────────
     // ── CACHÉ DE SOCIOS (TTL 10 min) ─────────────────────────
@@ -1166,6 +1257,7 @@
     function cambiarUsuario() {
         if (!confirm('¿Desea cambiar de usuario? Se eliminará la cuenta vinculada en este dispositivo.')) return;
         localStorage.removeItem('visor_secure_auth');
+        sessionStorage.removeItem('visor_secure_auth_sess');
         location.reload();
     }
 
@@ -1197,7 +1289,7 @@
     }
 
     // ── HANDLE SETUP ──────────────────────────────────────────
-    function handleSetup() {
+    async function handleSetup() {
         const id = document.getElementById('setupID').value.trim().toUpperCase();
         const rutRaw = document.getElementById('setupRUT').value.trim();
         const pin = document.getElementById('setupPIN').value.trim();
@@ -1209,15 +1301,45 @@
         const rutNormalizado = formatRUT(rutRaw);
         const u = allSocios.find(s => String(s.ID).toUpperCase() === id);
         if (u && pin.length === 4) {
-            localStorage.setItem('visor_secure_auth', JSON.stringify({id:u.ID,rut:rutNormalizado,pin,name:u.Nombre}));
+            const pinHash = await hashPin(pin, u.ID);
+            // PIN nunca en localStorage — solo hash para verificación en nueva sesión
+            localStorage.setItem('visor_secure_auth', JSON.stringify({id:u.ID, rut:rutNormalizado, name:u.Nombre, pinHash}));
+            // PIN plano en sessionStorage (se borra al cerrar el navegador)
+            sessionStorage.setItem('visor_secure_auth_sess', pin);
             location.reload();
         } else { alert("Datos incorrectos. Verifique su ID y PIN."); }
     }
 
     async function handleFastLogin() {
         const pin = document.getElementById('fastPIN').value;
-        const auth = JSON.parse(localStorage.getItem('visor_secure_auth'));
-        if (pin !== auth.pin) {
+        const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
+        const sessPin = sessionStorage.getItem('visor_secure_auth_sess');
+
+        let pinOk = false;
+        if (sessPin) {
+            // Misma sesión: comparación directa
+            pinOk = (pin === sessPin);
+        } else if (auth.pinHash) {
+            // Nueva sesión con hash: verificar y restaurar sesión
+            const entered = await hashPin(pin, auth.id);
+            pinOk = (entered === auth.pinHash);
+            if (pinOk) sessionStorage.setItem('visor_secure_auth_sess', pin);
+        } else if (auth.pin) {
+            // Formato anterior (PIN en plano): comparar y migrar automáticamente al nuevo formato
+            pinOk = (pin === auth.pin);
+            if (pinOk) {
+                const pinHash = await hashPin(pin, auth.id);
+                const { pin: _removed, ...rest } = auth;
+                localStorage.setItem('visor_secure_auth', JSON.stringify({ ...rest, pinHash }));
+                sessionStorage.setItem('visor_secure_auth_sess', pin);
+            }
+        } else {
+            // Sin credenciales → login completo
+            switchToSetup();
+            document.getElementById('fastPIN').value = '';
+            return;
+        }
+        if (!pinOk) {
             alert("PIN incorrecto");
             document.getElementById('fastPIN').value = '';
             return;
@@ -1291,53 +1413,48 @@
         navigator.sendBeacon(SCRIPT_URL_SOCIOS, blob);
     }
 
-    // ── INACTIVIDAD (15 min acumulados solo en primer plano) ──
-    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos en segundo plano
-    let backgroundStart = null; // momento en que la app se fue a segundo plano
+    // ── INACTIVIDAD (15 min sin interacción — primer y segundo plano) ──
+    // Usa timestamp en localStorage: funciona aunque el SO pause los timers en móvil.
+    const INACTIVITY_LIMIT = 15 * 60 * 1000;
+    const _INACT_KEY = 'propi_last_active';
     let inactivityTimer = null;
 
-    function resetInactivity() {
-        // Se llama cuando el usuario vuelve a la app — cancela el conteo
-        backgroundStart = null;
-        if (inactivityTimer) {
-            clearInterval(inactivityTimer);
-            inactivityTimer = null;
+    function _updateLastActive() {
+        try { localStorage.setItem(_INACT_KEY, String(Date.now())); } catch(e) {}
+    }
+
+    function _checkInactivity() {
+        if (!currentUser) return;
+        const last = Number(localStorage.getItem(_INACT_KEY) || 0);
+        if (last && (Date.now() - last) >= INACTIVITY_LIMIT) {
+            if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
+            showToast('Sesión cerrada por inactividad (15 min)', 'warning');
+            setTimeout(logout, 1200);
         }
     }
 
     function startInactivityClock() {
-        // No hace nada al iniciar — el conteo empieza solo cuando la app se oculta
+        _updateLastActive();
+        // Verificar cada 60 s — detecta inactividad en primer plano
+        inactivityTimer = setInterval(_checkInactivity, 60 * 1000);
+        // Resetear timestamp en cada interacción del usuario
+        ['click', 'touchstart', 'keydown', 'scroll'].forEach(ev =>
+            document.addEventListener(ev, _updateLastActive, { passive: true })
+        );
     }
 
-    function pauseInactivityClock() {
-        // Compatibilidad — no usado en la nueva lógica
-    }
-
-    function resumeInactivityClock() {
-        // Compatibilidad — no usado en la nueva lógica
-    }
+    function resetInactivity() { _updateLastActive(); }
+    function pauseInactivityClock() {}
+    function resumeInactivityClock() {}
 
     document.addEventListener('visibilitychange', () => {
         if (!currentUser) return;
-
         if (document.visibilityState === 'hidden') {
-            // App va a segundo plano → guardar momento y arrancar el temporizador
             logoutConexion();
-            backgroundStart = Date.now();
-            inactivityTimer = setTimeout(() => {
-                // Pasaron 15 min en segundo plano → cerrar sesión
-                logout();
-            }, INACTIVITY_LIMIT);
-
         } else {
-            // Usuario vuelve a la app → resetear todo
+            // Al volver a la app: verificar si ya pasaron 15 min desde la última interacción
             pingConexion();
-            if (inactivityTimer) {
-                clearTimeout(inactivityTimer);
-                inactivityTimer = null;
-            }
-            backgroundStart = null;
-            // Refrescar datos al volver
+            _checkInactivity();
             if (currentUser) refresh(false);
         }
     });
@@ -1346,16 +1463,21 @@
     window.addEventListener('pagehide', () => { if (currentUser) logoutConexion(); });
 
     // ── PERFIL DEL SOCIO ─────────────────────────────────────
+    // Parsear fecha YYYY-MM-DD como fecha LOCAL (evita UTC midnight = día anterior en Chile)
+    const _parseLocalDate = s => { const [y,m,d] = String(s).substring(0,10).split('-').map(Number); return new Date(y, m-1, d); };
+
     function renderPerfil() {
         if (!currentUser) return;
         const nombre = getDisplayName();
-        const dIng = new Date(currentUser.FechaIngreso);
+        const dIng = _parseLocalDate(currentUser.FechaIngreso);
         const hoy = new Date();
         let anos = hoy.getFullYear() - dIng.getFullYear();
         if (hoy.getMonth() < dIng.getMonth() || (hoy.getMonth() === dIng.getMonth() && hoy.getDate() < dIng.getDate())) anos--;
         anos = Math.max(0, anos);
         const areaN = String(currentUser.Area || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-        const pts = Math.min(4 + (anos * 2), (areaN.includes('mesa') ? 20 : areaN.includes('cambist') ? 8 : areaN.includes('boveda') ? 10 : 12));
+        const ptsFormula = Math.min(4 + (anos * 2), (areaN.includes('mesa') ? 20 : areaN.includes('cambist') ? 8 : areaN.includes('boveda') ? 10 : 12));
+        const ptsSB = Number(currentUser.Puntos);
+        const pts = (Number.isFinite(ptsSB) && ptsSB > 0) ? ptsSB : ptsFormula;
 
         document.getElementById('perfilLetra').textContent = nombre.charAt(0).toUpperCase();
         document.getElementById('perfilNombre').textContent = nombre;
@@ -1431,7 +1553,9 @@
 
     // ── SKELETON LOADERS ──────────────────────────────────────
     function showSkeletons() {
-        document.getElementById('montoRecibirLabel').innerHTML =
+        const _mrl = document.getElementById('montoRecibirLabel');
+        _mrl.removeAttribute('data-value'); // forzar re-render aunque el valor sea el mismo
+        _mrl.innerHTML =
             '<div class="skeleton h-9 w-36 rounded-xl" style="background:linear-gradient(90deg,rgba(255,255,255,0.15) 25%,rgba(255,255,255,0.25) 50%,rgba(255,255,255,0.15) 75%);background-size:600px 100%;animation:shimmer 1.6s infinite linear;border-radius:10px;"></div>';
         document.getElementById('detallesContables').innerHTML = [1,2,3].map(()=>`
             <div class="flex justify-between items-center px-5 py-4">
@@ -1547,9 +1671,9 @@
         d.id = 'debugToast';
         d.style.cssText = 'position:fixed;bottom:120px;left:10px;right:10px;background:#fff;border:1px solid #001723;border-radius:12px;padding:12px;z-index:999;font-size:11px;color:#191c1d;word-break:break-all;box-shadow:0 8px 24px rgba(0,0,0,0.1);';
         d.innerHTML = '<b style="color:#001723">Campos del mensaje (debug):</b><br>' +
-            Object.entries(msg).map(([k,v])=>`<span style="color:#006a62">${k}</span>: ${v}`).join('<br>') +
-            '<br><br><b>Mi ID:</b> ' + currentUser.ID +
-            '<br><b>Target ID:</b> ' + currentSocialTarget.id +
+            Object.entries(msg).map(([k,v])=>`<span style="color:#006a62">${escHtml(k)}</span>: ${escHtml(String(v))}`).join('<br>') +
+            '<br><br><b>Mi ID:</b> ' + escHtml(String(currentUser.ID)) +
+            '<br><b>Target ID:</b> ' + escHtml(String(currentSocialTarget.id)) +
             '<button onclick="this.parentElement.remove()" style="float:right;color:#ba1a1a;font-size:14px;margin-top:4px">✕</button>';
         document.body.appendChild(d);
         setTimeout(() => d.remove(), 15000);
@@ -1587,7 +1711,7 @@
             ]).then(async ([adminNotesRes, socialNotesRes]) => {
                 messages.admin = (await adminNotesRes.json()).data || [];
                 try { messages.social = (await socialNotesRes.json()).data || []; } catch(e){ messages.social=[]; }
-                renderChat();
+                renderChat(false);
                 checkNotifications();
             }).catch(e => console.error('Error cargando notas:', e));
 
@@ -1596,16 +1720,18 @@
             recData.forEach(r=>{
                 let f=String(r.fecha).substring(0,10);
                 let m=parseFloat(String(r.monto).replace(/\./g,''))||0;
-                let d=parseFloat(r.divisor)||1;
+                let d=parseFloat(r.divisor)||0;
                 if(!mapVP[f]) mapVP[f]={totalVP:0,montoReal:0};
-                mapVP[f].totalVP+=(m/d); mapVP[f].montoReal+=m;
+                if(d>0) mapVP[f].totalVP+=(m/d); mapVP[f].montoReal+=m;
             });
 
-            const dIng=new Date(currentUser.FechaIngreso), hoy=new Date();
+            const dIng=_parseLocalDate(currentUser.FechaIngreso), hoy=new Date();
             let anos=hoy.getFullYear()-dIng.getFullYear();
             if(hoy.getMonth()<dIng.getMonth()||(hoy.getMonth()===dIng.getMonth()&&hoy.getDate()<dIng.getDate())) anos--;
             const areaN=String(currentUser.Area||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-            const pts=Math.min(4+(Math.max(0,anos)*2),(areaN.includes('mesa')?20:areaN.includes('cambist')?8:areaN.includes('boveda')?10:12));
+            const ptsF=Math.min(4+(Math.max(0,anos)*2),(areaN.includes('mesa')?20:areaN.includes('cambist')?8:areaN.includes('boveda')?10:12));
+            const ptsSBb=Number(currentUser.Puntos);
+            const pts=(Number.isFinite(ptsSBb)&&ptsSBb>0)?ptsSBb:ptsF;
 
             let puntoGlobalTotal=0;
             const esPT=String(currentUser.TipoContrato).toLowerCase().includes('part');
@@ -1739,8 +1865,8 @@
                 const totalDia = entradas.reduce((s, r) => s + (parseFloat(r.monto) || 0), 0);
                 const vpDia = entradas.reduce((s, r) => {
                     const m = parseFloat(r.monto) || 0;
-                    const d = parseFloat(r.divisor) || 1;
-                    return s + (m / d);
+                    const d = parseFloat(r.divisor) || 0;
+                    return s + (d > 0 ? m / d : 0);
                 }, 0);
                 const gananciaDia = vpDia * pts;
 
@@ -1834,7 +1960,7 @@
             // Las notas se renderizan cuando llega la Fase 2 (background)
             // Solo renderizamos chat si ya hay mensajes en memoria
             if(messages.admin.length > 0 || messages.social.length > 0) {
-                renderChat();
+                renderChat(false);
                 checkNotifications();
             }
         } catch(e) { console.error("Refresh Error", e); }
@@ -1842,12 +1968,17 @@
 
     // ── LINKIFY ───────────────────────────────────────────────
     function linkify(text) {
-        // Detecta URLs con o sin http y las convierte en <a> clicables
-        return text.replace(
-            /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+)/gi,
+        // Escapar HTML primero para neutralizar cualquier payload en el texto
+        const safe = escHtml(text);
+        return safe.replace(
+            /(https?:\/\/[^\s<>"&]+|www\.[^\s<>"&]+)/gi,
             url => {
-                const href = url.startsWith('http') ? url : 'https://' + url;
-                return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:#264b5f;text-decoration:underline;text-underline-offset:2px;word-break:break-all;">${url}</a>`;
+                // Reconstruir la URL real (sin entidades HTML)
+                const rawUrl = url.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+                // Bloquear protocolos peligrosos
+                if (/^javascript:/i.test(rawUrl) || /^data:/i.test(rawUrl)) return escHtml(rawUrl);
+                const href = rawUrl.startsWith('http') ? rawUrl : 'https://' + rawUrl;
+                return `<a href="${escHtml(href)}" target="_blank" rel="noopener noreferrer" style="color:#264b5f;text-decoration:underline;text-underline-offset:2px;word-break:break-all;">${url}</a>`;
             }
         );
     }
@@ -1871,6 +2002,7 @@
         document.getElementById('btnChatSocial').className=mode==='SOCIAL'?'wa-mode-btn active':'wa-mode-btn';
         if(mode==='SOCIAL') document.getElementById('socialBar').classList.remove('hidden');
         else document.getElementById('socialBar').classList.add('hidden');
+        if(mode==='ADMIN') localStorage.setItem('_rec_last_seen', Date.now());
         renderChat();
     }
 
@@ -1903,10 +2035,15 @@
 
         // Firma del contenido — si no cambió nada, no tocar el DOM
         const signature = list.map(n =>
-            (n.uuid||n.fecha) + '|' + (n._sending?'s':n._failed?'f':'ok')
+            (n.uuid||n.fecha) + '|' + (n._sending?'s':n._failed?'f':'ok') + (n.pinned?'p':'')
         ).join(',');
         if (signature === _lastChatSignature && !forceScroll) return;
         _lastChatSignature = signature;
+
+        // En modo ADMIN: pinned messages al tope
+        if (currentChatMode === 'ADMIN') {
+            list = [...list].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+        }
 
         if(list.length===0){
             container.innerHTML=`
@@ -1920,22 +2057,28 @@
         const isScrolledToBottom=container.scrollHeight-container.clientHeight<=container.scrollTop+100;
 
         const avatarPalette=['#001723','#264b5f','#006a62','#705d00','#ba1a1a','#3f6378'];
+        const _TZ = 'America/Santiago';
+        const _clKey  = f => new Date(f).toLocaleDateString('es-CL', { timeZone: _TZ });
+        const _clLabel = f => new Date(f).toLocaleDateString('es-ES', { timeZone: _TZ, weekday: 'long', day: 'numeric', month: 'long' }).replace('.','');
+        const _clTime  = f => new Date(f).toLocaleTimeString('es-CL', { timeZone: _TZ, hour: '2-digit', minute: '2-digit', hour12: false });
         let lastDate='', html='';
+        window._chatMsgMap = {}; // mapa id→contenido para prepareEdit sin pasar texto en onclick
         list.forEach((n, idx) => {
             const isMine=String(n.socId)===String(currentUser.ID);
             const msgContent=n.mensaje||n.nota;
             const authorName=isMine?'Yo':(n.autor||'Anónimo');
             const msgId=n.uuid||n.fecha;
-            const msgDate=cleanDateStr(n.fecha);
-            const msgTime=String(n.fecha).substring(11,16);
+            window._chatMsgMap[msgId] = msgContent;
+            const msgDate=_clKey(n.fecha);
+            const msgTime=_clTime(n.fecha);
 
             if(msgDate!==lastDate){
                 lastDate=msgDate;
-                html+=`<div class="wa-date-sep"><span>${msgDate}</span></div>`;
+                html+=`<div class="wa-date-sep"><span>${_clLabel(n.fecha)}</span></div>`;
             }
 
             const prevN=list[idx-1];
-            const isFirstInGroup=!prevN||String(prevN.socId)!==String(n.socId)||cleanDateStr(prevN.fecha)!==msgDate;
+            const isFirstInGroup=!prevN||String(prevN.socId)!==String(n.socId)||_clKey(prevN.fecha)!==msgDate;
 
             let rowClass=isMine?'msg-row mine':'msg-row other';
             if(isFirstInGroup) rowClass+=' first-in-group';
@@ -1946,12 +2089,35 @@
             const colorIdx=authorName.charCodeAt(0)%avatarPalette.length;
             const avatarColor=avatarPalette[colorIdx];
 
+            let pinHtml = '', rxHtml = '';
+            if(currentChatMode === 'ADMIN') {
+                const myRx = JSON.parse(localStorage.getItem('_rec_my_reactions') || '{}');
+                const EMOJIS = ['👍','❤️','😂'];
+                const reactions = n.reactions || {};
+                const lastSeen = parseInt(localStorage.getItem('_rec_last_seen')) || 0;
+                const isNewMsg = lastSeen > 0 && new Date(n.fecha).getTime() > lastSeen;
+                if(n.pinned) pinHtml = '<span style="font-size:0.7em;background:#f59e0b;color:#fff;padding:1px 6px;border-radius:10px;margin-bottom:3px;display:inline-block">📌 FIJADA</span><br>';
+                if(isNewMsg) pinHtml += '<span style="font-size:0.7em;background:#3b82f6;color:#fff;padding:1px 6px;border-radius:10px;margin-bottom:3px;display:inline-block">NUEVO</span><br>';
+                const meIdRx = currentUser ? (currentUser.Nombre + ' ' + currentUser.Apellido).trim() : '';
+                rxHtml = `<div style="display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap">
+                    <button onclick="_chatPin('${msgId}',${!n.pinned})" style="background:none;border:none;cursor:pointer;font-size:0.85em;padding:0;opacity:0.65">${n.pinned?'📌':'📍'}</button>
+                    ${EMOJIS.map(e => {
+                        const arr = Array.isArray(reactions[e]) ? reactions[e] : [];
+                        const cnt = arr.length;
+                        const mine = meIdRx ? arr.includes(meIdRx) : myRx[msgId]?.[e];
+                        const names = arr.join(', ');
+                        return `<button onclick="_chatReaccion('${msgId}','${e}')" title="${names}" style="background:${mine?'rgba(59,130,246,0.15)':'rgba(0,0,0,0.06)'};border:1px solid ${mine?'#93c5fd':'rgba(0,0,0,0.1)'};border-radius:20px;padding:1px 7px;cursor:pointer;font-size:0.78em">${e}${cnt?' '+cnt:''}</button>`;
+                    }).join('')}
+                </div>`;
+            }
+
             html+=`
-            <div class="${rowClass}" data-msg-id="${msgId}" style="${n._sending ? 'opacity:0.75' : ''}">
+            <div class="${rowClass}" data-msg-id="${msgId}" style="${n._sending ? 'opacity:0.75' : ''}${n.pinned&&currentChatMode==='ADMIN'?' border-left:3px solid #f59e0b;':''}">
                 ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?`<div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${authorName.charAt(0).toUpperCase()}</div>`:''}</div>`:''}
                 <div class="msg-bubble ${bubbleClass}">
-                    ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${authorName}</div>`:''}
-                    <div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
+                    ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${escHtml(authorName)}</div>`:''}
+                    ${pinHtml}<div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
+                    ${rxHtml}
                     <div class="wa-time">
                         <span>${msgTime}</span>
                         ${isMine
@@ -1964,7 +2130,7 @@
                     </div>
                     ${isMine?`
                     <div style="display:flex;gap:10px;margin-top:5px;padding-top:5px;border-top:1px solid rgba(0,0,0,0.06)">
-                        <button onclick="prepareEdit('${msgId}',\`${msgContent}\`)" style="opacity:0.45;color:#191c1d"><span class="material-symbols-outlined" style="font-size:14px">edit</span></button>
+                        <button onclick="prepareEdit('${escHtml(msgId)}')" style="opacity:0.45;color:#191c1d"><span class="material-symbols-outlined" style="font-size:14px">edit</span></button>
                         <button onclick="deleteMsg('${msgId}')" style="opacity:0.5;color:#ba1a1a"><span class="material-symbols-outlined" style="font-size:14px">delete</span></button>
                     </div>`:''}
                 </div>
@@ -1972,7 +2138,30 @@
         });
 
         container.innerHTML=html;
-        if(forceScroll || isScrolledToBottom || container.scrollTop===0){
+
+        // Banner estilo WhatsApp para mensaje fijado (solo modo ADMIN)
+        const pinnedBanner = document.getElementById('pinnedBanner');
+        if (pinnedBanner) {
+            const pinnedMsg = currentChatMode === 'ADMIN' ? list.find(n => n.pinned) : null;
+            if (pinnedMsg) {
+                const preview = (pinnedMsg.mensaje || pinnedMsg.nota || '').substring(0, 70);
+                const pid = pinnedMsg.uuid || pinnedMsg.fecha;
+                window._pinnedId = pid;
+                pinnedBanner.innerHTML =
+                    `<span style="color:#f59e0b;font-size:18px;flex-shrink:0">📌</span>` +
+                    `<div onclick="window._goToPinned()" style="flex:1;cursor:pointer;overflow:hidden;min-width:0">` +
+                    `<div style="font-size:0.68em;color:#b45309;font-weight:700;letter-spacing:0.03em">Mensaje fijado</div>` +
+                    `<div style="font-size:0.82em;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${preview}</div>` +
+                    `</div>`;
+                pinnedBanner.style.display = 'flex';
+            } else {
+                pinnedBanner.style.display = 'none';
+                pinnedBanner.innerHTML = '';
+                window._pinnedId = null;
+            }
+        }
+
+        if(forceScroll || isScrolledToBottom){
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     container.scrollTop = container.scrollHeight;
@@ -2016,14 +2205,17 @@
 
     function initChatInput() {
         const tx   = document.getElementById('chatInput');
+        const nav  = document.getElementById('bottomNav');
+        const spc  = document.getElementById('chatSpacer');
+
+        // Siempre restaurar el spacer y el nav (puede quedar en estado roto tras logout)
+        if (spc) spc.style.height = (nav ? nav.offsetHeight || 72 : 72) + 'px';
+        if (nav) nav.style.display = '';
+
         if (!tx || tx._init) return;
         tx._init = true;
 
         const msgs = document.getElementById('chatMessages');
-        const nav  = document.getElementById('bottomNav');
-        const spc  = document.getElementById('chatSpacer');
-
-        spc.style.height = (nav ? nav.offsetHeight : 72) + 'px';
 
         function scrollEnd() {
             if (msgs) msgs.scrollTop = msgs.scrollHeight;
@@ -2056,8 +2248,9 @@
 
 
     // ── EDIT MESSAGE ──────────────────────────────────────────
-    function prepareEdit(id, text) {
+    function prepareEdit(id) {
         editingMessageId=id;
+        const text = (window._chatMsgMap && window._chatMsgMap[id]) || '';
         const input=document.getElementById('chatInput');
         input.innerText=text; input.focus();
         const range=document.createRange(), sel=window.getSelection();
@@ -2210,6 +2403,169 @@
             console.error('Error borrando:', e);
         }
     }
+
+    // ── PIN & REACTIONS (ADMIN chat) ──────────────────────────
+    window._goToPinned = () => {
+        const pid = window._pinnedId;
+        if (!pid) return;
+        const el = document.querySelector(`[data-msg-id="${pid}"]`);
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const bubble = el.querySelector('.msg-bubble') || el;
+        bubble.style.transition = 'background 0.3s';
+        const orig = bubble.style.background;
+        bubble.style.background = 'rgba(245,158,11,0.25)';
+        setTimeout(() => { bubble.style.background = orig; }, 1400);
+    };
+
+    window._chatPin = async (id, pinned) => {
+        // Si se va a fijar, desfijar cualquier otro primero (un solo pin a la vez)
+        if (pinned) {
+            const others = messages.admin.filter(m => m.pinned && (m.uuid||m.fecha) !== id);
+            for (const o of others) {
+                const oid = o.uuid || o.fecha;
+                await fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'togglePin', id: oid, pinned: false }) });
+                o.pinned = false;
+            }
+        }
+        // Actualizar localmente para respuesta inmediata
+        const msg = messages.admin.find(m => (m.uuid||m.fecha) === id);
+        if (msg) msg.pinned = pinned;
+        _lastChatSignature = '';
+        renderChat(false);
+        // Sincronizar con Supabase
+        await fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'togglePin', id, pinned }) });
+    };
+    window._chatReaccion = async (id, emoji) => {
+        const myRx = JSON.parse(localStorage.getItem('_rec_my_reactions') || '{}');
+        const meId = currentUser ? (currentUser.Nombre + ' ' + currentUser.Apellido).trim() : 'Socio';
+        const msg = messages.admin.find(m => (m.uuid||m.fecha) === id);
+        if (!msg) return;
+        if (!msg.reactions) msg.reactions = {};
+        const arr = Array.isArray(msg.reactions[emoji]) ? [...msg.reactions[emoji]] : [];
+        const pos = arr.indexOf(meId);
+        const adding = pos === -1;
+        if (adding) arr.push(meId); else arr.splice(pos, 1);
+        if (arr.length === 0) delete msg.reactions[emoji]; else msg.reactions[emoji] = arr;
+        // Mantener localStorage para highlight visual
+        if (!myRx[id]) myRx[id] = {};
+        if (adding) myRx[id][emoji] = true; else delete myRx[id][emoji];
+        localStorage.setItem('_rec_my_reactions', JSON.stringify(myRx));
+        _lastChatSignature = '';
+        renderChat(false);
+        fetch(SCRIPT_URL_RECAUDACIONES, { method:'POST', body: JSON.stringify({ action:'toggleReaction', id, emoji, user: meId, add: adding }) }).catch(()=>{});
+    };
+
+    // ── INGRESAR RECAUDACION ──────────────────────────────────
+    let _recTipoSelected = 'TarjetaMDA';
+
+    window.selRecTipo = (tipo) => {
+        _recTipoSelected = tipo;
+        document.querySelectorAll('.rec-tipo-btn').forEach(b => {
+            if (b.dataset.tipo === tipo) b.classList.add('active');
+            else b.classList.remove('active');
+        });
+    };
+
+    // Calcula el total de puntos del reparto (mismo criterio que socios-comicion →
+    // "Gestión de Socios" → Total Puntos / Pts Planta). Solo socios visibles/activos
+    // (fecha_inicio_puntos, regla del día 15). Usa el valor de BD si es > 0, si no la fórmula.
+    function _recCalcTotalPuntos() {
+        const hoy = new Date();
+        let total = 0, planta = 0;
+        (allSocios || []).forEach(s => {
+            const fechaStr = s.FechaIngreso;
+            if (!fechaStr) return;
+            const fechaPuntosRaw = (s.FechaInicioPuntos && String(s.FechaInicioPuntos).trim()) ? String(s.FechaInicioPuntos).trim() : fechaStr;
+            const pr = String(fechaPuntosRaw).split('-');
+            const anio15 = parseInt(pr[0]), mes15 = parseInt(pr[1]) - 1;
+            if (!Number.isFinite(anio15) || !Number.isFinite(mes15)) return;
+            const fechaParaPuntos = new Date(anio15, mes15, 15);
+            const visible = hoy >= fechaParaPuntos;
+            if (!visible) return; // solo socios activos/visibles
+            let anios = hoy.getFullYear() - anio15;
+            if (hoy.getMonth() < mes15 || (hoy.getMonth() === mes15 && hoy.getDate() < 15)) anios--;
+            if (anios < 0) anios = 0;
+            const areaNorm = String(s.Area || '').toLowerCase().trim();
+            let pts;
+            if (areaNorm === 'gastoscomision' || areaNorm.includes('gastos')) {
+                pts = 1;
+            } else {
+                let cap = 10;
+                if (areaNorm === 'mesas') cap = 20;
+                else if (areaNorm === 'maquinas') cap = 12;
+                else if (areaNorm === 'tecnicos') cap = 12;
+                else if (areaNorm === 'boveda') cap = 10;
+                else if (areaNorm.includes('cambista')) cap = 8;
+                const maxPos = Math.min(4 + anios * 2, cap);
+                const ptsSB = Number(s.Puntos);
+                pts = (Number.isFinite(ptsSB) && ptsSB > 0) ? ptsSB : maxPos;
+            }
+            total += pts;
+            if (String(s.TipoContrato) === 'Planta') planta += pts;
+        });
+        return { total, planta };
+    }
+
+    window.abrirModalRec = () => {
+        if (!currentUser) return;
+        document.getElementById('recFecha').value = new Date().toISOString().split('T')[0];
+        document.getElementById('recMonto').value = '';
+        document.getElementById('recDivisor').value = '';
+        // Mostrar el total de puntos como dato de referencia
+        const _pts = _recCalcTotalPuntos();
+        const elTP = document.getElementById('recInfoTotalPuntos');
+        const elPP = document.getElementById('recInfoPtsPlanta');
+        if (elTP) elTP.textContent = _pts.total.toLocaleString('es-CL') + ' pts';
+        if (elPP) elPP.textContent = _pts.planta.toLocaleString('es-CL') + ' pts';
+        selRecTipo('TarjetaMDA');
+        document.getElementById('modalRecaudacion').style.display = 'flex';
+    };
+
+    window.cerrarModalRec = () => {
+        document.getElementById('modalRecaudacion').style.display = 'none';
+    };
+
+    window.fmtRecMonto = (inp) => {
+        const v = inp.value.replace(/\D/g, '');
+        inp.value = v ? '$' + parseInt(v).toLocaleString('es-ES') : '';
+    };
+
+    window.enviarRec = async () => {
+        if (!currentUser) return;
+        if (!_recTipoSelected) return showToast('Selecciona una categoría', 'error');
+        const fecha = document.getElementById('recFecha').value;
+        const monto = parseInt((document.getElementById('recMonto').value || '').replace(/\D/g, '')) || 0;
+        const divisorRaw = parseFloat(document.getElementById('recDivisor').value) || 0;
+        if (!fecha) return showToast('Selecciona una fecha', 'error');
+        if (!monto) return showToast('Ingresa un monto válido', 'error');
+        const btn = document.getElementById('btnEnviarRec');
+        btn.disabled = true; btn.textContent = 'Registrando...';
+        try {
+            const payload = {
+                action: 'addRecaudacion',
+                tipo: _recTipoSelected,
+                fecha,
+                monto,
+                registrado_por_id: String(currentUser.ID),
+                registrado_por_nombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim()
+            };
+            if (divisorRaw > 0) payload.divisor = divisorRaw;
+            const res = await fetch(SCRIPT_URL_RECAUDACIONES, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const json = await res.json();
+            if (json.success) {
+                showToast('Recaudación registrada ✓', 'success');
+                cerrarModalRec();
+            } else {
+                showToast('Error: ' + (json.error || 'No se pudo guardar'), 'error');
+            }
+        } catch(e) { showToast('Error al registrar', 'error'); }
+        finally { btn.disabled = false; btn.textContent = 'Registrar Recaudación'; }
+    };
 
     // ── MODAL HELPERS ─────────────────────────────────────────
     function toggleModal(id, show) {
@@ -2466,9 +2822,8 @@
     }
 
     function logout() {
-        // Detener reloj de inactividad
         if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
-        inactivityAccum = 0; inactivityStart = null;
+        try { localStorage.removeItem(_INACT_KEY); } catch(e) {}
         currentUser = null;
         document.getElementById('appContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('flex');
@@ -2586,7 +2941,7 @@
         const periodoStr = fmtFecha(inicio) + ' AL ' + fmtFecha(fin);
 
         // Próximo aumento de puntos
-        const dIng = new Date(u.FechaIngreso);
+        const dIng = _parseLocalDate(u.FechaIngreso);
         const proxAnio = new Date(dIng);
         proxAnio.setFullYear(hoy.getFullYear() + (hoy >= new Date(hoy.getFullYear(), dIng.getMonth(), dIng.getDate()) ? 1 : 0));
         const proxAumentoStr = proxAnio.toLocaleDateString('es-CL', {day:'2-digit', month:'short'}).toUpperCase();
@@ -2639,10 +2994,10 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         <p><strong>PUERTO VARAS</strong></p>
     </div>
     <div class='section-title'>DATOS</div>
-    <div class='row'><label>NOMBRE</label><strong>${(u.Nombre+' '+u.Apellido).toUpperCase()}</strong></div>
-    <div class='row'><label>ÁREA</label><span>${u.Area.toUpperCase()}</span></div>
-    <div class='row'><label>CONTRATO</label><span>${u.TipoContrato.toUpperCase()}</span></div>
-    <div class='row'><label>AÑO INGRESO</label><span>${new Date(u.FechaIngreso).getFullYear()}</span></div>
+    <div class='row'><label>NOMBRE</label><strong>${escHtml((u.Nombre+' '+u.Apellido).toUpperCase())}</strong></div>
+    <div class='row'><label>ÁREA</label><span>${escHtml(u.Area.toUpperCase())}</span></div>
+    <div class='row'><label>CONTRATO</label><span>${escHtml(u.TipoContrato.toUpperCase())}</span></div>
+    <div class='row'><label>AÑO INGRESO</label><span>${_parseLocalDate(u.FechaIngreso).getFullYear()}</span></div>
     <div class='row'><label>PUNTOS</label><span>${b.pts}</span></div>
     <div class='row'><label>SUBE PUNTOS</label><span>${proxAumentoStr}</span></div>
     <div class='divider'></div>
@@ -2665,7 +3020,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     <div class='divider'></div>
     <div style='text-align:center;font-weight:bold;font-size:10px;margin:4px 0;'>PERÍODO ${periodoStr}</div>
     <div class='firmas'>
-        <div class='firma-box'><div class='firma-linea'></div><div class='firma-nombre'>${(u.Nombre+' '+u.Apellido).toUpperCase()}</div><div class='firma-label'>FIRMA SOCIO</div></div>
+        <div class='firma-box'><div class='firma-linea'></div><div class='firma-nombre'>${escHtml((u.Nombre+' '+u.Apellido).toUpperCase())}</div><div class='firma-label'>FIRMA SOCIO</div></div>
     </div>
     <div class='footer'>Emitido: ${fechaEmision} | Sistema Fondo Solidario | CarlosPN Interactive®</div>
 </div></body></html>`;
@@ -2726,6 +3081,22 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         return { inicio, fin };
     }
 
+    // Si el período actual no tiene datos, retrocede al período anterior
+    function getActivePeriodo(mapVP) {
+        const { inicio, fin } = getPeriodo();
+        const hoyReal = new Date(); hoyReal.setHours(0,0,0,0);
+        if (!mapVP || Object.keys(mapVP).length === 0) return { inicio, fin, hoy: hoyReal };
+        const hayDatos = Object.keys(mapVP).some(f => {
+            const fd = new Date(f + 'T12:00:00');
+            return fd >= inicio && fd <= fin;
+        });
+        if (hayDatos) return { inicio, fin, hoy: hoyReal };
+        // Período anterior
+        const pInicio = new Date(inicio.getFullYear(), inicio.getMonth() - 1, 15);
+        const pFin    = new Date(fin.getFullYear(),   fin.getMonth() - 1,   14);
+        return { inicio: pInicio, fin: pFin, hoy: new Date(pFin) };
+    }
+
     function toDateStr(d) {
         return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
@@ -2735,13 +3106,15 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         statsMapVP = mapVP;
         statsPts   = pts;
 
-        const { inicio, fin } = getPeriodo();
-        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const { inicio, fin, hoy } = getActivePeriodo(mapVP);
 
         // Etiqueta del período
         const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        const { inicio: inicioCal } = getPeriodo();
+        const esPeriodoAnterior = inicio < inicioCal;
         document.getElementById('stats-periodo-label').textContent =
-            `${inicio.getDate()} ${meses[inicio.getMonth()]} → ${fin.getDate()} ${meses[fin.getMonth()]} ${fin.getFullYear()}`;
+            `${inicio.getDate()} ${meses[inicio.getMonth()]} → ${fin.getDate()} ${meses[fin.getMonth()]} ${fin.getFullYear()}` +
+            (esPeriodoAnterior ? ' (período cerrado)' : '');
 
         // Construir array de TODOS los días del período
         const diasPeriodo = [];
@@ -2810,8 +3183,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         const canvas = document.getElementById('statsChart');
         if (!canvas || !currentUser) return;
         const ctx = canvas.getContext('2d');
-        const { inicio, fin } = getPeriodo();
-        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const { inicio, fin, hoy } = getActivePeriodo(statsMapVP);
         const pts = statsPts;
 
         // Construir datos según vista
@@ -2986,8 +3358,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     function renderStatsTable() {
         const container = document.getElementById('stats-table');
         if (!container) return;
-        const { inicio, fin } = getPeriodo();
-        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const { inicio, fin, hoy } = getActivePeriodo(statsMapVP);
         const pts = statsPts;
         const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 

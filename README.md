@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-02 — Modal recaudación: dato de Total Puntos y Pts Planta (SW v28)
+- En el modal "Ingresar Recaudación del Día" se agregó un recuadro informativo (solo lectura) con **Total Puntos** y **Pts Planta**, el mismo dato que muestra socios-comicion en Gestión de Socios.
+- Se calcula desde `allSocios` con el mismo criterio que socios-comicion: solo socios visibles/activos (regla del día 15 según `FechaInicioPuntos`), usando el valor de BD (`Puntos`) si es > 0 o la fórmula por antigüedad/área si no. Sirve como referencia al ingresar el divisor.
+- Nueva función `_recCalcTotalPuntos()` en `app.js`; se actualiza al abrir el modal.
+- SW incrementado a v28 por cambios en `app.js` e `index.html`.
+
 #### 2026-07-02 — Fix: el divisor no se guardaba en Supabase al registrar recaudación (SW v27)
 - Bug: al ingresar una recaudación del día con divisor, el handler `addRecaudacion` de `supabase-api.js` insertaba solo `id, fecha, tipo, monto` en la tabla `recaudaciones` e **ignoraba por completo `b.divisor`**. El divisor vive en una tabla aparte (`divisores`, una fila por fecha) que el handler `get` mergea por fecha, pero nunca se escribía ahí. Por eso el divisor no subía a Supabase ni aparecía en las otras apps (diario.propi, socios-comicion) que leen de la misma tabla.
 - Fix: `addRecaudacion` ahora hace `upsert` en `divisores` (`{ fecha, valor }`, on conflict `fecha`) cuando llega `b.divisor > 0`. Las tres apps comparten el mismo proyecto Supabase de recaudaciones, así que el divisor ahora se propaga a todas.

@@ -1324,11 +1324,57 @@
         });
     };
 
+    // Calcula el total de puntos del reparto (mismo criterio que socios-comicion →
+    // "Gestión de Socios" → Total Puntos / Pts Planta). Solo socios visibles/activos
+    // (fecha_inicio_puntos, regla del día 15). Usa el valor de BD si es > 0, si no la fórmula.
+    function _recCalcTotalPuntos() {
+        const hoy = new Date();
+        let total = 0, planta = 0;
+        (allSocios || []).forEach(s => {
+            const fechaStr = s.FechaIngreso;
+            if (!fechaStr) return;
+            const fechaPuntosRaw = (s.FechaInicioPuntos && String(s.FechaInicioPuntos).trim()) ? String(s.FechaInicioPuntos).trim() : fechaStr;
+            const pr = String(fechaPuntosRaw).split('-');
+            const anio15 = parseInt(pr[0]), mes15 = parseInt(pr[1]) - 1;
+            if (!Number.isFinite(anio15) || !Number.isFinite(mes15)) return;
+            const fechaParaPuntos = new Date(anio15, mes15, 15);
+            const visible = hoy >= fechaParaPuntos;
+            if (!visible) return; // solo socios activos/visibles
+            let anios = hoy.getFullYear() - anio15;
+            if (hoy.getMonth() < mes15 || (hoy.getMonth() === mes15 && hoy.getDate() < 15)) anios--;
+            if (anios < 0) anios = 0;
+            const areaNorm = String(s.Area || '').toLowerCase().trim();
+            let pts;
+            if (areaNorm === 'gastoscomision' || areaNorm.includes('gastos')) {
+                pts = 1;
+            } else {
+                let cap = 10;
+                if (areaNorm === 'mesas') cap = 20;
+                else if (areaNorm === 'maquinas') cap = 12;
+                else if (areaNorm === 'tecnicos') cap = 12;
+                else if (areaNorm === 'boveda') cap = 10;
+                else if (areaNorm.includes('cambista')) cap = 8;
+                const maxPos = Math.min(4 + anios * 2, cap);
+                const ptsSB = Number(s.Puntos);
+                pts = (Number.isFinite(ptsSB) && ptsSB > 0) ? ptsSB : maxPos;
+            }
+            total += pts;
+            if (String(s.TipoContrato) === 'Planta') planta += pts;
+        });
+        return { total, planta };
+    }
+
     window.abrirModalRec = () => {
         if (!currentUser) return;
         document.getElementById('recFecha').value = new Date().toISOString().split('T')[0];
         document.getElementById('recMonto').value = '';
         document.getElementById('recDivisor').value = '';
+        // Mostrar el total de puntos como dato de referencia
+        const _pts = _recCalcTotalPuntos();
+        const elTP = document.getElementById('recInfoTotalPuntos');
+        const elPP = document.getElementById('recInfoPtsPlanta');
+        if (elTP) elTP.textContent = _pts.total.toLocaleString('es-CL') + ' pts';
+        if (elPP) elPP.textContent = _pts.planta.toLocaleString('es-CL') + ' pts';
         selRecTipo('TarjetaMDA');
         document.getElementById('modalRecaudacion').style.display = 'flex';
     };

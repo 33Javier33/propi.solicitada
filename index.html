@@ -767,6 +767,19 @@
                 <button onclick="cerrarModalRec()" style="background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center">✕</button>
             </div>
 
+            <!-- Dato informativo: total de puntos del reparto (referencia, no editable) -->
+            <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:14px;padding:12px 14px;margin-bottom:18px;display:flex;justify-content:space-between;gap:10px;align-items:center">
+                <div style="text-align:center;flex:1">
+                    <div style="font-size:0.6em;font-weight:800;color:#6366f1;text-transform:uppercase;letter-spacing:0.06em">Total Puntos</div>
+                    <div id="recInfoTotalPuntos" style="font-size:1.15rem;font-weight:900;color:#4338ca;margin-top:2px">— pts</div>
+                </div>
+                <div style="width:1px;align-self:stretch;background:#c7d2fe"></div>
+                <div style="text-align:center;flex:1">
+                    <div style="font-size:0.6em;font-weight:800;color:#6366f1;text-transform:uppercase;letter-spacing:0.06em">Pts Planta</div>
+                    <div id="recInfoPtsPlanta" style="font-size:1.15rem;font-weight:900;color:#4338ca;margin-top:2px">— pts</div>
+                </div>
+            </div>
+
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Categoría</p>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
                 <button class="rec-tipo-btn" data-tipo="TarjetaMDA" onclick="selRecTipo('TarjetaMDA')">💳 TarjetaMDA</button>
