@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-05 — Auditoría: registrar quién ingresó la recaudación del día (SW v29)
+- Al registrar una recaudación desde la app, ahora se escribe un evento en la **auditoría de socios-comicion** (tabla `auditoria` de la base de socios, `dbSV`), con la acción "Registrar Recaudación".
+- Guarda quién la ingresó (`registrado_por_nombre` / `registrado_por_id`), tipo, fecha, monto y divisor. Aparece en el historial de auditoría de socios-comicion con origen `propi.solicitada`.
+- El registro es no bloqueante (no afecta el guardado de la recaudación si la auditoría falla).
+- Archivo modificado: `supabase-api.js`. SW incrementado a v29.
+
 #### 2026-07-02 — Modal recaudación: dato de Total Puntos y Pts Planta (SW v28)
 - En el modal "Ingresar Recaudación del Día" se agregó un recuadro informativo (solo lectura) con **Total Puntos** y **Pts Planta**, el mismo dato que muestra socios-comicion en Gestión de Socios.
 - Se calcula desde `allSocios` con el mismo criterio que socios-comicion: solo socios visibles/activos (regla del día 15 según `FechaInicioPuntos`), usando el valor de BD (`Puntos`) si es > 0 o la fórmula por antigüedad/área si no. Sirve como referencia al ingresar el divisor.

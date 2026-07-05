@@ -405,6 +405,35 @@ async function _recHandler(url, options) {
                 if (divErr) console.warn('[supabase-api] divisor upsert error:', divErr.message);
             }
             dbRV.channel('rec-data-sync').send({ type: 'broadcast', event: 'changed', payload: {} }).catch(() => {});
+
+            // Registrar en la auditoría de socios-comicion quién ingresó la recaudación.
+            // La tabla `auditoria` vive en la base de socios (dbSV) — la misma que lee
+            // socios-comicion, así que el evento aparece en su historial de auditoría.
+            if (!res.error) {
+                const _quien = b.registrado_por_nombre || 'Socio (app)';
+                const _fmtM  = '$' + (Number(b.monto) || 0).toLocaleString('es-CL');
+                const _det   = 'Fecha: ' + (b.fecha || '') + ' | Tipo: ' + (b.tipo || 'Sin Tipo')
+                             + ' | Monto: ' + _fmtM
+                             + (divVal > 0 ? ' | Divisor: ' + divVal : '');
+                dbSV.from('auditoria').insert({
+                    usuario: _quien,
+                    accion: 'Registrar Recaudación',
+                    folio: null,
+                    datos_extra: {
+                        detalle: _det,
+                        id_afectado: '',
+                        registrado_por_id: b.registrado_por_id || '',
+                        registrado_por_nombre: b.registrado_por_nombre || '',
+                        tipo: b.tipo || 'Sin Tipo',
+                        fecha: b.fecha || '',
+                        monto: Number(b.monto) || 0,
+                        divisor: divVal || null,
+                        origen: 'propi.solicitada'
+                    }
+                }).then(({ error }) => { if (error) console.warn('[supabase-api] auditoria recaudacion error:', error.message); })
+                  .catch(() => {});
+            }
+
             return _mockRes({ success: !res.error, error: res.error?.message });
         }
 
