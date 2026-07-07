@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Fix: el chat ya no queda en blanco por fallos transitorios de Supabase (SW v38)
+- **Bug:** los handlers `getNotes` de `supabase-api.js` (chat Soporte → `notas_recaudacion`, chat Equipo → `chat_mensajes`) hacían `const { data } = await ...` **ignorando el error**. Si Supabase fallaba un instante (los proyectos tuvieron pausas/restauraciones recientes), la consulta devolvía error y el handler entregaba `[]`, dejando el chat **vacío** hasta el siguiente refetch exitoso.
+- **Fix:** ambos handlers ahora (1) **reintentan una vez** ante error y (2) si aun así falla, devuelven los **últimos mensajes leídos con éxito** (`_lastNotasRec` / `_lastChatSocial`) en vez de vaciar el chat. Un hipo transitorio ya no borra la conversación en pantalla.
+- Se verificó en Supabase que los datos existen y son legibles por el rol `anon`: Soporte 59 mensajes, Equipo 4. El tema (Claro/Oscuro/Rosa) **no** afecta la carga del chat.
+- Archivos: `supabase-api.js`. SW v38.
+
+
 #### 2026-07-07 — Temas de la app: Claro / Oscuro / Rosa (SW v37)
 - **Nueva funcionalidad:** el usuario puede personalizar la apariencia de la app desde **Perfil → "Tema de la app"**. Tres opciones: **Claro** (por defecto, el de siempre), **Oscuro** y **Rosa** (tema femenino).
 - La elección se guarda como **memoria** en `localStorage` (`propi_tema`) y se aplica automáticamente al abrir la app, en cualquier dispositivo donde se haya elegido.

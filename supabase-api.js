@@ -12,6 +12,11 @@ const SUPABASE_KEY_REC_V    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJz
 const dbSV = supabase.createClient(SUPABASE_URL_SOCIOS_V, SUPABASE_KEY_SOCIOS_V);
 const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
 
+// Últimos mensajes leídos con éxito. Se usan como respaldo si una consulta a
+// Supabase falla de forma transitoria, para NO dejar el chat en blanco.
+let _lastNotasRec = null;   // chat Soporte (notas_recaudacion)
+let _lastChatSocial = null; // chat Equipo (chat_mensajes)
+
 // URLs originales de GAS — se mantienen en app.js tal cual
 const _GAS_SOCIOS = 'https://script.google.com/macros/s/AKfycbyr447pMQtsKoBfp8qTcB1uyE3rORhgPPmZM6Fgia3BgmIvtlZ_h04uGZrmx_HwubHQ/exec';
 const _GAS_REC    = 'https://script.google.com/macros/s/AKfycbz_kCb4aEe437zHGbRqnjCibw1NtAqfCbTNmsVPn9jaZOPBFaZ6-FwmiTLqVxq39X1P/exec';
@@ -203,14 +208,24 @@ async function _sociosHandler(url, options) {
 
         // Mensajes del chat social (socios entre sí)
         case 'getNotes': {
-            const { data } = await dbSV.from('chat_mensajes')
+            let { data, error } = await dbSV.from('chat_mensajes')
                 .select('*').neq('estado', 'DELETED').order('created_at', { ascending: true });
-            const mapped = (data || []).map(m => ({
+            if (error) { // reintento único ante fallo transitorio
+                await new Promise(r => setTimeout(r, 400));
+                ({ data, error } = await dbSV.from('chat_mensajes')
+                    .select('*').neq('estado', 'DELETED').order('created_at', { ascending: true }));
+            }
+            if (error || !data) {
+                console.error('[supabase-api] getNotes SOCIAL falló, se conservan los últimos mensajes:', error && error.message);
+                return _mockRes({ data: _lastChatSocial || [] });
+            }
+            const mapped = data.map(m => ({
                 uuid: m.id, fecha: m.created_at,
                 autor: m.autor, socId: m.socio_id,
                 mensaje: m.mensaje, nota: m.mensaje,
                 destinatario: m.destinatario, editado: m.editado || false
             }));
+            _lastChatSocial = mapped;
             return _mockRes({ data: mapped });
         }
 
@@ -368,15 +383,25 @@ async function _recHandler(url, options) {
 
         // Notas del tablero ADMIN (notas_recaudacion)
         case 'getNotes': {
-            const { data } = await dbRV.from('notas_recaudacion')
+            let { data, error } = await dbRV.from('notas_recaudacion')
                 .select('*').order('created_at', { ascending: true });
-            const mapped = (data || []).map(m => ({
+            if (error) { // reintento único ante fallo transitorio (p.ej. proyecto reanudando)
+                await new Promise(r => setTimeout(r, 400));
+                ({ data, error } = await dbRV.from('notas_recaudacion')
+                    .select('*').order('created_at', { ascending: true }));
+            }
+            if (error || !data) {
+                console.error('[supabase-api] getNotes REC falló, se conservan los últimos mensajes:', error && error.message);
+                return _mockRes({ data: _lastNotasRec || [] });
+            }
+            const mapped = data.map(m => ({
                 uuid: m.id, fecha: m.created_at,
                 autor: m.autor, socId: null,
                 mensaje: m.mensaje, nota: m.mensaje,
                 destinatario: 'ADMIN', editado: false,
                 pinned: m.pinned || false, reactions: m.reactions || {}
             }));
+            _lastNotasRec = mapped;
             mapped.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
             return _mockRes({ data: mapped });
         }
