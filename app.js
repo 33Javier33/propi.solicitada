@@ -100,6 +100,11 @@
             document.getElementById('setupBox').classList.add('hidden');
             const initial = (auth.name || '?').charAt(0).toUpperCase();
             document.getElementById('fastAvatarIcon').textContent = initial;
+            // Mostrar la foto guardada en el login (si existe)
+            const _fbox = document.getElementById('fastAvatarBox');
+            const _fico = document.getElementById('fastAvatarIcon');
+            if (auth.foto) { if (_fbox) _fbox.style.backgroundImage = 'url("' + auth.foto + '")'; if (_fico) _fico.style.display = 'none'; }
+            else { if (_fbox) _fbox.style.backgroundImage = ''; if (_fico) _fico.style.display = ''; }
             document.getElementById('fastName').textContent = (auth.name || '').split(' ')[0];
             document.getElementById('fastIDLabel').textContent = `ID: ${auth.id}`;
             setTimeout(() => document.getElementById('fastPIN').focus(), 100);
@@ -354,15 +359,25 @@
 
     // ── FOTO DE PERFIL (Supabase Storage, bucket público 'avatares') ──
     function _aplicarFotoPerfil(url) {
+        // Avatar del Perfil
         const av = document.getElementById('perfilAvatar');
         const letra = document.getElementById('perfilLetra');
-        if (!av) return;
+        if (av) {
+            if (url) { av.style.backgroundImage = 'url("' + url + '")'; if (letra) letra.style.display = 'none'; }
+            else { av.style.backgroundImage = ''; if (letra) letra.style.display = ''; }
+        }
+        // Avatar del header (arriba, junto al nombre)
+        const hd = document.getElementById('userAvatar');
+        if (hd) {
+            if (url) { hd.style.backgroundImage = 'url("' + url + '")'; hd.style.backgroundSize = 'cover'; hd.style.backgroundPosition = 'center'; hd.textContent = ''; }
+            else { hd.style.backgroundImage = ''; }
+        }
+        // Guardar la foto en el auth local para mostrarla en el login la próxima vez
         if (url) {
-            av.style.backgroundImage = `url("${url}")`;
-            if (letra) letra.style.display = 'none';
-        } else {
-            av.style.backgroundImage = '';
-            if (letra) letra.style.display = '';
+            try {
+                const a = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
+                if (a.id && a.foto !== url) { a.foto = url; localStorage.setItem('visor_secure_auth', JSON.stringify(a)); }
+            } catch(e) {}
         }
     }
 
@@ -489,6 +504,7 @@
         const nombre = getDisplayName();
         document.getElementById('userNameLabel').textContent = nombre;
         document.getElementById('userAvatar').textContent = nombre.charAt(0).toUpperCase();
+        _aplicarFotoPerfil(currentUser && currentUser.FotoUrl ? currentUser.FotoUrl : '');
     }
     function openEditNameModal() {
         document.getElementById('editNameInput').value = getDisplayName();

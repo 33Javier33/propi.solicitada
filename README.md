@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-06 — Foto de perfil también en el login y en el header (SW v34)
+- La foto del socio ahora se muestra además en el **avatar del header** (arriba, junto al nombre) y en el **avatar del login** (acceso rápido), no solo en el Perfil.
+- La foto se guarda en el auth local (`visor_secure_auth.foto`) para poder mostrarla en la pantalla de ingreso antes de cargar los datos.
+- Archivos: `index.html` (id en avatar del login), `app.js` (_aplicarFotoPerfil cubre header+login, checkSecurity muestra la foto). SW v34.
+
+
 #### 2026-07-06 — Foto de perfil: elegir entre cámara o galería (SW v33)
 - Al tocar el avatar ahora aparece un menú: **Tomar foto** (abre la cámara, input con `capture=user`) o **Elegir de galería** (input sin capture).
 - Archivos: `index.html` (dos inputs + menú), `app.js` (abrirMenuFoto/cerrarMenuFoto). SW v33.
