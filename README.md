@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-06 — Mis Documentos: el socio adjunta documentos (SW v31)
+- En el Perfil se agregó **Mis Documentos**: el socio puede subir su contrato u otros archivos (PDF/imagen), verlos y eliminarlos.
+- Se almacenan en **Supabase Storage** (bucket privado `documentos`, base de socios) con metadatos en la tabla `documentos`. Visibles/recuperables desde socios-comicion.
+- Usa `dbSV.storage` (subida, URL firmada 1h para ver, borrado). Límite 15 MB por archivo.
+- Archivos: `index.html` (apartado en Perfil), `app.js` (cargar/subir/ver/borrar). SW v31.
+
+
 #### 2026-07-06 — Modal para pedir el RUT del socio (SW v30)
 - Al abrir la app, si el socio aún no tiene RUT registrado, aparece un modal solicitándolo (placeholder `11.111.111-?`), explicando que se usará para informes y certificados. Se pre-llena con el RUT de recuperación local si existe.
 - El RUT se valida (RUT chileno) y se guarda en Supabase (columna nueva `socios.rut`) vía acción `guardarRutSocio`; queda disponible en socios-comicion (Gestión de Socios y Certificados). El evento queda en auditoría.

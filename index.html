@@ -755,6 +755,24 @@
                         <span class="material-symbols-outlined" style="font-size:18px;color:#cbd5e1;margin-left:auto">chevron_right</span>
                     </button>
 
+                    <!-- MIS DOCUMENTOS -->
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">folder</span>
+                            </div>
+                            <div style="min-width:0;">
+                                <p style="font-size:14px;font-weight:800;color:#001723;margin:0;">Mis Documentos</p>
+                                <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;line-height:1.4;">Adjunta tu contrato u otros documentos (PDF o imagen)</p>
+                            </div>
+                        </div>
+                        <input type="file" id="docFileInput" accept="application/pdf,image/*" style="display:none" onchange="subirDocumento(this)">
+                        <button id="docUploadBtn" onclick="document.getElementById('docFileInput').click()" style="width:100%;background:#6366f1;color:#fff;border:none;border-radius:12px;padding:12px;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                            <span class="material-symbols-outlined" style="font-size:18px;">upload_file</span> Subir documento
+                        </button>
+                        <div id="docsLista"></div>
+                    </div>
+
                 </div>
             </div>
         </div>

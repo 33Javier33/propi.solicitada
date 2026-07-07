@@ -348,7 +348,81 @@
         document.getElementById('perfilAntigMsg').textContent = anos < 1
             ? 'Primer año — bienvenido al equipo 👋'
             : 'Con ' + anos + ' año' + (anos === 1 ? '' : 's') + ' en el casino, tienes ' + pts + ' puntos asignados en el reparto.';
+        cargarDocumentos();
     }
+
+    // ── MIS DOCUMENTOS (Supabase Storage) ─────────────────────
+    function _escDoc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    async function cargarDocumentos() {
+        const cont = document.getElementById('docsLista');
+        if (!currentUser || !cont) return;
+        cont.innerHTML = '<p style="text-align:center;color:#94a3b8;font-size:12px;padding:10px;">Cargando…</p>';
+        try {
+            const { data } = await dbSV.from('documentos').select('*').eq('socio_id', String(currentUser.ID)).order('created_at', { ascending: false });
+            renderDocumentos(data || []);
+        } catch(e) { cont.innerHTML = '<p style="text-align:center;color:#dc2626;font-size:12px;padding:10px;">Error al cargar</p>'; }
+    }
+
+    function renderDocumentos(docs) {
+        const cont = document.getElementById('docsLista');
+        if (!cont) return;
+        if (!docs.length) { cont.innerHTML = '<p style="text-align:center;color:#94a3b8;font-size:12px;padding:8px;">Aún no has subido documentos.</p>'; return; }
+        cont.innerHTML = docs.map(function(d) {
+            const kb = d.tamano ? Math.round(d.tamano/1024) : 0;
+            const icon = (d.mime||'').indexOf('pdf') >= 0 ? 'picture_as_pdf' : 'image';
+            return '<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:8px;">'
+                + '<span class="material-symbols-outlined" style="font-size:22px;color:#6366f1;">' + icon + '</span>'
+                + '<div style="flex:1;min-width:0;">'
+                + '<p style="font-size:12px;font-weight:700;color:#001723;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _escDoc(d.nombre_archivo || 'documento') + '</p>'
+                + '<p style="font-size:10px;color:#94a3b8;margin:1px 0 0;">' + kb + ' KB</p>'
+                + '</div>'
+                + '<button onclick="verDocumento(\'' + d.storage_path + '\')" style="background:#eef2ff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:#4338ca;cursor:pointer;">Ver</button>'
+                + '<button onclick="borrarDocumento(\'' + d.id + '\',\'' + d.storage_path + '\')" style="background:#fee2e2;border:none;border-radius:8px;padding:6px 8px;color:#dc2626;cursor:pointer;">🗑</button>'
+                + '</div>';
+        }).join('');
+    }
+
+    window.subirDocumento = async function(input) {
+        const file = input.files && input.files[0];
+        input.value = '';
+        if (!file || !currentUser) return;
+        if (file.size > 15 * 1024 * 1024) { alert('El archivo supera 15 MB.'); return; }
+        const btn = document.getElementById('docUploadBtn');
+        const prev = btn ? btn.innerHTML : '';
+        if (btn) { btn.disabled = true; btn.textContent = 'Subiendo…'; }
+        const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = 'socio/' + currentUser.ID + '/' + Date.now() + '_' + safe;
+        try {
+            const up = await dbSV.storage.from('documentos').upload(path, file, { contentType: file.type, upsert: false });
+            if (up.error) throw up.error;
+            await dbSV.from('documentos').insert({
+                id: crypto.randomUUID(), socio_id: String(currentUser.ID),
+                socio_nombre: ((currentUser.Nombre||'') + ' ' + (currentUser.Apellido||'')).trim(),
+                categoria: 'socio', nombre_archivo: file.name, storage_path: path,
+                mime: file.type, tamano: file.size, subido_por: 'socio'
+            });
+            await cargarDocumentos();
+        } catch(e) { alert('No se pudo subir el documento: ' + (e.message || e)); }
+        finally { if (btn) { btn.disabled = false; btn.innerHTML = prev; } }
+    };
+
+    window.verDocumento = async function(path) {
+        try {
+            const { data, error } = await dbSV.storage.from('documentos').createSignedUrl(path, 3600);
+            if (error) throw error;
+            window.open(data.signedUrl, '_blank');
+        } catch(e) { alert('No se pudo abrir el documento.'); }
+    };
+
+    window.borrarDocumento = async function(id, path) {
+        if (!confirm('¿Eliminar este documento?')) return;
+        try {
+            await dbSV.storage.from('documentos').remove([path]);
+            await dbSV.from('documentos').delete().eq('id', id);
+            await cargarDocumentos();
+        } catch(e) { alert('No se pudo eliminar.'); }
+    };
 
     // ── NOMBRE PERSONALIZADO ─────────────────────────────────
     function getDisplayName() {
