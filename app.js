@@ -92,10 +92,21 @@
         fetch(`${SCRIPT_URL_RECAUDACIONES}?action=ping`).catch(()=>{});
     };
 
+    // Muestra el botón "Contactar a La Comisión Propina" SOLO cuando no hay
+    // una cuenta activa vinculada en el dispositivo (usuario nuevo sin acceso).
+    function _toggleLoginCTA() {
+        const cta = document.getElementById('loginCTA');
+        if (!cta) return;
+        let auth = {};
+        try { auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}'); } catch (e) {}
+        cta.style.display = auth.id ? 'none' : 'flex';
+    }
+
     // ── SECURITY / LOGIN ──────────────────────────────────────
     function checkSecurity() {
         const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
         document.getElementById('loginOverlay').classList.remove('hidden');
+        _toggleLoginCTA();
         if (auth.id && auth.rut) {
             document.getElementById('fastAccessBox').classList.remove('hidden');
             document.getElementById('setupBox').classList.add('hidden');
@@ -115,6 +126,7 @@
     function switchToSetup() {
         document.getElementById('fastAccessBox').classList.add('hidden');
         document.getElementById('setupBox').classList.remove('hidden');
+        _toggleLoginCTA();
     }
 
     function cambiarUsuario() {
@@ -130,6 +142,7 @@
             document.getElementById('setupBox').classList.add('hidden');
             document.getElementById('fastAccessBox').classList.remove('hidden');
         } else { alert("Debe vincular una cuenta primero."); }
+        _toggleLoginCTA();
     }
 
     // ── RUT HELPERS ───────────────────────────────────────────

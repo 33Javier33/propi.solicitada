@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — El botón "Contactar a La Comisión Propina" solo aparece sin cuenta activa (SW v45)
+- **Cambio de comportamiento:** el botón de WhatsApp del login ahora **solo se muestra cuando NO hay una cuenta activa vinculada** en el dispositivo (usuario nuevo, pantalla "Vincular Cuenta"). Si el socio ya tiene su cuenta (acceso rápido con PIN) o ya ingresó, el botón **desaparece**.
+- Implementación: el CTA (`#loginCTA`) arranca oculto y `_toggleLoginCTA()` lo muestra solo si no existe `auth.id` en `visor_secure_auth`. Se re-evalúa en `checkSecurity`, `switchToSetup` y `cancelRecovery`.
+- Archivos: `index.html` (`id="loginCTA"` + oculto por defecto), `app.js` (`_toggleLoginCTA`). SW v45.
+
+
 #### 2026-07-07 — Notificaciones push al teléfono (SW v44)
 - **Nueva funcionalidad:** el socio puede activar **notificaciones push** desde **Perfil → "Activar notificaciones"**. Recibe avisos en el teléfono **aunque la app esté cerrada** para: **mensajes del administrador** y **egresos procesados/rechazados** (ambos llegan como mensaje del administrador).
 - **Arquitectura:** Web Push (VAPID) + Service Worker. La suscripción del navegador se guarda en la tabla `push_subscriptions` (proyecto socios). Un **trigger** en `mensajes_admin` (pg_net) llama a la **Edge Function `push-notify`**, que envía el push con `web-push` a las suscripciones del socio.
