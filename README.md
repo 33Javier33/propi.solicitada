@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-06 — Aviso de nueva versión arriba + auto-actualización a los 15s (SW v36)
+- El aviso de "Nueva versión disponible" ahora aparece **arriba** (antes abajo, tapado por el teclado), con **cuenta regresiva de 15s**: si el usuario no toca "Actualizar", se aplica sola.
+- Muestra un texto de **novedades** de la versión (`APP_NOVEDADES`, editable por release).
+- El SW ya no hace `skipWaiting` automático en install: espera el mensaje `SKIP_WAITING` (del botón o del temporizador) para activar, así no reinicia sin avisar. Fallback de recarga por si no dispara `controllerchange`.
+- Archivos: `index.html` (banner arriba + lógica 15s), `sw.js` (install sin skipWaiting + listener de mensaje). SW v36.
+
+
 #### 2026-07-06 — Aviso informativo: foto de perfil y documentos (SW v35)
 - Al abrir la app aparece una vez (por dispositivo) un modal explicando que desde el Perfil pueden **agregar su foto** y **enviar documentos** (como el contrato). Botón "Ir a mi Perfil" que abre la sección.
 - Se muestra sin encimarse con otros modales (RUT/ayuda). Flag `propi_info_perfil_v1`.

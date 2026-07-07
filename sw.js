@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boveda-personal-v35';
+const CACHE_NAME = 'boveda-personal-v36';
 
 const urlsToCache = [
     'index.html',
@@ -10,13 +10,17 @@ const urlsToCache = [
     'img/icon-512x512.png'
 ];
 
-// 1. Install — cachear archivos y activar inmediatamente
+// 1. Install — cachear archivos. NO activa de inmediato: espera a que el banner
+//    (o el auto-update de 15s) mande SKIP_WAITING, para no reiniciar sin avisar.
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(urlsToCache))
-            .then(() => self.skipWaiting()) // activa de inmediato sin esperar
+        caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
     );
+});
+
+// Activar la nueva versión cuando la app lo pida (botón Actualizar o auto a los 15s)
+self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // 2. Activate — limpiar cachés viejos y tomar control de todas las pestañas
