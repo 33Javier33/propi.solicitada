@@ -353,6 +353,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Temas de la app: Claro / Oscuro / Rosa (SW v37)
+- **Nueva funcionalidad:** el usuario puede personalizar la apariencia de la app desde **Perfil → "Tema de la app"**. Tres opciones: **Claro** (por defecto, el de siempre), **Oscuro** y **Rosa** (tema femenino).
+- La elección se guarda como **memoria** en `localStorage` (`propi_tema`) y se aplica automáticamente al abrir la app, en cualquier dispositivo donde se haya elegido.
+- **Cómo funciona:** los colores de Tailwind `lm-*`/`wa-*` se convirtieron a variables CSS con canales RGB (`rgb(var(--lm-x) / <alpha-value>)`), conservando los modificadores de opacidad (`bg-lm-primary/10`). Cada tema redefine esas variables con `:root[data-theme="claro|oscuro|rosa"]`.
+- El tema Oscuro además sobreescribe los estilos inline con color fijo (tarjetas `#fff`, textos `#001723`, inputs, divisores) mediante reglas de mayor peso, para que Perfil y modales se vean correctamente en oscuro.
+- Se aplica el tema **antes del render** con un script inline en `<head>` (evita el parpadeo/FOUC) y se actualiza el `theme-color` de la barra del navegador según el tema.
+- Archivos: `index.html` (config Tailwind con variables, script early-theme, tarjeta selector en Perfil), `app.css` (variables `:root` por tema + overrides de oscuro + estilos del selector), `app.js` (`window.aplicarTema`, `_temaActual`, `_sincronizarTemaBtns`). SW v37.
+
+
 #### 2026-07-06 — Aviso de nueva versión arriba + auto-actualización a los 15s (SW v36)
 - El aviso de "Nueva versión disponible" ahora aparece **arriba** (antes abajo, tapado por el teclado), con **cuenta regresiva de 15s**: si el usuario no toca "Actualizar", se aplica sola.
 - Muestra un texto de **novedades** de la versión (`APP_NOVEDADES`, editable por release).

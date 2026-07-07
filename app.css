@@ -1,6 +1,95 @@
+        /* ═══════════════════════════════════════════════════════════
+           TEMAS DE LA APP — variables de color (canales RGB)
+           Se aplican con <html data-theme="claro|oscuro|rosa">.
+           Claro es el tema por defecto.
+        ═══════════════════════════════════════════════════════════ */
+        :root, :root[data-theme="claro"] {
+            --lm-bg:          248 249 250;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      225 227 228;
+            --lm-primary:     0 23 35;
+            --lm-primary-mid: 0 45 64;
+            --lm-accent:      38 75 95;
+            --lm-secondary:   0 106 98;
+            --lm-tertiary:    112 93 0;
+            --lm-green:       0 106 98;
+            --lm-red:         186 26 26;
+            --lm-yellow:      112 93 0;
+            --lm-muted:       114 120 125;
+            --lm-subtle:      243 244 245;
+            --lm-high:        231 232 233;
+            --wa-bg:          229 221 213;
+            --wa-mine:        217 253 211;
+            --wa-other:       255 255 255;
+            /* helpers para estilos inline */
+            --color-card:    #ffffff;
+            --color-subtle:  #f1f5f9;
+            --app-bg:        #f8f9fa;
+            --nav-bg:        rgba(248,249,250,0.92);
+            --nav-border:    rgba(0,0,0,0.07);
+            --glass-bg:      rgba(248,249,250,0.90);
+        }
+
+        /* ── TEMA ROSA (femenino, claro) ── */
+        :root[data-theme="rosa"] {
+            --lm-bg:          255 245 248;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      245 214 226;
+            --lm-primary:     157 23 77;
+            --lm-primary-mid: 190 24 93;
+            --lm-accent:      219 39 119;
+            --lm-secondary:   190 24 93;
+            --lm-tertiary:    159 18 57;
+            --lm-green:       0 128 105;
+            --lm-red:         190 24 60;
+            --lm-yellow:      161 98 7;
+            --lm-muted:       150 110 125;
+            --lm-subtle:      253 242 248;
+            --lm-high:        250 232 240;
+            --wa-bg:          250 232 240;
+            --wa-mine:        252 231 243;
+            --wa-other:       255 255 255;
+            --color-card:    #ffffff;
+            --color-subtle:  #fdf2f8;
+            --app-bg:        #fff5f8;
+            --nav-bg:        rgba(255,245,248,0.94);
+            --nav-border:    rgba(157,23,77,0.10);
+            --glass-bg:      rgba(255,245,248,0.92);
+        }
+
+        /* ── TEMA OSCURO ── */
+        :root[data-theme="oscuro"] {
+            --lm-bg:          15 23 42;
+            --lm-surface:     30 41 59;
+            --lm-card:        30 41 59;
+            --lm-border:      51 65 85;
+            --lm-primary:     96 165 250;
+            --lm-primary-mid: 59 130 246;
+            --lm-accent:      147 197 253;
+            --lm-secondary:   52 211 153;
+            --lm-tertiary:    250 204 21;
+            --lm-green:       52 211 153;
+            --lm-red:         248 113 113;
+            --lm-yellow:      250 204 21;
+            --lm-muted:       148 163 184;
+            --lm-subtle:      51 65 85;
+            --lm-high:        71 85 105;
+            --wa-bg:          15 23 42;
+            --wa-mine:        6 78 59;
+            --wa-other:       30 41 59;
+            --color-card:    #1e293b;
+            --color-subtle:  #334155;
+            --app-bg:        #0f172a;
+            --nav-bg:        rgba(15,23,42,0.94);
+            --nav-border:    rgba(255,255,255,0.08);
+            --glass-bg:      rgba(15,23,42,0.90);
+        }
+
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         html { height: 100%; }
-        body { background: #f8f9fa; color: #191c1d; font-family: 'Inter', sans-serif; overflow: hidden; height: 100%; min-height: max(884px, 100dvh); }
+        body { background: var(--app-bg, #f8f9fa); color: #191c1d; font-family: 'Inter', sans-serif; overflow: hidden; height: 100%; min-height: max(884px, 100dvh); transition: background 0.25s; }
 
         /* ── SAFE AREA INSETS (iOS notch / Dynamic Island / Home indicator) ── */
         .pt-safe-top {
@@ -48,10 +137,10 @@
 
         /* ── GLASSMORPHISM (light) ── */
         .glass {
-            background: rgba(248,249,250,0.90);
+            background: var(--glass-bg, rgba(248,249,250,0.90));
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+            border-bottom: 1px solid var(--nav-border, rgba(0,0,0,0.06));
         }
 
         /* ── TOAST ── */
@@ -291,10 +380,80 @@
             box-shadow: 0 3px 10px rgba(99,102,241,0.3);
         }
 
+        /* ── SELECTOR DE TEMA ── */
+        .tema-btn { transition: border-color .18s, transform .12s, box-shadow .18s; }
+        .tema-btn:active { transform: scale(0.96); }
+        .tema-btn.active {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+        }
+        :root[data-theme="rosa"] .tema-btn.active {
+            border-color: #db2777 !important;
+            box-shadow: 0 0 0 3px rgba(219,39,119,0.18);
+        }
+        :root[data-theme="oscuro"] .tema-btn {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        :root[data-theme="oscuro"] .tema-btn span[style*="color:#334155"] { color: #cbd5e1 !important; }
+        :root[data-theme="oscuro"] .tema-btn.active {
+            border-color: #60a5fa !important;
+            box-shadow: 0 0 0 3px rgba(96,165,250,0.20);
+        }
+
         /* ── NAV BOTTOM ── */
         #bottomNav {
-            background: rgba(248,249,250,0.92);
+            background: var(--nav-bg, rgba(248,249,250,0.92));
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border-top: 1px solid rgba(0,0,0,0.07);
+            border-top: 1px solid var(--nav-border, rgba(0,0,0,0.07));
         }
+
+        /* ═══════════════════════════════════════════════════════════
+           TEMA OSCURO — ajustes para elementos con estilos inline
+           (los estilos inline con color fijo no siguen las variables,
+            así que se sobreescriben con reglas de mayor peso).
+        ═══════════════════════════════════════════════════════════ */
+        :root[data-theme="oscuro"] body { color: #e2e8f0; }
+
+        /* Tarjetas / superficies claras → superficie oscura */
+        :root[data-theme="oscuro"] [style*="background:#fff;"],
+        :root[data-theme="oscuro"] [style*="background:#ffffff"],
+        :root[data-theme="oscuro"] [style*="background:#f8fafc"],
+        :root[data-theme="oscuro"] [style*="background:#f8f9fa"],
+        :root[data-theme="oscuro"] [style*="background:#f0f2f5"],
+        :root[data-theme="oscuro"] [style*="background:#f9fafb"] {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        :root[data-theme="oscuro"] [style*="background:#f3f4f5"],
+        :root[data-theme="oscuro"] [style*="background:#f1f5f9"] {
+            background: #334155 !important;
+        }
+        /* Divisores claros */
+        :root[data-theme="oscuro"] [style*="border-bottom:1px solid #f1f5f9"],
+        :root[data-theme="oscuro"] [style*="border:1px solid #e2e8f0"],
+        :root[data-theme="oscuro"] [style*="border:1px solid #e1e3e4"] {
+            border-color: #334155 !important;
+        }
+        /* Texto oscuro → claro */
+        :root[data-theme="oscuro"] [style*="color:#001723"],
+        :root[data-theme="oscuro"] [style*="color:#1e293b"],
+        :root[data-theme="oscuro"] [style*="color:#191c1d"],
+        :root[data-theme="oscuro"] [style*="color:#0f172a"] {
+            color: #e2e8f0 !important;
+        }
+        :root[data-theme="oscuro"] [style*="color:#64748b"],
+        :root[data-theme="oscuro"] [style*="color:#72787d"],
+        :root[data-theme="oscuro"] [style*="color:#42484c"] {
+            color: #94a3b8 !important;
+        }
+        /* Inputs en oscuro */
+        :root[data-theme="oscuro"] input {
+            background: #334155 !important;
+            border-color: #475569 !important;
+            color: #e2e8f0 !important;
+        }
+        :root[data-theme="oscuro"] input::placeholder { color: #94a3b8 !important; }
+        /* Calendario en oscuro */
+        :root[data-theme="oscuro"] .unread-dot { border-color: #0f172a; }

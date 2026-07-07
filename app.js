@@ -355,7 +355,31 @@
             ? 'Primer año — bienvenido al equipo 👋'
             : 'Con ' + anos + ' año' + (anos === 1 ? '' : 's') + ' en el casino, tienes ' + pts + ' puntos asignados en el reparto.';
         cargarDocumentos();
+        _sincronizarTemaBtns();
     }
+
+    // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
+    const _TEMAS = ['claro', 'oscuro', 'rosa'];
+    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d' };
+    function _temaActual() {
+        let t = 'claro';
+        try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}
+        return _TEMAS.includes(t) ? t : 'claro';
+    }
+    function _sincronizarTemaBtns() {
+        const actual = _temaActual();
+        document.querySelectorAll('.tema-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-tema') === actual);
+        });
+    }
+    window.aplicarTema = function (nombre) {
+        if (!_TEMAS.includes(nombre)) nombre = 'claro';
+        document.documentElement.setAttribute('data-theme', nombre);
+        try { localStorage.setItem('propi_tema', nombre); } catch (e) {}
+        const m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', _TEMA_COLOR[nombre] || '#001723');
+        _sincronizarTemaBtns();
+    };
 
     // ── FOTO DE PERFIL (Supabase Storage, bucket público 'avatares') ──
     function _aplicarFotoPerfil(url) {

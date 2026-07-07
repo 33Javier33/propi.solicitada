@@ -23,25 +23,25 @@
             theme: {
                 extend: {
                     colors: {
-                        "lm-bg":          "#f8f9fa",
-                        "lm-surface":     "#ffffff",
-                        "lm-card":        "#ffffff",
-                        "lm-border":      "#e1e3e4",
-                        "lm-primary":     "#001723",
-                        "lm-primary-mid": "#002d40",
-                        "lm-accent":      "#264b5f",
-                        "lm-secondary":   "#006a62",
-                        "lm-tertiary":    "#705d00",
-                        "lm-green":       "#006a62",
-                        "lm-red":         "#ba1a1a",
-                        "lm-yellow":      "#705d00",
-                        "lm-muted":       "#72787d",
-                        "lm-subtle":      "#f3f4f5",
-                        "lm-high":        "#e7e8e9",
+                        "lm-bg":          "rgb(var(--lm-bg) / <alpha-value>)",
+                        "lm-surface":     "rgb(var(--lm-surface) / <alpha-value>)",
+                        "lm-card":        "rgb(var(--lm-card) / <alpha-value>)",
+                        "lm-border":      "rgb(var(--lm-border) / <alpha-value>)",
+                        "lm-primary":     "rgb(var(--lm-primary) / <alpha-value>)",
+                        "lm-primary-mid": "rgb(var(--lm-primary-mid) / <alpha-value>)",
+                        "lm-accent":      "rgb(var(--lm-accent) / <alpha-value>)",
+                        "lm-secondary":   "rgb(var(--lm-secondary) / <alpha-value>)",
+                        "lm-tertiary":    "rgb(var(--lm-tertiary) / <alpha-value>)",
+                        "lm-green":       "rgb(var(--lm-green) / <alpha-value>)",
+                        "lm-red":         "rgb(var(--lm-red) / <alpha-value>)",
+                        "lm-yellow":      "rgb(var(--lm-yellow) / <alpha-value>)",
+                        "lm-muted":       "rgb(var(--lm-muted) / <alpha-value>)",
+                        "lm-subtle":      "rgb(var(--lm-subtle) / <alpha-value>)",
+                        "lm-high":        "rgb(var(--lm-high) / <alpha-value>)",
                         /* chat */
-                        "wa-bg":          "#e5ddd5",
-                        "wa-mine":        "#d9fdd3",
-                        "wa-other":       "#ffffff",
+                        "wa-bg":          "rgb(var(--wa-bg) / <alpha-value>)",
+                        "wa-mine":        "rgb(var(--wa-mine) / <alpha-value>)",
+                        "wa-other":       "rgb(var(--wa-other) / <alpha-value>)",
                     },
                     fontFamily: {
                         "headline": ["Manrope"],
@@ -53,6 +53,19 @@
         }
     </script>
     <link rel="stylesheet" href="app.css">
+    <!-- Aplicar tema guardado antes del render para evitar parpadeo -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('propi_tema') || 'claro';
+                if (!['claro', 'oscuro', 'rosa'].includes(t)) t = 'claro';
+                document.documentElement.setAttribute('data-theme', t);
+                var tc = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d' };
+                var m = document.querySelector('meta[name="theme-color"]');
+                if (m) m.setAttribute('content', tc[t] || '#001723');
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body class="h-[100dvh] w-full flex flex-col">
 
@@ -764,6 +777,39 @@
                         <span class="material-symbols-outlined" style="font-size:18px;color:#cbd5e1;margin-left:auto">chevron_right</span>
                     </button>
 
+                    <!-- PERSONALIZACIÓN / TEMA -->
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">palette</span>
+                            </div>
+                            <div style="min-width:0;">
+                                <p style="font-size:14px;font-weight:800;color:#001723;margin:0;">Tema de la app</p>
+                                <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;line-height:1.4;">Elige tu apariencia favorita. Se guarda en este dispositivo.</p>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                            <button type="button" data-tema="claro" onclick="aplicarTema('claro')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f8f9fa,#e7e8e9);border:1px solid #cbd5e1;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#001723">light_mode</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Claro</span>
+                            </button>
+                            <button type="button" data-tema="oscuro" onclick="aplicarTema('oscuro')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #334155;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#60a5fa">dark_mode</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Oscuro</span>
+                            </button>
+                            <button type="button" data-tema="rosa" onclick="aplicarTema('rosa')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#fbcfe8,#db2777);border:1px solid #f5d6e2;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff">favorite</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Rosa</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- MIS DOCUMENTOS -->
                     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
@@ -910,7 +956,7 @@
         }
 
         // Novedades de esta versión (se muestran en el aviso). Actualizar en cada release.
-        var APP_NOVEDADES = 'Foto de perfil, envío de documentos y mejoras';
+        var APP_NOVEDADES = 'Nuevos temas: Claro, Oscuro y Rosa (en Perfil)';
         var _updWorker = null, _updTimer = null;
 
         function _aplicarActualizacion() {
