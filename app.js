@@ -546,7 +546,31 @@
         setInterval(pingConexion, 120000);
         // Pedir el RUT si el socio aún no lo tiene (para certificados/informes)
         setTimeout(checkRutRequired, 1400);
+        // Mostrar una vez el aviso de foto/documentos
+        setTimeout(checkInfoPerfil, 2400);
     }
+
+    // ── AVISO: foto de perfil y documentos (una vez por dispositivo) ──
+    function checkInfoPerfil() {
+        if (localStorage.getItem('propi_info_perfil_v1')) return;
+        // No encimar sobre otros modales que puedan estar abiertos
+        const otros = ['rutModal', 'helpModal', 'loginHelpModal', 'fotoMenuModal', 'editNameModal'];
+        for (let i = 0; i < otros.length; i++) {
+            const m = document.getElementById(otros[i]);
+            if (m && !m.classList.contains('hidden')) { setTimeout(checkInfoPerfil, 3000); return; }
+        }
+        localStorage.setItem('propi_info_perfil_v1', '1');
+        const m = document.getElementById('infoPerfilModal');
+        if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    }
+    window.cerrarInfoPerfil = function() {
+        const m = document.getElementById('infoPerfilModal');
+        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    };
+    window.irAMiPerfil = function() {
+        window.cerrarInfoPerfil();
+        try { switchTab('tab-perfil'); } catch(e) {}
+    };
 
     // ── SOLICITAR RUT (para certificados/informes en socios-comicion) ──
     function checkRutRequired() {

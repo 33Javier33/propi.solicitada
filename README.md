@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-06 — Aviso informativo: foto de perfil y documentos (SW v35)
+- Al abrir la app aparece una vez (por dispositivo) un modal explicando que desde el Perfil pueden **agregar su foto** y **enviar documentos** (como el contrato). Botón "Ir a mi Perfil" que abre la sección.
+- Se muestra sin encimarse con otros modales (RUT/ayuda). Flag `propi_info_perfil_v1`.
+- Archivos: `index.html` (modal), `app.js` (checkInfoPerfil/cerrarInfoPerfil/irAMiPerfil). SW v35.
+
+
 #### 2026-07-06 — Foto de perfil también en el login y en el header (SW v34)
 - La foto del socio ahora se muestra además en el **avatar del header** (arriba, junto al nombre) y en el **avatar del login** (acceso rápido), no solo en el Perfil.
 - La foto se guarda en el auth local (`visor_secure_auth.foto`) para poder mostrarla en la pantalla de ingreso antes de cargar los datos.

@@ -1716,7 +1716,31 @@
         setInterval(pingConexion, 120000);
         // Pedir el RUT si el socio aún no lo tiene (para certificados/informes)
         setTimeout(checkRutRequired, 1400);
+        // Mostrar una vez el aviso de foto/documentos
+        setTimeout(checkInfoPerfil, 2400);
     }
+
+    // ── AVISO: foto de perfil y documentos (una vez por dispositivo) ──
+    function checkInfoPerfil() {
+        if (localStorage.getItem('propi_info_perfil_v1')) return;
+        // No encimar sobre otros modales que puedan estar abiertos
+        const otros = ['rutModal', 'helpModal', 'loginHelpModal', 'fotoMenuModal', 'editNameModal'];
+        for (let i = 0; i < otros.length; i++) {
+            const m = document.getElementById(otros[i]);
+            if (m && !m.classList.contains('hidden')) { setTimeout(checkInfoPerfil, 3000); return; }
+        }
+        localStorage.setItem('propi_info_perfil_v1', '1');
+        const m = document.getElementById('infoPerfilModal');
+        if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    }
+    window.cerrarInfoPerfil = function() {
+        const m = document.getElementById('infoPerfilModal');
+        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    };
+    window.irAMiPerfil = function() {
+        window.cerrarInfoPerfil();
+        try { switchTab('tab-perfil'); } catch(e) {}
+    };
 
     // ── SOLICITAR RUT (para certificados/informes en socios-comicion) ──
     function checkRutRequired() {
@@ -4162,6 +4186,38 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         </button>
     </div>
 </div>
+<!-- MODAL INFORMATIVO: foto de perfil y documentos -->
+<div id="infoPerfilModal" class="hidden fixed inset-0 z-[355] bg-black/50 backdrop-blur-sm items-end justify-center" onclick="if(event.target===this)cerrarInfoPerfil()">
+    <div class="w-full max-w-sm rounded-t-[28px] p-6 shadow-2xl" style="background:var(--color-card,#fff)">
+        <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5"></div>
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <span class="material-symbols-outlined" style="font-size:28px;color:#6366f1">badge</span>
+        </div>
+        <h3 class="font-headline text-lg font-bold text-lm-primary mb-1 text-center">Completa tu perfil</h3>
+        <p class="text-xs text-lm-muted text-center mb-4" style="line-height:1.5;">Desde tu <b>Perfil</b> puedes:</p>
+
+        <div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;margin-bottom:10px;">
+            <span class="material-symbols-outlined" style="color:#6366f1;">photo_camera</span>
+            <div>
+                <p style="font-weight:700;color:#001723;font-size:13px;margin:0;">Agregar tu foto de perfil</p>
+                <p style="font-size:11px;color:#72787d;margin:2px 0 0;line-height:1.4;">Toca tu avatar y elige tomar una foto o subir una de tu galería.</p>
+            </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;margin-bottom:16px;">
+            <span class="material-symbols-outlined" style="color:#6366f1;">upload_file</span>
+            <div>
+                <p style="font-weight:700;color:#001723;font-size:13px;margin:0;">Enviar tus documentos</p>
+                <p style="font-size:11px;color:#72787d;margin:2px 0 0;line-height:1.4;">En "Mis Documentos" adjunta tu <b>contrato</b> u otros archivos (PDF o imagen).</p>
+            </div>
+        </div>
+
+        <button onclick="irAMiPerfil()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20 mb-3">
+            Ir a mi Perfil
+        </button>
+        <button onclick="cerrarInfoPerfil()" class="w-full py-3 rounded-2xl font-medium text-lm-muted text-sm">Más tarde</button>
+    </div>
+</div>
+
 <!-- MENÚ: FOTO DE PERFIL (cámara o galería) -->
 <div id="fotoMenuModal" class="hidden fixed inset-0 z-[360] bg-black/50 backdrop-blur-sm items-end justify-center" onclick="if(event.target===this)cerrarMenuFoto()">
     <div class="w-full max-w-sm rounded-t-[28px] p-5 shadow-2xl" style="background:var(--color-card,#fff)">
