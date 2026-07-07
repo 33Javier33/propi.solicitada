@@ -353,6 +353,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Guía de ayuda: botones "Recaudación del Día" y "Solicitar Egreso" (SW v42)
+- Se agregaron **2 diapositivas** a la guía (`helpSlides`), después de "Anticipos y Descuentos":
+  1. **Registrar la Recaudación del Día** — explica el botón morado del Balance: categorías, fecha, monto y divisor opcional.
+  2. **Solicitar un Egreso (anticipo)** — explica el botón celeste: pedir un anticipo con monto y motivo, el estado "pendiente" y cómo termina reflejado en el Balance.
+- Cada diapositiva incluye su `preview` visual acorde al estilo de la guía.
+- Archivos: `app.js` (helpSlides). SW v42.
+
+
 #### 2026-07-07 — Solicitud de Egreso (anticipo) desde la app (SW v41)
 - **Nueva funcionalidad:** en el Balance, junto a "Recaudación del Día", se agregó el botón **"Solicitar Egreso"**. Abre un modal donde el socio ingresa un **monto** y un **motivo** opcional, y envía la solicitud de **anticipo de propina**.
 - La solicitud se guarda como **PENDIENTE** en la tabla `solicitudes_egreso` (proyecto socios). En la app queda una tarjeta de estado ("Egreso solicitado · pendiente") mientras la administración no la procese.
