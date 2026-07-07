@@ -406,7 +406,58 @@
         setInterval(()=>refresh(false), 20000); // silencioso cada 20s
         setInterval(()=>refreshChat(false), 8000);
         setInterval(pingConexion, 120000);
+        // Pedir el RUT si el socio aún no lo tiene (para certificados/informes)
+        setTimeout(checkRutRequired, 1400);
     }
+
+    // ── SOLICITAR RUT (para certificados/informes en socios-comicion) ──
+    function checkRutRequired() {
+        if (!currentUser) return;
+        if (currentUser.Rut && String(currentUser.Rut).trim()) return; // ya lo tiene
+        // No encimar sobre el modal de ayuda si está abierto
+        const help = document.getElementById('helpModal');
+        if (help && !help.classList.contains('hidden')) { setTimeout(checkRutRequired, 3000); return; }
+        // Pre-llenar con el RUT de recuperación local, si existe
+        let pre = '';
+        try { const a = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}'); if (a.rut) pre = formatRUT(a.rut); } catch(e) {}
+        const inp = document.getElementById('rutModalInput');
+        if (inp) inp.value = pre;
+        const err = document.getElementById('rutModalError');
+        if (err) err.classList.add('hidden');
+        const m = document.getElementById('rutModal');
+        if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    }
+
+    window.closeRutModal = function() {
+        const m = document.getElementById('rutModal');
+        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    };
+
+    window.submitRut = async function() {
+        const inp = document.getElementById('rutModalInput');
+        const err = document.getElementById('rutModalError');
+        const btn = document.getElementById('rutModalBtn');
+        const raw = (inp.value || '').trim();
+        if (!validateRUT(raw)) { err.textContent = 'RUT no válido. Ej: 12.345.678-9'; err.classList.remove('hidden'); return; }
+        const rut = formatRUT(raw);
+        btn.disabled = true; btn.textContent = 'Guardando...';
+        try {
+            const res = await fetch(SCRIPT_URL_SOCIOS, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'guardarRutSocio', socioId: currentUser.ID, rut: rut, nombre: ((currentUser.Nombre||'') + ' ' + (currentUser.Apellido||'')).trim() })
+            });
+            const j = await res.json();
+            if (!j || !j.success) throw new Error((j && j.error) || 'Error');
+            currentUser.Rut = rut;
+            const s = allSocios.find(x => String(x.ID) === String(currentUser.ID)); if (s) s.Rut = rut;
+            btn.textContent = '✓ Guardado';
+            setTimeout(function() { window.closeRutModal(); btn.disabled = false; btn.textContent = 'Guardar RUT'; }, 700);
+            return;
+        } catch(e) {
+            err.textContent = 'No se pudo guardar, reintenta.'; err.classList.remove('hidden');
+        }
+        btn.disabled = false; btn.textContent = 'Guardar RUT';
+    };
 
     // ── SKELETON LOADERS ──────────────────────────────────────
     function showSkeletons() {

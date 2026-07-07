@@ -915,6 +915,31 @@
         </button>
     </div>
 </div>
+<!-- MODAL: SOLICITAR RUT (para certificados/informes) -->
+<div id="rutModal" class="hidden fixed inset-0 z-[350] bg-black/50 backdrop-blur-sm items-end justify-center">
+    <div class="bg-white w-full max-w-sm rounded-t-[28px] p-6 shadow-2xl" style="background:var(--color-card,#fff)">
+        <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5"></div>
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <span class="material-symbols-outlined" style="font-size:28px;color:#6366f1">badge</span>
+        </div>
+        <h3 class="font-headline text-lg font-bold text-lm-primary mb-1 text-center">Necesitamos tu RUT</h3>
+        <p class="text-xs text-lm-muted text-center mb-4" style="line-height:1.5;">
+            Se requiere tu RUT para completar tu información. Se usará en los <b>informes y certificados</b> que solicites.
+        </p>
+        <input id="rutModalInput" type="text" inputmode="text" maxlength="12"
+            class="w-full rounded-2xl py-4 px-5 font-medium text-base text-center mb-2"
+            placeholder="11.111.111-?"
+            onkeydown="if(event.key==='Enter') submitRut()" />
+        <div id="rutModalError" class="hidden text-center text-xs font-semibold mb-2" style="color:#dc2626;"></div>
+        <button id="rutModalBtn" onclick="submitRut()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20 mb-3 mt-2">
+            Guardar RUT
+        </button>
+        <button onclick="closeRutModal()" class="w-full py-3 rounded-2xl font-medium text-lm-muted text-sm transition-colors hover:text-lm-primary">
+            Ahora no
+        </button>
+    </div>
+</div>
+
 <!-- BANNER NUEVA VERSIÓN -->
 <div id="updateBanner" class="hidden fixed bottom-0 left-0 right-0 z-[500] items-center justify-between gap-3"
      style="background:#001723;padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,0.3);">

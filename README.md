@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-06 — Modal para pedir el RUT del socio (SW v30)
+- Al abrir la app, si el socio aún no tiene RUT registrado, aparece un modal solicitándolo (placeholder `11.111.111-?`), explicando que se usará para informes y certificados. Se pre-llena con el RUT de recuperación local si existe.
+- El RUT se valida (RUT chileno) y se guarda en Supabase (columna nueva `socios.rut`) vía acción `guardarRutSocio`; queda disponible en socios-comicion (Gestión de Socios y Certificados). El evento queda en auditoría.
+- Archivos: `index.html` (modal), `app.js` (checkRutRequired/submitRut), `supabase-api.js` (handler + map Rut). SW v30.
+
+
 #### 2026-07-05 — Auditoría: registrar quién ingresó la recaudación del día (SW v29)
 - Al registrar una recaudación desde la app, ahora se escribe un evento en la **auditoría de socios-comicion** (tabla `auditoria` de la base de socios, `dbSV`), con la acción "Registrar Recaudación".
 - Guarda quién la ingresó (`registrado_por_nombre` / `registrado_por_id`), tipo, fecha, monto y divisor. Aparece en el historial de auditoría de socios-comicion con origen `propi.solicitada`.

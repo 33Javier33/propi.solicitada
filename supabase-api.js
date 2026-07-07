@@ -94,7 +94,8 @@ async function _sociosHandler(url, options) {
                 Area: s.area, TipoContrato: s.contrato,
                 FechaIngreso: s.fecha_ingreso,
                 FechaInicioLiquidacion: s.fecha_inicio_puntos,
-                Puntos: s.puntos, PuntosActivos: s.puntos_activos, Activo: s.activo
+                Puntos: s.puntos, PuntosActivos: s.puntos_activos, Activo: s.activo,
+                Rut: s.rut || ''
             }));
             return _mockRes({ data: mapped });
         }
@@ -253,6 +254,25 @@ async function _sociosHandler(url, options) {
             // Pasar al GAS para notificación Telegram de desconexión
             _origFetch(url, options).catch(() => {});
             return _mockRes({ success: true });
+
+        // Guardar el RUT del socio (para certificados/informes). Se refleja en socios-comicion.
+        case 'guardarRutSocio': {
+            try {
+                const _sid = String(b.socioId || b.id || '');
+                const _rut = String(b.rut || '').trim();
+                if (!_sid || !_rut) return _mockRes({ success: false, error: 'Faltan datos' });
+                const { error } = await dbSV.from('socios').update({ rut: _rut }).eq('id', _sid);
+                if (error) return _mockRes({ success: false, error: error.message });
+                // Auditar en socios-comicion
+                dbSV.from('auditoria').insert({
+                    usuario: (b.nombre || 'Socio') + ' (app)',
+                    accion: 'Registrar RUT',
+                    folio: null,
+                    datos_extra: { detalle: 'RUT registrado desde propi.solicitada: ' + _rut, id_afectado: _sid, rut: _rut, origen: 'propi.solicitada' }
+                }).then(() => {}).catch(() => {});
+                return _mockRes({ success: true });
+            } catch (e) { return _mockRes({ success: false, error: e.message }); }
+        }
 
         // Historial anticipos: GAS (caché 1h) para archivados + Supabase para activos
         // GAS es la única fuente de histórico para evitar duplicados por naming (guión vs espacio)
