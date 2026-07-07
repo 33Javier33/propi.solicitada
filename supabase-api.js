@@ -91,6 +91,32 @@ async function _sociosHandler(url, options) {
 
     switch (action) {
 
+        // Solicitud de egreso (anticipo) hecha por el socio desde la app.
+        // Crea un registro PENDIENTE que la administración ve en socios-comicion.
+        case 'solicitarEgreso': {
+            const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('EGR-' + Date.now());
+            const { error } = await dbSV.from('solicitudes_egreso').insert({
+                id,
+                socio_id: String(b.socioId || ''),
+                socio_nombre: b.socioNombre || '',
+                monto: Number(b.monto) || 0,
+                nota: b.nota || '',
+                estado: 'PENDIENTE'
+            });
+            // Avisar en tiempo real a socios-comicion (si está escuchando)
+            if (!error) dbSV.channel('sv-egresos').send({ type: 'broadcast', event: 'nueva', payload: {} }).catch(() => {});
+            return _mockRes({ success: !error, error: error && error.message, id });
+        }
+
+        // Última solicitud de egreso PENDIENTE del socio (para mostrar el estado en la app)
+        case 'miSolicitudEgreso': {
+            const { data } = await dbSV.from('solicitudes_egreso')
+                .select('*').eq('socio_id', String(b.socioId || ''))
+                .eq('estado', 'PENDIENTE')
+                .order('created_at', { ascending: false }).limit(1);
+            return _mockRes({ data: (data || [])[0] || null });
+        }
+
         // Lista de socios activos (PascalCase para compatibilidad con app.js)
         case 'getSocios': {
             const { data } = await dbSV.from('socios').select('*').eq('activo', true).order('apellido');

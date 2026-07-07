@@ -572,6 +572,9 @@
         setTimeout(checkRutRequired, 1400);
         // Mostrar una vez el aviso de foto/documentos
         setTimeout(checkInfoPerfil, 2400);
+        // Estado de la solicitud de egreso pendiente
+        setTimeout(renderEgresoEstado, 1800);
+        setInterval(renderEgresoEstado, 30000);
     }
 
     // ── AVISO: foto de perfil y documentos (una vez por dispositivo) ──
@@ -1660,6 +1663,81 @@
         } catch(e) { showToast('Error al registrar', 'error'); }
         finally { btn.disabled = false; btn.textContent = 'Registrar Recaudación'; }
     };
+
+    // ── SOLICITUD DE EGRESO (anticipo de propina) ─────────────
+    window.abrirModalEgreso = () => {
+        if (!currentUser) return;
+        document.getElementById('egresoMonto').value = '';
+        document.getElementById('egresoNota').value = '';
+        document.getElementById('modalEgreso').style.display = 'flex';
+    };
+    window.cerrarModalEgreso = () => {
+        document.getElementById('modalEgreso').style.display = 'none';
+    };
+    window.fmtEgresoMonto = (inp) => {
+        const v = inp.value.replace(/\D/g, '');
+        inp.value = v ? '$' + parseInt(v).toLocaleString('es-ES') : '';
+    };
+
+    window.enviarEgreso = async () => {
+        if (!currentUser) return;
+        const monto = parseInt((document.getElementById('egresoMonto').value || '').replace(/\D/g, '')) || 0;
+        const nota = (document.getElementById('egresoNota').value || '').trim();
+        const btn = document.getElementById('btnEnviarEgreso');
+        if (!monto) { btn.textContent = 'Ingresa un monto'; setTimeout(() => btn.textContent = 'Enviar solicitud', 1600); return; }
+        btn.disabled = true; btn.textContent = 'Enviando...';
+        try {
+            const res = await fetch(SCRIPT_URL_SOCIOS, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'solicitarEgreso',
+                    socioId: String(currentUser.ID),
+                    socioNombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim(),
+                    monto, nota
+                })
+            });
+            const json = await res.json();
+            if (json.success) {
+                btn.textContent = '✓ Solicitud enviada';
+                setTimeout(() => { cerrarModalEgreso(); btn.textContent = 'Enviar solicitud'; renderEgresoEstado(); }, 1100);
+            } else {
+                btn.textContent = 'Error, reintenta';
+                setTimeout(() => btn.textContent = 'Enviar solicitud', 1800);
+            }
+        } catch (e) {
+            btn.textContent = 'Error de conexión';
+            setTimeout(() => btn.textContent = 'Enviar solicitud', 1800);
+        } finally { btn.disabled = false; }
+    };
+
+    // Muestra la tarjeta con la solicitud de egreso pendiente del socio (si la hay)
+    async function renderEgresoEstado() {
+        const box = document.getElementById('egresoEstadoBox');
+        if (!box || !currentUser) return;
+        try {
+            const res = await fetch(SCRIPT_URL_SOCIOS, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'miSolicitudEgreso', socioId: String(currentUser.ID) })
+            });
+            const s = (await res.json()).data;
+            if (!s) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+            const montoTxt = '$' + (Number(s.monto) || 0).toLocaleString('es-CL');
+            box.innerHTML = `
+              <div style="background:#e0f2fe;border:1px solid #7dd3fc;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+                <div style="width:36px;height:36px;border-radius:10px;background:rgba(2,132,199,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                  <span class="material-symbols-outlined" style="font-size:20px;color:#0284c7">hourglass_top</span>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12px;font-weight:800;color:#075985">Egreso solicitado · pendiente</div>
+                  <div style="font-size:11px;color:#0369a1;margin-top:1px">${montoTxt} — a la espera de que la administración lo procese</div>
+                </div>
+              </div>`;
+            box.classList.remove('hidden');
+        } catch (e) { /* silencioso */ }
+    }
+    window.renderEgresoEstado = renderEgresoEstado;
 
     // ── MODAL HELPERS ─────────────────────────────────────────
     function toggleModal(id, show) {

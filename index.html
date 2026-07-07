@@ -445,13 +445,19 @@
                 <div id="detallesContables" class="bg-lm-card border border-lm-border rounded-[20px] overflow-hidden divide-y divide-lm-border shadow-sm"></div>
             </div>
 
-            <!-- INGRESAR RECAUDACION -->
-            <div class="px-4 mb-5">
-                <button onclick="abrirModalRec()" class="w-full py-3.5 rounded-[18px] flex items-center justify-center gap-3 font-semibold text-sm border transition-all active:scale-[0.98]" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
+            <!-- INGRESAR RECAUDACION + SOLICITAR EGRESO -->
+            <div class="px-4 mb-5 flex gap-2.5">
+                <button onclick="abrirModalRec()" class="flex-1 py-3.5 rounded-[18px] flex items-center justify-center gap-2 font-semibold text-[13px] border transition-all active:scale-[0.98]" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
                     <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    Ingresar Recaudación del Día
+                    Recaudación del Día
+                </button>
+                <button onclick="abrirModalEgreso()" class="flex-1 py-3.5 rounded-[18px] flex items-center justify-center gap-2 font-semibold text-[13px] border transition-all active:scale-[0.98]" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
+                    <span class="material-symbols-outlined text-[18px]">request_quote</span>
+                    Solicitar Egreso
                 </button>
             </div>
+            <!-- Estado de la solicitud de egreso pendiente (se llena por JS) -->
+            <div id="egresoEstadoBox" class="px-4 mb-5 hidden"></div>
 
             <!-- CALENDARIO BTN -->
             <div id="calendarBtnContainer" class="hidden px-4 mb-5">
@@ -873,6 +879,27 @@
 
             <button id="btnEnviarRec" onclick="enviarRec()" style="width:100%;padding:15px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
                 Registrar Recaudación
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL SOLICITAR EGRESO -->
+    <div id="modalEgreso" onclick="if(event.target===this)cerrarModalEgreso()" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-end">
+        <div style="background:#f8fafc;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;box-shadow:0 -8px 32px rgba(0,0,0,0.18);max-height:90vh;overflow-y:auto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <h3 style="font-size:1.05rem;font-weight:800;color:#1e293b">Solicitar Egreso</h3>
+                <button onclick="cerrarModalEgreso()" style="background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>
+            <p style="font-size:0.8rem;color:#64748b;line-height:1.45;margin-bottom:18px">Solicita un <b>anticipo de propina</b>. La administración recibirá tu solicitud como <b>pendiente</b> para procesarla.</p>
+
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Monto solicitado</p>
+            <input type="tel" id="egresoMonto" placeholder="$0" oninput="fmtEgresoMonto(this)" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:1.1rem;font-weight:700;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
+
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Motivo <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
+            <textarea id="egresoNota" rows="2" placeholder="Ej: gasto imprevisto" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:22px;resize:none;font-family:inherit"></textarea>
+
+            <button id="btnEnviarEgreso" onclick="enviarEgreso()" style="width:100%;padding:15px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
+                Enviar solicitud
             </button>
         </div>
     </div>

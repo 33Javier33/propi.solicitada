@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Solicitud de Egreso (anticipo) desde la app (SW v41)
+- **Nueva funcionalidad:** en el Balance, junto a "Recaudación del Día", se agregó el botón **"Solicitar Egreso"**. Abre un modal donde el socio ingresa un **monto** y un **motivo** opcional, y envía la solicitud de **anticipo de propina**.
+- La solicitud se guarda como **PENDIENTE** en la tabla `solicitudes_egreso` (proyecto socios). En la app queda una tarjeta de estado ("Egreso solicitado · pendiente") mientras la administración no la procese.
+- En **socios-comicion → Anticipos y Ausencias** aparece un aviso con los egresos pendientes; al tocar uno, se abre el socio con el monto pre-cargado para registrar el anticipo. Al registrarlo, la solicitud pasa a **PROCESADO** (realtime).
+- Archivos: `index.html` (botón + modal + tarjeta estado), `app.js` (`abrirModalEgreso`, `enviarEgreso`, `renderEgresoEstado`), `supabase-api.js` (acciones `solicitarEgreso` y `miSolicitudEgreso`). Nueva tabla Supabase `solicitudes_egreso` (RLS anon, realtime). SW v41.
+
+
 #### 2026-07-07 — Guía de ayuda: nuevas diapositivas de las últimas funciones (SW v40)
 - Se agregaron **4 diapositivas** a la guía (`helpSlides`), entre "Perfil" y "Seguridad":
   1. **Tu Foto de Perfil** — cómo subir foto desde cámara o galería y dónde aparece.
