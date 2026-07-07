@@ -29,6 +29,7 @@
             --nav-bg:        rgba(248,249,250,0.92);
             --nav-border:    rgba(0,0,0,0.07);
             --glass-bg:      rgba(248,249,250,0.90);
+            --chat-bg:       #e5ddd5;
         }
 
         /* ── TEMA ROSA (femenino, claro) ── */
@@ -57,6 +58,7 @@
             --nav-bg:        rgba(255,245,248,0.94);
             --nav-border:    rgba(157,23,77,0.10);
             --glass-bg:      rgba(255,245,248,0.92);
+            --chat-bg:       #f6dfe9;
         }
 
         /* ── TEMA OSCURO ── */
@@ -85,6 +87,7 @@
             --nav-bg:        rgba(15,23,42,0.94);
             --nav-border:    rgba(255,255,255,0.08);
             --glass-bg:      rgba(15,23,42,0.90);
+            --chat-bg:       #0b141a;
         }
 
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
@@ -169,7 +172,7 @@
         .unread-dot { position: absolute; top: 0px; right: 22%; width: 9px; height: 9px; background: #ba1a1a; border-radius: 50%; border: 2px solid #f8f9fa; }
 
         /* ── CHAT WHATSAPP (light) ── */
-        #chatMessages { background: #e5ddd5; }
+        #chatMessages { background: var(--chat-bg, #e5ddd5); }
 
         .wa-header {
             background: #001723;
@@ -457,3 +460,45 @@
         :root[data-theme="oscuro"] input::placeholder { color: #94a3b8 !important; }
         /* Calendario en oscuro */
         :root[data-theme="oscuro"] .unread-dot { border-color: #0f172a; }
+
+        /* ── CHAT en OSCURO (estilo WhatsApp dark) ── */
+        /* Burbujas y texto: alta especificidad + !important para ganarle a los
+           colores fijos e inline (color:inherit) de las burbujas. */
+        :root[data-theme="oscuro"] #chatMessages .msg-other .msg-bubble,
+        :root[data-theme="oscuro"] #chatMessages .msg-admin .msg-bubble {
+            background: #202c33 !important; color: #e9edef !important;
+        }
+        :root[data-theme="oscuro"] #chatMessages .msg-mine .msg-bubble {
+            background: #005c4b !important; color: #e9edef !important;
+        }
+        /* El texto del mensaje usa color:inherit — forzarlo claro */
+        :root[data-theme="oscuro"] #chatMessages .msg-bubble,
+        :root[data-theme="oscuro"] #chatMessages .msg-bubble div {
+            color: #e9edef !important;
+        }
+        /* Colas de las burbujas */
+        :root[data-theme="oscuro"] #chatMessages .msg-other .msg-bubble::after,
+        :root[data-theme="oscuro"] #chatMessages .msg-admin .msg-bubble::after {
+            border-bottom-color: #202c33 !important;
+        }
+        :root[data-theme="oscuro"] #chatMessages .msg-mine .msg-bubble::after {
+            border-bottom-color: #005c4b !important;
+        }
+        /* Nombre del autor (color inline oscuro → legible sobre burbuja oscura) */
+        :root[data-theme="oscuro"] #chatMessages .msg-bubble .wa-author { color: #53bdeb !important; }
+        /* Enlaces dentro del mensaje */
+        :root[data-theme="oscuro"] #chatMessages .msg-bubble a { color: #53bdeb !important; }
+        /* Hora (selector más específico que ".msg-bubble div") */
+        :root[data-theme="oscuro"] #chatMessages .msg-bubble .wa-time { color: #8696a0 !important; }
+        /* Separador de fecha */
+        :root[data-theme="oscuro"] #chatMessages .wa-date-sep span {
+            background: #182229 !important; color: #8696a0 !important;
+        }
+        /* Banner de mensaje fijado */
+        :root[data-theme="oscuro"] #pinnedBanner { background: #182229 !important; border-bottom-color: #f59e0b !important; }
+        :root[data-theme="oscuro"] #pinnedBanner * { color: #e9edef !important; }
+        /* Barra de entrada del chat */
+        :root[data-theme="oscuro"] #chatInputContainer,
+        :root[data-theme="oscuro"] #chatSpacer { background: #182229 !important; }
+        :root[data-theme="oscuro"] #chatInput { color: #e9edef !important; }
+        :root[data-theme="oscuro"] #chatInput:empty:before { color: #8696a0 !important; }

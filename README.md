@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Fix: chat legible en tema Oscuro (SW v39)
+- **Bug:** en tema Oscuro las burbujas del chat conservaban colores fijos (fondo claro y `color:inherit`), por lo que el texto de los mensajes quedaba casi invisible (letras claras sobre burbuja clara).
+- **Fix:** el chat ahora es *theme-aware*. El fondo del área de mensajes usa `--chat-bg` por tema (Claro beige, Rosa rosado, Oscuro `#0b141a`). En Oscuro se agregaron reglas de alta especificidad (`#chatMessages ...`) que fuerzan estilo tipo WhatsApp dark: burbujas `#202c33`/`#005c4b`, texto `#e9edef`, autor `#53bdeb`, hora `#8696a0`, colas, separador de fecha, banner fijado y barra de entrada.
+- Se cuidó la especificidad para que el color del autor/hora no fuera pisado por la regla general del cuerpo del mensaje.
+- Archivos: `app.css`. SW v39.
+
+
 #### 2026-07-07 — Fix: el chat ya no queda en blanco por fallos transitorios de Supabase (SW v38)
 - **Bug:** los handlers `getNotes` de `supabase-api.js` (chat Soporte → `notas_recaudacion`, chat Equipo → `chat_mensajes`) hacían `const { data } = await ...` **ignorando el error**. Si Supabase fallaba un instante (los proyectos tuvieron pausas/restauraciones recientes), la consulta devolvía error y el handler entregaba `[]`, dejando el chat **vacío** hasta el siguiente refetch exitoso.
 - **Fix:** ambos handlers ahora (1) **reintentan una vez** ante error y (2) si aun así falla, devuelven los **últimos mensajes leídos con éxito** (`_lastNotasRec` / `_lastChatSocial`) en vez de vaciar el chat. Un hipo transitorio ya no borra la conversación en pantalla.
