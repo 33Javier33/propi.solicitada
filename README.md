@@ -353,6 +353,16 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Guía de ayuda: nuevas diapositivas de las últimas funciones (SW v40)
+- Se agregaron **4 diapositivas** a la guía (`helpSlides`), entre "Perfil" y "Seguridad":
+  1. **Tu Foto de Perfil** — cómo subir foto desde cámara o galería y dónde aparece.
+  2. **Mis Documentos — Envía tu contrato** — adjuntar PDF/imagen (contrato u otros), privados.
+  3. **¿Por qué me pidieron el RUT?** — explica que sirve para recuperar el PIN y para los certificados; se guarda seguro y no vuelve a pedirse.
+  4. **Personaliza tu App — Temas** — elegir Claro / Oscuro / Rosa, guardado en el dispositivo.
+- Cada diapositiva incluye su `preview` visual acorde al estilo de la guía.
+- Archivos: `app.js` (helpSlides). SW v40.
+
+
 #### 2026-07-07 — Fix: chat legible en tema Oscuro (SW v39)
 - **Bug:** en tema Oscuro las burbujas del chat conservaban colores fijos (fondo claro y `color:inherit`), por lo que el texto de los mensajes quedaba casi invisible (letras claras sobre burbuja clara).
 - **Fix:** el chat ahora es *theme-aware*. El fondo del área de mensajes usa `--chat-bg` por tema (Claro beige, Rosa rosado, Oscuro `#0b141a`). En Oscuro se agregaron reglas de alta especificidad (`#chatMessages ...`) que fuerzan estilo tipo WhatsApp dark: burbujas `#202c33`/`#005c4b`, texto `#e9edef`, autor `#53bdeb`, hora `#8696a0`, colas, separador de fecha, banner fijado y barra de entrada.

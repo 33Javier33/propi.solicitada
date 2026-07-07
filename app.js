@@ -2847,6 +2847,83 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
               </div>`
         },
         {
+            icon: 'photo_camera',
+            color: '#6366f1',
+            title: 'Tu Foto de Perfil',
+            body: 'En <b>Perfil</b> puedes ponerte una foto. Toca tu <b>avatar</b> (o el botón de la cámara) y elige:<br><br>📷 <b>Tomar foto:</b> abre la cámara del celular al instante.<br>🖼️ <b>Elegir de galería:</b> busca una foto que ya tengas guardada.<br><br>Tu foto aparecerá en el <b>inicio de sesión</b>, arriba junto a tu nombre y en tu Perfil. La administración también la verá en Gestión de Socios, para reconocerte fácilmente.<br><br>Es totalmente opcional — si no subes ninguna, se muestra la inicial de tu nombre.',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:16px;text-align:center;">
+                <div style="position:relative;width:72px;margin:0 auto 10px;">
+                  <div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#001723,#006a62);display:flex;align-items:center;justify-content:center;"><span style="font-size:28px;font-weight:700;color:#fff">J</span></div>
+                  <div style="position:absolute;bottom:-3px;right:-3px;width:26px;height:26px;border-radius:50%;background:#6366f1;border:2px solid #fff;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:14px;color:#fff">photo_camera</span></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="display:flex;align-items:center;gap:8px;background:#f8f9fa;border:1px solid #e7e8e9;border-radius:12px;padding:9px 12px;"><span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">photo_camera</span><span style="font-size:12px;font-weight:600;color:#001723">Tomar foto</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;background:#f8f9fa;border:1px solid #e7e8e9;border-radius:12px;padding:9px 12px;"><span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">image</span><span style="font-size:12px;font-weight:600;color:#001723">Elegir de galería</span></div>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'folder',
+            color: '#6366f1',
+            title: 'Mis Documentos — Envía tu contrato',
+            body: 'En <b>Perfil → Mis Documentos</b> puedes adjuntar archivos y hacerlos llegar a la administración sin salir de la app.<br><br>📄 Toca <b>"Subir documento"</b> y elige un <b>PDF o una imagen</b> (por ejemplo, tu <b>contrato</b> firmado u otro papel que te pidan).<br><br>🔒 Tus documentos son <b>privados</b>: solo tú y la administración pueden verlos.<br><br>Ahí mismo verás la lista de lo que ya subiste, y puedes abrir o eliminar cada archivo.',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:16px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                  <div style="width:34px;height:34px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">folder</span></div>
+                  <div><div style="font-size:13px;font-weight:800;color:#001723">Mis Documentos</div><div style="font-size:10px;color:#94a3b8">Contrato u otros (PDF o imagen)</div></div>
+                </div>
+                <div style="background:#6366f1;color:#fff;border-radius:12px;padding:10px;font-size:12px;font-weight:700;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span>Subir documento</div>
+                <div style="display:flex;align-items:center;gap:8px;background:#f8f9fa;border:1px solid #e7e8e9;border-radius:12px;padding:9px 11px;">
+                  <span class="material-symbols-outlined" style="font-size:18px;color:#ba1a1a">picture_as_pdf</span>
+                  <div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:600;color:#001723">Contrato_2026.pdf</div><div style="font-size:9px;color:#94a3b8">Subido ✓</div></div>
+                  <span class="material-symbols-outlined" style="font-size:16px;color:#94a3b8">visibility</span>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'badge',
+            color: '#264b5f',
+            title: '¿Por qué me pidieron el RUT?',
+            body: 'La primera vez que abres la app te pedimos tu <b>RUT chileno</b>. Es un paso rápido y sirve para dos cosas importantes:<br><br>🔑 <b>Recuperar tu PIN:</b> si algún día lo olvidas, con tu RUT podrás recuperar el acceso.<br><br>📜 <b>Tus certificados:</b> el RUT se usa para generar tus certificados oficiales del Fondo con tus datos correctos.<br><br>Se guarda de forma segura. Una vez ingresado, <b>no vuelve a aparecer</b>. Si tienes algún problema, la administración también puede registrarlo por ti en Gestión de Socios.',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:18px;">
+                <div style="width:44px;height:44px;border-radius:13px;background:rgba(38,75,95,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><span class="material-symbols-outlined" style="font-size:22px;color:#264b5f">badge</span></div>
+                <div style="font-size:13px;font-weight:800;color:#001723;text-align:center;margin-bottom:3px;">Confirma tu RUT</div>
+                <div style="font-size:10px;color:#94a3b8;text-align:center;margin-bottom:12px;">Para recuperar tu PIN y tus certificados</div>
+                <div style="background:#f3f4f5;border:1px solid #c2c7cc;border-radius:12px;padding:11px;font-size:16px;color:#191c1d;text-align:center;letter-spacing:0.04em;margin-bottom:10px;">12.345.678-9</div>
+                <div style="background:#001723;border-radius:12px;padding:10px;font-size:12px;font-weight:700;color:#fff;text-align:center;">Guardar</div>
+              </div>`
+        },
+        {
+            icon: 'palette',
+            color: '#db2777',
+            title: 'Personaliza tu App — Temas',
+            body: '¿Quieres que la app se vea a tu gusto? En <b>Perfil → Tema de la app</b> puedes elegir entre tres estilos:<br><br>☀️ <b>Claro:</b> el estilo clásico, claro y limpio.<br>🌙 <b>Oscuro:</b> ideal para la noche o poca luz; cuida la vista.<br>🌸 <b>Rosa:</b> un tema en tonos rosados.<br><br>El tema que elijas <b>queda guardado en tu celular</b> y se aplica cada vez que abres la app. Puedes cambiarlo las veces que quieras.',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:16px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                  <div style="width:34px;height:34px;border-radius:10px;background:rgba(219,39,119,0.1);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:18px;color:#db2777">palette</span></div>
+                  <div><div style="font-size:13px;font-weight:800;color:#001723">Tema de la app</div><div style="font-size:10px;color:#94a3b8">Se guarda en este celular</div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                  <div style="border:2px solid #6366f1;border-radius:12px;padding:10px 6px;text-align:center;box-shadow:0 0 0 3px rgba(99,102,241,0.12);">
+                    <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#f8f9fa,#e7e8e9);border:1px solid #cbd5e1;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:16px;color:#001723">light_mode</span></div>
+                    <div style="font-size:10px;font-weight:700;color:#334155">Claro</div>
+                  </div>
+                  <div style="border:2px solid #e2e8f0;border-radius:12px;padding:10px 6px;text-align:center;">
+                    <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #334155;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:16px;color:#60a5fa">dark_mode</span></div>
+                    <div style="font-size:10px;font-weight:700;color:#334155">Oscuro</div>
+                  </div>
+                  <div style="border:2px solid #e2e8f0;border-radius:12px;padding:10px 6px;text-align:center;">
+                    <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#fbcfe8,#db2777);border:1px solid #f5d6e2;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:16px;color:#fff">favorite</span></div>
+                    <div style="font-size:10px;font-weight:700;color:#334155">Rosa</div>
+                  </div>
+                </div>
+              </div>`
+        },
+        {
             icon: 'lock',
             color: '#264b5f',
             title: 'Seguridad — Tu PIN',
