@@ -337,6 +337,7 @@
         const pts = (Number.isFinite(ptsSB) && ptsSB > 0) ? ptsSB : ptsFormula;
 
         document.getElementById('perfilLetra').textContent = nombre.charAt(0).toUpperCase();
+        _aplicarFotoPerfil(currentUser.FotoUrl || '');
         document.getElementById('perfilNombre').textContent = nombre;
         document.getElementById('perfilID').textContent = 'ID: ' + currentUser.ID;
         document.getElementById('perfilIDCard').textContent = currentUser.ID;
@@ -350,6 +351,44 @@
             : 'Con ' + anos + ' año' + (anos === 1 ? '' : 's') + ' en el casino, tienes ' + pts + ' puntos asignados en el reparto.';
         cargarDocumentos();
     }
+
+    // ── FOTO DE PERFIL (Supabase Storage, bucket público 'avatares') ──
+    function _aplicarFotoPerfil(url) {
+        const av = document.getElementById('perfilAvatar');
+        const letra = document.getElementById('perfilLetra');
+        if (!av) return;
+        if (url) {
+            av.style.backgroundImage = `url("${url}")`;
+            if (letra) letra.style.display = 'none';
+        } else {
+            av.style.backgroundImage = '';
+            if (letra) letra.style.display = '';
+        }
+    }
+
+    window.subirFotoPerfil = async function(input) {
+        const file = input.files && input.files[0];
+        input.value = '';
+        if (!file || !currentUser) return;
+        if (!/^image\//.test(file.type)) { alert('Selecciona una imagen.'); return; }
+        if (file.size > 8 * 1024 * 1024) { alert('La imagen supera 8 MB.'); return; }
+        try {
+            const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+            const path = 'socio/' + currentUser.ID + '.' + ext;
+            // upsert:true → reemplaza la foto anterior del socio
+            const up = await dbSV.storage.from('avatares').upload(path, file, { contentType: file.type, upsert: true });
+            if (up.error) throw up.error;
+            const pub = dbSV.storage.from('avatares').getPublicUrl(path);
+            // cache-busting para forzar recarga tras reemplazo
+            const url = pub.data.publicUrl + '?v=' + Date.now();
+            const res = await fetch(SCRIPT_URL_SOCIOS, { method: 'POST', body: JSON.stringify({ action: 'guardarFotoSocio', socioId: currentUser.ID, fotoUrl: url }) });
+            const j = await res.json();
+            if (!j || !j.success) throw new Error((j && j.error) || 'Error');
+            currentUser.FotoUrl = url;
+            const s = allSocios.find(x => String(x.ID) === String(currentUser.ID)); if (s) s.FotoUrl = url;
+            _aplicarFotoPerfil(url);
+        } catch(e) { alert('No se pudo subir la foto: ' + (e.message || e)); }
+    };
 
     // ── MIS DOCUMENTOS (Supabase Storage) ─────────────────────
     function _escDoc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }

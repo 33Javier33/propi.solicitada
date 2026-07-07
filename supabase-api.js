@@ -95,7 +95,7 @@ async function _sociosHandler(url, options) {
                 FechaIngreso: s.fecha_ingreso,
                 FechaInicioLiquidacion: s.fecha_inicio_puntos,
                 Puntos: s.puntos, PuntosActivos: s.puntos_activos, Activo: s.activo,
-                Rut: s.rut || ''
+                Rut: s.rut || '', FotoUrl: s.foto_url || ''
             }));
             return _mockRes({ data: mapped });
         }
@@ -270,6 +270,17 @@ async function _sociosHandler(url, options) {
                     folio: null,
                     datos_extra: { detalle: 'RUT registrado desde propi.solicitada: ' + _rut, id_afectado: _sid, rut: _rut, origen: 'propi.solicitada' }
                 }).then(() => {}).catch(() => {});
+                return _mockRes({ success: true });
+            } catch (e) { return _mockRes({ success: false, error: e.message }); }
+        }
+
+        // Guardar la URL de la foto de perfil del socio
+        case 'guardarFotoSocio': {
+            try {
+                const _sid = String(b.socioId || b.id || '');
+                if (!_sid) return _mockRes({ success: false, error: 'Faltan datos' });
+                const { error } = await dbSV.from('socios').update({ foto_url: b.fotoUrl || null }).eq('id', _sid);
+                if (error) return _mockRes({ success: false, error: error.message });
                 return _mockRes({ success: true });
             } catch (e) { return _mockRes({ success: false, error: e.message }); }
         }

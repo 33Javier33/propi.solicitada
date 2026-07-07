@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-06 — Foto de perfil del socio (SW v32)
+- En el Perfil, el socio puede **subir su foto** (toca el avatar o el botón de cámara). Se muestra como avatar.
+- Se guarda en **Supabase Storage** (bucket público `avatares`, ruta `socio/<id>.<ext>`, con upsert que reemplaza la anterior) y la URL pública queda en `socios.foto_url`. Se refleja en socios-comicion (Gestión de Socios).
+- Acción `guardarFotoSocio`. Archivos: `index.html` (avatar+cámara), `app.js` (subirFotoPerfil/_aplicarFotoPerfil), `supabase-api.js` (map FotoUrl + handler). SW v32.
+
+
 #### 2026-07-06 — Mis Documentos: el socio adjunta documentos (SW v31)
 - En el Perfil se agregó **Mis Documentos**: el socio puede subir su contrato u otros archivos (PDF/imagen), verlos y eliminarlos.
 - Se almacenan en **Supabase Storage** (bucket privado `documentos`, base de socios) con metadatos en la tabla `documentos`. Visibles/recuperables desde socios-comicion.
