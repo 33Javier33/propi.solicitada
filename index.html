@@ -676,14 +676,16 @@
                 <!-- Avatar y nombre -->
                 <div style="text-align:center;margin-bottom:24px;padding-top:8px;">
                     <div style="position:relative;width:88px;margin:0 auto 12px;">
-                        <div id="perfilAvatar" onclick="document.getElementById('fotoPerfilInput').click()" style="width:88px;height:88px;border-radius:24px;background:linear-gradient(135deg,#001723,#006a62);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,23,35,0.2);overflow:hidden;cursor:pointer;background-size:cover;background-position:center;">
+                        <div id="perfilAvatar" onclick="abrirMenuFoto()" style="width:88px;height:88px;border-radius:24px;background:linear-gradient(135deg,#001723,#006a62);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,23,35,0.2);overflow:hidden;cursor:pointer;background-size:cover;background-position:center;">
                             <span id="perfilLetra" style="font-size:32px;font-weight:700;color:#fff;font-family:inherit">?</span>
                         </div>
-                        <button onclick="document.getElementById('fotoPerfilInput').click()" title="Cambiar foto"
+                        <button onclick="abrirMenuFoto()" title="Cambiar foto"
                             style="position:absolute;bottom:-2px;right:-2px;width:30px;height:30px;border-radius:50%;background:#6366f1;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
                             <span class="material-symbols-outlined" style="font-size:16px;">photo_camera</span>
                         </button>
-                        <input type="file" id="fotoPerfilInput" accept="image/*" style="display:none" onchange="subirFotoPerfil(this)">
+                        <!-- Dos inputs: uno abre la cámara, otro la galería -->
+                        <input type="file" id="fotoPerfilCamara" accept="image/*" capture="user" style="display:none" onchange="subirFotoPerfil(this)">
+                        <input type="file" id="fotoPerfilGaleria" accept="image/*" style="display:none" onchange="subirFotoPerfil(this)">
                     </div>
                     <h2 id="perfilNombre" style="font-size:18px;font-weight:700;color:#001723;margin:0 0 4px">...</h2>
                     <span id="perfilID" style="font-size:11px;font-weight:600;color:#94a3b8;letter-spacing:0.05em"></span>
@@ -940,6 +942,24 @@
         </button>
     </div>
 </div>
+<!-- MENÚ: FOTO DE PERFIL (cámara o galería) -->
+<div id="fotoMenuModal" class="hidden fixed inset-0 z-[360] bg-black/50 backdrop-blur-sm items-end justify-center" onclick="if(event.target===this)cerrarMenuFoto()">
+    <div class="w-full max-w-sm rounded-t-[28px] p-5 shadow-2xl" style="background:var(--color-card,#fff)">
+        <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
+        <h3 class="font-headline text-base font-bold text-lm-primary mb-1 text-center">Foto de perfil</h3>
+        <p class="text-xs text-lm-muted text-center mb-4">Toma una foto o elige una de tu galería</p>
+        <button onclick="cerrarMenuFoto();document.getElementById('fotoPerfilCamara').click()" style="width:100%;display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;">
+            <span class="material-symbols-outlined" style="color:#6366f1;">photo_camera</span>
+            <span style="font-weight:700;color:#001723;font-size:14px;">Tomar foto</span>
+        </button>
+        <button onclick="cerrarMenuFoto();document.getElementById('fotoPerfilGaleria').click()" style="width:100%;display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;">
+            <span class="material-symbols-outlined" style="color:#6366f1;">image</span>
+            <span style="font-weight:700;color:#001723;font-size:14px;">Elegir de galería</span>
+        </button>
+        <button onclick="cerrarMenuFoto()" class="w-full py-3 rounded-2xl font-medium text-lm-muted text-sm">Cancelar</button>
+    </div>
+</div>
+
 <!-- MODAL: SOLICITAR RUT (para certificados/informes) -->
 <div id="rutModal" class="hidden fixed inset-0 z-[350] bg-black/50 backdrop-blur-sm items-end justify-center">
     <div class="bg-white w-full max-w-sm rounded-t-[28px] p-6 shadow-2xl" style="background:var(--color-card,#fff)">

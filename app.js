@@ -366,6 +366,15 @@
         }
     }
 
+    window.abrirMenuFoto = function() {
+        const m = document.getElementById('fotoMenuModal');
+        if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    };
+    window.cerrarMenuFoto = function() {
+        const m = document.getElementById('fotoMenuModal');
+        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    };
+
     window.subirFotoPerfil = async function(input) {
         const file = input.files && input.files[0];
         input.value = '';

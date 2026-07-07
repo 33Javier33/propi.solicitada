@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-06 — Foto de perfil: elegir entre cámara o galería (SW v33)
+- Al tocar el avatar ahora aparece un menú: **Tomar foto** (abre la cámara, input con `capture=user`) o **Elegir de galería** (input sin capture).
+- Archivos: `index.html` (dos inputs + menú), `app.js` (abrirMenuFoto/cerrarMenuFoto). SW v33.
+
+
 #### 2026-07-06 — Foto de perfil del socio (SW v32)
 - En el Perfil, el socio puede **subir su foto** (toca el avatar o el botón de cámara). Se muestra como avatar.
 - Se guarda en **Supabase Storage** (bucket público `avatares`, ruta `socio/<id>.<ext>`, con upsert que reemplaza la anterior) y la URL pública queda en `socios.foto_url`. Se refleja en socios-comicion (Gestión de Socios).
