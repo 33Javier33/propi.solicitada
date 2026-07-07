@@ -1142,6 +1142,10 @@
                     <button id="btnChatSocial" class="wa-mode-btn" onclick="setChatMode('SOCIAL')">
                         <span class="material-symbols-outlined text-[16px]">forum</span> Equipo
                     </button>
+                    <button id="btnChatPriv" class="wa-mode-btn" onclick="setChatMode('PRIV')" style="position:relative">
+                        <span class="material-symbols-outlined text-[16px]">shield_person</span> Admin
+                        <span id="privUnreadDot" style="display:none;position:absolute;top:3px;right:5px;width:8px;height:8px;background:#ff5252;border-radius:50%;border:2px solid #001723"></span>
+                    </button>
                 </div>
             </div>
 
@@ -1451,7 +1455,8 @@
     let allSocios=[], currentUser=null, messages={admin:[],social:[]},
         currentChatMode='ADMIN', currentSocialTarget={id:'TODOS',name:'Chat General'},
         lastMsgCount=parseInt(localStorage.getItem('lastMsgCountV19')||0),
-        globalDiasCalendar=[], userTypeGlobal='', editingMessageId=null;
+        globalDiasCalendar=[], userTypeGlobal='', editingMessageId=null,
+        adminPrivMsgs=[];
 
     // Datos de balance guardados globalmente para el comprobante
     let _lastBalance = {
@@ -2015,6 +2020,9 @@
         setInterval(()=>refresh(false), 20000); // silencioso cada 20s
         setInterval(()=>refreshChat(false), 8000);
         setInterval(pingConexion, 120000);
+        // Mensajes privados del administrador (carga + refresco + aviso)
+        setTimeout(()=>refreshAdminPriv(false), 2000);
+        setInterval(()=>refreshAdminPriv(false), 8000);
         // Pedir el RUT si el socio aún no lo tiene (para certificados/informes)
         setTimeout(checkRutRequired, 1400);
         // Mostrar una vez el aviso de foto/documentos
@@ -2544,16 +2552,92 @@
         currentChatMode=mode;
         document.getElementById('btnChatAdmin').className=mode==='ADMIN'?'wa-mode-btn active':'wa-mode-btn';
         document.getElementById('btnChatSocial').className=mode==='SOCIAL'?'wa-mode-btn active':'wa-mode-btn';
+        const bp=document.getElementById('btnChatPriv'); if(bp) bp.className=mode==='PRIV'?'wa-mode-btn active':'wa-mode-btn';
         if(mode==='SOCIAL') document.getElementById('socialBar').classList.remove('hidden');
         else document.getElementById('socialBar').classList.add('hidden');
         if(mode==='ADMIN') localStorage.setItem('_rec_last_seen', Date.now());
+        if(mode==='PRIV'){ _adminPrivMarkSeen(); refreshAdminPriv(true); }
         renderChat();
+    }
+
+    // ── MENSAJES PRIVADOS DEL ADMINISTRADOR (mensajes_admin) ──
+    function _adminPrivLastSeen(){ return parseInt(localStorage.getItem('_admin_priv_last_seen'))||0; }
+    function _adminPrivMarkSeen(){ localStorage.setItem('_admin_priv_last_seen', Date.now()); setTimeout(_adminPrivUpdateDot, 50); }
+    function _adminPrivUpdateDot(){
+        const seen=_adminPrivLastSeen();
+        const hay=(adminPrivMsgs||[]).some(m=>m.remitente==='ADMIN' && new Date(m.fecha).getTime()>seen);
+        const dot=document.getElementById('privUnreadDot'); if(dot) dot.style.display=hay?'block':'none';
+        if(hay){ const nb=document.getElementById('notifBadge'); if(nb) nb.classList.remove('hidden'); }
+    }
+
+    async function refreshAdminPriv(force){
+        if(!currentUser) return;
+        try{
+            const res=await fetch(SCRIPT_URL_SOCIOS,{method:'POST',body:JSON.stringify({action:'getAdminMsgs',socioId:String(currentUser.ID)})});
+            const data=(await res.json()).data||[];
+            // Conservar los optimistas aún no confirmados por el servidor
+            const pend=(adminPrivMsgs||[]).filter(m=>m._sending && !data.some(d=>d.mensaje===m.mensaje));
+            adminPrivMsgs=data.concat(pend);
+            if(currentChatMode==='PRIV'){ renderChatPriv(force); _adminPrivMarkSeen(); }
+            else _adminPrivUpdateDot();
+        }catch(e){ /* silencioso */ }
+    }
+
+    function renderChatPriv(forceScroll=true){
+        const container=document.getElementById('chatMessages');
+        if(!container) return;
+        const list=adminPrivMsgs||[];
+        if(!list.length){
+            container.innerHTML=`<div class="flex flex-col items-center justify-center h-full gap-3 opacity-40">
+                <span class="material-symbols-outlined text-5xl text-lm-muted">shield_person</span>
+                <p class="text-sm text-lm-muted text-center px-8">Aquí verás los mensajes privados<br>de la administración</p>
+            </div>`;
+            return;
+        }
+        const _TZ='America/Santiago';
+        const _clKey=f=>new Date(f).toLocaleDateString('es-CL',{timeZone:_TZ});
+        const _clLabel=f=>new Date(f).toLocaleDateString('es-ES',{timeZone:_TZ,weekday:'long',day:'numeric',month:'long'});
+        const _clTime=f=>new Date(f).toLocaleTimeString('es-CL',{timeZone:_TZ,hour:'2-digit',minute:'2-digit',hour12:false});
+        let lastDate='',html='';
+        list.forEach(n=>{
+            const isMine=n.remitente==='SOCIO';
+            const msgDate=_clKey(n.fecha);
+            if(msgDate!==lastDate){ lastDate=msgDate; html+=`<div class="wa-date-sep"><span>${_clLabel(n.fecha)}</span></div>`; }
+            const rowClass=isMine?'msg-row mine first-in-group':'msg-row other first-in-group';
+            const bubbleClass=isMine?'msg-mine':'msg-admin';
+            html+=`<div class="${rowClass}" style="${n._sending?'opacity:0.7':''}">
+                ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0"><div style="width:32px;height:32px;border-radius:50%;background:#264b5f;display:flex;align-items:center;justify-content:center;color:#fff"><span class="material-symbols-outlined" style="font-size:18px">shield_person</span></div></div>`:''}
+                <div class="msg-bubble ${bubbleClass}">
+                    ${!isMine?`<div class="wa-author" style="color:#264b5f">${escHtml(n.autor||'Administración')}</div>`:''}
+                    <div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(n.mensaje||'')}</div>
+                    <div class="wa-time"><span>${_clTime(n.fecha)}</span></div>
+                </div>
+            </div>`;
+        });
+        container.innerHTML=html;
+        if(forceScroll) container.scrollTop=container.scrollHeight;
+    }
+
+    async function handleSendPriv(texto){
+        const tempId='tmp_'+Date.now();
+        adminPrivMsgs.push({uuid:tempId,fecha:new Date().toISOString(),autor:currentUser.Nombre,remitente:'SOCIO',mensaje:texto,nota:texto,_sending:true});
+        renderChatPriv(true);
+        try{
+            await fetch(SCRIPT_URL_SOCIOS,{method:'POST',body:JSON.stringify({
+                action:'sendAdminMsg', socioId:String(currentUser.ID),
+                autor:(currentUser.Nombre+' '+currentUser.Apellido).trim(),
+                mensaje:texto, remitente:'SOCIO'
+            })});
+            const m=adminPrivMsgs.find(x=>x.uuid===tempId); if(m) m._sending=false;
+        }catch(e){}
+        setTimeout(()=>refreshAdminPriv(false),600);
     }
 
     // ── RENDER CHAT (WhatsApp style) ──────────────────────────
     let _lastChatSignature = '';
 
     function renderChat(forceScroll=true) {
+        if(currentChatMode==='PRIV') return renderChatPriv(forceScroll);
         const container=document.getElementById('chatMessages');
         let list=[];
 
@@ -2819,6 +2903,9 @@
         const btn = document.getElementById('sendBtn');
         btn.disabled = true;
         clearChatInput();
+
+        // Modo privado con la administración: ruta aislada
+        if (currentChatMode === 'PRIV') { await handleSendPriv(texto); btn.disabled = false; return; }
 
         const url    = currentChatMode === 'ADMIN' ? SCRIPT_URL_RECAUDACIONES : SCRIPT_URL_SOCIOS;
         const dest   = currentChatMode === 'ADMIN' ? 'ADMIN' : currentSocialTarget.id;
@@ -4384,6 +4471,35 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
                     <div style="background:#d9fdd3;border-radius:8px;border-bottom-right-radius:2px;padding:7px 10px;max-width:75%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
                       <div style="font-size:12px;color:#191c1d;">Muchas gracias!</div>
                       <div style="font-size:9px;color:rgba(0,106,98,0.65);text-align:right;margin-top:3px;display:flex;align-items:center;justify-content:flex-end;gap:2px;">10:25 <span class="material-symbols-outlined" style="font-size:11px;color:#006a62">done_all</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'shield_person',
+            color: '#264b5f',
+            title: 'Mensajes del Administrador (privado)',
+            body: 'Dentro de <b>Mensajes</b>, además de "Soporte" y "Equipo", tienes la pestaña <b>"Admin"</b> 🛡️.<br><br>Ahí llegan los <b>mensajes privados</b> que la administración te envía <b>solo a ti</b> — nadie más los ve.<br><br>💬 Puedes <b>responderle</b> directamente desde ahí, como una conversación normal.<br><br>🔴 Cuando tengas un mensaje nuevo del administrador, verás un <b>punto rojo</b> en la pestaña "Admin" y en el ícono de Mensajes.',
+            preview: `
+              <div style="border-radius:16px;overflow:hidden;border:1px solid #e1e3e4;">
+                <div style="background:#001723;padding:8px 10px;display:flex;gap:5px;">
+                  <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:8px;padding:6px;text-align:center;font-size:10px;font-weight:600;color:rgba(255,255,255,0.45);">Soporte</div>
+                  <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:8px;padding:6px;text-align:center;font-size:10px;font-weight:600;color:rgba(255,255,255,0.45);">Equipo</div>
+                  <div style="flex:1;background:rgba(255,255,255,0.18);border-radius:8px;padding:6px;text-align:center;font-size:10px;font-weight:700;color:#fff;position:relative;">Admin<span style="position:absolute;top:2px;right:6px;width:7px;height:7px;background:#ff5252;border-radius:50%;"></span></div>
+                </div>
+                <div style="background:#e5ddd5;padding:10px;">
+                  <div style="display:flex;justify-content:flex-start;margin-bottom:6px;">
+                    <div style="background:#fef3cd;border-radius:8px;border-bottom-left-radius:2px;padding:7px 10px;max-width:78%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                      <div style="font-size:10px;font-weight:800;color:#264b5f;margin-bottom:2px;">🛡️ Administración</div>
+                      <div style="font-size:12px;color:#191c1d;">Hola, pasa por oficina a firmar tu contrato.</div>
+                      <div style="font-size:9px;color:rgba(0,0,0,0.35);text-align:right;margin-top:3px;">09:15</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end;">
+                    <div style="background:#d9fdd3;border-radius:8px;border-bottom-right-radius:2px;padding:7px 10px;max-width:78%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                      <div style="font-size:12px;color:#191c1d;">Perfecto, voy en la tarde 👍</div>
+                      <div style="font-size:9px;color:rgba(0,106,98,0.65);text-align:right;margin-top:3px;">09:18</div>
                     </div>
                   </div>
                 </div>

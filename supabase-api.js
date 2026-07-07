@@ -16,6 +16,7 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
 // Supabase falla de forma transitoria, para NO dejar el chat en blanco.
 let _lastNotasRec = null;   // chat Soporte (notas_recaudacion)
 let _lastChatSocial = null; // chat Equipo (chat_mensajes)
+let _lastAdminMsgs = null;  // mensajes privados del administrador (mensajes_admin)
 
 // URLs originales de GAS — se mantienen en app.js tal cual
 const _GAS_SOCIOS = 'https://script.google.com/macros/s/AKfycbyr447pMQtsKoBfp8qTcB1uyE3rORhgPPmZM6Fgia3BgmIvtlZ_h04uGZrmx_HwubHQ/exec';
@@ -115,6 +116,35 @@ async function _sociosHandler(url, options) {
                 .eq('estado', 'PENDIENTE')
                 .order('created_at', { ascending: false }).limit(1);
             return _mockRes({ data: (data || [])[0] || null });
+        }
+
+        // Mensajes privados administrador ⇄ socio (tabla mensajes_admin)
+        case 'getAdminMsgs': {
+            let { data, error } = await dbSV.from('mensajes_admin')
+                .select('*').eq('socio_id', String(b.socioId || ''))
+                .neq('estado', 'DELETED').order('created_at', { ascending: true });
+            if (error) { // reintento único ante fallo transitorio
+                await new Promise(r => setTimeout(r, 400));
+                ({ data, error } = await dbSV.from('mensajes_admin')
+                    .select('*').eq('socio_id', String(b.socioId || ''))
+                    .neq('estado', 'DELETED').order('created_at', { ascending: true }));
+            }
+            if (error || !data) return _mockRes({ data: _lastAdminMsgs || [] });
+            const mapped = data.map(m => ({
+                uuid: m.id, fecha: m.created_at, autor: m.autor,
+                remitente: m.remitente, mensaje: m.mensaje, nota: m.mensaje
+            }));
+            _lastAdminMsgs = mapped;
+            return _mockRes({ data: mapped });
+        }
+        case 'sendAdminMsg': {
+            const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('MA-' + Date.now());
+            const { error } = await dbSV.from('mensajes_admin').insert({
+                id, socio_id: String(b.socioId || ''),
+                remitente: b.remitente || 'SOCIO',
+                autor: b.autor || '', mensaje: b.mensaje || ''
+            });
+            return _mockRes({ success: !error, error: error && error.message, id });
         }
 
         // Lista de socios activos (PascalCase para compatibilidad con app.js)

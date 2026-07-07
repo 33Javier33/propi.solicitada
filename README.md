@@ -353,6 +353,16 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Mensajes privados del Administrador (SW v43)
+- **Nueva funcionalidad:** en la pestaña **Mensajes** se agregó un tercer modo **"Admin" 🛡️** con la conversación **privada** entre el socio y la administración (solo ese socio la ve). El socio puede **leer y responder**.
+- Muestra un **punto rojo** en la pestaña "Admin" y en el ícono de Mensajes del nav cuando hay un mensaje nuevo del administrador.
+- Se implementó como un **modo aislado** (`renderChatPriv`/`handleSendPriv`/`refreshAdminPriv`) para no tocar la lógica de Soporte/Equipo.
+- Los mensajes que envía el responsable desde **socios-comicion → 💬 Mensajes** aparecen aquí.
+- Nueva diapositiva de ayuda explicando la pestaña "Admin".
+- Fuente: nueva tabla `mensajes_admin` (proyecto socios, RLS anon, realtime).
+- Archivos: `index.html` (botón modo + dot), `app.js` (render/send/refresh privados + helpSlide), `supabase-api.js` (acciones `getAdminMsgs`/`sendAdminMsg`). SW v43.
+
+
 #### 2026-07-07 — Guía de ayuda: botones "Recaudación del Día" y "Solicitar Egreso" (SW v42)
 - Se agregaron **2 diapositivas** a la guía (`helpSlides`), después de "Anticipos y Descuentos":
   1. **Registrar la Recaudación del Día** — explica el botón morado del Balance: categorías, fecha, monto y divisor opcional.
