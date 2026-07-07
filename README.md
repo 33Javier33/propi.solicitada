@@ -353,6 +353,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Notificaciones push al teléfono (SW v44)
+- **Nueva funcionalidad:** el socio puede activar **notificaciones push** desde **Perfil → "Activar notificaciones"**. Recibe avisos en el teléfono **aunque la app esté cerrada** para: **mensajes del administrador** y **egresos procesados/rechazados** (ambos llegan como mensaje del administrador).
+- **Arquitectura:** Web Push (VAPID) + Service Worker. La suscripción del navegador se guarda en la tabla `push_subscriptions` (proyecto socios). Un **trigger** en `mensajes_admin` (pg_net) llama a la **Edge Function `push-notify`**, que envía el push con `web-push` a las suscripciones del socio.
+- **iPhone:** las notificaciones web requieren que el socio **agregue la app a la pantalla de inicio** (instalarla como PWA) y la abra desde ahí; iOS no permite push en una pestaña de Safari. En Android/Chrome funcionan directo.
+- El SW ahora maneja los eventos `push` (muestra la notificación) y `notificationclick` (enfoca/abre la app).
+- Nueva diapositiva de ayuda explicando cómo activarlas (incluye el caso iPhone).
+- Archivos: `sw.js` (handlers push + v44), `app.js` (suscripción + botón + helpSlide), `supabase-api.js` (`savePushSub`/`deletePushSub`), `index.html` (botón en Perfil). Backend: tabla `push_subscriptions`, Edge Function `push-notify`, trigger en `mensajes_admin`. SW v44.
+
+
 #### 2026-07-07 — Mensajes privados del Administrador (SW v43)
 - **Nueva funcionalidad:** en la pestaña **Mensajes** se agregó un tercer modo **"Admin" 🛡️** con la conversación **privada** entre el socio y la administración (solo ese socio la ve). El socio puede **leer y responder**.
 - Muestra un **punto rojo** en la pestaña "Admin" y en el ícono de Mensajes del nav cuando hay un mensaje nuevo del administrador.

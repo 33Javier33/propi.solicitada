@@ -357,6 +357,7 @@
             : 'Con ' + anos + ' año' + (anos === 1 ? '' : 's') + ' en el casino, tienes ' + pts + ' puntos asignados en el reparto.';
         cargarDocumentos();
         _sincronizarTemaBtns();
+        _pushRefrescarEstado();
     }
 
     // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
@@ -579,6 +580,8 @@
         // Estado de la solicitud de egreso pendiente
         setTimeout(renderEgresoEstado, 1800);
         setInterval(renderEgresoEstado, 30000);
+        // Estado del botón de notificaciones push
+        setTimeout(_pushRefrescarEstado, 2600);
     }
 
     // ── AVISO: foto de perfil y documentos (una vez por dispositivo) ──
@@ -1821,6 +1824,99 @@
         } catch (e) { /* silencioso */ }
     }
     window.renderEgresoEstado = renderEgresoEstado;
+
+    // ── NOTIFICACIONES PUSH (Web Push) ─────────────────────────
+    const VAPID_PUBLIC_KEY = 'BFzJrgZgoGMHxdHbqCyiftayb-JINxQNy3ek3h1YRH9yoZQIBp7zfFgr8IG72rLkzRpBsLPY2XVvy5k4G_gA6RI';
+    function _urlB64ToUint8(base64) {
+        const pad = '='.repeat((4 - base64.length % 4) % 4);
+        const b = (base64 + pad).replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(b); const arr = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        return arr;
+    }
+    async function _guardarPushSub(sub) {
+        if (!currentUser) return;
+        try {
+            await fetch(SCRIPT_URL_SOCIOS, { method: 'POST', body: JSON.stringify({
+                action: 'savePushSub', socioId: String(currentUser.ID),
+                sub: sub.toJSON ? sub.toJSON() : sub, ua: navigator.userAgent
+            })});
+        } catch (e) { /* silencioso */ }
+    }
+    function _pushPintarBtn(activa, denegado) {
+        const btn = document.getElementById('btnNotif'); if (!btn) return;
+        const lbl = document.getElementById('btnNotifLabel');
+        const sub = document.getElementById('btnNotifSub');
+        const ic  = document.getElementById('btnNotifIcon');
+        if (denegado) {
+            if (lbl) lbl.textContent = 'Notificaciones bloqueadas';
+            if (sub) sub.textContent = 'Actívalas en los ajustes del navegador';
+            if (ic)  ic.textContent = 'notifications_off';
+            btn.dataset.on = 'no';
+        } else if (activa) {
+            if (lbl) lbl.textContent = 'Notificaciones activadas';
+            if (sub) sub.textContent = 'Toca para desactivarlas';
+            if (ic)  ic.textContent = 'notifications_active';
+            btn.dataset.on = 'si';
+        } else {
+            if (lbl) lbl.textContent = 'Activar notificaciones';
+            if (sub) sub.textContent = 'Recibe avisos aunque la app esté cerrada';
+            if (ic)  ic.textContent = 'notifications';
+            btn.dataset.on = 'no';
+        }
+    }
+    async function _pushRefrescarEstado() {
+        const btn = document.getElementById('btnNotif'); if (!btn) return;
+        if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+            btn.style.display = 'none'; return;
+        }
+        let activa = false;
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            activa = !!sub && Notification.permission === 'granted';
+            if (sub && currentUser) _guardarPushSub(sub); // mantener fresca la suscripción
+        } catch (e) {}
+        _pushPintarBtn(activa, Notification.permission === 'denied');
+    }
+    window.activarNotificaciones = async function () {
+        const btn = document.getElementById('btnNotif');
+        if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+            alert('Tu navegador no admite notificaciones.\n\n📱 En iPhone: primero agrega la app a la pantalla de inicio (Compartir → "Agregar a inicio") y ábrela desde ahí.');
+            return;
+        }
+        if (btn && btn.dataset.on === 'si') { await _desactivarNotificaciones(); return; }
+        try {
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') {
+                _pushPintarBtn(false, perm === 'denied');
+                if (perm === 'denied') alert('Bloqueaste las notificaciones. Puedes activarlas en los ajustes del navegador para este sitio.');
+                return;
+            }
+            const reg = await navigator.serviceWorker.ready;
+            let sub = await reg.pushManager.getSubscription();
+            if (!sub) {
+                sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: _urlB64ToUint8(VAPID_PUBLIC_KEY) });
+            }
+            await _guardarPushSub(sub);
+            _pushPintarBtn(true, false);
+        } catch (e) {
+            alert('No se pudieron activar las notificaciones.\n\n📱 En iPhone recuerda: agrega la app a la pantalla de inicio y ábrela desde ahí.');
+        }
+    };
+    async function _desactivarNotificaciones() {
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) {
+                const ep = sub.endpoint;
+                await sub.unsubscribe().catch(() => {});
+                try { await fetch(SCRIPT_URL_SOCIOS, { method: 'POST', body: JSON.stringify({ action: 'deletePushSub', endpoint: ep }) }); } catch (e) {}
+            }
+        } catch (e) {}
+        _pushPintarBtn(false, false);
+    }
+    window._pushRefrescarEstado = _pushRefrescarEstado;
 
     // ── MODAL HELPERS ─────────────────────────────────────────
     function toggleModal(id, show) {
@@ -3151,6 +3247,24 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
                     <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#fbcfe8,#db2777);border:1px solid #f5d6e2;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:16px;color:#fff">favorite</span></div>
                     <div style="font-size:10px;font-weight:700;color:#334155">Rosa</div>
                   </div>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'notifications_active',
+            color: '#0284c7',
+            title: 'Notificaciones en tu teléfono',
+            body: 'En <b>Perfil</b> puedes tocar <b>"Activar notificaciones"</b> para recibir avisos <b>aunque la app esté cerrada</b>:<br><br>🛡️ Mensajes del <b>administrador</b>.<br>💸 Cuando tu <b>egreso</b> es procesado o rechazado.<br><br>La primera vez el teléfono te pedirá <b>permiso</b>: toca "Permitir".<br><br>🍏 <b>En iPhone</b> es necesario primero <b>agregar la app a la pantalla de inicio</b> (botón Compartir → "Agregar a inicio") y abrirla desde ese ícono. Recién ahí funcionan las notificaciones.',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:16px;">
+                <div style="display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px;margin-bottom:12px;">
+                  <div style="width:34px;height:34px;border-radius:10px;background:rgba(14,165,233,0.12);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:18px;color:#0284c7">notifications_active</span></div>
+                  <div style="flex:1;"><div style="font-size:12px;font-weight:800;color:#001723">Notificaciones activadas</div><div style="font-size:10px;color:#94a3b8">Recibirás avisos en el teléfono</div></div>
+                  <div style="width:34px;height:20px;border-radius:12px;background:#0284c7;position:relative;"><div style="position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#fff;"></div></div>
+                </div>
+                <div style="display:flex;gap:9px;align-items:flex-start;background:#001723;border-radius:12px;padding:10px 12px;">
+                  <div style="width:26px;height:26px;border-radius:7px;background:#0284c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:15px;color:#fff">shield_person</span></div>
+                  <div style="min-width:0;"><div style="font-size:11px;font-weight:800;color:#fff">Administración</div><div style="font-size:10px;color:rgba(255,255,255,0.7);">Hola, pasa por oficina a firmar 👋</div></div>
                 </div>
               </div>`
         },

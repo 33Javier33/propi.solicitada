@@ -147,6 +147,25 @@ async function _sociosHandler(url, options) {
             return _mockRes({ success: !error, error: error && error.message, id });
         }
 
+        // Suscripción a notificaciones push (Web Push) del socio
+        case 'savePushSub': {
+            const sub = b.sub || {};
+            if (!sub.endpoint) return _mockRes({ success: false, error: 'sin endpoint' });
+            const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('PS-' + Date.now());
+            const { error } = await dbSV.from('push_subscriptions').upsert({
+                id, socio_id: String(b.socioId || ''),
+                endpoint: sub.endpoint,
+                p256dh: (sub.keys && sub.keys.p256dh) || '',
+                auth: (sub.keys && sub.keys.auth) || '',
+                user_agent: b.ua || ''
+            }, { onConflict: 'endpoint' });
+            return _mockRes({ success: !error, error: error && error.message });
+        }
+        case 'deletePushSub': {
+            if (b.endpoint) await dbSV.from('push_subscriptions').delete().eq('endpoint', b.endpoint);
+            return _mockRes({ success: true });
+        }
+
         // Lista de socios activos (PascalCase para compatibilidad con app.js)
         case 'getSocios': {
             const { data } = await dbSV.from('socios').select('*').eq('activo', true).order('apellido');
