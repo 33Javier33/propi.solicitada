@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Fix: no marcar "conectado" en Telegram al volver tras inactividad (SW v52)
+- **Bug:** al volver a la app después de los 15 min de inactividad, el `visibilitychange` hacía `pingConexion()` (enviaba "conectado" a Telegram) **antes** de verificar la inactividad, mostrando una reconexión falsa cuando en realidad la sesión se cerró por inactividad.
+- **Fix:** al volver, primero se verifica la inactividad; si ya expiró, se cierra la sesión **sin** enviar "conectado". Además `logout()` ahora envía la **desconexión** (`logoutConexion`) antes de limpiar el usuario, para que Telegram refleje el cierre.
+- Archivos: `app.js` (handler `visibilitychange` + `logout`). SW v52.
+
+
 #### 2026-07-07 — Actualización realmente silenciosa + no vuelve al login (SW v51)
 - **Bug 1 (volvía al login):** al aplicar una actualización, la recarga mostraba el login pidiendo el PIN. Ahora `checkSecurity` **auto-entra** si la sesión sigue viva (PIN de sesión en `sessionStorage`), salvo que haya expirado por inactividad (≥15 min). El cierre por inactividad/manual (`logout`) ahora **borra el PIN de sesión**, así tras inactividad sí se pide PIN (seguridad intacta).
 - **Bug 2 (el aviso reaparecía al Actualizar):** se quitó la recarga prematura (fallback de 1200 ms) que recargaba antes de que el nuevo SW activara. Ahora el botón "Actualizar" recarga **una sola vez** vía `controllerchange` (con red de seguridad a 3.5 s) y no reaparece.

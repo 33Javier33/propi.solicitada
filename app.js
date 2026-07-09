@@ -340,9 +340,15 @@
         if (document.visibilityState === 'hidden') {
             logoutConexion();
         } else {
-            // Al volver a la app: verificar si ya pasaron 15 min desde la última interacción
+            // Al volver a la app: revisar PRIMERO la inactividad. Si ya expiró (≥15 min),
+            // cerrar la sesión SIN marcar "conectado" en Telegram (se desconectó, no se reconectó).
+            const last = Number(localStorage.getItem(_INACT_KEY) || 0);
+            if (last && (Date.now() - last) >= INACTIVITY_LIMIT) {
+                _checkInactivity(); // cierra la sesión (envía la desconexión)
+                return;
+            }
+            // Sesión aún válida: marcar conexión activa y refrescar
             pingConexion();
-            _checkInactivity();
             if (currentUser) refresh(false);
         }
     });
@@ -2276,6 +2282,8 @@
 
     function logout() {
         if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
+        // Avisar la desconexión (Telegram) ANTES de limpiar el usuario
+        try { logoutConexion(); } catch(e) {}
         try { localStorage.removeItem(_INACT_KEY); } catch(e) {}
         // Al cerrar sesión (inactividad o manual) se exige el PIN de nuevo: borrar el PIN de sesión
         try { sessionStorage.removeItem('visor_secure_auth_sess'); } catch(e) {}
