@@ -353,6 +353,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Campana de notificaciones en el header (SW v53)
+- Nueva **campana** 🔔 en el header (junto al área/ayuda/salir) con un **badge del número de mensajes sin leer** de los tres canales.
+- Al **tocarla** despliega un **menú** con los mensajes sin leer (etiqueta del canal: Soporte / Equipo / Admin, autor, texto y hora).
+- Al **tocar un mensaje** lleva al canal correcto: Soporte→Soporte, Admin→Admin, y Equipo→Equipo abriendo la conversación del socio que escribió (o Chat General si era general).
+- No leídos = mensajes de otros posteriores a la última vez que abriste ese canal (marcas `_rec_last_seen`, `_social_last_seen`, `_admin_priv_last_seen`; se inicializan a "ahora" la primera vez para no contar el historial).
+- Archivos: `index.html` (campana + menú), `app.js` (`_getUnread`, `renderNotifBell`, `toggleNotifMenu`, `_irAMensaje`; enganchado a los ciclos de refresco). SW v53.
+
+
 #### 2026-07-07 — Fix: no marcar "conectado" en Telegram al volver tras inactividad (SW v52)
 - **Bug:** al volver a la app después de los 15 min de inactividad, el `visibilitychange` hacía `pingConexion()` (enviaba "conectado" a Telegram) **antes** de verificar la inactividad, mostrando una reconexión falsa cuando en realidad la sesión se cerró por inactividad.
 - **Fix:** al volver, primero se verifica la inactividad; si ya expiró, se cierra la sesión **sin** enviar "conectado". Además `logout()` ahora envía la **desconexión** (`logoutConexion`) antes de limpiar el usuario, para que Telegram refleje el cierre.

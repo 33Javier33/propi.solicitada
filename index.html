@@ -372,6 +372,14 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
+            <!-- Campana de notificaciones -->
+            <div style="position:relative;">
+                <button id="notifBell" onclick="toggleNotifMenu()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-lm-subtle text-lm-muted hover:text-lm-primary transition-colors border border-lm-border relative">
+                    <span class="material-symbols-outlined text-[18px]">notifications</span>
+                    <span id="notifBellBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;background:#ba1a1a;color:#fff;border-radius:9px;font-size:10px;font-weight:800;align-items:center;justify-content:center;line-height:1;">0</span>
+                </button>
+                <div id="notifMenu" style="display:none;position:absolute;top:46px;right:0;width:300px;max-width:86vw;max-height:62vh;overflow-y:auto;background:var(--color-card,#ffffff);border:1px solid var(--color-subtle,#e2e8f0);border-radius:16px;box-shadow:0 14px 44px rgba(0,0,0,0.20);z-index:250;padding:6px;"></div>
+            </div>
             <div class="flex items-center gap-1.5 bg-lm-subtle border border-lm-border rounded-xl px-3 py-1.5">
                 <div class="w-1.5 h-1.5 rounded-full bg-lm-green pulse-dot"></div>
                 <span id="userAreaLabel" class="text-[11px] text-lm-primary font-medium">...</span>
@@ -1016,7 +1024,7 @@
         }
 
         // Novedades de esta versión (se muestran en el aviso). Actualizar en cada release.
-        var APP_NOVEDADES = 'Mejoras internas y correcciones';
+        var APP_NOVEDADES = 'Campana de notificaciones de mensajes';
         var _updWorker = null, _updTimer = null, _updateApplying = false;
 
         // AUTO (15 s): silencioso — activa el nuevo SW sin recargar. Se aplica al reabrir la app.

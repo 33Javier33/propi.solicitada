@@ -634,6 +634,11 @@
         setInterval(renderEgresoEstado, 30000);
         // Estado del botón de notificaciones push
         setTimeout(_pushRefrescarEstado, 2600);
+        // Campana de notificaciones: inicializar marcas de "visto" a ahora si no existen
+        // (evita contar todo el historial como no leído la primera vez)
+        ['_rec_last_seen','_social_last_seen','_admin_priv_last_seen'].forEach(k=>{ if(localStorage.getItem(k)==null) localStorage.setItem(k, String(Date.now())); });
+        setTimeout(renderNotifBell, 1500);
+        setInterval(renderNotifBell, 15000);
     }
 
     // ── AVISO: foto de perfil y documentos (una vez por dispositivo) ──
@@ -815,6 +820,7 @@
 
             renderChat(forceRender);
             if (newTotal !== prevTotal) checkNotifications();
+            renderNotifBell();
 
         } catch(e) { console.error('Chat refresh error', e); }
         finally { chatRefreshing = false; }
@@ -869,6 +875,7 @@
                 try { messages.social = (await socialNotesRes.json()).data || []; } catch(e){ messages.social=[]; }
                 renderChat(false);
                 checkNotifications();
+                renderNotifBell();
             }).catch(e => console.error('Error cargando notas:', e));
 
             // ── Cálculo del balance (igual que antes) ────────────
@@ -1160,9 +1167,95 @@
         if(mode==='SOCIAL') document.getElementById('socialBar').classList.remove('hidden');
         else document.getElementById('socialBar').classList.add('hidden');
         if(mode==='ADMIN') localStorage.setItem('_rec_last_seen', Date.now());
+        if(mode==='SOCIAL') localStorage.setItem('_social_last_seen', Date.now());
         if(mode==='PRIV'){ _adminPrivMarkSeen(); refreshAdminPriv(true); }
         renderChat();
+        setTimeout(renderNotifBell, 250);
     }
+
+    // ── CAMPANA DE NOTIFICACIONES (mensajes sin leer de los 3 canales) ──
+    function _getUnread(){
+        const items=[]; if(!currentUser) return items;
+        const myId=String(currentUser.ID);
+        // Soporte (notas_recaudacion): notas no mías más nuevas que la última vista
+        const recSeen=parseInt(localStorage.getItem('_rec_last_seen'))||0;
+        (messages.admin||[]).forEach(n=>{
+            if(n._sending) return;
+            const t=new Date(n.fecha).getTime();
+            if(String(n.socId)!==myId && t>recSeen && (n.mensaje||n.nota||n.foto))
+                items.push({canal:'ADMIN',autor:n.autor||'Administración',texto:n.mensaje||n.nota||'',foto:n.foto,t,fecha:n.fecha});
+        });
+        // Equipo (chat_mensajes): mensajes hacia mí o al Chat General, no míos
+        const socSeen=parseInt(localStorage.getItem('_social_last_seen'))||0;
+        (messages.social||[]).forEach(n=>{
+            if(n._sending) return;
+            const nSoc=String(n.socId||''); const nDest=String(n.destinatario||'');
+            if(nSoc===myId) return;
+            const paraMi=nDest===myId, general=nDest==='TODOS';
+            const t=new Date(n.fecha).getTime();
+            if((paraMi||general) && t>socSeen && (n.mensaje||n.nota||n.foto))
+                items.push({canal:'SOCIAL',autor:n.autor||'Socio',texto:n.mensaje||n.nota||'',foto:n.foto,t,fecha:n.fecha,
+                    socioId: general?'TODOS':nSoc, socioName: general?'Chat General':(n.autor||'Socio')});
+        });
+        // Admin (mensajes_admin): mensajes del administrador no vistos
+        const privSeen=parseInt(localStorage.getItem('_admin_priv_last_seen'))||0;
+        (adminPrivMsgs||[]).forEach(n=>{
+            if(n._sending || n.remitente!=='ADMIN') return;
+            const t=new Date(n.fecha).getTime();
+            if(t>privSeen && (n.mensaje||n.foto))
+                items.push({canal:'PRIV',autor:n.autor||'Administración',texto:n.mensaje||'',foto:n.foto,t,fecha:n.fecha});
+        });
+        items.sort((a,b)=>b.t-a.t);
+        return items;
+    }
+    function renderNotifBell(){
+        const items=_getUnread();
+        const badge=document.getElementById('notifBellBadge');
+        if(badge){ if(items.length){ badge.textContent=items.length>99?'99+':String(items.length); badge.style.display='flex'; } else badge.style.display='none'; }
+        const menu=document.getElementById('notifMenu');
+        if(menu && menu.style.display==='block') _renderNotifMenu(items);
+    }
+    function _renderNotifMenu(items){
+        const menu=document.getElementById('notifMenu'); if(!menu) return;
+        window._notifItems=items;
+        const _t=f=>{ try{ return new Date(f).toLocaleString('es-CL',{timeZone:'America/Santiago',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}); }catch(e){ return ''; } };
+        const chip={ADMIN:{txt:'Soporte',col:'#6366f1'},SOCIAL:{txt:'Equipo',col:'#0ea5e9'},PRIV:{txt:'Admin',col:'#264b5f'}};
+        if(!items.length){ menu.innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;">Sin mensajes nuevos ✅</div>'; return; }
+        menu.innerHTML='<div style="padding:8px 10px;font-weight:800;font-size:12px;color:#64748b;">Mensajes sin leer ('+items.length+')</div>'+
+            items.map((it,i)=>{ const c=chip[it.canal]||chip.SOCIAL;
+                return `<div onclick="_irAMensaje(${i})" style="padding:9px 10px;border-radius:10px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--color-subtle,#f1f5f9)'" onmouseout="this.style.background='transparent'">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                        <span style="background:${c.col}22;color:${c.col};font-size:9px;font-weight:800;padding:1px 6px;border-radius:6px;">${c.txt}</span>
+                        <span style="font-size:12px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">${escHtml(it.autor)}</span>
+                        <span style="margin-left:auto;font-size:9px;color:#94a3b8;white-space:nowrap;">${_t(it.fecha)}</span>
+                    </div>
+                    <div style="font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml((it.texto||(it.foto?'📷 Foto':'')).slice(0,60))}</div>
+                </div>`;
+            }).join('');
+    }
+    window.toggleNotifMenu=function(){
+        const menu=document.getElementById('notifMenu'); if(!menu) return;
+        if(menu.style.display==='block'){ menu.style.display='none'; }
+        else { _renderNotifMenu(_getUnread()); menu.style.display='block'; }
+    };
+    window._irAMensaje=function(i){
+        const items=window._notifItems||[]; const it=items[i]; if(!it) return;
+        const menu=document.getElementById('notifMenu'); if(menu) menu.style.display='none';
+        switchTab('tab-chat');
+        setTimeout(()=>{
+            if(it.canal==='ADMIN') setChatMode('ADMIN');
+            else if(it.canal==='PRIV') setChatMode('PRIV');
+            else if(it.canal==='SOCIAL'){ setChatMode('SOCIAL'); if(typeof selectSocialTarget==='function') selectSocialTarget(it.socioId||'TODOS', it.socioName||'Chat General'); }
+            setTimeout(renderNotifBell, 300);
+        }, 60);
+    };
+    // Cerrar el menú al tocar fuera
+    document.addEventListener('click', e => {
+        const menu=document.getElementById('notifMenu'); const bell=document.getElementById('notifBell');
+        if(!menu || menu.style.display!=='block') return;
+        if(bell && bell.contains(e.target)) return;
+        if(!menu.contains(e.target)) menu.style.display='none';
+    });
 
     // ── MENSAJES PRIVADOS DEL ADMINISTRADOR (mensajes_admin) ──
     function _adminPrivLastSeen(){ return parseInt(localStorage.getItem('_admin_priv_last_seen'))||0; }
@@ -1184,6 +1277,7 @@
             adminPrivMsgs=data.concat(pend);
             if(currentChatMode==='PRIV'){ renderChatPriv(force); _adminPrivMarkSeen(); }
             else _adminPrivUpdateDot();
+            renderNotifBell();
         }catch(e){ /* silencioso */ }
     }
 
