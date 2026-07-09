@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Foto de perfil ampliable al tocarla (SW v46)
+- Al **tocar la foto de perfil** (en Perfil, en el header junto al nombre, y en el login) se abre un **lightbox** que la muestra en grande. Si no hay foto, tocar el avatar del Perfil abre el menú para agregarla (la inicial se mantiene como siempre si no sube foto — opcional).
+- Nuevo overlay `#fotoGrandeOverlay` + `verFotoGrande()`, `cerrarFotoGrande()`, `tapPerfilAvatar()`, `_authFoto()`.
+- Archivos: `index.html` (overlay + onclicks), `app.js`. SW v46.
+
+
 #### 2026-07-07 — El botón "Contactar a La Comisión Propina" solo aparece sin cuenta activa (SW v45)
 - **Cambio de comportamiento:** el botón de WhatsApp del login ahora **solo se muestra cuando NO hay una cuenta activa vinculada** en el dispositivo (usuario nuevo, pantalla "Vincular Cuenta"). Si el socio ya tiene su cuenta (acceso rápido con PIN) o ya ingresó, el botón **desaparece**.
 - Implementación: el CTA (`#loginCTA`) arranca oculto y `_toggleLoginCTA()` lo muestra solo si no existe `auth.id` en `visor_secure_auth`. Se re-evalúa en `checkSecurity`, `switchToSetup` y `cancelRecovery`.

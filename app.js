@@ -420,6 +420,27 @@
         }
     }
 
+    // ── Foto ampliada (lightbox) ──
+    window.verFotoGrande = function(url) {
+        if (!url) return;
+        const o = document.getElementById('fotoGrandeOverlay');
+        const im = document.getElementById('fotoGrandeImg');
+        if (!o || !im) return;
+        im.src = url; o.style.display = 'flex';
+    };
+    window.cerrarFotoGrande = function() {
+        const o = document.getElementById('fotoGrandeOverlay');
+        if (o) o.style.display = 'none';
+    };
+    window._authFoto = function() {
+        try { return (JSON.parse(localStorage.getItem('visor_secure_auth') || '{}')).foto || ''; } catch (e) { return ''; }
+    };
+    // Tocar el avatar del Perfil: si hay foto la agranda; si no, abre el menú para agregarla
+    window.tapPerfilAvatar = function() {
+        const url = currentUser && currentUser.FotoUrl;
+        if (url) verFotoGrande(url); else abrirMenuFoto();
+    };
+
     window.abrirMenuFoto = function() {
         const m = document.getElementById('fotoMenuModal');
         if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }

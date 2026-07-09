@@ -313,7 +313,7 @@
     <!-- FAST ACCESS / PIN -->
     <div id="fastAccessBox" class="w-full max-w-sm hidden">
         <div class="text-center mb-10">
-            <div id="fastAvatarBox" class="w-20 h-20 rounded-full bg-lm-high border-2 border-lm-primary/20 mx-auto mb-5 flex items-center justify-center shadow-xl shadow-lm-primary/10 overflow-hidden" style="background-size:cover;background-position:center;">
+            <div id="fastAvatarBox" onclick="verFotoGrande(_authFoto())" class="w-20 h-20 rounded-full bg-lm-high border-2 border-lm-primary/20 mx-auto mb-5 flex items-center justify-center shadow-xl shadow-lm-primary/10 overflow-hidden cursor-pointer" style="background-size:cover;background-position:center;">
                 <span id="fastAvatarIcon" class="text-3xl font-bold text-lm-primary font-headline">?</span>
             </div>
             <h2 id="fastName" class="font-headline text-2xl font-bold text-lm-primary">...</h2>
@@ -365,7 +365,7 @@
     <!-- HEADER -->
     <header class="px-5 pt-safe-top py-3.5 flex items-center justify-between shrink-0 glass z-20">
         <div class="flex items-center gap-3">
-            <div id="userAvatar" class="w-10 h-10 rounded-2xl bg-gradient-to-br from-lm-primary to-lm-accent flex items-center justify-center text-white font-bold text-base shadow-lg font-headline">?</div>
+            <div id="userAvatar" onclick="verFotoGrande((currentUser&&currentUser.FotoUrl)||'')" class="w-10 h-10 rounded-2xl bg-gradient-to-br from-lm-primary to-lm-accent flex items-center justify-center text-white font-bold text-base shadow-lg font-headline cursor-pointer">?</div>
             <div>
                 <p class="text-[10px] text-lm-muted font-medium">Bienvenido</p>
                 <h2 id="userNameLabel" onclick="openEditNameModal()" class="text-sm font-semibold text-lm-primary leading-tight cursor-pointer flex items-center gap-1">...<span class="material-symbols-outlined text-[13px] text-lm-muted" style="font-size:13px;">edit</span></h2>
@@ -699,7 +699,7 @@
                 <!-- Avatar y nombre -->
                 <div style="text-align:center;margin-bottom:24px;padding-top:8px;">
                     <div style="position:relative;width:88px;margin:0 auto 12px;">
-                        <div id="perfilAvatar" onclick="abrirMenuFoto()" style="width:88px;height:88px;border-radius:24px;background:linear-gradient(135deg,#001723,#006a62);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,23,35,0.2);overflow:hidden;cursor:pointer;background-size:cover;background-position:center;">
+                        <div id="perfilAvatar" onclick="tapPerfilAvatar()" style="width:88px;height:88px;border-radius:24px;background:linear-gradient(135deg,#001723,#006a62);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,23,35,0.2);overflow:hidden;cursor:pointer;background-size:cover;background-position:center;">
                             <span id="perfilLetra" style="font-size:32px;font-weight:700;color:#fff;font-family:inherit">?</span>
                         </div>
                         <button onclick="abrirMenuFoto()" title="Cambiar foto"
@@ -918,6 +918,12 @@
                 Enviar solicitud
             </button>
         </div>
+    </div>
+
+    <!-- LIGHTBOX: foto de perfil ampliada -->
+    <div id="fotoGrandeOverlay" onclick="cerrarFotoGrande()" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;padding:24px;flex-direction:column;gap:16px;">
+        <img id="fotoGrandeImg" src="" alt="Foto" style="max-width:100%;max-height:82vh;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.5);object-fit:contain;">
+        <button onclick="cerrarFotoGrande()" style="background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:1.3rem;cursor:pointer;">✕</button>
     </div>
 
     <nav id="bottomNav" class="fixed bottom-0 w-full z-[60] pb-safe-bottom">
