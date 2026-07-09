@@ -1007,24 +1007,35 @@
 
                 }).catch(e => console.warn('[SW] Error:', e));
 
-                // Si el SW fue activado, recargar para aplicar cambios
+                // Recargar SOLO cuando el usuario pidió actualizar (botón). El auto-update
+                // es silencioso: activa el nuevo SW en segundo plano sin recargar.
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    window.location.reload();
+                    if (_updateApplying) { _updateApplying = false; window.location.reload(); }
                 });
             });
         }
 
         // Novedades de esta versión (se muestran en el aviso). Actualizar en cada release.
-        var APP_NOVEDADES = 'Nuevos temas: Claro, Oscuro y Rosa (en Perfil)';
-        var _updWorker = null, _updTimer = null;
+        var APP_NOVEDADES = 'Mejoras internas y correcciones';
+        var _updWorker = null, _updTimer = null, _updateApplying = false;
 
-        function _aplicarActualizacion() {
+        // AUTO (15 s): silencioso — activa el nuevo SW sin recargar. Se aplica al reabrir la app.
+        function _actualizarSilencioso() {
             if (_updTimer) { clearInterval(_updTimer); _updTimer = null; }
             const banner = document.getElementById('updateBanner');
             if (banner) { banner.classList.add('hidden'); banner.classList.remove('flex'); }
             if (_updWorker) _updWorker.postMessage({ type: 'SKIP_WAITING' });
-            // Fallback: si por algún motivo no dispara controllerchange, recargar igual
-            setTimeout(function () { try { window.location.reload(); } catch (e) {} }, 1200);
+        }
+
+        // BOTÓN "Actualizar": aplica ahora. Recarga UNA vez (vía controllerchange) y la app
+        // vuelve a entrar sola sin pedir el PIN (la sesión sigue viva). No reaparece el aviso.
+        function _aplicarActualizacion() {
+            if (_updTimer) { clearInterval(_updTimer); _updTimer = null; }
+            const banner = document.getElementById('updateBanner');
+            if (banner) { banner.classList.add('hidden'); banner.classList.remove('flex'); }
+            if (_updWorker) { _updateApplying = true; _updWorker.postMessage({ type: 'SKIP_WAITING' }); }
+            // Red de seguridad: solo si controllerchange no dispara en 3.5 s
+            setTimeout(function () { if (_updateApplying) { _updateApplying = false; try { window.location.reload(); } catch (e) {} } }, 3500);
         }
 
         function showUpdateBanner(worker) {
@@ -1045,7 +1056,7 @@
                 restante--;
                 const c = document.getElementById('updateCountdown');
                 if (c) c.textContent = restante + 's';
-                if (restante <= 0) { clearInterval(_updTimer); _updTimer = null; _aplicarActualizacion(); }
+                if (restante <= 0) { clearInterval(_updTimer); _updTimer = null; _actualizarSilencioso(); }
             }, 1000);
 
             document.getElementById('updateBannerBtn').onclick = _aplicarActualizacion;

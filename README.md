@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Actualización realmente silenciosa + no vuelve al login (SW v51)
+- **Bug 1 (volvía al login):** al aplicar una actualización, la recarga mostraba el login pidiendo el PIN. Ahora `checkSecurity` **auto-entra** si la sesión sigue viva (PIN de sesión en `sessionStorage`), salvo que haya expirado por inactividad (≥15 min). El cierre por inactividad/manual (`logout`) ahora **borra el PIN de sesión**, así tras inactividad sí se pide PIN (seguridad intacta).
+- **Bug 2 (el aviso reaparecía al Actualizar):** se quitó la recarga prematura (fallback de 1200 ms) que recargaba antes de que el nuevo SW activara. Ahora el botón "Actualizar" recarga **una sola vez** vía `controllerchange` (con red de seguridad a 3.5 s) y no reaparece.
+- **Auto-update (15 s):** ahora es **realmente silencioso** — activa el nuevo SW en segundo plano **sin recargar**; se aplica al reabrir la app. La recarga automática por `controllerchange` solo ocurre si el usuario tocó "Actualizar".
+- Archivos: `app.js` (`checkSecurity` auto-login + `logout` limpia sesión), `index.html` (`_actualizarSilencioso`, `_aplicarActualizacion`, `controllerchange` guardado). SW v51.
+
+
 #### 2026-07-07 — Equipo: foto del socio en la lista de contactos y el chat (SW v50)
 - Al elegir con quién mensajear en **Equipo**, la **lista de contactos** ahora muestra la **foto** de cada socio (antes solo la inicial), y la **barra del destinatario** muestra su foto al seleccionarlo.
 - En las burbujas del chat Equipo, el avatar del emisor muestra su foto (se identifica por `socId`). Si el socio no tiene foto, se mantiene la inicial.

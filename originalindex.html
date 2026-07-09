@@ -1584,6 +1584,18 @@
     // ── SECURITY / LOGIN ──────────────────────────────────────
     function checkSecurity() {
         const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
+        // Auto-entrar sin pedir el PIN si la sesión sigue activa (ej: tras recargar por
+        // una actualización). El PIN de sesión vive en sessionStorage y sobrevive el reload.
+        // NO auto-entra si la sesión expiró por inactividad (≥15 min) → ahí sí pide PIN.
+        const sessPin = sessionStorage.getItem('visor_secure_auth_sess');
+        const _lastAct = Number(localStorage.getItem('propi_last_active') || 0);
+        const _expiroInact = _lastAct && (Date.now() - _lastAct) >= (15 * 60 * 1000);
+        if (auth.id && auth.rut && sessPin && !_expiroInact) {
+            const fp = document.getElementById('fastPIN');
+            if (fp) fp.value = sessPin;
+            handleFastLogin();
+            return;
+        }
         document.getElementById('loginOverlay').classList.remove('hidden');
         _toggleLoginCTA();
         if (auth.id && auth.rut) {
@@ -3744,6 +3756,8 @@
     function logout() {
         if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
         try { localStorage.removeItem(_INACT_KEY); } catch(e) {}
+        // Al cerrar sesión (inactividad o manual) se exige el PIN de nuevo: borrar el PIN de sesión
+        try { sessionStorage.removeItem('visor_secure_auth_sess'); } catch(e) {}
         currentUser = null;
         document.getElementById('appContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('flex');
@@ -4991,24 +5005,35 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
 
                 }).catch(e => console.warn('[SW] Error:', e));
 
-                // Si el SW fue activado, recargar para aplicar cambios
+                // Recargar SOLO cuando el usuario pidió actualizar (botón). El auto-update
+                // es silencioso: activa el nuevo SW en segundo plano sin recargar.
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    window.location.reload();
+                    if (_updateApplying) { _updateApplying = false; window.location.reload(); }
                 });
             });
         }
 
         // Novedades de esta versión (se muestran en el aviso). Actualizar en cada release.
-        var APP_NOVEDADES = 'Nuevos temas: Claro, Oscuro y Rosa (en Perfil)';
-        var _updWorker = null, _updTimer = null;
+        var APP_NOVEDADES = 'Mejoras internas y correcciones';
+        var _updWorker = null, _updTimer = null, _updateApplying = false;
 
-        function _aplicarActualizacion() {
+        // AUTO (15 s): silencioso — activa el nuevo SW sin recargar. Se aplica al reabrir la app.
+        function _actualizarSilencioso() {
             if (_updTimer) { clearInterval(_updTimer); _updTimer = null; }
             const banner = document.getElementById('updateBanner');
             if (banner) { banner.classList.add('hidden'); banner.classList.remove('flex'); }
             if (_updWorker) _updWorker.postMessage({ type: 'SKIP_WAITING' });
-            // Fallback: si por algún motivo no dispara controllerchange, recargar igual
-            setTimeout(function () { try { window.location.reload(); } catch (e) {} }, 1200);
+        }
+
+        // BOTÓN "Actualizar": aplica ahora. Recarga UNA vez (vía controllerchange) y la app
+        // vuelve a entrar sola sin pedir el PIN (la sesión sigue viva). No reaparece el aviso.
+        function _aplicarActualizacion() {
+            if (_updTimer) { clearInterval(_updTimer); _updTimer = null; }
+            const banner = document.getElementById('updateBanner');
+            if (banner) { banner.classList.add('hidden'); banner.classList.remove('flex'); }
+            if (_updWorker) { _updateApplying = true; _updWorker.postMessage({ type: 'SKIP_WAITING' }); }
+            // Red de seguridad: solo si controllerchange no dispara en 3.5 s
+            setTimeout(function () { if (_updateApplying) { _updateApplying = false; try { window.location.reload(); } catch (e) {} } }, 3500);
         }
 
         function showUpdateBanner(worker) {
@@ -5029,7 +5054,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
                 restante--;
                 const c = document.getElementById('updateCountdown');
                 if (c) c.textContent = restante + 's';
-                if (restante <= 0) { clearInterval(_updTimer); _updTimer = null; _aplicarActualizacion(); }
+                if (restante <= 0) { clearInterval(_updTimer); _updTimer = null; _actualizarSilencioso(); }
             }, 1000);
 
             document.getElementById('updateBannerBtn').onclick = _aplicarActualizacion;

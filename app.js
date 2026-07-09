@@ -105,6 +105,18 @@
     // ── SECURITY / LOGIN ──────────────────────────────────────
     function checkSecurity() {
         const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
+        // Auto-entrar sin pedir el PIN si la sesión sigue activa (ej: tras recargar por
+        // una actualización). El PIN de sesión vive en sessionStorage y sobrevive el reload.
+        // NO auto-entra si la sesión expiró por inactividad (≥15 min) → ahí sí pide PIN.
+        const sessPin = sessionStorage.getItem('visor_secure_auth_sess');
+        const _lastAct = Number(localStorage.getItem('propi_last_active') || 0);
+        const _expiroInact = _lastAct && (Date.now() - _lastAct) >= (15 * 60 * 1000);
+        if (auth.id && auth.rut && sessPin && !_expiroInact) {
+            const fp = document.getElementById('fastPIN');
+            if (fp) fp.value = sessPin;
+            handleFastLogin();
+            return;
+        }
         document.getElementById('loginOverlay').classList.remove('hidden');
         _toggleLoginCTA();
         if (auth.id && auth.rut) {
@@ -2265,6 +2277,8 @@
     function logout() {
         if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
         try { localStorage.removeItem(_INACT_KEY); } catch(e) {}
+        // Al cerrar sesión (inactividad o manual) se exige el PIN de nuevo: borrar el PIN de sesión
+        try { sessionStorage.removeItem('visor_secure_auth_sess'); } catch(e) {}
         currentUser = null;
         document.getElementById('appContainer').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('flex');
