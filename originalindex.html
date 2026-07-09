@@ -2800,6 +2800,7 @@
                 <div class="msg-bubble ${bubbleClass}">
                     ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${escHtml(authorName)}</div>`:''}
                     ${pinHtml}<div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
+                    ${n.foto ? `<img src="${(n.foto+'').replace(/"/g,'%22')}" onclick="verFotoGrande('${(n.foto+'').replace(/'/g,'%27')}')" style="max-width:200px;max-height:220px;border-radius:12px;margin-top:6px;object-fit:cover;cursor:zoom-in;display:block;">` : ''}
                     ${rxHtml}
                     <div class="wa-time">
                         <span>${msgTime}</span>

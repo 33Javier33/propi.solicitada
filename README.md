@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Ver foto en las notas de Soporte (SW v47)
+- Las notas del administrador (chat **Soporte**) ahora pueden traer una **foto**: si la nota tiene imagen, se muestra en la burbuja y **se amplía al tocarla** (lightbox).
+- La foto la adjunta la administración desde socios-comicion (sección Notas). Aquí solo se lee la URL (`notas_recaudacion.foto_url`).
+- Archivos: `supabase-api.js` (mapea `foto` en getNotes REC), `app.js` (render de la imagen en el chat). SW v47.
+
+
 #### 2026-07-07 — Foto de perfil ampliable al tocarla (SW v46)
 - Al **tocar la foto de perfil** (en Perfil, en el header junto al nombre, y en el login) se abre un **lightbox** que la muestra en grande. Si no hay foto, tocar el avatar del Perfil abre el menú para agregarla (la inicial se mantiene como siempre si no sube foto — opcional).
 - Nuevo overlay `#fotoGrandeOverlay` + `verFotoGrande()`, `cerrarFotoGrande()`, `tapPerfilAvatar()`, `_authFoto()`.
