@@ -672,7 +672,13 @@
                         <span class="material-symbols-outlined" style="font-size:16px">close</span>
                     </button>
                 </div>
+                <!-- Vista previa de la foto adjunta -->
+                <div id="chatFotoPreview" style="display:none; align-items:center; gap:8px; background:#fff; border:1px solid #e1e3e4; border-radius:12px; padding:6px 10px; margin-bottom:6px;"></div>
+                <input type="file" id="chatFotoInput" accept="image/*" style="display:none" onchange="chatAdjuntarFoto(this)">
                 <div style="display:flex; align-items:flex-end; gap:8px;">
+                    <button onclick="document.getElementById('chatFotoInput').click()" title="Adjuntar foto" style="width:44px;height:44px;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;">
+                        <span class="material-symbols-outlined" style="color:#6366f1;font-size:22px">photo_camera</span>
+                    </button>
                     <div style="flex:1; background:#ffffff; border-radius:22px; padding:10px 16px; display:flex; align-items:center; border:1px solid #e1e3e4; min-height:44px;">
                         <div id="chatInput"
                             contenteditable="true"

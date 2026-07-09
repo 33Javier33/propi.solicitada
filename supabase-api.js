@@ -132,7 +132,8 @@ async function _sociosHandler(url, options) {
             if (error || !data) return _mockRes({ data: _lastAdminMsgs || [] });
             const mapped = data.map(m => ({
                 uuid: m.id, fecha: m.created_at, autor: m.autor,
-                remitente: m.remitente, mensaje: m.mensaje, nota: m.mensaje
+                remitente: m.remitente, mensaje: m.mensaje, nota: m.mensaje,
+                foto: m.foto_url || ''
             }));
             _lastAdminMsgs = mapped;
             return _mockRes({ data: mapped });
@@ -142,7 +143,8 @@ async function _sociosHandler(url, options) {
             const { error } = await dbSV.from('mensajes_admin').insert({
                 id, socio_id: String(b.socioId || ''),
                 remitente: b.remitente || 'SOCIO',
-                autor: b.autor || '', mensaje: b.mensaje || ''
+                autor: b.autor || '', mensaje: b.mensaje || '',
+                foto_url: b.foto_url || null
             });
             return _mockRes({ success: !error, error: error && error.message, id });
         }
@@ -298,7 +300,8 @@ async function _sociosHandler(url, options) {
                 uuid: m.id, fecha: m.created_at,
                 autor: m.autor, socId: m.socio_id,
                 mensaje: m.mensaje, nota: m.mensaje,
-                destinatario: m.destinatario, editado: m.editado || false
+                destinatario: m.destinatario, editado: m.editado || false,
+                foto: m.foto_url || ''
             }));
             _lastChatSocial = mapped;
             return _mockRes({ data: mapped });
@@ -308,7 +311,8 @@ async function _sociosHandler(url, options) {
             await dbSV.from('chat_mensajes').insert({
                 id: crypto.randomUUID(), autor: b.autor || 'Socio',
                 socio_id: b.socId || null, mensaje: b.mensaje || '',
-                destinatario: b.destinatario || 'TODOS', estado: 'ACTIVE'
+                destinatario: b.destinatario || 'TODOS', estado: 'ACTIVE',
+                foto_url: b.foto_url || null
             });
             return _mockRes({ success: true });
         }
@@ -484,7 +488,8 @@ async function _recHandler(url, options) {
 
         case 'addNote': {
             await dbRV.from('notas_recaudacion').insert({
-                id: crypto.randomUUID(), autor: b.autor || 'Socio', mensaje: b.mensaje || ''
+                id: crypto.randomUUID(), autor: b.autor || 'Socio', mensaje: b.mensaje || '',
+                foto_url: b.foto_url || null
             });
             return _mockRes({ success: true });
         }

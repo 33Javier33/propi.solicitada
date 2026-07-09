@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Enviar y ver fotos en el chat (Soporte, Equipo y Admin) (SW v48)
+- El socio ahora puede **adjuntar una foto** (botón 📷 en la barra del chat) y enviarla en **cualquier canal**: Soporte, Equipo o Admin. Se sube al bucket público `avatares` (carpeta `chat/`).
+- Las fotos **se ven** en las burbujas de los tres canales, ampliables al tocarlas. Incluye las fotos que envía la administración desde socios-comicion (Mensajes/Admin) y las notas de Soporte.
+- Interceptor: `addNote` (Soporte→`notas_recaudacion`, Equipo→`chat_mensajes`) y `sendAdminMsg` (`mensajes_admin`) ahora guardan/leen `foto_url`; los mapeos de `getNotes`/`getAdminMsgs` devuelven `foto`.
+- Archivos: `index.html` (botón + preview), `app.js` (adjuntar/subir/enviar/render), `supabase-api.js` (handlers). SW v48.
+
+
 #### 2026-07-07 — Ver foto en las notas de Soporte (SW v47)
 - Las notas del administrador (chat **Soporte**) ahora pueden traer una **foto**: si la nota tiene imagen, se muestra en la burbuja y **se amplía al tocarla** (lightbox).
 - La foto la adjunta la administración desde socios-comicion (sección Notas). Aquí solo se lee la URL (`notas_recaudacion.foto_url`).

@@ -1195,7 +1195,8 @@
                 ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0"><div style="width:32px;height:32px;border-radius:50%;background:#264b5f;display:flex;align-items:center;justify-content:center;color:#fff"><span class="material-symbols-outlined" style="font-size:18px">shield_person</span></div></div>`:''}
                 <div class="msg-bubble ${bubbleClass}">
                     ${!isMine?`<div class="wa-author" style="color:#264b5f">${escHtml(n.autor||'Administración')}</div>`:''}
-                    <div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(n.mensaje||'')}</div>
+                    ${n.mensaje?`<div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(n.mensaje||'')}</div>`:''}
+                    ${n.foto?`<img src="${(n.foto+'').replace(/"/g,'%22')}" onclick="verFotoGrande('${(n.foto+'').replace(/'/g,'%27')}')" style="max-width:200px;max-height:220px;border-radius:12px;margin-top:${n.mensaje?'6px':'0'};object-fit:cover;cursor:zoom-in;display:block;">`:''}
                     <div class="wa-time"><span>${_clTime(n.fecha)}</span></div>
                 </div>
             </div>`;
@@ -1204,15 +1205,47 @@
         if(forceScroll) container.scrollTop=container.scrollHeight;
     }
 
-    async function handleSendPriv(texto){
+    // ── Foto adjunta en el chat (Soporte / Equipo / Admin) ──
+    let _chatFotoFile = null;
+    window.chatAdjuntarFoto = function(input){
+        const f = input.files && input.files[0];
+        if(!f) return;
+        if(!f.type.startsWith('image/')){ return; }
+        _chatFotoFile = f;
+        const prev = document.getElementById('chatFotoPreview');
+        if(prev){
+            const u = URL.createObjectURL(f);
+            prev.style.display='flex';
+            prev.innerHTML = `<img src="${u}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">
+                <span style="flex:1;font-size:12px;color:#006a62;font-weight:700;">Foto lista para enviar</span>
+                <button onclick="chatQuitarFoto()" style="background:none;border:none;color:#ba1a1a;cursor:pointer;font-size:16px;">✕</button>`;
+        }
+    };
+    window.chatQuitarFoto = function(){
+        _chatFotoFile = null;
+        const prev = document.getElementById('chatFotoPreview');
+        if(prev){ prev.style.display='none'; prev.innerHTML=''; }
+        const inp = document.getElementById('chatFotoInput'); if(inp) inp.value='';
+    };
+    async function _subirFotoChat(file){
+        try{
+            const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'');
+            const path='chat/'+String(currentUser.ID)+'_'+Date.now()+'.'+ext;
+            const up=await dbSV.storage.from('avatares').upload(path,file,{contentType:file.type,upsert:true});
+            if(up.error) return '';
+            return dbSV.storage.from('avatares').getPublicUrl(path).data.publicUrl;
+        }catch(e){ return ''; }
+    }
+
+    async function handleSendPriv(texto, fotoUrl){
         const tempId='tmp_'+Date.now();
-        adminPrivMsgs.push({uuid:tempId,fecha:new Date().toISOString(),autor:currentUser.Nombre,remitente:'SOCIO',mensaje:texto,nota:texto,_sending:true});
+        adminPrivMsgs.push({uuid:tempId,fecha:new Date().toISOString(),autor:currentUser.Nombre,remitente:'SOCIO',mensaje:texto,nota:texto,foto:fotoUrl||'',_sending:true});
         renderChatPriv(true);
         try{
             await fetch(SCRIPT_URL_SOCIOS,{method:'POST',body:JSON.stringify({
                 action:'sendAdminMsg', socioId:String(currentUser.ID),
                 autor:(currentUser.Nombre+' '+currentUser.Apellido).trim(),
-                mensaje:texto, remitente:'SOCIO'
+                mensaje:texto, remitente:'SOCIO', foto_url:fotoUrl||''
             })});
             const m=adminPrivMsgs.find(x=>x.uuid===tempId); if(m) m._sending=false;
         }catch(e){}
@@ -1485,14 +1518,18 @@
     async function handleSend(e) {
         if (e && e.preventDefault) e.preventDefault();
         const texto = getChatText();
-        if (!texto) return;
+        if (!texto && !_chatFotoFile) return;
 
         const btn = document.getElementById('sendBtn');
         btn.disabled = true;
         clearChatInput();
 
+        // Subir foto adjunta (si hay) antes de enviar
+        let fotoUrl = '';
+        if (_chatFotoFile && !editingMessageId) { fotoUrl = await _subirFotoChat(_chatFotoFile); chatQuitarFoto(); }
+
         // Modo privado con la administración: ruta aislada
-        if (currentChatMode === 'PRIV') { await handleSendPriv(texto); btn.disabled = false; return; }
+        if (currentChatMode === 'PRIV') { await handleSendPriv(texto, fotoUrl); btn.disabled = false; return; }
 
         const url    = currentChatMode === 'ADMIN' ? SCRIPT_URL_RECAUDACIONES : SCRIPT_URL_SOCIOS;
         const dest   = currentChatMode === 'ADMIN' ? 'ADMIN' : currentSocialTarget.id;
@@ -1509,6 +1546,7 @@
                 mensaje: texto,
                 nota: texto,
                 destinatario: dest,
+                foto: fotoUrl || '',
                 _sending: true
             };
             if (currentChatMode === 'ADMIN') messages.admin.push(optimista);
@@ -1525,7 +1563,8 @@
                     mensaje: texto,
                     socId: currentUser.ID,
                     destinatario: dest,
-                    noteId: editingMessageId
+                    noteId: editingMessageId,
+                    foto_url: fotoUrl || ''
                 })
             });
 
