@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Equipo: foto del socio en la lista de contactos y el chat (SW v50)
+- Al elegir con quién mensajear en **Equipo**, la **lista de contactos** ahora muestra la **foto** de cada socio (antes solo la inicial), y la **barra del destinatario** muestra su foto al seleccionarlo.
+- En las burbujas del chat Equipo, el avatar del emisor muestra su foto (se identifica por `socId`). Si el socio no tiene foto, se mantiene la inicial.
+- Archivos: `app.js` (`renderUsersList`, `selectSocialTarget`, avatar en `renderChat`). SW v50.
+
+
 #### 2026-07-07 — Chat: opción de Cámara y Galería al adjuntar foto (SW v49)
 - La barra del chat ahora tiene **dos botones**: **📷 (Tomar foto — cámara)** e **🖼️ (Elegir de galería)**, en vez de un solo botón que abría solo la galería.
 - Archivos: `index.html` (dos inputs con/sin `capture` + dos botones), `app.js` (reset de ambos inputs). SW v49.

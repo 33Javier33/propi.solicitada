@@ -1335,6 +1335,12 @@
             const showAvatar=!isMine&&isFirstInGroup;
             const colorIdx=authorName.charCodeAt(0)%avatarPalette.length;
             const avatarColor=avatarPalette[colorIdx];
+            // Foto del emisor (solo chat Equipo, donde socId identifica al socio)
+            let avatarFoto='';
+            if(currentChatMode==='SOCIAL' && n.socId){ const _s=allSocios.find(u=>String(u.ID)===String(n.socId)); if(_s) avatarFoto=(_s.FotoUrl||'').trim(); }
+            const avatarInner = avatarFoto
+                ? `<div style="width:32px;height:32px;border-radius:50%;background-image:url('${avatarFoto.replace(/'/g,'%27')}');background-size:cover;background-position:center;border:1px solid #e2e8f0;"></div>`
+                : `<div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${authorName.charAt(0).toUpperCase()}</div>`;
 
             let pinHtml = '', rxHtml = '';
             if(currentChatMode === 'ADMIN') {
@@ -1360,7 +1366,7 @@
 
             html+=`
             <div class="${rowClass}" data-msg-id="${msgId}" style="${n._sending ? 'opacity:0.75' : ''}${n.pinned&&currentChatMode==='ADMIN'?' border-left:3px solid #f59e0b;':''}">
-                ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?`<div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${authorName.charAt(0).toUpperCase()}</div>`:''}</div>`:''}
+                ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?avatarInner:''}</div>`:''}
                 <div class="msg-bubble ${bubbleClass}">
                     ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${escHtml(authorName)}</div>`:''}
                     ${pinHtml}<div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
@@ -2009,8 +2015,12 @@
         </button>`;
         list.forEach((u,i)=>{
             const c=avatarColors[i%avatarColors.length];
+            const foto=(u.FotoUrl||'').trim();
+            const av = foto
+                ? `<div class="w-10 h-10 rounded-full shrink-0" style="background-image:url('${foto.replace(/'/g,'%27')}');background-size:cover;background-position:center;border:1px solid #e2e8f0;"></div>`
+                : `<div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-white" style="background:${c}">${u.Nombre.charAt(0)}</div>`;
             html+=`<button onclick="selectSocialTarget('${u.ID}','${u.Nombre} ${u.Apellido}')" class="w-full text-left p-3.5 rounded-2xl hover:bg-lm-subtle flex items-center gap-3 transition-all">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 text-white" style="background:${c}">${u.Nombre.charAt(0)}</div>
+                ${av}
                 <div><p class="text-sm font-semibold text-lm-primary">${u.Nombre} ${u.Apellido}</p><p class="text-xs text-lm-muted mt-0.5">${u.Area}</p></div>
             </button>`;
         });
@@ -2020,7 +2030,13 @@
     function selectSocialTarget(id, name) {
         currentSocialTarget={id,name};
         document.getElementById('targetNameLabel').textContent=name;
-        document.getElementById('targetIcon').textContent=id==='TODOS'?'G':name.charAt(0);
+        const ti=document.getElementById('targetIcon');
+        const soc = id!=='TODOS' ? allSocios.find(u=>String(u.ID)===String(id)) : null;
+        const foto = soc && (soc.FotoUrl||'').trim();
+        if(ti){
+            if(foto){ ti.style.backgroundImage='url("'+foto+'")'; ti.style.backgroundSize='cover'; ti.style.backgroundPosition='center'; ti.textContent=''; }
+            else { ti.style.backgroundImage=''; ti.textContent=id==='TODOS'?'G':name.charAt(0); }
+        }
         toggleModal('usersModal',false);
         renderChat();
     }
