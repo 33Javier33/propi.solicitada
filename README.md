@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-07 — Chat: opción de Cámara y Galería al adjuntar foto (SW v49)
+- La barra del chat ahora tiene **dos botones**: **📷 (Tomar foto — cámara)** e **🖼️ (Elegir de galería)**, en vez de un solo botón que abría solo la galería.
+- Archivos: `index.html` (dos inputs con/sin `capture` + dos botones), `app.js` (reset de ambos inputs). SW v49.
+
+
 #### 2026-07-07 — Enviar y ver fotos en el chat (Soporte, Equipo y Admin) (SW v48)
 - El socio ahora puede **adjuntar una foto** (botón 📷 en la barra del chat) y enviarla en **cualquier canal**: Soporte, Equipo o Admin. Se sube al bucket público `avatares` (carpeta `chat/`).
 - Las fotos **se ven** en las burbujas de los tres canales, ampliables al tocarlas. Incluye las fotos que envía la administración desde socios-comicion (Mensajes/Admin) y las notas de Soporte.

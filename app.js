@@ -1225,7 +1225,7 @@
         _chatFotoFile = null;
         const prev = document.getElementById('chatFotoPreview');
         if(prev){ prev.style.display='none'; prev.innerHTML=''; }
-        const inp = document.getElementById('chatFotoInput'); if(inp) inp.value='';
+        ['chatFotoCam','chatFotoGal'].forEach(id => { const inp=document.getElementById(id); if(inp) inp.value=''; });
     };
     async function _subirFotoChat(file){
         try{
