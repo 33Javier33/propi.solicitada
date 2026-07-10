@@ -512,14 +512,21 @@
         cont.innerHTML = docs.map(function(d) {
             const kb = d.tamano ? Math.round(d.tamano/1024) : 0;
             const icon = (d.mime||'').indexOf('pdf') >= 0 ? 'picture_as_pdf' : 'image';
-            return '<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:8px;">'
+            const esAdmin = (d.subido_por || 'socio') !== 'socio';
+            const meta = esAdmin
+                ? '<p style="font-size:10px;color:#6366f1;font-weight:700;margin:1px 0 0;">📎 Enviado por administración · ' + kb + ' KB</p>'
+                : '<p style="font-size:10px;color:#94a3b8;margin:1px 0 0;">' + kb + ' KB</p>';
+            const borrarBtn = esAdmin
+                ? ''
+                : '<button onclick="borrarDocumento(\'' + d.id + '\',\'' + d.storage_path + '\')" style="background:#fee2e2;border:none;border-radius:8px;padding:6px 8px;color:#dc2626;cursor:pointer;">🗑</button>';
+            return '<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid ' + (esAdmin ? '#c7d2fe' : '#e2e8f0') + ';border-radius:12px;margin-bottom:8px;' + (esAdmin ? 'background:#f5f7ff;' : '') + '">'
                 + '<span class="material-symbols-outlined" style="font-size:22px;color:#6366f1;">' + icon + '</span>'
                 + '<div style="flex:1;min-width:0;">'
                 + '<p style="font-size:12px;font-weight:700;color:#001723;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _escDoc(d.nombre_archivo || 'documento') + '</p>'
-                + '<p style="font-size:10px;color:#94a3b8;margin:1px 0 0;">' + kb + ' KB</p>'
+                + meta
                 + '</div>'
                 + '<button onclick="verDocumento(\'' + d.storage_path + '\')" style="background:#eef2ff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:#4338ca;cursor:pointer;">Ver</button>'
-                + '<button onclick="borrarDocumento(\'' + d.id + '\',\'' + d.storage_path + '\')" style="background:#fee2e2;border:none;border-radius:8px;padding:6px 8px;color:#dc2626;cursor:pointer;">🗑</button>'
+                + borrarBtn
                 + '</div>';
         }).join('');
     }

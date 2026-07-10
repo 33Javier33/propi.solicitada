@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — La administración puede enviar documentos al socio (Mis Documentos) (SW v55)
+- Ahora los documentos que la **administración** sube desde socios-comicion (Documentación → por socio) le aparecen al socio en **Perfil → Mis Documentos**, junto con los que él mismo subió.
+- Los documentos enviados por la administración se muestran **destacados** (fondo lila + etiqueta "📎 Enviado por administración") y **el socio no puede eliminarlos** (solo puede borrar los que subió él).
+- Sin cambios de esquema: se reutiliza la tabla `documentos` (`categoria='socio'`, `socio_id`, `subido_por`). El socio ya filtra por su `socio_id`, así que el documento aparece automáticamente.
+- Archivos: `app.js` (`renderDocumentos`: distingue `subido_por` ≠ `'socio'`). SW v55.
+
 #### 2026-07-07 — Campana de notificaciones en el header (SW v53)
 - Nueva **campana** 🔔 en el header (junto al área/ayuda/salir) con un **badge del número de mensajes sin leer** de los tres canales.
 - Al **tocarla** despliega un **menú** con los mensajes sin leer (etiqueta del canal: Soporte / Equipo / Admin, autor, texto y hora).
