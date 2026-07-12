@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Fix: Perfil y Mensajes no tomaban el skin premium (especificidad) (SW v66)
+- **Causa**: en tema Oscuro, sus convertidores de estilos inline (`:root[data-theme="oscuro"] [style*=...]`) tenían **más especificidad** que el skin premium por clase, así que ganaban. Estadísticas cambiaba (usa variables) pero **Perfil y Mensajes** (usan estilos inline `#fff`/`#001723`) se quedaban con los colores del Oscuro.
+- **Fix**: el skin premium pasó de una clase en `body` a un atributo `data-premium` en `<html>`, con selector `:root[data-premium][data-premium] …` (atributo repetido) para **garantizar mayor especificidad** que las reglas del tema Oscuro. Ahora Perfil y Mensajes sí toman la paleta premium.
+- Archivos: `app.css` (reglas `:root[data-premium][data-premium]`), `app.js` (`_aplicarHomeVersion` set/removeAttribute `data-premium`). SW v66.
+
 #### 2026-07-09 — Versión Dashboard: skin premium en toda la app + fix header en Mensajes (SW v65)
 - **Fix Mensajes**: el skin anterior ponía un fondo opaco directo sobre `#tab-chat`, que **tapaba el header** (foto, campana, área, ayuda, cerrar) que se ve por el espaciador superior del chat. Ahora el skin se aplica al `body` (no al chat directo), así el header vuelve a verse.
 - **Header y barra inferior acordes al tema**: al aplicar `.premium-skin` al `body`, el header (`.glass`) y la barra de navegación (`#bottomNav`) toman las variables premium (`--glass-bg` / `--nav-bg` / `--nav-border`), quedando en el tono oscuro premium.

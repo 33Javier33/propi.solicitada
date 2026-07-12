@@ -458,7 +458,9 @@
 
         /* ── SKIN PREMIUM (Versión Dashboard) para Estadísticas / Mensajes / Perfil ──
            Usa la paleta del tema oscuro (probada) para no romper contrastes. */
-        .premium-skin {
+        /* data-premium en <html> con atributo repetido = especificidad garantizada
+           mayor que las reglas del tema oscuro (para que gane también en Perfil/Mensajes). */
+        :root[data-premium][data-premium] {
             --lm-bg: 15 20 25; --lm-surface: 23 28 34; --lm-card: 23 28 34; --lm-border: 67 71 75;
             --lm-primary: 96 165 250; --lm-primary-mid: 59 130 246; --lm-accent: 147 197 253;
             --lm-secondary: 61 226 115; --lm-tertiary: 250 204 21; --lm-green: 61 226 115; --lm-red: 255 180 171;
@@ -466,35 +468,34 @@
             --color-card: #171c22; --color-subtle: #1d232a; --app-bg: #0f1419; --chat-bg: #0a0f14;
             --wa-other: 23 28 34; --wa-mine: 6 78 59; --wa-bg: 15 20 25;
             --glass-bg: rgba(15,20,25,0.92); --nav-bg: rgba(15,20,25,0.95); --nav-border: rgba(255,255,255,0.08);
-            background: #0f1419 !important;
         }
-        .premium-skin [style*="background:#fff;"],
-        .premium-skin [style*="background:#ffffff"],
-        .premium-skin [style*="background:#f8fafc"],
-        .premium-skin [style*="background:#f8f9fa"] { background: #171c22 !important; border-color: #43474b !important; }
-        .premium-skin [style*="background:#f1f5f9"],
-        .premium-skin [style*="background:#f3f4f5"],
-        .premium-skin [style*="background:#f0f2f5"] { background: #1d232a !important; }
-        .premium-skin [style*="color:#001723"],
-        .premium-skin [style*="color:#1e293b"],
-        .premium-skin [style*="color:#0f172a"],
-        .premium-skin [style*="color:#191c1d"] { color: #f8f9fa !important; }
-        .premium-skin [style*="color:#64748b"],
-        .premium-skin [style*="color:#72787d"],
-        .premium-skin [style*="color:#42484c"] { color: #c3c7cb !important; }
-        .premium-skin [style*="border:1px solid #e2e8f0"],
-        .premium-skin [style*="border-bottom:1px solid #f1f5f9"],
-        .premium-skin [style*="border:1px solid #e1e3e4"] { border-color: #43474b !important; }
-        .premium-skin input { background: #1d232a !important; border-color: #43474b !important; color: #f8f9fa !important; }
-        .premium-skin input::placeholder { color: #8d9196 !important; }
+        :root[data-premium][data-premium] body { background: #0f1419 !important; color: #e2e8f0 !important; }
+        :root[data-premium][data-premium] [style*="background:#fff;"],
+        :root[data-premium][data-premium] [style*="background:#ffffff"],
+        :root[data-premium][data-premium] [style*="background:#f8fafc"],
+        :root[data-premium][data-premium] [style*="background:#f8f9fa"] { background: #171c22 !important; border-color: #43474b !important; }
+        :root[data-premium][data-premium] [style*="background:#f1f5f9"],
+        :root[data-premium][data-premium] [style*="background:#f3f4f5"],
+        :root[data-premium][data-premium] [style*="background:#f0f2f5"] { background: #1d232a !important; }
+        :root[data-premium][data-premium] [style*="color:#001723"],
+        :root[data-premium][data-premium] [style*="color:#1e293b"],
+        :root[data-premium][data-premium] [style*="color:#0f172a"],
+        :root[data-premium][data-premium] [style*="color:#191c1d"] { color: #f8f9fa !important; }
+        :root[data-premium][data-premium] [style*="color:#64748b"],
+        :root[data-premium][data-premium] [style*="color:#72787d"],
+        :root[data-premium][data-premium] [style*="color:#42484c"] { color: #c3c7cb !important; }
+        :root[data-premium][data-premium] [style*="border:1px solid #e2e8f0"],
+        :root[data-premium][data-premium] [style*="border-bottom:1px solid #f1f5f9"],
+        :root[data-premium][data-premium] [style*="border:1px solid #e1e3e4"] { border-color: #43474b !important; }
+        :root[data-premium][data-premium] input { background: #1d232a !important; border-color: #43474b !important; color: #f8f9fa !important; }
+        :root[data-premium][data-premium] input::placeholder { color: #8d9196 !important; }
         /* Chat en premium */
-        .premium-skin #chatMessages .msg-other .msg-bubble,
-        .premium-skin #chatMessages .msg-admin .msg-bubble { background: #171c22 !important; color: #f8f9fa !important; }
-        .premium-skin #chatMessages .msg-mine .msg-bubble { background: #005322 !important; color: #eafff0 !important; }
-        .premium-skin #chatMessages .msg-bubble,
-        .premium-skin #chatMessages .msg-bubble div { color: #f8f9fa !important; }
-        /* Barra de input del chat en premium */
-        .premium-skin #chatInputContainer { background: #171c22 !important; border-color: #43474b !important; }
+        :root[data-premium][data-premium] #chatMessages .msg-other .msg-bubble,
+        :root[data-premium][data-premium] #chatMessages .msg-admin .msg-bubble { background: #171c22 !important; color: #f8f9fa !important; }
+        :root[data-premium][data-premium] #chatMessages .msg-mine .msg-bubble { background: #005322 !important; color: #eafff0 !important; }
+        :root[data-premium][data-premium] #chatMessages .msg-bubble,
+        :root[data-premium][data-premium] #chatMessages .msg-bubble div { color: #f8f9fa !important; }
+        :root[data-premium][data-premium] #chatInputContainer { background: #171c22 !important; border-color: #43474b !important; }
         :root[data-theme="rosa"] .tema-btn.active {
             border-color: #db2777 !important;
             box-shadow: 0 0 0 3px rgba(219,39,119,0.18);

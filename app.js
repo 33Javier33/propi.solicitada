@@ -500,7 +500,8 @@
             if (p) p.style.display = esPremium ? 'block' : 'none';
         });
         // Skin premium a toda la app (header, barra inferior, Estadísticas, Mensajes, Perfil)
-        document.body.classList.toggle('premium-skin', esPremium);
+        if (esPremium) document.documentElement.setAttribute('data-premium', '1');
+        else document.documentElement.removeAttribute('data-premium');
         _sincronizarHomeverBtns();
         if (esPremium) _refrescarPremium();
     }
