@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Versión Dashboard: skin premium en toda la app + fix header en Mensajes (SW v65)
+- **Fix Mensajes**: el skin anterior ponía un fondo opaco directo sobre `#tab-chat`, que **tapaba el header** (foto, campana, área, ayuda, cerrar) que se ve por el espaciador superior del chat. Ahora el skin se aplica al `body` (no al chat directo), así el header vuelve a verse.
+- **Header y barra inferior acordes al tema**: al aplicar `.premium-skin` al `body`, el header (`.glass`) y la barra de navegación (`#bottomNav`) toman las variables premium (`--glass-bg` / `--nav-bg` / `--nav-border`), quedando en el tono oscuro premium.
+- **Paleta más distinta**: el skin ahora usa los tonos del mockup (fondo `#0f1419`, tarjetas `#171c22`, verde `#3de273`) en vez de la paleta oscura estándar, para que se note el cambio respecto al tema Oscuro. Se mantiene el primario azul para no romper el contraste de botones/tarjetas con texto blanco.
+- Archivos: `app.css` (`.premium-skin` con variables de header/nav + tonos mockup), `app.js` (`_aplicarHomeVersion` aplica el skin al `body`). SW v65.
+
 #### 2026-07-09 — Versión Dashboard: tema premium también en Estadísticas, Mensajes y Perfil (SW v64)
 - Se completó la **Versión Dashboard** aplicando el **tema oscuro premium** a las secciones **Estadísticas**, **Mensajes** y **Perfil**, reutilizando su mismo layout y cableado (no se duplicó lógica).
 - Se hace con una clase `.premium-skin` que redefine la paleta (variables `--lm-*`, `--color-card`, `--chat-bg`, etc.) y convierte los estilos inline claros a oscuros, sólo en esas tres pestañas y sólo cuando la versión Dashboard está activa. Usa los colores del tema oscuro (probados) para no romper contrastes.

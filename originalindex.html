@@ -514,39 +514,42 @@
         /* ── SKIN PREMIUM (Versión Dashboard) para Estadísticas / Mensajes / Perfil ──
            Usa la paleta del tema oscuro (probada) para no romper contrastes. */
         .premium-skin {
-            --lm-bg: 15 23 42; --lm-surface: 30 41 59; --lm-card: 30 41 59; --lm-border: 51 65 85;
+            --lm-bg: 15 20 25; --lm-surface: 23 28 34; --lm-card: 23 28 34; --lm-border: 67 71 75;
             --lm-primary: 96 165 250; --lm-primary-mid: 59 130 246; --lm-accent: 147 197 253;
-            --lm-secondary: 52 211 153; --lm-tertiary: 250 204 21; --lm-green: 52 211 153; --lm-red: 248 113 113;
-            --lm-muted: 148 163 184; --lm-subtle: 51 65 85; --lm-high: 71 85 105;
-            --color-card: #1e293b; --color-subtle: #334155; --app-bg: #0f172a; --chat-bg: #0b141a;
-            --wa-other: 30 41 59; --wa-mine: 6 78 59; --wa-bg: 15 23 42;
-            background: #0f172a !important;
+            --lm-secondary: 61 226 115; --lm-tertiary: 250 204 21; --lm-green: 61 226 115; --lm-red: 255 180 171;
+            --lm-muted: 141 145 150; --lm-subtle: 29 35 42; --lm-high: 40 46 53;
+            --color-card: #171c22; --color-subtle: #1d232a; --app-bg: #0f1419; --chat-bg: #0a0f14;
+            --wa-other: 23 28 34; --wa-mine: 6 78 59; --wa-bg: 15 20 25;
+            --glass-bg: rgba(15,20,25,0.92); --nav-bg: rgba(15,20,25,0.95); --nav-border: rgba(255,255,255,0.08);
+            background: #0f1419 !important;
         }
         .premium-skin [style*="background:#fff;"],
         .premium-skin [style*="background:#ffffff"],
         .premium-skin [style*="background:#f8fafc"],
-        .premium-skin [style*="background:#f8f9fa"] { background: #1e293b !important; border-color: #334155 !important; }
+        .premium-skin [style*="background:#f8f9fa"] { background: #171c22 !important; border-color: #43474b !important; }
         .premium-skin [style*="background:#f1f5f9"],
         .premium-skin [style*="background:#f3f4f5"],
-        .premium-skin [style*="background:#f0f2f5"] { background: #334155 !important; }
+        .premium-skin [style*="background:#f0f2f5"] { background: #1d232a !important; }
         .premium-skin [style*="color:#001723"],
         .premium-skin [style*="color:#1e293b"],
         .premium-skin [style*="color:#0f172a"],
-        .premium-skin [style*="color:#191c1d"] { color: #e2e8f0 !important; }
+        .premium-skin [style*="color:#191c1d"] { color: #f8f9fa !important; }
         .premium-skin [style*="color:#64748b"],
         .premium-skin [style*="color:#72787d"],
-        .premium-skin [style*="color:#42484c"] { color: #94a3b8 !important; }
+        .premium-skin [style*="color:#42484c"] { color: #c3c7cb !important; }
         .premium-skin [style*="border:1px solid #e2e8f0"],
         .premium-skin [style*="border-bottom:1px solid #f1f5f9"],
-        .premium-skin [style*="border:1px solid #e1e3e4"] { border-color: #334155 !important; }
-        .premium-skin input { background: #1e293b !important; border-color: #334155 !important; color: #e2e8f0 !important; }
-        .premium-skin input::placeholder { color: #94a3b8 !important; }
+        .premium-skin [style*="border:1px solid #e1e3e4"] { border-color: #43474b !important; }
+        .premium-skin input { background: #1d232a !important; border-color: #43474b !important; color: #f8f9fa !important; }
+        .premium-skin input::placeholder { color: #8d9196 !important; }
         /* Chat en premium */
         .premium-skin #chatMessages .msg-other .msg-bubble,
-        .premium-skin #chatMessages .msg-admin .msg-bubble { background: #1e293b !important; color: #e2e8f0 !important; }
-        .premium-skin #chatMessages .msg-mine .msg-bubble { background: #064e3b !important; color: #e2e8f0 !important; }
+        .premium-skin #chatMessages .msg-admin .msg-bubble { background: #171c22 !important; color: #f8f9fa !important; }
+        .premium-skin #chatMessages .msg-mine .msg-bubble { background: #005322 !important; color: #eafff0 !important; }
         .premium-skin #chatMessages .msg-bubble,
-        .premium-skin #chatMessages .msg-bubble div { color: #e2e8f0 !important; }
+        .premium-skin #chatMessages .msg-bubble div { color: #f8f9fa !important; }
+        /* Barra de input del chat en premium */
+        .premium-skin #chatInputContainer { background: #171c22 !important; border-color: #43474b !important; }
         :root[data-theme="rosa"] .tema-btn.active {
             border-color: #db2777 !important;
             box-shadow: 0 0 0 3px rgba(219,39,119,0.18);
@@ -2331,11 +2334,8 @@
             if (c) c.style.display = esPremium ? 'none' : '';
             if (p) p.style.display = esPremium ? 'block' : 'none';
         });
-        // Estadísticas / Mensajes / Perfil: mismo layout, skin premium (tema oscuro)
-        ['tab-stats', 'tab-chat', 'tab-perfil'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.toggle('premium-skin', esPremium);
-        });
+        // Skin premium a toda la app (header, barra inferior, Estadísticas, Mensajes, Perfil)
+        document.body.classList.toggle('premium-skin', esPremium);
         _sincronizarHomeverBtns();
         if (esPremium) _refrescarPremium();
     }

@@ -499,11 +499,8 @@
             if (c) c.style.display = esPremium ? 'none' : '';
             if (p) p.style.display = esPremium ? 'block' : 'none';
         });
-        // Estadísticas / Mensajes / Perfil: mismo layout, skin premium (tema oscuro)
-        ['tab-stats', 'tab-chat', 'tab-perfil'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.toggle('premium-skin', esPremium);
-        });
+        // Skin premium a toda la app (header, barra inferior, Estadísticas, Mensajes, Perfil)
+        document.body.classList.toggle('premium-skin', esPremium);
         _sincronizarHomeverBtns();
         if (esPremium) _refrescarPremium();
     }
