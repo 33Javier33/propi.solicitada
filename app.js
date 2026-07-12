@@ -508,6 +508,51 @@
         _aplicarHomeVersion(v);
     };
 
+    // Historial premium: render de "Anticipos Anteriores" (estilo oscuro)
+    function pmRenderAntAnt(data) {
+        const cont = document.getElementById('pmAntAntList');
+        if (!cont) return;
+        if (!data || !data.length) {
+            cont.innerHTML = '<div style="text-align:center;padding:40px 16px;color:#8d9196;font-size:13px;">Sin anticipos anteriores.</div>';
+            return;
+        }
+        cont.innerHTML = data.map(periodo => {
+            const total = (periodo.registros || []).reduce((s, r) => s + (Number(r.monto) || 0), 0);
+            const regs = (periodo.registros || []).map(r => `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-top:1px solid #43474b;">
+                <div style="min-width:0;"><p style="font-size:13px;color:#e1e3e4;margin:0;">${r.fecha || ''}</p>${r.responsable ? `<p style="font-size:10px;color:#8d9196;margin:2px 0 0;">${r.responsable}</p>` : ''}</div>
+                <span style="font-size:13px;font-weight:700;color:#c3c7cb;flex-shrink:0;margin-left:10px;">-${formatMoney(Number(r.monto) || 0)}</span>
+            </div>`).join('');
+            return `<div style="background:#171c22;border:1px solid #43474b;border-radius:14px;margin-bottom:12px;overflow:hidden;">
+                <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;background:#1d232a;">
+                    <span style="font-size:13px;font-weight:700;color:#fff;">${periodo.periodo || 'Período'}</span>
+                    <span style="font-size:14px;font-weight:800;color:#ffb4ab;">-${formatMoney(total)}</span>
+                </div>
+                ${regs}
+            </div>`;
+        }).join('');
+    }
+
+    // Historial premium: alterna Movimientos / Anticipos Anteriores
+    window.pmSwitchHist = async function (view) {
+        const esAnt = view === 'anticipos';
+        const vMovs = document.getElementById('pmHistMovsView');
+        const vAnt = document.getElementById('pmHistAntView');
+        const bMovs = document.getElementById('pmHistTabMovs');
+        const bAnt = document.getElementById('pmHistTabAnt');
+        if (vMovs) vMovs.style.display = esAnt ? 'none' : 'block';
+        if (vAnt) vAnt.style.display = esAnt ? 'block' : 'none';
+        if (bMovs) { bMovs.style.background = esAnt ? 'transparent' : '#ffffff'; bMovs.style.color = esAnt ? '#c3c7cb' : '#0f1419'; }
+        if (bAnt) { bAnt.style.background = esAnt ? '#ffffff' : 'transparent'; bAnt.style.color = esAnt ? '#0f1419' : '#c3c7cb'; }
+        if (esAnt) {
+            const cont = document.getElementById('pmAntAntList');
+            if (!_histAnticiposLoaded) {
+                if (cont) cont.innerHTML = '<div style="text-align:center;padding:40px 16px;color:#c3c7cb;font-size:13px;">Cargando…</div>';
+                try { await loadHistorialAnticipos(); } catch (e) {}
+            }
+            pmRenderAntAnt(_histAnticiposData);
+        }
+    };
+
     // ── FOTO DE PERFIL (Supabase Storage, bucket público 'avatares') ──
     function _aplicarFotoPerfil(url) {
         // Avatar del Perfil

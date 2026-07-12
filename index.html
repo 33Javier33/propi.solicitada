@@ -648,10 +648,17 @@
 
             <!-- ═══════ HISTORIAL PREMIUM (Dashboard oscuro) ═══════ -->
             <div id="historyPremium" style="display:none;background:#0f1419;min-height:calc(100vh - 120px);padding:16px 16px 40px;">
-                <div style="margin-bottom:20px;">
+                <div style="margin-bottom:16px;">
                     <p style="font-size:13px;color:#c3c7cb;margin:0 0 3px;">Resumen Contable</p>
                     <h2 style="font-family:Manrope,sans-serif;font-size:24px;font-weight:700;color:#ffffff;margin:0;">Historial de Movimientos</h2>
                 </div>
+                <!-- Toggle Movimientos / Anticipos Anteriores -->
+                <div style="display:flex;gap:6px;background:#171c22;border:1px solid #43474b;border-radius:14px;padding:5px;margin-bottom:18px;">
+                    <button id="pmHistTabMovs" onclick="pmSwitchHist('movs')" style="flex:1;padding:9px;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;background:#ffffff;color:#0f1419;">Movimientos</button>
+                    <button id="pmHistTabAnt" onclick="pmSwitchHist('anticipos')" style="flex:1;padding:9px;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:#c3c7cb;">Anticipos Anteriores</button>
+                </div>
+
+                <div id="pmHistMovsView">
                 <!-- Stats -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
                     <div style="background:#171c22;border:1px solid #43474b;border-radius:14px;padding:16px;">
@@ -682,6 +689,12 @@
                     <span id="pmHistCount" style="font-size:11px;color:#8d9196;">—</span>
                 </div>
                 <div id="pmHistList" style="background:#0a0f14;border:1px solid #43474b;border-radius:14px;overflow:hidden;min-height:70px;"></div>
+                </div><!-- /pmHistMovsView -->
+
+                <!-- Vista: Anticipos Anteriores (premium) -->
+                <div id="pmHistAntView" style="display:none;">
+                    <div id="pmAntAntList" style="min-height:80px;"></div>
+                </div>
             </div>
         </div>
 

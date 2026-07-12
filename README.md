@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Historial premium: opción "Anticipos Anteriores" (SW v62)
+- En la vista **Historial** de la Versión Dashboard se agregó el toggle **Movimientos / Anticipos Anteriores** (igual que en la clásica).
+- "Anticipos Anteriores" reutiliza la misma carga de datos (`loadHistorialAnticipos` → `getHistorialCompletoSocio`) y los muestra en **estilo oscuro**: cada período como tarjeta con su total y el detalle de registros (fecha, responsable, monto). Se carga la primera vez que se abre.
+- Archivos: `index.html` (toggle + `#pmHistMovsView` / `#pmHistAntView` / `#pmAntAntList`), `app.js` (`pmSwitchHist`, `pmRenderAntAnt`). SW v62.
+
 #### 2026-07-09 — Versión Dashboard: también el Historial en estilo premium (SW v61)
 - La **Versión Dashboard** ahora incluye la sección **Historial** en estilo oscuro premium (además del inicio). Al activar Dashboard, el Historial muestra: **stats** (Total Rendimiento, Anticipos Solicitados, Valor Punto a hoy) y una **lista de movimientos** que combina rendimientos por día (verde) y anticipos (rojo), ordenados por fecha, con contador — todo con **datos reales**.
 - Se envolvió el historial clásico en `#historyClasico` y se agregó `#historyPremium`. `_aplicarHomeVersion` alterna ahora ambas secciones (inicio + historial) a la vez.
