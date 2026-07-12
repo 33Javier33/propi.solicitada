@@ -712,7 +712,12 @@
     <!-- BOTTOM NAV -->
         <!-- ── TAB: PERFIL ── -->
         <div id="tab-perfil" class="tab-section overflow-y-auto pb-32 pt-4 bg-lm-bg">
-            <div class="px-4">
+            <div class="px-4" style="position:relative;">
+
+                <!-- Engranaje: abre modal de Ajustes y personalización -->
+                <button onclick="abrirAjustesModal()" title="Ajustes y personalización" style="position:absolute;top:0;right:16px;z-index:5;width:42px;height:42px;border-radius:13px;background:#fff;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                    <span class="material-symbols-outlined" style="font-size:23px;color:#6366f1;">settings</span>
+                </button>
 
                 <!-- Avatar y nombre -->
                 <div style="text-align:center;margin-bottom:24px;padding-top:8px;">
@@ -783,41 +788,41 @@
                                 </div>
                                 <span id="perfilRut" style="font-size:13px;font-weight:700;color:#001723;font-family:monospace">—</span>
                             </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:32px;height:32px;border-radius:9px;background:rgba(0,106,98,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <span class="material-symbols-outlined" style="font-size:16px;color:#006a62">workspace_premium</span>
+                                    </div>
+                                    <span style="font-size:13px;color:#64748b;font-weight:500">Años en Casino</span>
+                                </div>
+                                <span id="perfilAnios" style="font-size:14px;font-weight:800;color:#001723">—</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:32px;height:32px;border-radius:9px;background:rgba(16,185,129,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <span class="material-symbols-outlined" style="font-size:16px;color:#10b981">stars</span>
+                                    </div>
+                                    <span style="font-size:13px;color:#64748b;font-weight:500">Mis Puntos</span>
+                                </div>
+                                <span id="perfilPuntos" style="font-size:16px;font-weight:800;color:#10b981">—</span>
+                            </div>
                         </div>
+                        <p id="perfilAntigMsg" style="font-size:11px;color:#94a3b8;margin:12px 0 0;text-align:center;line-height:1.5"></p>
                     </div>
 
-                    <!-- Tarjeta antigüedad y puntos -->
-                    <div style="background:linear-gradient(135deg,#001723,#006a62);border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(0,23,35,0.2);">
-                        <p style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px">Antigüedad y Puntos</p>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                            <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;text-align:center">
-                                <p style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase;margin-bottom:4px">Años en Casino</p>
-                                <p id="perfilAnios" style="font-size:24px;font-weight:700;color:#fff">—</p>
-                            </div>
-                            <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;text-align:center">
-                                <p style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:700;text-transform:uppercase;margin-bottom:4px">Mis Puntos</p>
-                                <p id="perfilPuntos" style="font-size:24px;font-weight:700;color:#4ade80">—</p>
-                            </div>
-                        </div>
-                        <p id="perfilAntigMsg" style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:12px;text-align:center;line-height:1.5"></p>
+                    <!-- MODAL AJUSTES Y PERSONALIZACIÓN (se abre desde el engranaje ⚙️ de arriba) -->
+                    <div id="ajustesModal" class="hidden fixed inset-0 z-[340] bg-black/50 backdrop-blur-sm items-end justify-center" onclick="if(event.target===this)cerrarAjustesModal()">
+                    <div class="w-full max-w-sm rounded-t-[28px] p-5 shadow-2xl max-h-[88vh] overflow-y-auto" style="background:var(--color-card,#fff)">
+                    <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                        <h3 class="font-headline text-lg font-bold text-lm-primary" style="margin:0;">Ajustes y personalización</h3>
+                        <button onclick="cerrarAjustesModal()" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.06);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                            <span class="material-symbols-outlined" style="font-size:20px;color:#64748b;">close</span>
+                        </button>
                     </div>
-
-                    <!-- AJUSTES (desplegable): nombre, notificaciones, tema y documentos -->
-                    <button id="perfilAjustesBtn" onclick="togglePerfilAjustes()" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-top:14px;">
-                        <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                            <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">settings</span>
-                        </div>
-                        <div style="text-align:left;flex:1;min-width:0">
-                            <p style="font-size:13px;font-weight:700;color:#001723;margin:0">Ajustes y personalización</p>
-                            <p style="font-size:11px;color:#94a3b8;margin:2px 0 0">Nombre, notificaciones, tema y documentos</p>
-                        </div>
-                        <span id="perfilAjustesChevron" class="material-symbols-outlined" style="font-size:22px;color:#cbd5e1;margin-left:auto;transition:transform 0.25s">expand_more</span>
-                    </button>
-
-                    <div id="perfilAjustesPanel" style="display:none;margin-top:14px;">
 
                     <!-- Botón editar nombre -->
-                    <button onclick="openEditNameModal()" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <button onclick="cerrarAjustesModal();openEditNameModal()" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
                             <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">edit</span>
                         </div>
@@ -891,7 +896,8 @@
                         <div id="docsLista"></div>
                     </div>
 
-                    </div><!-- /perfilAjustesPanel -->
+                    </div>
+                    </div><!-- /ajustesModal -->
 
                 </div>
             </div>

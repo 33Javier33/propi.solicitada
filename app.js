@@ -579,14 +579,16 @@
         } catch(e) { alert('No se pudo eliminar.'); }
     };
 
-    // ── AJUSTES del perfil (desplegable): nombre, notificaciones, tema, documentos ──
-    window.togglePerfilAjustes = function() {
-        const panel = document.getElementById('perfilAjustesPanel');
-        const chev  = document.getElementById('perfilAjustesChevron');
-        if (!panel) return;
-        const abierto = panel.style.display !== 'none';
-        panel.style.display = abierto ? 'none' : 'block';
-        if (chev) chev.style.transform = abierto ? '' : 'rotate(180deg)';
+    // ── AJUSTES del perfil (modal): nombre, notificaciones, tema, documentos ──
+    window.abrirAjustesModal = function() {
+        const m = document.getElementById('ajustesModal');
+        if (!m) return;
+        m.classList.remove('hidden'); m.classList.add('flex');
+    };
+    window.cerrarAjustesModal = function() {
+        const m = document.getElementById('ajustesModal');
+        if (!m) return;
+        m.classList.add('hidden'); m.classList.remove('flex');
     };
 
     // ── NOMBRE PERSONALIZADO ─────────────────────────────────

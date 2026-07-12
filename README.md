@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Perfil: engranaje ⚙️ arriba abre Ajustes en modal + Antigüedad dentro de Información Laboral (SW v58)
+- **Ajustes y personalización** ya no ocupa espacio en la página: se movió a un **engranaje ⚙️ en la esquina superior derecha** del Perfil. Al tocarlo abre un **modal** (hoja inferior) con las 4 opciones: Cambiar nombre, Notificaciones, Tema y Mis Documentos. Reemplaza la barra desplegable anterior.
+- **Antigüedad y Puntos** se integró **dentro de Información Laboral**: "Años en Casino" 🏅 y "Mis Puntos" ⭐ ahora son filas de esa tarjeta (con el mensaje descriptivo al pie). Se eliminó la tarjeta verde separada.
+- Archivos: `index.html` (engranaje `abrirAjustesModal()`, `#ajustesModal`, filas de antigüedad en Info Laboral), `app.js` (`abrirAjustesModal`/`cerrarAjustesModal`; se quitó `togglePerfilAjustes`), `app.css` (se quitó la regla de la barra). SW v58.
+
 #### 2026-07-09 — Perfil: RUT en Información Laboral + barra de Ajustes visible en oscuro (SW v57)
 - En **Perfil → Información Laboral** se agregó la fila **RUT** del socio (huella 🔎). Toma `currentUser.Rut` y, si no viene, usa el RUT guardado en el login del dispositivo (`visor_secure_auth`), formateado (12.345.678-9).
 - **Modo oscuro**: la barra **⚙️ Ajustes y personalización** perdía contraste (quedaba igual que las tarjetas). Se le dio un fondo/borde propios en oscuro para que resalte como botón. Archivos: `app.css` (`#perfilAjustesBtn` en `[data-theme="oscuro"]`).
