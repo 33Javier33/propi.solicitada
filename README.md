@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Versión Dashboard: también el Historial en estilo premium (SW v61)
+- La **Versión Dashboard** ahora incluye la sección **Historial** en estilo oscuro premium (además del inicio). Al activar Dashboard, el Historial muestra: **stats** (Total Rendimiento, Anticipos Solicitados, Valor Punto a hoy) y una **lista de movimientos** que combina rendimientos por día (verde) y anticipos (rojo), ordenados por fecha, con contador — todo con **datos reales**.
+- Se envolvió el historial clásico en `#historyClasico` y se agregó `#historyPremium`. `_aplicarHomeVersion` alterna ahora ambas secciones (inicio + historial) a la vez.
+- Archivos: `index.html` (`#historyPremium`), `app.js` (poblado de `pmHist*` en el cálculo, toggle por pares en `_aplicarHomeVersion`). SW v61.
+
 #### 2026-07-09 — Nueva "Versión de inicio: Dashboard (Premium)" seleccionable (SW v60)
 - Se agregó una **versión alternativa de la pantalla de inicio/Balance** con estética oscura premium (tipo dashboard), **manteniendo la clásica**. Se elige desde **⚙️ Ajustes → Versión de inicio** (Clásica / Dashboard) y se guarda por dispositivo (`propi_home_version`).
 - La versión Dashboard incluye: saludo, **tarjeta de balance premium** (balance, miembro desde, ID), **Accesos Rápidos** (Recaudación del Día, Solicitar Egreso, Ver Calendario), **stats** (Mis Puntos + Valor Punto Hoy, Remanente) y **Últimos Movimientos** — todo poblado con los **datos reales** del socio (mismos cálculos que la clásica).

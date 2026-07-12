@@ -492,12 +492,13 @@
         const rt = document.getElementById('remateTag'); if (rt) _pmSet('pmRemanente', rt.textContent);
     }
     function _aplicarHomeVersion(v) {
-        const clasico = document.getElementById('homeClasico');
-        const premium = document.getElementById('homePremium');
-        if (!clasico || !premium) return;
         const esPremium = v === 'premium';
-        clasico.style.display = esPremium ? 'none' : '';
-        premium.style.display = esPremium ? 'block' : 'none';
+        // Pares (clásico / premium) por sección
+        [['homeClasico', 'homePremium'], ['historyClasico', 'historyPremium']].forEach(([cId, pId]) => {
+            const c = document.getElementById(cId), p = document.getElementById(pId);
+            if (c) c.style.display = esPremium ? 'none' : '';
+            if (p) p.style.display = esPremium ? 'block' : 'none';
+        });
         _sincronizarHomeverBtns();
         if (esPremium) _refrescarPremium();
     }
@@ -1233,6 +1234,46 @@
                 + '</div>';
             }).join('');
             if (isFirstLoad) animateIn(document.getElementById('historyList'), '60ms');
+
+            // ── Versión premium: Historial (mismos datos, estilo oscuro) ──
+            (function () {
+                const stat = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+                let totalRend = 0; const rows = [];
+                fechasOrdenadas.forEach(f => {
+                    const entradas = porFecha[f];
+                    const esAus = !esPT && ausenciasSet.has(f);
+                    const esDT = esPT && diasTrabajadosSet && diasTrabajadosSet.has(f);
+                    if (!(esPT ? esDT : !esAus)) return;
+                    const vpDia = entradas.reduce((s, r) => { const m = parseFloat(r.monto) || 0; const d = parseFloat(r.divisor) || 0; return s + (d > 0 ? m / d : 0); }, 0);
+                    const g = vpDia * pts;
+                    if (g > 0) { totalRend += g; rows.push({ fecha: f, tipo: 'Rendimiento', detalle: 'Fondo Solidario — Cierre del día', monto: g, pos: true }); }
+                });
+                merged.forEach(a => rows.push({ fecha: String(a.fecha).substring(0, 10), tipo: 'Anticipo', detalle: (a.desc || a.tipo || 'Anticipo'), monto: (a.cantidad || a.monto || 0), pos: false }));
+                rows.sort((a, b) => b.fecha.localeCompare(a.fecha));
+                stat('pmHistTotal', formatMoney(Math.round(totalRend)));
+                stat('pmHistAnticipos', formatMoney(tAnt + tDesc));
+                stat('pmHistPunto', formatMoney(Math.round(puntoGlobalTotal)));
+                const cont = document.getElementById('pmHistList');
+                if (cont) {
+                    cont.innerHTML = rows.length ? rows.map(r => {
+                        const col = r.pos ? '#3de273' : '#ffb4ab';
+                        const signo = r.pos ? '' : '-';
+                        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #43474b;">
+                            <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                                <div style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0;"></div>
+                                <div style="min-width:0;">
+                                    <p style="font-size:14px;font-weight:600;color:#f8f9fa;margin:0;">${r.tipo}</p>
+                                    <p style="font-size:12px;color:#c3c7cb;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cleanDateStr(r.fecha)} · ${r.detalle}</p>
+                                </div>
+                            </div>
+                            <b style="color:${col};font-size:16px;flex-shrink:0;margin-left:10px;white-space:nowrap;">${signo}${formatMoney(r.monto)}</b>
+                        </div>`;
+                    }).join('') : '<div style="text-align:center;padding:32px;color:#c3c7cb;font-size:13px;">Sin movimientos en este periodo</div>';
+                    const cnt = document.getElementById('pmHistCount');
+                    if (cnt) cnt.textContent = 'Mostrando ' + rows.length + ' movimiento' + (rows.length === 1 ? '' : 's');
+                }
+            })();
+
             const btn=document.getElementById('calendarBtnContainer');
             if(globalDiasCalendar.length>0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
 
