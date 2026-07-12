@@ -378,6 +378,13 @@
         document.getElementById('perfilNombre').textContent = nombre;
         document.getElementById('perfilID').textContent = 'ID: ' + currentUser.ID;
         document.getElementById('perfilIDCard').textContent = currentUser.ID;
+        (function(){
+            const elRut = document.getElementById('perfilRut');
+            if (!elRut) return;
+            let rutVal = currentUser.Rut && String(currentUser.Rut).trim();
+            if (!rutVal) { try { const a = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}'); if (a.rut) rutVal = a.rut; } catch(e) {} }
+            elRut.textContent = rutVal ? formatRUT(rutVal) : '—';
+        })();
         document.getElementById('perfilArea').textContent = currentUser.Area || '—';
         document.getElementById('perfilContrato').textContent = currentUser.TipoContrato || '—';
         document.getElementById('perfilFechaIngreso').textContent = dIng.toLocaleDateString('es-CL', {day:'2-digit', month:'long', year:'numeric'});

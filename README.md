@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Perfil: RUT en Información Laboral + barra de Ajustes visible en oscuro (SW v57)
+- En **Perfil → Información Laboral** se agregó la fila **RUT** del socio (huella 🔎). Toma `currentUser.Rut` y, si no viene, usa el RUT guardado en el login del dispositivo (`visor_secure_auth`), formateado (12.345.678-9).
+- **Modo oscuro**: la barra **⚙️ Ajustes y personalización** perdía contraste (quedaba igual que las tarjetas). Se le dio un fondo/borde propios en oscuro para que resalte como botón. Archivos: `app.css` (`#perfilAjustesBtn` en `[data-theme="oscuro"]`).
+- Archivos: `index.html` (fila RUT), `app.js` (poblar `#perfilRut`). SW v57.
+
 #### 2026-07-09 — Perfil: opciones agrupadas en un desplegable "Ajustes y personalización" (SW v56)
 - En **Perfil**, las opciones **Cambiar mi nombre**, **Notificaciones**, **Tema de la app** y **Mis Documentos** ahora están dentro de un botón desplegable **⚙️ Ajustes y personalización** que las muestra/oculta al tocarlo (chevron que rota).
 - Deja el Perfil más limpio: por defecto se ve solo la tarjeta del socio + el botón de ajustes; el resto se despliega bajo demanda.

@@ -453,6 +453,12 @@
             background: #1e293b !important;
             border-color: #334155 !important;
         }
+        /* Barra "Ajustes y personalización": resaltarla en oscuro para que no se pierda */
+        :root[data-theme="oscuro"] #perfilAjustesBtn {
+            background: #273349 !important;
+            border-color: #3b4d6b !important;
+        }
+        :root[data-theme="oscuro"] #perfilAjustesBtn #perfilAjustesChevron { color: #cbd5e1 !important; }
         :root[data-theme="oscuro"] .tema-btn span[style*="color:#334155"] { color: #cbd5e1 !important; }
         :root[data-theme="oscuro"] .tema-btn.active {
             border-color: #60a5fa !important;
@@ -1271,7 +1277,7 @@
                                 </div>
                                 <span id="perfilFechaIngreso" style="font-size:13px;font-weight:700;color:#001723">—</span>
                             </div>
-                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9">
                                 <div style="display:flex;align-items:center;gap:10px">
                                     <div style="width:32px;height:32px;border-radius:9px;background:rgba(0,23,35,0.07);display:flex;align-items:center;justify-content:center;flex-shrink:0">
                                         <span class="material-symbols-outlined" style="font-size:16px;color:#001723">badge</span>
@@ -1279,6 +1285,15 @@
                                     <span style="font-size:13px;color:#64748b;font-weight:500">ID Socio</span>
                                 </div>
                                 <span id="perfilIDCard" style="font-size:13px;font-weight:700;color:#001723;font-family:monospace">—</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:32px;height:32px;border-radius:9px;background:rgba(20,184,166,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <span class="material-symbols-outlined" style="font-size:16px;color:#14b8a6">fingerprint</span>
+                                    </div>
+                                    <span style="font-size:13px;color:#64748b;font-weight:500">RUT</span>
+                                </div>
+                                <span id="perfilRut" style="font-size:13px;font-weight:700;color:#001723;font-family:monospace">—</span>
                             </div>
                         </div>
                     </div>
@@ -1881,6 +1896,13 @@
         document.getElementById('perfilNombre').textContent = nombre;
         document.getElementById('perfilID').textContent = 'ID: ' + currentUser.ID;
         document.getElementById('perfilIDCard').textContent = currentUser.ID;
+        (function(){
+            const elRut = document.getElementById('perfilRut');
+            if (!elRut) return;
+            let rutVal = currentUser.Rut && String(currentUser.Rut).trim();
+            if (!rutVal) { try { const a = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}'); if (a.rut) rutVal = a.rut; } catch(e) {} }
+            elRut.textContent = rutVal ? formatRUT(rutVal) : '—';
+        })();
         document.getElementById('perfilArea').textContent = currentUser.Area || '—';
         document.getElementById('perfilContrato').textContent = currentUser.TipoContrato || '—';
         document.getElementById('perfilFechaIngreso').textContent = dIng.toLocaleDateString('es-CL', {day:'2-digit', month:'long', year:'numeric'});
