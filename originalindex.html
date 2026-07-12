@@ -5714,7 +5714,9 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
+                // updateViaCache:'none' → el navegador NUNCA usa caché HTTP para sw.js,
+                // así detecta la versión nueva apenas se publica.
+                navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
                     console.log('[SW] Registrado:', reg.scope);
 
                     // Si ya hay un SW esperando al cargar (ej: venía de otra pestaña)
@@ -5739,8 +5741,11 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
                         }
                     });
 
-                    // También chequear al cargar por primera vez
+                    // Chequear al cargar…
                     reg.update().catch(() => {});
+                    // …y cada 45 s mientras la app esté abierta (aunque no cambie de foco),
+                    // para que el banner aparezca solo tras publicar una versión nueva.
+                    setInterval(() => { reg.update().catch(() => {}); }, 45000);
 
                 }).catch(e => console.warn('[SW] Error:', e));
 
@@ -5753,7 +5758,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         }
 
         // Novedades de esta versión (se muestran en el aviso). Actualizar en cada release.
-        var APP_NOVEDADES = 'Campana de notificaciones de mensajes';
+        var APP_NOVEDADES = 'Nueva versión Dashboard y mejoras';
         var _updWorker = null, _updTimer = null, _updateApplying = false;
 
         // AUTO (15 s): silencioso — activa el nuevo SW sin recargar. Se aplica al reabrir la app.
@@ -5793,7 +5798,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
                 restante--;
                 const c = document.getElementById('updateCountdown');
                 if (c) c.textContent = restante + 's';
-                if (restante <= 0) { clearInterval(_updTimer); _updTimer = null; _actualizarSilencioso(); }
+                if (restante <= 0) { clearInterval(_updTimer); _updTimer = null; _aplicarActualizacion(); }
             }, 1000);
 
             document.getElementById('updateBannerBtn').onclick = _aplicarActualizacion;

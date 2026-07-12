@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Fix: el banner de actualización no aparecía (chequeo periódico) (SW v68)
+- **Causa**: la app solo chequeaba actualizaciones al cargar y al volver al foco (`visibilitychange`). Si quedaba abierta en primer plano, nunca se chequeaba → el banner no aparecía y había que recargar a mano (Ctrl+R).
+- **Fix**: el Service Worker ahora se registra con `updateViaCache:'none'` (nunca cachea `sw.js` por HTTP) y se agregó un **chequeo periódico cada 45 s** (`reg.update()`) mientras la app está abierta. Así el banner aparece solo poco después de publicar una versión.
+- Además, al terminar la cuenta regresiva de 15 s el banner ahora **recarga** para aplicar la versión (la sesión se mantiene por el auto-login), en vez de solo activarse en silencio — así la versión aparece sin acción manual.
+- Nota: este arreglo recién toma efecto **después de cargar esta versión una vez** (la app en ejecución todavía tiene la lógica vieja). De ahí en adelante, las actualizaciones aparecen solas.
+- Archivos: `index.html` (registro SW + `setInterval` de chequeo + cuenta regresiva recarga). SW v68.
+
 #### 2026-07-09 — Calendario condicional en premium + cambio de tarjeta en ambas versiones (SW v67)
 - **Calendario**: en la versión Dashboard el acceso "Ver Calendario de Turnos" aparecía siempre. Ahora se oculta si no hay días/ausencias que mostrar (`globalDiasCalendar.length === 0`), igual que en la clásica (para Planta sin ausencias no aparece).
 - **Efecto de cambio de tarjeta en ambas versiones**: el botón 💳 que alterna entre la tarjeta normal y la **tarjeta bancaria** ahora también está en la versión **Dashboard**. Se agregó una tarjeta bancaria premium (`#pmBalanceTarjeta`) y `_aplicarBalanceEstilo` / `_refrescarTarjeta` ahora manejan los dos juegos de tarjetas (clásica y premium) con la misma preferencia (`propi_balance_estilo`).
