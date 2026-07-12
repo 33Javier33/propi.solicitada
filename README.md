@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Versión Dashboard: tema premium también en Estadísticas, Mensajes y Perfil (SW v64)
+- Se completó la **Versión Dashboard** aplicando el **tema oscuro premium** a las secciones **Estadísticas**, **Mensajes** y **Perfil**, reutilizando su mismo layout y cableado (no se duplicó lógica).
+- Se hace con una clase `.premium-skin` que redefine la paleta (variables `--lm-*`, `--color-card`, `--chat-bg`, etc.) y convierte los estilos inline claros a oscuros, sólo en esas tres pestañas y sólo cuando la versión Dashboard está activa. Usa los colores del tema oscuro (probados) para no romper contrastes.
+- `_aplicarHomeVersion` ahora: muestra los layouts premium de inicio/historial **y** aplica/quita `.premium-skin` en `#tab-stats`, `#tab-chat`, `#tab-perfil`. Al volver a "Clásica", todo regresa al tema de color elegido.
+- Archivos: `app.css` (`.premium-skin`), `app.js` (`_aplicarHomeVersion`). SW v64.
+
 #### 2026-07-09 — Historial premium: desglose de tipos por día (SW v63)
 - La lista de **Movimientos** del Historial premium ahora muestra, por día, una **tarjeta con el desglose de tipos** (Mesas, MDA, Bóveda, etc. con su monto), igual que la versión clásica, más la grilla **Valor Punto / Mis Pts / Mi Ganancia** y la etiqueta del día (Ausencia / Trabajado / No trabajado). Antes solo mostraba una línea por día sin los tipos.
 - Archivos: `app.js` (reconstrucción del bloque premium del historial con `tiposHTML`), `index.html` (`#pmHistList` sin caja, cada día es su propia tarjeta). SW v63.

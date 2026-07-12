@@ -493,11 +493,16 @@
     }
     function _aplicarHomeVersion(v) {
         const esPremium = v === 'premium';
-        // Pares (clásico / premium) por sección
+        // Pares (clásico / premium) por sección con layout propio
         [['homeClasico', 'homePremium'], ['historyClasico', 'historyPremium']].forEach(([cId, pId]) => {
             const c = document.getElementById(cId), p = document.getElementById(pId);
             if (c) c.style.display = esPremium ? 'none' : '';
             if (p) p.style.display = esPremium ? 'block' : 'none';
+        });
+        // Estadísticas / Mensajes / Perfil: mismo layout, skin premium (tema oscuro)
+        ['tab-stats', 'tab-chat', 'tab-perfil'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('premium-skin', esPremium);
         });
         _sincronizarHomeverBtns();
         if (esPremium) _refrescarPremium();
