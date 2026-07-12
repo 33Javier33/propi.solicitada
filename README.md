@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Perfil: opciones agrupadas en un desplegable "Ajustes y personalización" (SW v56)
+- En **Perfil**, las opciones **Cambiar mi nombre**, **Notificaciones**, **Tema de la app** y **Mis Documentos** ahora están dentro de un botón desplegable **⚙️ Ajustes y personalización** que las muestra/oculta al tocarlo (chevron que rota).
+- Deja el Perfil más limpio: por defecto se ve solo la tarjeta del socio + el botón de ajustes; el resto se despliega bajo demanda.
+- Archivos: `index.html` (botón `#perfilAjustesBtn` + contenedor `#perfilAjustesPanel` envolviendo los 4 bloques), `app.js` (`togglePerfilAjustes`). SW v56.
+
 #### 2026-07-09 — La administración puede enviar documentos al socio (Mis Documentos) (SW v55)
 - Ahora los documentos que la **administración** sube desde socios-comicion (Documentación → por socio) le aparecen al socio en **Perfil → Mis Documentos**, junto con los que él mismo subió.
 - Los documentos enviados por la administración se muestran **destacados** (fondo lila + etiqueta "📎 Enviado por administración") y **el socio no puede eliminarlos** (solo puede borrar los que subió él).

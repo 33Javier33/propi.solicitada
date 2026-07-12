@@ -1299,6 +1299,20 @@
                         <p id="perfilAntigMsg" style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:12px;text-align:center;line-height:1.5"></p>
                     </div>
 
+                    <!-- AJUSTES (desplegable): nombre, notificaciones, tema y documentos -->
+                    <button id="perfilAjustesBtn" onclick="togglePerfilAjustes()" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-top:14px;">
+                        <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                            <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">settings</span>
+                        </div>
+                        <div style="text-align:left;flex:1;min-width:0">
+                            <p style="font-size:13px;font-weight:700;color:#001723;margin:0">Ajustes y personalización</p>
+                            <p style="font-size:11px;color:#94a3b8;margin:2px 0 0">Nombre, notificaciones, tema y documentos</p>
+                        </div>
+                        <span id="perfilAjustesChevron" class="material-symbols-outlined" style="font-size:22px;color:#cbd5e1;margin-left:auto;transition:transform 0.25s">expand_more</span>
+                    </button>
+
+                    <div id="perfilAjustesPanel" style="display:none;margin-top:14px;">
+
                     <!-- Botón editar nombre -->
                     <button onclick="openEditNameModal()" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -1373,6 +1387,8 @@
                         </button>
                         <div id="docsLista"></div>
                     </div>
+
+                    </div><!-- /perfilAjustesPanel -->
 
                 </div>
             </div>
@@ -2057,6 +2073,16 @@
             await dbSV.from('documentos').delete().eq('id', id);
             await cargarDocumentos();
         } catch(e) { alert('No se pudo eliminar.'); }
+    };
+
+    // ── AJUSTES del perfil (desplegable): nombre, notificaciones, tema, documentos ──
+    window.togglePerfilAjustes = function() {
+        const panel = document.getElementById('perfilAjustesPanel');
+        const chev  = document.getElementById('perfilAjustesChevron');
+        if (!panel) return;
+        const abierto = panel.style.display !== 'none';
+        panel.style.display = abierto ? 'none' : 'block';
+        if (chev) chev.style.transform = abierto ? '' : 'rotate(180deg)';
     };
 
     // ── NOMBRE PERSONALIZADO ─────────────────────────────────

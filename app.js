@@ -572,6 +572,16 @@
         } catch(e) { alert('No se pudo eliminar.'); }
     };
 
+    // ── AJUSTES del perfil (desplegable): nombre, notificaciones, tema, documentos ──
+    window.togglePerfilAjustes = function() {
+        const panel = document.getElementById('perfilAjustesPanel');
+        const chev  = document.getElementById('perfilAjustesChevron');
+        if (!panel) return;
+        const abierto = panel.style.display !== 'none';
+        panel.style.display = abierto ? 'none' : 'block';
+        if (chev) chev.style.transform = abierto ? '' : 'rotate(180deg)';
+    };
+
     // ── NOMBRE PERSONALIZADO ─────────────────────────────────
     function getDisplayName() {
         const key = `displayName_${currentUser.ID}`;
