@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Historial premium: desglose de tipos por día (SW v63)
+- La lista de **Movimientos** del Historial premium ahora muestra, por día, una **tarjeta con el desglose de tipos** (Mesas, MDA, Bóveda, etc. con su monto), igual que la versión clásica, más la grilla **Valor Punto / Mis Pts / Mi Ganancia** y la etiqueta del día (Ausencia / Trabajado / No trabajado). Antes solo mostraba una línea por día sin los tipos.
+- Archivos: `app.js` (reconstrucción del bloque premium del historial con `tiposHTML`), `index.html` (`#pmHistList` sin caja, cada día es su propia tarjeta). SW v63.
+
 #### 2026-07-09 — Historial premium: opción "Anticipos Anteriores" (SW v62)
 - En la vista **Historial** de la Versión Dashboard se agregó el toggle **Movimientos / Anticipos Anteriores** (igual que en la clásica).
 - "Anticipos Anteriores" reutiliza la misma carga de datos (`loadHistorialAnticipos` → `getHistorialCompletoSocio`) y los muestra en **estilo oscuro**: cada período como tarjeta con su total y el detalle de registros (fecha, responsable, monto). Se carga la primera vez que se abre.
