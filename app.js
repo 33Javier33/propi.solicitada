@@ -396,6 +396,7 @@
         cargarDocumentos();
         _sincronizarTemaBtns();
         _aplicarBalanceEstilo(_balanceEstiloGuardado());
+        _aplicarHomeVersion(_homeVersionGuardada());
         _pushRefrescarEstado();
     }
 
@@ -456,6 +457,54 @@
         const nuevo = _balanceEstiloGuardado() === 'tarjeta' ? 'clasico' : 'tarjeta';
         try { localStorage.setItem('propi_balance_estilo', nuevo); } catch (e) {}
         _aplicarBalanceEstilo(nuevo);
+    };
+
+    // ── VERSIÓN DE INICIO (clásica / dashboard premium) ──────────────
+    function _homeVersionGuardada() {
+        try { return localStorage.getItem('propi_home_version') === 'premium' ? 'premium' : 'clasico'; }
+        catch (e) { return 'clasico'; }
+    }
+    function _sincronizarHomeverBtns() {
+        const actual = _homeVersionGuardada();
+        document.querySelectorAll('.homever-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-homever') === actual);
+        });
+    }
+    function _pmSet(id, val) { const e = document.getElementById(id); if (e) e.textContent = val; }
+    function _refrescarPremium() {
+        // Identidad
+        if (typeof currentUser !== 'undefined' && currentUser) {
+            _pmSet('pmSaludo', 'Bienvenido, ' + (getDisplayName() || '').split(' ')[0]);
+            _pmSet('pmRolTxt', ((currentUser.Area || 'Fondo Solidario') + ' · Casino Puerto Varas'));
+            const id = String(currentUser.ID || '').replace(/\D/g, '');
+            _pmSet('pmId', '#' + (id.slice(-4) || '0000'));
+            if (currentUser.FechaIngreso) {
+                const p = String(currentUser.FechaIngreso).split('-');
+                const MES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+                if (p.length >= 2) _pmSet('pmDesde', (MES[parseInt(p[1]) - 1] || '') + ' ' + p[0]);
+            }
+        }
+        // Cifras en vivo (espejo del clásico, por si se cambia antes de un refresco)
+        const bal = document.getElementById('montoRecibirLabel');
+        if (bal) { const v = bal.getAttribute('data-value'); _pmSet('pmBalance', (v !== null && v !== '') ? formatMoney(Number(v)) : bal.textContent); }
+        const pp = document.getElementById('perfilPuntos'); if (pp) _pmSet('pmPuntos', pp.textContent);
+        const gp = document.getElementById('globalPtsTag'); if (gp) _pmSet('pmValorPunto', '$' + gp.textContent);
+        const rt = document.getElementById('remateTag'); if (rt) _pmSet('pmRemanente', rt.textContent);
+    }
+    function _aplicarHomeVersion(v) {
+        const clasico = document.getElementById('homeClasico');
+        const premium = document.getElementById('homePremium');
+        if (!clasico || !premium) return;
+        const esPremium = v === 'premium';
+        clasico.style.display = esPremium ? 'none' : '';
+        premium.style.display = esPremium ? 'block' : 'none';
+        _sincronizarHomeverBtns();
+        if (esPremium) _refrescarPremium();
+    }
+    window.setHomeVersion = function (v) {
+        v = (v === 'premium') ? 'premium' : 'clasico';
+        try { localStorage.setItem('propi_home_version', v); } catch (e) {}
+        _aplicarHomeVersion(v);
     };
 
     // ── FOTO DE PERFIL (Supabase Storage, bucket público 'avatares') ──
@@ -1011,6 +1060,14 @@
             if (_mt) _mt.textContent = formatMoney(liquido);
             document.getElementById('remateTag').textContent = formatMoney(remanente);
             document.getElementById('globalPtsTag').textContent = Math.round(puntoGlobalTotal).toLocaleString('es-CL');
+            // Versión premium (dashboard): cifras en vivo
+            (function () {
+                const _s = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+                _s('pmBalance', formatMoney(liquido));
+                _s('pmRemanente', formatMoney(remanente));
+                _s('pmValorPunto', formatMoney(Math.round(puntoGlobalTotal)));
+                _s('pmPuntos', String(pts));
+            })();
 
             // Resumen contable - Lumina style
             document.getElementById('detallesContables').innerHTML = `
@@ -1063,6 +1120,20 @@
                 listaContainer.innerHTML=`<div class="text-center py-10 text-xs text-lm-muted">Sin movimientos en este periodo</div>`;
             }
             if (isFirstLoad) animateIn(listaContainer, '120ms');
+
+            // Versión premium: mismos movimientos, estilo oscuro
+            const _pmMovs = document.getElementById('pmMovs');
+            if (_pmMovs) {
+                _pmMovs.innerHTML = (merged.length > 0)
+                    ? merged.map(a => `<div style="display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid #43474b;">
+                        <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                            <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,180,171,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#ffb4ab;font-size:18px;">arrow_downward</span></div>
+                            <div style="min-width:0;"><p style="font-size:14px;font-weight:600;color:#e1e3e4;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.desc || a.tipo || 'Anticipo'}</p><p style="font-size:11px;color:#c3c7cb;margin:2px 0 0;">${cleanDateStr(a.fecha)}</p></div>
+                        </div>
+                        <b style="color:#ffb4ab;font-size:14px;flex-shrink:0;margin-left:10px;white-space:nowrap;">-${formatMoney(a.cantidad || a.monto)}</b>
+                    </div>`).join('')
+                    : '<div style="text-align:center;padding:28px;color:#c3c7cb;font-size:13px;">Sin movimientos en este periodo</div>';
+            }
 
             // Historial — agrupado por fecha, con desglose de tipos dentro de cada día
             const ausenciasSet = new Set(

@@ -399,6 +399,7 @@
         <!-- ── TAB: HOME (BALANCE) ── -->
         <div id="tab-home" class="tab-section active overflow-y-auto pb-32 pt-1 bg-lm-bg">
 
+            <div id="homeClasico">
             <!-- Indicador última actualización -->
             <div id="lastUpdateBar" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;padding:0 16px 6px;opacity:0.6;">
                 <span class="material-symbols-outlined" style="font-size:12px;color:#94a3b8">sync</span>
@@ -524,6 +525,90 @@
                 </div>
 
             </div>
+            </div><!-- /homeClasico -->
+
+            <!-- ═══════ VERSIÓN PREMIUM (Dashboard oscuro) ═══════ -->
+            <div id="homePremium" style="display:none;padding:16px 16px 40px;background:#0f1419;min-height:calc(100vh - 120px);">
+                <!-- Saludo -->
+                <div style="margin-bottom:20px;">
+                    <h1 id="pmSaludo" style="font-family:Manrope,sans-serif;font-size:24px;font-weight:700;color:#e1e3e4;margin:0 0 3px;">Bienvenido</h1>
+                    <p style="font-size:13px;color:#c3c7cb;display:flex;align-items:center;gap:6px;margin:0;">
+                        <span class="material-symbols-outlined" style="font-size:16px;color:#cee6f7;font-variation-settings:'FILL' 1;">stars</span>
+                        <span id="pmRolTxt">Fondo Solidario · Casino Puerto Varas</span>
+                    </p>
+                </div>
+                <!-- Tarjeta balance premium -->
+                <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,#171c22,#282e36);border:1px solid #43474b;border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.35);margin-bottom:26px;">
+                    <div style="position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.03);pointer-events:none;"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;position:relative;z-index:2;">
+                        <div>
+                            <p style="font-size:11px;font-weight:600;letter-spacing:0.09em;color:#cee6f7;text-transform:uppercase;margin:0 0 6px;">Balance a Recibir</p>
+                            <h2 id="pmBalance" style="font-family:Manrope,sans-serif;font-size:38px;font-weight:700;letter-spacing:-0.02em;color:#e1e3e4;margin:0;">$0</h2>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+                            <button onclick="descargarComprobante()" title="Comprobante" style="width:36px;height:36px;border-radius:10px;background:#282e36;border:1px solid #43474b;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:18px;color:#cee6f7;">receipt</span></button>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px;padding-top:18px;border-top:1px solid #43474b;position:relative;z-index:2;">
+                        <div>
+                            <p style="font-size:12px;color:#c3c7cb;margin:0 0 3px;">Miembro desde</p>
+                            <p id="pmDesde" style="font-size:15px;font-weight:600;color:#e1e3e4;margin:0;">—</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <p style="font-size:12px;color:#c3c7cb;margin:0 0 3px;">ID Socio</p>
+                            <p id="pmId" style="font-size:15px;font-weight:600;color:#e1e3e4;margin:0;">—</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Accesos rápidos -->
+                <h3 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:#e1e3e4;margin:0 0 14px;">Accesos Rápidos</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;">
+                    <button onclick="abrirModalRec()" style="display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:18px;background:#171c22;border:1px solid #43474b;border-radius:16px;cursor:pointer;">
+                        <div style="width:44px;height:44px;border-radius:10px;background:#005322;display:flex;align-items:center;justify-content:center;margin-bottom:12px;"><span class="material-symbols-outlined" style="color:#66ff8e;">add_circle</span></div>
+                        <span style="font-size:12px;color:#c3c7cb;margin-bottom:2px;">Ingresar</span>
+                        <span style="font-size:15px;font-weight:700;color:#e1e3e4;line-height:1.25;">Recaudación del Día</span>
+                    </button>
+                    <button onclick="abrirModalEgreso()" style="display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:18px;background:#171c22;border:1px solid #43474b;border-radius:16px;cursor:pointer;">
+                        <div style="width:44px;height:44px;border-radius:10px;background:#333942;display:flex;align-items:center;justify-content:center;margin-bottom:12px;"><span class="material-symbols-outlined" style="color:#cee6f7;">request_quote</span></div>
+                        <span style="font-size:12px;color:#c3c7cb;margin-bottom:2px;">Solicitar</span>
+                        <span style="font-size:15px;font-weight:700;color:#e1e3e4;line-height:1.25;">Solicitar Egreso</span>
+                    </button>
+                    <button id="pmCalBtn" onclick="openCalendar()" style="grid-column:span 2;display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#171c22;border:1px solid #43474b;border-radius:16px;cursor:pointer;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:44px;height:44px;border-radius:10px;background:#333942;display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="color:#cee6f7;">event_note</span></div>
+                            <span style="font-size:15px;font-weight:700;color:#e1e3e4;">Ver Calendario de Turnos</span>
+                        </div>
+                        <span class="material-symbols-outlined" style="color:#8d9196;">chevron_right</span>
+                    </button>
+                </div>
+                <!-- Stats -->
+                <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:28px;">
+                    <div style="background:#171c22;border:1px solid #43474b;border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:space-between;">
+                        <div style="display:flex;gap:14px;align-items:center;min-width:0;">
+                            <div style="width:52px;height:52px;border-radius:50%;background:#344957;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#cee6f7;font-variation-settings:'FILL' 1;">stars</span></div>
+                            <div style="min-width:0;">
+                                <h4 style="font-size:14px;font-weight:700;color:#e1e3e4;margin:0;">Mis Puntos</h4>
+                                <p style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;color:#e1e3e4;margin:0;"><span id="pmPuntos">0</span> <span style="font-size:12px;font-weight:400;color:#c3c7cb;">pts</span></p>
+                            </div>
+                        </div>
+                        <div style="text-align:right;flex-shrink:0;">
+                            <p style="font-size:11px;color:#c3c7cb;margin:0 0 2px;">Valor Punto Hoy</p>
+                            <p id="pmValorPunto" style="font-size:16px;font-weight:700;color:#25D366;margin:0;">$0</p>
+                        </div>
+                    </div>
+                    <div style="background:#171c22;border:1px solid #43474b;border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:space-between;">
+                        <div style="display:flex;gap:14px;align-items:center;min-width:0;">
+                            <div style="width:52px;height:52px;border-radius:50%;background:#282e36;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#cee6f7;">savings</span></div>
+                            <div><h4 style="font-size:14px;font-weight:700;color:#e1e3e4;margin:0;">Remanente</h4><p style="font-size:11px;color:#c3c7cb;margin:0;">Pasa al próximo mes</p></div>
+                        </div>
+                        <p id="pmRemanente" style="font-family:Manrope,sans-serif;font-size:22px;font-weight:800;color:#e1e3e4;margin:0;flex-shrink:0;">$0</p>
+                    </div>
+                </div>
+                <!-- Movimientos -->
+                <h3 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:#e1e3e4;margin:0 0 14px;">Últimos Movimientos</h3>
+                <div id="pmMovs" style="background:#171c22;border:1px solid #43474b;border-radius:16px;overflow:hidden;min-height:70px;"></div>
+            </div>
+
         </div>
 
         <!-- ── TAB: HISTORIAL ── -->
@@ -927,6 +1012,29 @@
                                     <span class="material-symbols-outlined" style="font-size:18px;color:#fff">spa</span>
                                 </span>
                                 <span style="font-size:11px;font-weight:700;color:#334155">Lavanda</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- VERSIÓN DE INICIO -->
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">dashboard</span>
+                            </div>
+                            <div style="min-width:0;">
+                                <p style="font-size:14px;font-weight:800;color:#001723;margin:0;">Versión de inicio</p>
+                                <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;line-height:1.4;">Elige cómo se ve tu pantalla de Balance.</p>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <button type="button" data-homever="clasico" onclick="setHomeVersion('clasico')" class="homever-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:14px 8px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span class="material-symbols-outlined" style="font-size:24px;color:#6366f1">wallet</span>
+                                <span style="font-size:12px;font-weight:700;color:#334155">Clásica</span>
+                            </button>
+                            <button type="button" data-homever="premium" onclick="setHomeVersion('premium')" class="homever-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:14px 8px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span class="material-symbols-outlined" style="font-size:24px;color:#6366f1">dashboard</span>
+                                <span style="font-size:12px;font-weight:700;color:#334155">Dashboard</span>
                             </button>
                         </div>
                     </div>

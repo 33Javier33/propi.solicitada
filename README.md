@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Nueva "Versión de inicio: Dashboard (Premium)" seleccionable (SW v60)
+- Se agregó una **versión alternativa de la pantalla de inicio/Balance** con estética oscura premium (tipo dashboard), **manteniendo la clásica**. Se elige desde **⚙️ Ajustes → Versión de inicio** (Clásica / Dashboard) y se guarda por dispositivo (`propi_home_version`).
+- La versión Dashboard incluye: saludo, **tarjeta de balance premium** (balance, miembro desde, ID), **Accesos Rápidos** (Recaudación del Día, Solicitar Egreso, Ver Calendario), **stats** (Mis Puntos + Valor Punto Hoy, Remanente) y **Últimos Movimientos** — todo poblado con los **datos reales** del socio (mismos cálculos que la clásica).
+- El home clásico se envolvió en `#homeClasico`; la nueva vista es `#homePremium` (oscura, hardcodeada, independiente del tema de color).
+- Archivos: `index.html` (`#homePremium`, selector en el modal de Ajustes), `app.js` (`setHomeVersion`, `_aplicarHomeVersion`, `_refrescarPremium`, poblado de `pm*` en el cálculo del balance), `app.css` (`.homever-btn`). SW v60.
+
 #### 2026-07-09 — Barra inferior legible en oscuro + 2 temas nuevos + Balance estilo tarjeta bancaria (SW v59)
 - **Barra de navegación en modo oscuro**: la pestaña activa quedaba casi invisible (usaba `#001723` fijo). Ahora usa `rgb(var(--lm-primary))`, así resalta en todos los temas.
 - **Dos temas nuevos** para probar: **Aqua** (turquesa 💧) y **Lavanda** (púrpura 🌿), ambos claros. Se eligen desde ⚙️ Ajustes → Tema. (`_TEMAS`/`_TEMA_COLOR` en `app.js`, bloques de variables en `app.css`.)

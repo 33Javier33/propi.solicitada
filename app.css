@@ -448,6 +448,13 @@
             border-color: #6366f1 !important;
             box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
         }
+        .homever-btn:active { transform: scale(0.96); }
+        .homever-btn.active {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+        }
+        :root[data-theme="oscuro"] .homever-btn { background: #1e293b !important; border-color: #334155 !important; }
+        :root[data-theme="oscuro"] .homever-btn span[style*="color:#334155"] { color: #cbd5e1 !important; }
         :root[data-theme="rosa"] .tema-btn.active {
             border-color: #db2777 !important;
             box-shadow: 0 0 0 3px rgba(219,39,119,0.18);
