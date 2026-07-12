@@ -1222,27 +1222,23 @@
                         <span class="material-symbols-outlined" style="color:#8d9196;">chevron_right</span>
                     </button>
                 </div>
-                <!-- Stats -->
-                <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:28px;">
-                    <div style="background:#171c22;border:1px solid #43474b;border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:space-between;">
-                        <div style="display:flex;gap:14px;align-items:center;min-width:0;">
-                            <div style="width:52px;height:52px;border-radius:50%;background:#344957;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#cee6f7;font-variation-settings:'FILL' 1;">stars</span></div>
-                            <div style="min-width:0;">
-                                <h4 style="font-size:14px;font-weight:700;color:#e1e3e4;margin:0;">Mis Puntos</h4>
-                                <p style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;color:#e1e3e4;margin:0;"><span id="pmPuntos">0</span> <span style="font-size:12px;font-weight:400;color:#c3c7cb;">pts</span></p>
-                            </div>
+                <!-- Stats: Mis Puntos y Remanente lado a lado -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;">
+                    <div style="background:#171c22;border:1px solid #43474b;border-radius:16px;padding:16px;">
+                        <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px;">
+                            <div style="width:38px;height:38px;border-radius:10px;background:#344957;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#cee6f7;font-size:19px;font-variation-settings:'FILL' 1;">stars</span></div>
+                            <h4 style="font-size:13px;font-weight:700;color:#e1e3e4;margin:0;">Mis Puntos</h4>
                         </div>
-                        <div style="text-align:right;flex-shrink:0;">
-                            <p style="font-size:11px;color:#c3c7cb;margin:0 0 2px;">Valor Punto Hoy</p>
-                            <p id="pmValorPunto" style="font-size:16px;font-weight:700;color:#25D366;margin:0;">$0</p>
-                        </div>
+                        <p style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;color:#e1e3e4;margin:0;"><span id="pmPuntos">0</span> <span style="font-size:12px;font-weight:400;color:#c3c7cb;">pts</span></p>
+                        <p style="font-size:11px;color:#c3c7cb;margin:4px 0 0;">Valor punto: <span id="pmValorPunto" style="color:#25D366;font-weight:700;">$0</span></p>
                     </div>
-                    <div style="background:#171c22;border:1px solid #43474b;border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:space-between;">
-                        <div style="display:flex;gap:14px;align-items:center;min-width:0;">
-                            <div style="width:52px;height:52px;border-radius:50%;background:#282e36;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#cee6f7;">savings</span></div>
-                            <div><h4 style="font-size:14px;font-weight:700;color:#e1e3e4;margin:0;">Remanente</h4><p style="font-size:11px;color:#c3c7cb;margin:0;">Pasa al próximo mes</p></div>
+                    <div style="background:#171c22;border:1px solid #43474b;border-radius:16px;padding:16px;">
+                        <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px;">
+                            <div style="width:38px;height:38px;border-radius:10px;background:#282e36;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#cee6f7;font-size:19px;">savings</span></div>
+                            <h4 style="font-size:13px;font-weight:700;color:#e1e3e4;margin:0;">Remanente</h4>
                         </div>
-                        <p id="pmRemanente" style="font-family:Manrope,sans-serif;font-size:22px;font-weight:800;color:#e1e3e4;margin:0;flex-shrink:0;">$0</p>
+                        <p id="pmRemanente" style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;color:#e1e3e4;margin:0;">$0</p>
+                        <p style="font-size:11px;color:#c3c7cb;margin:4px 0 0;">Pasa al próximo mes</p>
                     </div>
                 </div>
                 <!-- Movimientos -->

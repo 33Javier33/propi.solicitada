@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Dashboard: "Mis Puntos" y "Remanente" lado a lado (SW v69)
+- En la home de la versión Dashboard, las tarjetas **Mis Puntos** y **Remanente** pasaron de estar apiladas (una debajo de otra) a estar **lado a lado** en dos columnas, ocupando menos espacio. Se rediseñaron como tarjetas compactas verticales (ícono + título arriba, valor grande, y un dato secundario abajo: "Valor punto" / "Pasa al próximo mes"). IDs sin cambios (`pmPuntos`, `pmValorPunto`, `pmRemanente`).
+- Archivos: `index.html` (grid de stats premium a 2 columnas). SW v69.
+
 #### 2026-07-09 — Fix: el banner de actualización no aparecía (chequeo periódico) (SW v68)
 - **Causa**: la app solo chequeaba actualizaciones al cargar y al volver al foco (`visibilitychange`). Si quedaba abierta en primer plano, nunca se chequeaba → el banner no aparecía y había que recargar a mano (Ctrl+R).
 - **Fix**: el Service Worker ahora se registra con `updateViaCache:'none'` (nunca cachea `sw.js` por HTTP) y se agregó un **chequeo periódico cada 45 s** (`reg.update()`) mientras la app está abierta. Así el banner aparece solo poco después de publicar una versión.
