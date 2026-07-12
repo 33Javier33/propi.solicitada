@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Barra inferior legible en oscuro + 2 temas nuevos + Balance estilo tarjeta bancaria (SW v59)
+- **Barra de navegación en modo oscuro**: la pestaña activa quedaba casi invisible (usaba `#001723` fijo). Ahora usa `rgb(var(--lm-primary))`, así resalta en todos los temas.
+- **Dos temas nuevos** para probar: **Aqua** (turquesa 💧) y **Lavanda** (púrpura 🌿), ambos claros. Se eligen desde ⚙️ Ajustes → Tema. (`_TEMAS`/`_TEMA_COLOR` en `app.js`, bloques de variables en `app.css`.)
+- **Balance estilo "tarjeta bancaria"** (versión alternativa, se mantiene la clásica): en la pestaña **Balance**, botón 💳 en la tarjeta para alternar entre la vista clásica y una **tarjeta tipo bancaria** (chip dorado, monto, número enmascarado con los últimos 4 del ID, titular y "miembro desde"). La preferencia se guarda por dispositivo (`propi_balance_estilo`). El botón 🔄 en la tarjeta vuelve a la clásica.
+- Archivos: `app.css` (`.nav-btn.active`, temas aqua/lavanda), `index.html` (botones de tema, `#balanceTarjeta`, botón alternar), `app.js` (`toggleBalanceEstilo`, `_aplicarBalanceEstilo`, `_refrescarTarjeta`, sync del monto). SW v59.
+
 #### 2026-07-09 — Perfil: engranaje ⚙️ arriba abre Ajustes en modal + Antigüedad dentro de Información Laboral (SW v58)
 - **Ajustes y personalización** ya no ocupa espacio en la página: se movió a un **engranaje ⚙️ en la esquina superior derecha** del Perfil. Al tocarlo abre un **modal** (hoja inferior) con las 4 opciones: Cambiar nombre, Notificaciones, Tema y Mis Documentos. Reemplaza la barra desplegable anterior.
 - **Antigüedad y Puntos** se integró **dentro de Información Laboral**: "Años en Casino" 🏅 y "Mis Puntos" ⭐ ahora son filas de esa tarjeta (con el mensaje descriptivo al pie). Se eliminó la tarjeta verde separada.

@@ -145,6 +145,64 @@
             --chat-bg:       #0b141a;
         }
 
+        /* ── TEMA AQUA (turquesa, claro) ── */
+        :root[data-theme="aqua"] {
+            --lm-bg:          236 254 255;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      186 230 253;
+            --lm-primary:     14 116 144;
+            --lm-primary-mid: 8 145 178;
+            --lm-accent:      6 182 212;
+            --lm-secondary:   13 148 136;
+            --lm-tertiary:    2 132 199;
+            --lm-green:       13 148 136;
+            --lm-red:         220 38 38;
+            --lm-yellow:      161 98 7;
+            --lm-muted:       90 120 130;
+            --lm-subtle:      236 254 255;
+            --lm-high:        207 250 254;
+            --wa-bg:          207 250 254;
+            --wa-mine:        204 251 241;
+            --wa-other:       255 255 255;
+            --color-card:    #ffffff;
+            --color-subtle:  #ecfeff;
+            --app-bg:        #ecfeff;
+            --nav-bg:        rgba(236,254,255,0.94);
+            --nav-border:    rgba(14,116,144,0.10);
+            --glass-bg:      rgba(236,254,255,0.92);
+            --chat-bg:       #d7f0f2;
+        }
+
+        /* ── TEMA LAVANDA (púrpura, claro) ── */
+        :root[data-theme="lavanda"] {
+            --lm-bg:          245 243 255;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      221 214 254;
+            --lm-primary:     91 33 182;
+            --lm-primary-mid: 124 58 237;
+            --lm-accent:      139 92 246;
+            --lm-secondary:   109 40 217;
+            --lm-tertiary:    76 29 149;
+            --lm-green:       5 150 105;
+            --lm-red:         220 38 38;
+            --lm-yellow:      161 98 7;
+            --lm-muted:       120 110 140;
+            --lm-subtle:      245 243 255;
+            --lm-high:        237 233 254;
+            --wa-bg:          237 233 254;
+            --wa-mine:        233 213 255;
+            --wa-other:       255 255 255;
+            --color-card:    #ffffff;
+            --color-subtle:  #f5f3ff;
+            --app-bg:        #f5f3ff;
+            --nav-bg:        rgba(245,243,255,0.94);
+            --nav-border:    rgba(91,33,182,0.10);
+            --glass-bg:      rgba(245,243,255,0.92);
+            --chat-bg:       #e6e0f5;
+        }
+
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         html { height: 100%; }
         body { background: var(--app-bg, #f8f9fa); color: #191c1d; font-family: 'Inter', sans-serif; overflow: hidden; height: 100%; min-height: max(884px, 100dvh); transition: background 0.25s; }
@@ -180,7 +238,7 @@
 
         /* ── NAV ── */
         .nav-btn { color: #9ba3ab; transition: color 0.2s; }
-        .nav-btn.active { color: #001723; }
+        .nav-btn.active { color: rgb(var(--lm-primary)); }
         .nav-btn.active .nav-icon { font-variation-settings: 'FILL' 1; }
 
         /* ── HERO CARD ── */
@@ -911,8 +969,8 @@
                 <span id="lastUpdateLabel" style="font-size:10px;color:#94a3b8;font-weight:500">Actualizando...</span>
             </div>
 
-            <!-- HERO BALANCE CARD -->
-            <div class="mx-4 mt-4 mb-5 card-shine rounded-[28px] p-6 shadow-2xl relative overflow-hidden" style="min-height:180px">
+            <!-- HERO BALANCE CARD (estilo clásico) -->
+            <div id="balanceClasico" class="mx-4 mt-4 mb-5 card-shine rounded-[28px] p-6 shadow-2xl relative overflow-hidden" style="min-height:180px">
                 <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5 blur-2xl pointer-events-none"></div>
                 <div class="absolute right-10 bottom-0 w-24 h-24 rounded-full bg-lm-secondary/10 blur-xl pointer-events-none"></div>
                 <div class="flex items-start justify-between mb-6 relative z-10">
@@ -921,6 +979,11 @@
                         <h2 id="montoRecibirLabel" class="font-headline text-4xl font-bold text-white tracking-tight">$0</h2>
                     </div>
                     <div style="display:flex;gap:8px;align-items:center;">
+                        <button onclick="toggleBalanceEstilo()" title="Cambiar a vista tarjeta"
+                            style="width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                            <span class="material-symbols-outlined" style="font-size:20px;color:rgba(255,255,255,0.85)">credit_card</span>
+                        </button>
                         <button onclick="descargarComprobante()" title="Descargar Comprobante"
                             style="width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;"
                             onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
@@ -928,6 +991,42 @@
                         </button>
                         <div class="w-10 h-10 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center">
                             <span class="material-symbols-outlined text-white/80 text-xl">account_balance_wallet</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HERO BALANCE CARD (estilo tarjeta bancaria) -->
+            <div id="balanceTarjeta" class="mx-4 mt-4 mb-5" style="display:none;">
+                <div style="position:relative;border-radius:22px;padding:20px;min-height:210px;overflow:hidden;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);box-shadow:0 14px 34px rgba(0,0,0,0.35);color:#fff;">
+                    <div style="position:absolute;right:-30px;top:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
+                    <div style="position:absolute;left:-20px;bottom:-45px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2;">
+                        <div>
+                            <p style="font-size:9px;font-weight:800;letter-spacing:0.14em;color:rgba(255,255,255,0.65);text-transform:uppercase;margin:0;">Fondo Solidario</p>
+                            <p style="font-size:10px;color:rgba(255,255,255,0.45);margin:2px 0 0;">Casino Puerto Varas</p>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <button onclick="descargarComprobante()" title="Descargar Comprobante" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                                <span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.85)">receipt</span>
+                            </button>
+                            <button onclick="toggleBalanceEstilo()" title="Volver a vista clásica" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                                <span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.85)">sync_alt</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="width:46px;height:34px;border-radius:7px;background:linear-gradient(135deg,#f7d774,#c9a227);margin:16px 0 10px;position:relative;z-index:2;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.12);"></div>
+                    <p style="font-size:9px;font-weight:800;letter-spacing:0.14em;color:rgba(255,255,255,0.55);text-transform:uppercase;margin:0;position:relative;z-index:2;">Balance a recibir</p>
+                    <h2 id="montoRecibirTarjeta" class="font-headline" style="font-size:34px;font-weight:800;color:#fff;letter-spacing:-0.01em;margin:2px 0 14px;position:relative;z-index:2;">$0</h2>
+                    <p id="tarjetaNumero" style="font-family:monospace;font-size:16px;letter-spacing:3px;color:rgba(255,255,255,0.88);margin:0 0 14px;position:relative;z-index:2;">•••• •••• •••• ••••</p>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-end;position:relative;z-index:2;">
+                        <div style="min-width:0;">
+                            <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Titular</p>
+                            <p id="tarjetaTitular" style="font-size:13px;font-weight:700;color:#fff;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</p>
+                        </div>
+                        <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+                            <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Miembro desde</p>
+                            <p id="tarjetaDesde" style="font-size:13px;font-weight:700;color:#fff;margin:2px 0 0;">—</p>
                         </div>
                     </div>
                 </div>
@@ -1380,6 +1479,18 @@
                                     <span class="material-symbols-outlined" style="font-size:18px;color:#fff">favorite</span>
                                 </span>
                                 <span style="font-size:11px;font-weight:700;color:#334155">Rosa</span>
+                            </button>
+                            <button type="button" data-tema="aqua" onclick="aplicarTema('aqua')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#67e8f9,#0891b2);border:1px solid #a5e8f0;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff">water_drop</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Aqua</span>
+                            </button>
+                            <button type="button" data-tema="lavanda" onclick="aplicarTema('lavanda')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#c4b5fd,#7c3aed);border:1px solid #d6cbf5;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff">spa</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Lavanda</span>
                             </button>
                         </div>
                     </div>
@@ -1913,12 +2024,13 @@
             : 'Con ' + anos + ' año' + (anos === 1 ? '' : 's') + ' en el casino, tienes ' + pts + ' puntos asignados en el reparto.';
         cargarDocumentos();
         _sincronizarTemaBtns();
+        _aplicarBalanceEstilo(_balanceEstiloGuardado());
         _pushRefrescarEstado();
     }
 
     // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
-    const _TEMAS = ['claro', 'oscuro', 'rosa'];
-    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d' };
+    const _TEMAS = ['claro', 'oscuro', 'rosa', 'aqua', 'lavanda'];
+    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
     function _temaActual() {
         let t = 'claro';
         try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}
@@ -1937,6 +2049,42 @@
         const m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', _TEMA_COLOR[nombre] || '#001723');
         _sincronizarTemaBtns();
+    };
+
+    // ── ESTILO DEL BALANCE (clásico / tarjeta bancaria) ──────────────
+    function _balanceEstiloGuardado() {
+        try { return localStorage.getItem('propi_balance_estilo') === 'tarjeta' ? 'tarjeta' : 'clasico'; }
+        catch (e) { return 'clasico'; }
+    }
+    function _refrescarTarjeta() {
+        const src = document.getElementById('montoRecibirLabel');
+        const dst = document.getElementById('montoRecibirTarjeta');
+        if (src && dst) {
+            const v = src.getAttribute('data-value');
+            dst.textContent = (v !== null && v !== '') ? formatMoney(Number(v)) : src.textContent;
+        }
+        const tit = document.getElementById('tarjetaTitular');
+        if (tit) tit.textContent = (getDisplayName() || '—').toUpperCase();
+        if (typeof currentUser !== 'undefined' && currentUser) {
+            const num = document.getElementById('tarjetaNumero');
+            if (num) { const id = String(currentUser.ID || '').replace(/\D/g, ''); num.textContent = '•••• •••• •••• ' + (id.slice(-4) || '0000'); }
+            const desde = document.getElementById('tarjetaDesde');
+            if (desde && currentUser.FechaIngreso) desde.textContent = String(currentUser.FechaIngreso).split('-')[0] || '—';
+        }
+    }
+    function _aplicarBalanceEstilo(estilo) {
+        const clasico = document.getElementById('balanceClasico');
+        const tarjeta = document.getElementById('balanceTarjeta');
+        if (!clasico || !tarjeta) return;
+        const esTarjeta = estilo === 'tarjeta';
+        clasico.style.display = esTarjeta ? 'none' : '';
+        tarjeta.style.display = esTarjeta ? 'block' : 'none';
+        if (esTarjeta) _refrescarTarjeta();
+    }
+    window.toggleBalanceEstilo = function () {
+        const nuevo = _balanceEstiloGuardado() === 'tarjeta' ? 'clasico' : 'tarjeta';
+        try { localStorage.setItem('propi_balance_estilo', nuevo); } catch (e) {}
+        _aplicarBalanceEstilo(nuevo);
     };
 
     // ── FOTO DE PERFIL (Supabase Storage, bucket público 'avatares') ──
@@ -2488,6 +2636,8 @@
                 montoEl.setAttribute('data-value', newMonto);
                 if (isFirstLoad) animateIn(montoEl, '0ms');
             }
+            const _mt = document.getElementById('montoRecibirTarjeta');
+            if (_mt) _mt.textContent = formatMoney(liquido);
             document.getElementById('remateTag').textContent = formatMoney(remanente);
             document.getElementById('globalPtsTag').textContent = Math.round(puntoGlobalTotal).toLocaleString('es-CL');
 

@@ -90,6 +90,64 @@
             --chat-bg:       #0b141a;
         }
 
+        /* ── TEMA AQUA (turquesa, claro) ── */
+        :root[data-theme="aqua"] {
+            --lm-bg:          236 254 255;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      186 230 253;
+            --lm-primary:     14 116 144;
+            --lm-primary-mid: 8 145 178;
+            --lm-accent:      6 182 212;
+            --lm-secondary:   13 148 136;
+            --lm-tertiary:    2 132 199;
+            --lm-green:       13 148 136;
+            --lm-red:         220 38 38;
+            --lm-yellow:      161 98 7;
+            --lm-muted:       90 120 130;
+            --lm-subtle:      236 254 255;
+            --lm-high:        207 250 254;
+            --wa-bg:          207 250 254;
+            --wa-mine:        204 251 241;
+            --wa-other:       255 255 255;
+            --color-card:    #ffffff;
+            --color-subtle:  #ecfeff;
+            --app-bg:        #ecfeff;
+            --nav-bg:        rgba(236,254,255,0.94);
+            --nav-border:    rgba(14,116,144,0.10);
+            --glass-bg:      rgba(236,254,255,0.92);
+            --chat-bg:       #d7f0f2;
+        }
+
+        /* ── TEMA LAVANDA (púrpura, claro) ── */
+        :root[data-theme="lavanda"] {
+            --lm-bg:          245 243 255;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      221 214 254;
+            --lm-primary:     91 33 182;
+            --lm-primary-mid: 124 58 237;
+            --lm-accent:      139 92 246;
+            --lm-secondary:   109 40 217;
+            --lm-tertiary:    76 29 149;
+            --lm-green:       5 150 105;
+            --lm-red:         220 38 38;
+            --lm-yellow:      161 98 7;
+            --lm-muted:       120 110 140;
+            --lm-subtle:      245 243 255;
+            --lm-high:        237 233 254;
+            --wa-bg:          237 233 254;
+            --wa-mine:        233 213 255;
+            --wa-other:       255 255 255;
+            --color-card:    #ffffff;
+            --color-subtle:  #f5f3ff;
+            --app-bg:        #f5f3ff;
+            --nav-bg:        rgba(245,243,255,0.94);
+            --nav-border:    rgba(91,33,182,0.10);
+            --glass-bg:      rgba(245,243,255,0.92);
+            --chat-bg:       #e6e0f5;
+        }
+
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         html { height: 100%; }
         body { background: var(--app-bg, #f8f9fa); color: #191c1d; font-family: 'Inter', sans-serif; overflow: hidden; height: 100%; min-height: max(884px, 100dvh); transition: background 0.25s; }
@@ -125,7 +183,7 @@
 
         /* ── NAV ── */
         .nav-btn { color: #9ba3ab; transition: color 0.2s; }
-        .nav-btn.active { color: #001723; }
+        .nav-btn.active { color: rgb(var(--lm-primary)); }
         .nav-btn.active .nav-icon { font-variation-settings: 'FILL' 1; }
 
         /* ── HERO CARD ── */

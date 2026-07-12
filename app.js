@@ -395,12 +395,13 @@
             : 'Con ' + anos + ' año' + (anos === 1 ? '' : 's') + ' en el casino, tienes ' + pts + ' puntos asignados en el reparto.';
         cargarDocumentos();
         _sincronizarTemaBtns();
+        _aplicarBalanceEstilo(_balanceEstiloGuardado());
         _pushRefrescarEstado();
     }
 
     // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
-    const _TEMAS = ['claro', 'oscuro', 'rosa'];
-    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d' };
+    const _TEMAS = ['claro', 'oscuro', 'rosa', 'aqua', 'lavanda'];
+    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
     function _temaActual() {
         let t = 'claro';
         try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}
@@ -419,6 +420,42 @@
         const m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', _TEMA_COLOR[nombre] || '#001723');
         _sincronizarTemaBtns();
+    };
+
+    // ── ESTILO DEL BALANCE (clásico / tarjeta bancaria) ──────────────
+    function _balanceEstiloGuardado() {
+        try { return localStorage.getItem('propi_balance_estilo') === 'tarjeta' ? 'tarjeta' : 'clasico'; }
+        catch (e) { return 'clasico'; }
+    }
+    function _refrescarTarjeta() {
+        const src = document.getElementById('montoRecibirLabel');
+        const dst = document.getElementById('montoRecibirTarjeta');
+        if (src && dst) {
+            const v = src.getAttribute('data-value');
+            dst.textContent = (v !== null && v !== '') ? formatMoney(Number(v)) : src.textContent;
+        }
+        const tit = document.getElementById('tarjetaTitular');
+        if (tit) tit.textContent = (getDisplayName() || '—').toUpperCase();
+        if (typeof currentUser !== 'undefined' && currentUser) {
+            const num = document.getElementById('tarjetaNumero');
+            if (num) { const id = String(currentUser.ID || '').replace(/\D/g, ''); num.textContent = '•••• •••• •••• ' + (id.slice(-4) || '0000'); }
+            const desde = document.getElementById('tarjetaDesde');
+            if (desde && currentUser.FechaIngreso) desde.textContent = String(currentUser.FechaIngreso).split('-')[0] || '—';
+        }
+    }
+    function _aplicarBalanceEstilo(estilo) {
+        const clasico = document.getElementById('balanceClasico');
+        const tarjeta = document.getElementById('balanceTarjeta');
+        if (!clasico || !tarjeta) return;
+        const esTarjeta = estilo === 'tarjeta';
+        clasico.style.display = esTarjeta ? 'none' : '';
+        tarjeta.style.display = esTarjeta ? 'block' : 'none';
+        if (esTarjeta) _refrescarTarjeta();
+    }
+    window.toggleBalanceEstilo = function () {
+        const nuevo = _balanceEstiloGuardado() === 'tarjeta' ? 'clasico' : 'tarjeta';
+        try { localStorage.setItem('propi_balance_estilo', nuevo); } catch (e) {}
+        _aplicarBalanceEstilo(nuevo);
     };
 
     // ── FOTO DE PERFIL (Supabase Storage, bucket público 'avatares') ──
@@ -970,6 +1007,8 @@
                 montoEl.setAttribute('data-value', newMonto);
                 if (isFirstLoad) animateIn(montoEl, '0ms');
             }
+            const _mt = document.getElementById('montoRecibirTarjeta');
+            if (_mt) _mt.textContent = formatMoney(liquido);
             document.getElementById('remateTag').textContent = formatMoney(remanente);
             document.getElementById('globalPtsTag').textContent = Math.round(puntoGlobalTotal).toLocaleString('es-CL');
 
