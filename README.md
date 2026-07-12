@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Calendario condicional en premium + cambio de tarjeta en ambas versiones (SW v67)
+- **Calendario**: en la versión Dashboard el acceso "Ver Calendario de Turnos" aparecía siempre. Ahora se oculta si no hay días/ausencias que mostrar (`globalDiasCalendar.length === 0`), igual que en la clásica (para Planta sin ausencias no aparece).
+- **Efecto de cambio de tarjeta en ambas versiones**: el botón 💳 que alterna entre la tarjeta normal y la **tarjeta bancaria** ahora también está en la versión **Dashboard**. Se agregó una tarjeta bancaria premium (`#pmBalanceTarjeta`) y `_aplicarBalanceEstilo` / `_refrescarTarjeta` ahora manejan los dos juegos de tarjetas (clásica y premium) con la misma preferencia (`propi_balance_estilo`).
+- Archivos: `index.html` (`#pmBalanceCard`, `#pmBalanceTarjeta`, botón 💳), `app.js` (`_aplicarBalanceEstilo`/`_refrescarTarjeta` para ambas versiones, `#pmCalBtn` condicional, monto premium en vivo). SW v67.
+
 #### 2026-07-09 — Fix: Perfil y Mensajes no tomaban el skin premium (especificidad) (SW v66)
 - **Causa**: en tema Oscuro, sus convertidores de estilos inline (`:root[data-theme="oscuro"] [style*=...]`) tenían **más especificidad** que el skin premium por clase, así que ganaban. Estadísticas cambiaba (usa variables) pero **Perfil y Mensajes** (usan estilos inline `#fff`/`#001723`) se quedaban con los colores del Oscuro.
 - **Fix**: el skin premium pasó de una clase en `body` a un atributo `data-premium` en `<html>`, con selector `:root[data-premium][data-premium] …` (atributo repetido) para **garantizar mayor especificidad** que las reglas del tema Oscuro. Ahora Perfil y Mensajes sí toman la paleta premium.

@@ -429,28 +429,34 @@
         catch (e) { return 'clasico'; }
     }
     function _refrescarTarjeta() {
+        const _set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
         const src = document.getElementById('montoRecibirLabel');
-        const dst = document.getElementById('montoRecibirTarjeta');
-        if (src && dst) {
-            const v = src.getAttribute('data-value');
-            dst.textContent = (v !== null && v !== '') ? formatMoney(Number(v)) : src.textContent;
-        }
-        const tit = document.getElementById('tarjetaTitular');
-        if (tit) tit.textContent = (getDisplayName() || '—').toUpperCase();
+        let monto = '$0';
+        if (src) { const v = src.getAttribute('data-value'); monto = (v !== null && v !== '') ? formatMoney(Number(v)) : src.textContent; }
+        _set('montoRecibirTarjeta', monto);
+        _set('montoRecibirTarjetaPm', monto);
+        const titular = (getDisplayName() || '—').toUpperCase();
+        _set('tarjetaTitular', titular);
+        _set('tarjetaTitularPm', titular);
         if (typeof currentUser !== 'undefined' && currentUser) {
-            const num = document.getElementById('tarjetaNumero');
-            if (num) { const id = String(currentUser.ID || '').replace(/\D/g, ''); num.textContent = '•••• •••• •••• ' + (id.slice(-4) || '0000'); }
-            const desde = document.getElementById('tarjetaDesde');
-            if (desde && currentUser.FechaIngreso) desde.textContent = String(currentUser.FechaIngreso).split('-')[0] || '—';
+            const id = String(currentUser.ID || '').replace(/\D/g, '');
+            const num = '•••• •••• •••• ' + (id.slice(-4) || '0000');
+            _set('tarjetaNumero', num);
+            _set('tarjetaNumeroPm', num);
+            if (currentUser.FechaIngreso) {
+                const anio = String(currentUser.FechaIngreso).split('-')[0] || '—';
+                _set('tarjetaDesde', anio);
+                _set('tarjetaDesdePm', anio);
+            }
         }
     }
     function _aplicarBalanceEstilo(estilo) {
-        const clasico = document.getElementById('balanceClasico');
-        const tarjeta = document.getElementById('balanceTarjeta');
-        if (!clasico || !tarjeta) return;
         const esTarjeta = estilo === 'tarjeta';
-        clasico.style.display = esTarjeta ? 'none' : '';
-        tarjeta.style.display = esTarjeta ? 'block' : 'none';
+        [['balanceClasico', 'balanceTarjeta'], ['pmBalanceCard', 'pmBalanceTarjeta']].forEach(([nId, tId]) => {
+            const n = document.getElementById(nId), t = document.getElementById(tId);
+            if (n) n.style.display = esTarjeta ? 'none' : '';
+            if (t) t.style.display = esTarjeta ? 'block' : 'none';
+        });
         if (esTarjeta) _refrescarTarjeta();
     }
     window.toggleBalanceEstilo = function () {
@@ -1107,6 +1113,8 @@
             }
             const _mt = document.getElementById('montoRecibirTarjeta');
             if (_mt) _mt.textContent = formatMoney(liquido);
+            const _mtp = document.getElementById('montoRecibirTarjetaPm');
+            if (_mtp) _mtp.textContent = formatMoney(liquido);
             document.getElementById('remateTag').textContent = formatMoney(remanente);
             document.getElementById('globalPtsTag').textContent = Math.round(puntoGlobalTotal).toLocaleString('es-CL');
             // Versión premium (dashboard): cifras en vivo
@@ -1337,7 +1345,11 @@
             })();
 
             const btn=document.getElementById('calendarBtnContainer');
-            if(globalDiasCalendar.length>0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
+            const hayCalendario = globalDiasCalendar.length > 0;
+            if(hayCalendario) btn.classList.remove('hidden'); else btn.classList.add('hidden');
+            // Versión premium: mismo criterio para el acceso "Ver Calendario"
+            const btnPm = document.getElementById('pmCalBtn');
+            if (btnPm) btnPm.style.display = hayCalendario ? '' : 'none';
 
             // Guardar datos para el comprobante PDF
             const vpVals = Object.values(mapVP);

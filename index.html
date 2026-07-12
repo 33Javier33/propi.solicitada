@@ -538,7 +538,7 @@
                     </p>
                 </div>
                 <!-- Tarjeta balance premium -->
-                <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,#171c22,#282e36);border:1px solid #43474b;border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.35);margin-bottom:26px;">
+                <div id="pmBalanceCard" style="position:relative;overflow:hidden;background:linear-gradient(135deg,#171c22,#282e36);border:1px solid #43474b;border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.35);margin-bottom:26px;">
                     <div style="position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.03);pointer-events:none;"></div>
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;position:relative;z-index:2;">
                         <div>
@@ -546,6 +546,7 @@
                             <h2 id="pmBalance" style="font-family:Manrope,sans-serif;font-size:38px;font-weight:700;letter-spacing:-0.02em;color:#e1e3e4;margin:0;">$0</h2>
                         </div>
                         <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+                            <button onclick="toggleBalanceEstilo()" title="Cambiar a vista tarjeta" style="width:36px;height:36px;border-radius:10px;background:#282e36;border:1px solid #43474b;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:18px;color:#cee6f7;">credit_card</span></button>
                             <button onclick="descargarComprobante()" title="Comprobante" style="width:36px;height:36px;border-radius:10px;background:#282e36;border:1px solid #43474b;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:18px;color:#cee6f7;">receipt</span></button>
                         </div>
                     </div>
@@ -557,6 +558,34 @@
                         <div style="text-align:right;">
                             <p style="font-size:12px;color:#c3c7cb;margin:0 0 3px;">ID Socio</p>
                             <p id="pmId" style="font-size:15px;font-weight:600;color:#e1e3e4;margin:0;">—</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta bancaria (premium) -->
+                <div id="pmBalanceTarjeta" style="display:none;margin-bottom:26px;">
+                    <div style="position:relative;border-radius:20px;padding:20px;min-height:210px;overflow:hidden;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);box-shadow:0 14px 34px rgba(0,0,0,0.4);color:#fff;">
+                        <div style="position:absolute;right:-30px;top:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2;">
+                            <div>
+                                <p style="font-size:9px;font-weight:800;letter-spacing:0.14em;color:rgba(255,255,255,0.65);text-transform:uppercase;margin:0;">Fondo Solidario</p>
+                                <p style="font-size:10px;color:rgba(255,255,255,0.45);margin:2px 0 0;">Casino Puerto Varas</p>
+                            </div>
+                            <button onclick="toggleBalanceEstilo()" title="Volver a la tarjeta" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.85)">sync_alt</span></button>
+                        </div>
+                        <div style="width:46px;height:34px;border-radius:7px;background:linear-gradient(135deg,#f7d774,#c9a227);margin:16px 0 10px;position:relative;z-index:2;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.12);"></div>
+                        <p style="font-size:9px;font-weight:800;letter-spacing:0.14em;color:rgba(255,255,255,0.55);text-transform:uppercase;margin:0;position:relative;z-index:2;">Balance a recibir</p>
+                        <h2 id="montoRecibirTarjetaPm" style="font-family:Manrope,sans-serif;font-size:34px;font-weight:800;color:#fff;margin:2px 0 14px;position:relative;z-index:2;">$0</h2>
+                        <p id="tarjetaNumeroPm" style="font-family:monospace;font-size:16px;letter-spacing:3px;color:rgba(255,255,255,0.88);margin:0 0 14px;position:relative;z-index:2;">•••• •••• •••• ••••</p>
+                        <div style="display:flex;justify-content:space-between;align-items:flex-end;position:relative;z-index:2;">
+                            <div style="min-width:0;">
+                                <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Titular</p>
+                                <p id="tarjetaTitularPm" style="font-size:13px;font-weight:700;color:#fff;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</p>
+                            </div>
+                            <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+                                <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Miembro desde</p>
+                                <p id="tarjetaDesdePm" style="font-size:13px;font-weight:700;color:#fff;margin:2px 0 0;">—</p>
+                            </div>
                         </div>
                     </div>
                 </div>
