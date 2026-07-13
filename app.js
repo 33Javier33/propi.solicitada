@@ -386,6 +386,12 @@
             if (!rutVal) { try { const a = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}'); if (a.rut) rutVal = a.rut; } catch(e) {} }
             elRut.textContent = rutVal ? formatRUT(rutVal) : '—';
         })();
+        (function(){
+            const elC = document.getElementById('perfilCorreo');
+            if (!elC) return;
+            const c = currentUser.Correo && String(currentUser.Correo).trim();
+            elC.textContent = c || 'Agregar correo';
+        })();
         document.getElementById('perfilArea').textContent = currentUser.Area || '—';
         document.getElementById('perfilContrato').textContent = currentUser.TipoContrato || '—';
         document.getElementById('perfilFechaIngreso').textContent = dIng.toLocaleDateString('es-CL', {day:'2-digit', month:'long', year:'numeric'});
@@ -833,6 +839,8 @@
         setInterval(()=>refreshAdminPriv(false), 8000);
         // Pedir el RUT si el socio aún no lo tiene (para certificados/informes)
         setTimeout(checkRutRequired, 1400);
+        // Pedir el correo si aún no lo tiene (para completar información del perfil)
+        setTimeout(checkCorreoRequired, 3200);
         // Mostrar una vez el aviso de foto/documentos
         setTimeout(checkInfoPerfil, 2400);
         // Estado de la solicitud de egreso pendiente
@@ -916,6 +924,53 @@
             err.textContent = 'No se pudo guardar, reintenta.'; err.classList.remove('hidden');
         }
         btn.disabled = false; btn.textContent = 'Guardar RUT';
+    };
+
+    // ── CORREO ELECTRÓNICO DEL SOCIO ──────────────────────────
+    function checkCorreoRequired() {
+        if (!currentUser) return;
+        if (currentUser.Correo && String(currentUser.Correo).trim()) return; // ya lo tiene
+        const help = document.getElementById('helpModal');
+        if (help && !help.classList.contains('hidden')) { setTimeout(checkCorreoRequired, 3000); return; }
+        const rutM = document.getElementById('rutModal');
+        if (rutM && !rutM.classList.contains('hidden')) { setTimeout(checkCorreoRequired, 3000); return; }
+        window.openCorreoModal();
+    }
+    window.openCorreoModal = function() {
+        const inp = document.getElementById('correoModalInput');
+        if (inp) inp.value = (currentUser && currentUser.Correo) || '';
+        const err = document.getElementById('correoModalError'); if (err) err.classList.add('hidden');
+        const m = document.getElementById('correoModal');
+        if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+    };
+    window.closeCorreoModal = function() {
+        const m = document.getElementById('correoModal');
+        if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    };
+    window.submitCorreo = async function() {
+        const inp = document.getElementById('correoModalInput');
+        const err = document.getElementById('correoModalError');
+        const btn = document.getElementById('correoModalBtn');
+        const raw = (inp.value || '').trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) { err.textContent = 'Correo no válido. Ej: nombre@correo.com'; err.classList.remove('hidden'); return; }
+        btn.disabled = true; btn.textContent = 'Guardando...';
+        try {
+            const res = await fetch(SCRIPT_URL_SOCIOS, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'guardarCorreoSocio', socioId: currentUser.ID, correo: raw, nombre: ((currentUser.Nombre||'') + ' ' + (currentUser.Apellido||'')).trim() })
+            });
+            const j = await res.json();
+            if (!j || !j.success) throw new Error((j && j.error) || 'Error');
+            currentUser.Correo = raw;
+            const s = allSocios.find(x => String(x.ID) === String(currentUser.ID)); if (s) s.Correo = raw;
+            btn.textContent = '✓ Guardado';
+            if (typeof renderPerfil === 'function') renderPerfil();
+            setTimeout(function() { window.closeCorreoModal(); btn.disabled = false; btn.textContent = 'Guardar correo'; }, 700);
+            return;
+        } catch(e) {
+            err.textContent = 'No se pudo guardar, reintenta.'; err.classList.remove('hidden');
+        }
+        btn.disabled = false; btn.textContent = 'Guardar correo';
     };
 
     // ── SKELETON LOADERS ──────────────────────────────────────

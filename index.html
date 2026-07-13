@@ -1001,7 +1001,7 @@
                                 </div>
                                 <span id="perfilIDCard" style="font-size:13px;font-weight:700;color:#001723;font-family:monospace">—</span>
                             </div>
-                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9">
                                 <div style="display:flex;align-items:center;gap:10px">
                                     <div style="width:32px;height:32px;border-radius:9px;background:rgba(20,184,166,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
                                         <span class="material-symbols-outlined" style="font-size:16px;color:#14b8a6">fingerprint</span>
@@ -1009,6 +1009,18 @@
                                     <span style="font-size:13px;color:#64748b;font-weight:500">RUT</span>
                                 </div>
                                 <span id="perfilRut" style="font-size:13px;font-weight:700;color:#001723;font-family:monospace">—</span>
+                            </div>
+                            <div onclick="openCorreoModal()" style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;cursor:pointer">
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div style="width:32px;height:32px;border-radius:9px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <span class="material-symbols-outlined" style="font-size:16px;color:#6366f1">mail</span>
+                                    </div>
+                                    <span style="font-size:13px;color:#64748b;font-weight:500">Correo</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:4px;min-width:0">
+                                    <span id="perfilCorreo" style="font-size:13px;font-weight:700;color:#001723;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:165px">—</span>
+                                    <span class="material-symbols-outlined" style="font-size:16px;color:#cbd5e1;flex-shrink:0">edit</span>
+                                </div>
                             </div>
                             <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9">
                                 <div style="display:flex;align-items:center;gap:10px">
@@ -1479,6 +1491,31 @@
             Guardar RUT
         </button>
         <button onclick="closeRutModal()" class="w-full py-3 rounded-2xl font-medium text-lm-muted text-sm transition-colors hover:text-lm-primary">
+            Ahora no
+        </button>
+    </div>
+</div>
+
+<!-- MODAL CORREO ELECTRÓNICO -->
+<div id="correoModal" class="hidden fixed inset-0 z-[350] bg-black/50 backdrop-blur-sm items-end justify-center">
+    <div class="bg-white w-full max-w-sm rounded-t-[28px] p-6 shadow-2xl" style="background:var(--color-card,#fff)">
+        <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5"></div>
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <span class="material-symbols-outlined" style="font-size:28px;color:#6366f1">mail</span>
+        </div>
+        <h3 class="font-headline text-lg font-bold text-lm-primary mb-1 text-center">Agrega tu correo electrónico</h3>
+        <p class="text-xs text-lm-muted text-center mb-4" style="line-height:1.5;">
+            Se solicita agregar tu <b>correo electrónico</b> para completar tu información. Quedará guardado en tu perfil.
+        </p>
+        <input id="correoModalInput" type="email" inputmode="email" autocomplete="email"
+            class="w-full rounded-2xl py-4 px-5 font-medium text-base text-center mb-2"
+            placeholder="nombre@correo.com"
+            onkeydown="if(event.key==='Enter') submitCorreo()" />
+        <div id="correoModalError" class="hidden text-center text-xs font-semibold mb-2" style="color:#dc2626;"></div>
+        <button id="correoModalBtn" onclick="submitCorreo()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20 mb-3 mt-2">
+            Guardar correo
+        </button>
+        <button onclick="closeCorreoModal()" class="w-full py-3 rounded-2xl font-medium text-lm-muted text-sm transition-colors hover:text-lm-primary">
             Ahora no
         </button>
     </div>

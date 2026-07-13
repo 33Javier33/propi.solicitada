@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Correo del socio: se solicita al ingresar, se guarda en Supabase y se muestra en el perfil (SW v75)
+- Al ingresar a la app, si el socio **no tiene correo**, aparece un aviso: "Se solicita agregar tu correo electrónico para completar tu información" (modal `#correoModal`, ~3s después de entrar; espera si el modal de RUT/ayuda está abierto).
+- El correo se **guarda en Supabase** (nueva columna `socios.correo`, acción `guardarCorreoSocio` en `supabase-api.js`, con auditoría). El mapeo `getSocios` ahora incluye `Correo`.
+- Se muestra en **Perfil → Información Laboral** (fila "Correo" ✉️). La fila es **tocable para agregar/editar** el correo manualmente (abre el mismo modal). Validación de formato de email.
+- Archivos: `supabase-api.js` (`guardarCorreoSocio` + `Correo` en getSocios), `index.html` (`#correoModal` + fila Correo en el perfil), `app.js` (`checkCorreoRequired`, `openCorreoModal`, `submitCorreo`, poblar `#perfilCorreo`). Migración Supabase: `add_correo_to_socios`. SW v75.
+
 #### 2026-07-09 — Forma de la foto movida a Ajustes + foto de login más grande (SW v74)
 - El selector **"Forma de la foto"** se movió del login a **Perfil → ⚙️ Ajustes** (junto a Tema y Versión de inicio). Cambia la forma del avatar del login (Círculo/Redondeado/Cuadrado/Hexágono) y se guarda por dispositivo. El resaltado del chip activo se sincroniza al abrir el perfil.
 - La **foto del login se hizo más grande** (de 80px a 128px, `w-20`→`w-32`), con el ícono/placeholder acorde.

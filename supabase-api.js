@@ -177,7 +177,7 @@ async function _sociosHandler(url, options) {
                 FechaIngreso: s.fecha_ingreso,
                 FechaInicioLiquidacion: s.fecha_inicio_puntos,
                 Puntos: s.puntos, PuntosActivos: s.puntos_activos, Activo: s.activo,
-                Rut: s.rut || '', FotoUrl: s.foto_url || ''
+                Rut: s.rut || '', FotoUrl: s.foto_url || '', Correo: s.correo || ''
             }));
             return _mockRes({ data: mapped });
         }
@@ -363,6 +363,24 @@ async function _sociosHandler(url, options) {
                     accion: 'Registrar RUT',
                     folio: null,
                     datos_extra: { detalle: 'RUT registrado desde propi.solicitada: ' + _rut, id_afectado: _sid, rut: _rut, origen: 'propi.solicitada' }
+                }).then(() => {}).catch(() => {});
+                return _mockRes({ success: true });
+            } catch (e) { return _mockRes({ success: false, error: e.message }); }
+        }
+
+        // Guardar el correo electrónico del socio
+        case 'guardarCorreoSocio': {
+            try {
+                const _sid = String(b.socioId || b.id || '');
+                const _correo = String(b.correo || '').trim().toLowerCase();
+                if (!_sid || !_correo) return _mockRes({ success: false, error: 'Faltan datos' });
+                const { error } = await dbSV.from('socios').update({ correo: _correo }).eq('id', _sid);
+                if (error) return _mockRes({ success: false, error: error.message });
+                dbSV.from('auditoria').insert({
+                    usuario: (b.nombre || 'Socio') + ' (app)',
+                    accion: 'Registrar Correo',
+                    folio: null,
+                    datos_extra: { detalle: 'Correo registrado desde propi.solicitada: ' + _correo, id_afectado: _sid, correo: _correo, origen: 'propi.solicitada' }
                 }).then(() => {}).catch(() => {});
                 return _mockRes({ success: true });
             } catch (e) { return _mockRes({ success: false, error: e.message }); }
