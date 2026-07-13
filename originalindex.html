@@ -241,6 +241,11 @@
         .nav-btn.active { color: rgb(var(--lm-primary)); }
         .nav-btn.active .nav-icon { font-variation-settings: 'FILL' 1; }
 
+        /* ── Selector de forma de la foto del login ── */
+        .login-shape-btn { padding: 8px; border-radius: 12px; border: 2px solid var(--color-subtle, #f1f5f9); background: transparent; cursor: pointer; color: #9ba3ab; transition: all .15s; display: flex; }
+        .login-shape-btn:active { transform: scale(0.94); }
+        .login-shape-btn.active { color: rgb(var(--lm-primary)); border-color: rgb(var(--lm-primary)); }
+
         /* ── HERO CARD ── */
         .card-shine {
             background: linear-gradient(135deg, #001723 0%, #002d40 55%, #264b5f 100%);
@@ -923,7 +928,13 @@
             </div>
             <div>
                 <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">Crear PIN</label>
-                <input type="password" id="setupPIN" maxlength="4" inputmode="numeric" placeholder="••••" class="w-full rounded-2xl py-4 px-5 font-medium text-2xl text-center tracking-[0.5em]">
+                <div style="position:relative;">
+                    <input type="password" id="setupPIN" maxlength="4" inputmode="numeric" placeholder="••••" class="w-full rounded-2xl py-4 pr-12 px-5 font-medium text-2xl text-center tracking-[0.5em]">
+                    <button type="button" onclick="togglePinVisible('setupPIN', this)" aria-label="Ver PIN"
+                        style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;display:flex;align-items:center;padding:4px;">
+                        <span class="material-symbols-outlined" style="font-size:22px;color:#94a3b8;">visibility</span>
+                    </button>
+                </div>
             </div>
             <button onclick="handleSetup()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20 mt-2">
                 Activar Dispositivo
@@ -945,9 +956,15 @@
         </div>
         <div class="mb-6">
             <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider text-center block mb-3">Ingrese su PIN</label>
-            <input type="password" id="fastPIN" maxlength="4" inputmode="numeric" placeholder="••••"
-                onkeydown="if(event.key==='Enter') handleFastLogin()"
-                class="w-full rounded-2xl py-5 text-4xl text-center tracking-[0.6em] text-lm-primary">
+            <div style="position:relative;">
+                <input type="password" id="fastPIN" maxlength="4" inputmode="numeric" placeholder="••••"
+                    onkeydown="if(event.key==='Enter') handleFastLogin()"
+                    class="w-full rounded-2xl py-5 pr-14 text-4xl text-center tracking-[0.6em] text-lm-primary">
+                <button type="button" onclick="togglePinVisible('fastPIN', this)" aria-label="Ver PIN"
+                    style="position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;display:flex;align-items:center;padding:6px;">
+                    <span class="material-symbols-outlined" style="font-size:24px;color:#94a3b8;">visibility</span>
+                </button>
+            </div>
         </div>
         <button onclick="handleFastLogin()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20">
             Ingresar
@@ -959,6 +976,24 @@
             <button onclick="cambiarUsuario()" class="text-sm text-lm-muted font-medium hover:text-lm-primary transition-colors text-center">
                 Cambiar de Usuario
             </button>
+        </div>
+        <!-- Selector de forma de la foto del login -->
+        <div class="mt-7 pt-5" style="border-top:1px solid var(--color-subtle,#f1f5f9);">
+            <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider text-center mb-3">Forma de la foto</p>
+            <div class="flex justify-center gap-3">
+                <button type="button" onclick="setLoginAvatarShape('circle')" data-shape="circle" class="login-shape-btn" title="Círculo">
+                    <span style="display:block;width:26px;height:26px;background:currentColor;border-radius:50%;"></span>
+                </button>
+                <button type="button" onclick="setLoginAvatarShape('rounded')" data-shape="rounded" class="login-shape-btn" title="Redondeado">
+                    <span style="display:block;width:26px;height:26px;background:currentColor;border-radius:9px;"></span>
+                </button>
+                <button type="button" onclick="setLoginAvatarShape('square')" data-shape="square" class="login-shape-btn" title="Cuadrado">
+                    <span style="display:block;width:26px;height:26px;background:currentColor;border-radius:3px;"></span>
+                </button>
+                <button type="button" onclick="setLoginAvatarShape('hex')" data-shape="hex" class="login-shape-btn" title="Hexágono">
+                    <span style="display:block;width:26px;height:26px;background:currentColor;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);"></span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -2010,6 +2045,7 @@
             const _fico = document.getElementById('fastAvatarIcon');
             if (auth.foto) { if (_fbox) _fbox.style.backgroundImage = 'url("' + auth.foto + '")'; if (_fico) _fico.style.display = 'none'; }
             else { if (_fbox) _fbox.style.backgroundImage = ''; if (_fico) _fico.style.display = ''; }
+            _aplicarLoginShape(_loginShapeGuardada());
             document.getElementById('fastName').textContent = (auth.name || '').split(' ')[0];
             document.getElementById('fastIDLabel').textContent = `ID: ${auth.id}`;
             setTimeout(() => document.getElementById('fastPIN').focus(), 100);
@@ -2483,6 +2519,39 @@
         const o = document.getElementById('fotoGrandeOverlay');
         if (o) o.style.display = 'none';
     };
+    // ── Ver/ocultar PIN (ojito) ──
+    window.togglePinVisible = function (id, btn) {
+        const inp = document.getElementById(id);
+        if (!inp) return;
+        const mostrar = inp.type === 'password';
+        inp.type = mostrar ? 'text' : 'password';
+        const icon = btn && btn.querySelector('.material-symbols-outlined');
+        if (icon) icon.textContent = mostrar ? 'visibility_off' : 'visibility';
+    };
+
+    // ── Forma de la foto del login (círculo / redondeado / cuadrado / hexágono) ──
+    const _LOGIN_SHAPES = {
+        circle:  { r: '50%',  clip: 'none' },
+        rounded: { r: '22px', clip: 'none' },
+        square:  { r: '10px', clip: 'none' },
+        hex:     { r: '0',    clip: 'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)' }
+    };
+    function _loginShapeGuardada() {
+        try { const s = localStorage.getItem('propi_login_shape'); return _LOGIN_SHAPES[s] ? s : 'circle'; }
+        catch (e) { return 'circle'; }
+    }
+    function _aplicarLoginShape(shape) {
+        const cfg = _LOGIN_SHAPES[shape] || _LOGIN_SHAPES.circle;
+        const box = document.getElementById('fastAvatarBox');
+        if (box) { box.style.borderRadius = cfg.r; box.style.clipPath = cfg.clip; box.style.webkitClipPath = cfg.clip; }
+        document.querySelectorAll('.login-shape-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-shape') === shape));
+    }
+    window.setLoginAvatarShape = function (shape) {
+        if (!_LOGIN_SHAPES[shape]) shape = 'circle';
+        try { localStorage.setItem('propi_login_shape', shape); } catch (e) {}
+        _aplicarLoginShape(shape);
+    };
+
     window._authFoto = function() {
         try { return (JSON.parse(localStorage.getItem('visor_secure_auth') || '{}')).foto || ''; } catch (e) { return ''; }
     };

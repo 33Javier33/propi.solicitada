@@ -186,6 +186,11 @@
         .nav-btn.active { color: rgb(var(--lm-primary)); }
         .nav-btn.active .nav-icon { font-variation-settings: 'FILL' 1; }
 
+        /* ── Selector de forma de la foto del login ── */
+        .login-shape-btn { padding: 8px; border-radius: 12px; border: 2px solid var(--color-subtle, #f1f5f9); background: transparent; cursor: pointer; color: #9ba3ab; transition: all .15s; display: flex; }
+        .login-shape-btn:active { transform: scale(0.94); }
+        .login-shape-btn.active { color: rgb(var(--lm-primary)); border-color: rgb(var(--lm-primary)); }
+
         /* ── HERO CARD ── */
         .card-shine {
             background: linear-gradient(135deg, #001723 0%, #002d40 55%, #264b5f 100%);

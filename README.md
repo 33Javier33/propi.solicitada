@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Login: ojito para ver el PIN + elegir forma de la foto (SW v73)
+- **Ojito (ver PIN)**: se agregó un botón 👁 en los campos de PIN (acceso rápido `#fastPIN` y "Crear PIN" `#setupPIN`) para mostrar/ocultar el PIN. Alterna `type` password/text y el ícono visibility/visibility_off.
+- **Forma de la foto del login**: en el acceso rápido se agregó un selector "Forma de la foto" con 4 opciones — **Círculo, Redondeado, Cuadrado, Hexágono**. Se aplica al avatar del login y se guarda por dispositivo (`propi_login_shape`).
+- Archivos: `index.html` (ojitos + selector de forma), `app.css` (`.login-shape-btn`), `app.js` (`togglePinVisible`, `setLoginAvatarShape`, `_aplicarLoginShape`). SW v73.
+
 #### 2026-07-09 — Dashboard: ahora SÍ sigue el tema (claro/oscuro/rosa/aqua/lavanda) (SW v72)
 - Antes el Dashboard forzaba una paleta oscura fija y elegir un tema casi no cambiaba nada. Ahora el **layout Dashboard sigue completamente el tema de color**: con temas claros se ve claro, con Oscuro se ve oscuro, y con Rosa/Aqua/Lavanda toma esos colores.
 - Se implementó con variables `--pm-*` (fondo, tarjeta, texto, acento, verde, rojo, borde) definidas por tema, y reglas `.pm-layout [style*=...]` que mapean los colores fijos del layout premium a esas variables. Las secciones con skin (Estadísticas/Mensajes/Perfil) ahora siguen el tema por su cuenta (se quitó el forzado oscuro `data-premium`).

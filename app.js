@@ -129,6 +129,7 @@
             const _fico = document.getElementById('fastAvatarIcon');
             if (auth.foto) { if (_fbox) _fbox.style.backgroundImage = 'url("' + auth.foto + '")'; if (_fico) _fico.style.display = 'none'; }
             else { if (_fbox) _fbox.style.backgroundImage = ''; if (_fico) _fico.style.display = ''; }
+            _aplicarLoginShape(_loginShapeGuardada());
             document.getElementById('fastName').textContent = (auth.name || '').split(' ')[0];
             document.getElementById('fastIDLabel').textContent = `ID: ${auth.id}`;
             setTimeout(() => document.getElementById('fastPIN').focus(), 100);
@@ -602,6 +603,39 @@
         const o = document.getElementById('fotoGrandeOverlay');
         if (o) o.style.display = 'none';
     };
+    // ── Ver/ocultar PIN (ojito) ──
+    window.togglePinVisible = function (id, btn) {
+        const inp = document.getElementById(id);
+        if (!inp) return;
+        const mostrar = inp.type === 'password';
+        inp.type = mostrar ? 'text' : 'password';
+        const icon = btn && btn.querySelector('.material-symbols-outlined');
+        if (icon) icon.textContent = mostrar ? 'visibility_off' : 'visibility';
+    };
+
+    // ── Forma de la foto del login (círculo / redondeado / cuadrado / hexágono) ──
+    const _LOGIN_SHAPES = {
+        circle:  { r: '50%',  clip: 'none' },
+        rounded: { r: '22px', clip: 'none' },
+        square:  { r: '10px', clip: 'none' },
+        hex:     { r: '0',    clip: 'polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)' }
+    };
+    function _loginShapeGuardada() {
+        try { const s = localStorage.getItem('propi_login_shape'); return _LOGIN_SHAPES[s] ? s : 'circle'; }
+        catch (e) { return 'circle'; }
+    }
+    function _aplicarLoginShape(shape) {
+        const cfg = _LOGIN_SHAPES[shape] || _LOGIN_SHAPES.circle;
+        const box = document.getElementById('fastAvatarBox');
+        if (box) { box.style.borderRadius = cfg.r; box.style.clipPath = cfg.clip; box.style.webkitClipPath = cfg.clip; }
+        document.querySelectorAll('.login-shape-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-shape') === shape));
+    }
+    window.setLoginAvatarShape = function (shape) {
+        if (!_LOGIN_SHAPES[shape]) shape = 'circle';
+        try { localStorage.setItem('propi_login_shape', shape); } catch (e) {}
+        _aplicarLoginShape(shape);
+    };
+
     window._authFoto = function() {
         try { return (JSON.parse(localStorage.getItem('visor_secure_auth') || '{}')).foto || ''; } catch (e) { return ''; }
     };
