@@ -496,6 +496,27 @@
         :root[data-premium][data-premium] #chatMessages .msg-bubble,
         :root[data-premium][data-premium] #chatMessages .msg-bubble div { color: #f8f9fa !important; }
         :root[data-premium][data-premium] #chatInputContainer { background: #171c22 !important; border-color: #43474b !important; }
+
+        /* ── Acento premium según el tema de color elegido (mantiene el fondo oscuro) ──
+           Cambia variables (secciones con skin) y el acento celeste #cee6f7 del layout premium. */
+        :root[data-premium][data-premium][data-theme="rosa"] {
+            --lm-primary: 236 72 153; --lm-primary-mid: 219 39 119; --lm-accent: 249 168 212; --lm-secondary: 244 114 182;
+        }
+        :root[data-premium][data-premium][data-theme="rosa"] [style*="color:#cee6f7"],
+        :root[data-premium][data-premium][data-theme="rosa"] [style*="color:#6366f1"] { color: #f9a8d4 !important; }
+        :root[data-premium][data-premium][data-theme="aqua"] {
+            --lm-primary: 8 145 178; --lm-primary-mid: 14 116 144; --lm-accent: 103 232 249; --lm-secondary: 34 211 238;
+        }
+        :root[data-premium][data-premium][data-theme="aqua"] [style*="color:#cee6f7"],
+        :root[data-premium][data-premium][data-theme="aqua"] [style*="color:#6366f1"] { color: #67e8f9 !important; }
+        :root[data-premium][data-premium][data-theme="lavanda"] {
+            --lm-primary: 139 92 246; --lm-primary-mid: 124 58 237; --lm-accent: 196 181 253; --lm-secondary: 167 139 250;
+        }
+        :root[data-premium][data-premium][data-theme="lavanda"] [style*="color:#cee6f7"],
+        :root[data-premium][data-premium][data-theme="lavanda"] [style*="color:#6366f1"] { color: #c4b5fd !important; }
+        :root[data-premium][data-premium][data-theme="claro"] {
+            --lm-primary: 96 165 250; --lm-accent: 147 197 253;
+        }
         :root[data-theme="rosa"] .tema-btn.active {
             border-color: #db2777 !important;
             box-shadow: 0 0 0 3px rgba(219,39,119,0.18);

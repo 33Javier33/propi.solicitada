@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Dashboard: el acento sigue el tema de color elegido (SW v71)
+- Antes, en la versión Dashboard el skin premium tenía una paleta fija y **elegir un tema no cambiaba nada**. Ahora el **acento premium sigue el tema de color** (Rosa, Aqua, Lavanda) manteniendo el fondo oscuro.
+- Se hace con reglas `:root[data-premium][data-premium][data-theme="X"]` que cambian las variables de acento (`--lm-primary`/`--lm-accent`/`--lm-secondary`) para las secciones con skin, y overridean los colores de acento fijos del layout premium (`#cee6f7` celeste y `#6366f1` índigo de los íconos del Perfil) al color del tema. Oscuro y Claro mantienen el acento azul/celeste por defecto.
+- Los verdes de montos positivos se mantienen (color semántico de ganancia).
+- Archivos: `app.css` (acento premium por tema). SW v71.
+
 #### 2026-07-09 — Dashboard: tarjeta "Valor Punto" + Mis Puntos dentro de la tarjeta bancaria (SW v70)
 - La tarjeta de stat que decía **"Mis Puntos"** ahora se titula **"Valor Punto"** y muestra ese valor ($ del punto a hoy) como número grande (verde).
 - **Mis Puntos** se movió **dentro de la tarjeta bancaria** (vista tarjeta del balance): aparece en la fila inferior, al centro (Titular · Mis Puntos · Miembro desde), en dorado. Aplica a la tarjeta clásica y a la premium.
