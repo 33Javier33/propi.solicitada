@@ -456,67 +456,58 @@
         :root[data-theme="oscuro"] .homever-btn { background: #1e293b !important; border-color: #334155 !important; }
         :root[data-theme="oscuro"] .homever-btn span[style*="color:#334155"] { color: #cbd5e1 !important; }
 
-        /* ── SKIN PREMIUM (Versión Dashboard) para Estadísticas / Mensajes / Perfil ──
-           Usa la paleta del tema oscuro (probada) para no romper contrastes. */
-        /* data-premium en <html> con atributo repetido = especificidad garantizada
-           mayor que las reglas del tema oscuro (para que gane también en Perfil/Mensajes). */
-        :root[data-premium][data-premium] {
-            --lm-bg: 15 20 25; --lm-surface: 23 28 34; --lm-card: 23 28 34; --lm-border: 67 71 75;
-            --lm-primary: 96 165 250; --lm-primary-mid: 59 130 246; --lm-accent: 147 197 253;
-            --lm-secondary: 61 226 115; --lm-tertiary: 250 204 21; --lm-green: 61 226 115; --lm-red: 255 180 171;
-            --lm-muted: 141 145 150; --lm-subtle: 29 35 42; --lm-high: 40 46 53;
-            --color-card: #171c22; --color-subtle: #1d232a; --app-bg: #0f1419; --chat-bg: #0a0f14;
-            --wa-other: 23 28 34; --wa-mine: 6 78 59; --wa-bg: 15 20 25;
-            --glass-bg: rgba(15,20,25,0.92); --nav-bg: rgba(15,20,25,0.95); --nav-border: rgba(255,255,255,0.08);
+        /* ── VERSIÓN DASHBOARD: el layout premium SIGUE EL TEMA de color ──
+           Los colores fijos del layout se mapean a variables --pm-* que cambian por tema.
+           Las secciones con skin (Estadísticas/Mensajes/Perfil) ya siguen el tema por su cuenta.
+           Las tarjetas bancarias se mantienen oscuras (protegidas al final). */
+        :root, :root[data-theme="claro"] {
+            --pm-bg:#eef2f6; --pm-card:#ffffff; --pm-card2:#f1f5f9; --pm-card-hi:#e6ecf3; --pm-border:#e2e8f0;
+            --pm-text:#001723; --pm-muted:#64748b; --pm-accent:#264b5f; --pm-green:#0a8f78; --pm-red:#dc2626;
         }
-        :root[data-premium][data-premium] body { background: #0f1419 !important; color: #e2e8f0 !important; }
-        :root[data-premium][data-premium] [style*="background:#fff;"],
-        :root[data-premium][data-premium] [style*="background:#ffffff"],
-        :root[data-premium][data-premium] [style*="background:#f8fafc"],
-        :root[data-premium][data-premium] [style*="background:#f8f9fa"] { background: #171c22 !important; border-color: #43474b !important; }
-        :root[data-premium][data-premium] [style*="background:#f1f5f9"],
-        :root[data-premium][data-premium] [style*="background:#f3f4f5"],
-        :root[data-premium][data-premium] [style*="background:#f0f2f5"] { background: #1d232a !important; }
-        :root[data-premium][data-premium] [style*="color:#001723"],
-        :root[data-premium][data-premium] [style*="color:#1e293b"],
-        :root[data-premium][data-premium] [style*="color:#0f172a"],
-        :root[data-premium][data-premium] [style*="color:#191c1d"] { color: #f8f9fa !important; }
-        :root[data-premium][data-premium] [style*="color:#64748b"],
-        :root[data-premium][data-premium] [style*="color:#72787d"],
-        :root[data-premium][data-premium] [style*="color:#42484c"] { color: #c3c7cb !important; }
-        :root[data-premium][data-premium] [style*="border:1px solid #e2e8f0"],
-        :root[data-premium][data-premium] [style*="border-bottom:1px solid #f1f5f9"],
-        :root[data-premium][data-premium] [style*="border:1px solid #e1e3e4"] { border-color: #43474b !important; }
-        :root[data-premium][data-premium] input { background: #1d232a !important; border-color: #43474b !important; color: #f8f9fa !important; }
-        :root[data-premium][data-premium] input::placeholder { color: #8d9196 !important; }
-        /* Chat en premium */
-        :root[data-premium][data-premium] #chatMessages .msg-other .msg-bubble,
-        :root[data-premium][data-premium] #chatMessages .msg-admin .msg-bubble { background: #171c22 !important; color: #f8f9fa !important; }
-        :root[data-premium][data-premium] #chatMessages .msg-mine .msg-bubble { background: #005322 !important; color: #eafff0 !important; }
-        :root[data-premium][data-premium] #chatMessages .msg-bubble,
-        :root[data-premium][data-premium] #chatMessages .msg-bubble div { color: #f8f9fa !important; }
-        :root[data-premium][data-premium] #chatInputContainer { background: #171c22 !important; border-color: #43474b !important; }
-
-        /* ── Acento premium según el tema de color elegido (mantiene el fondo oscuro) ──
-           Cambia variables (secciones con skin) y el acento celeste #cee6f7 del layout premium. */
-        :root[data-premium][data-premium][data-theme="rosa"] {
-            --lm-primary: 236 72 153; --lm-primary-mid: 219 39 119; --lm-accent: 249 168 212; --lm-secondary: 244 114 182;
+        :root[data-theme="oscuro"] {
+            --pm-bg:#0f172a; --pm-card:#1e293b; --pm-card2:#0b1220; --pm-card-hi:#334155; --pm-border:#334155;
+            --pm-text:#e2e8f0; --pm-muted:#94a3b8; --pm-accent:#7dd3fc; --pm-green:#34d399; --pm-red:#f87171;
         }
-        :root[data-premium][data-premium][data-theme="rosa"] [style*="color:#cee6f7"],
-        :root[data-premium][data-premium][data-theme="rosa"] [style*="color:#6366f1"] { color: #f9a8d4 !important; }
-        :root[data-premium][data-premium][data-theme="aqua"] {
-            --lm-primary: 8 145 178; --lm-primary-mid: 14 116 144; --lm-accent: 103 232 249; --lm-secondary: 34 211 238;
+        :root[data-theme="rosa"] {
+            --pm-bg:#fff1f6; --pm-card:#ffffff; --pm-card2:#fdf2f8; --pm-card-hi:#fce7f3; --pm-border:#f5d6e2;
+            --pm-text:#9d174d; --pm-muted:#9d6b7d; --pm-accent:#db2777; --pm-green:#0a8f78; --pm-red:#e11d48;
         }
-        :root[data-premium][data-premium][data-theme="aqua"] [style*="color:#cee6f7"],
-        :root[data-premium][data-premium][data-theme="aqua"] [style*="color:#6366f1"] { color: #67e8f9 !important; }
-        :root[data-premium][data-premium][data-theme="lavanda"] {
-            --lm-primary: 139 92 246; --lm-primary-mid: 124 58 237; --lm-accent: 196 181 253; --lm-secondary: 167 139 250;
+        :root[data-theme="aqua"] {
+            --pm-bg:#e7fbfd; --pm-card:#ffffff; --pm-card2:#f0fdff; --pm-card-hi:#cffafe; --pm-border:#bae6fd;
+            --pm-text:#0e4a5a; --pm-muted:#5a7882; --pm-accent:#0891b2; --pm-green:#0a8f78; --pm-red:#dc2626;
         }
-        :root[data-premium][data-premium][data-theme="lavanda"] [style*="color:#cee6f7"],
-        :root[data-premium][data-premium][data-theme="lavanda"] [style*="color:#6366f1"] { color: #c4b5fd !important; }
-        :root[data-premium][data-premium][data-theme="claro"] {
-            --lm-primary: 96 165 250; --lm-accent: 147 197 253;
+        :root[data-theme="lavanda"] {
+            --pm-bg:#f3f0ff; --pm-card:#ffffff; --pm-card2:#faf9ff; --pm-card-hi:#ede9fe; --pm-border:#ddd6fe;
+            --pm-text:#4c1d95; --pm-muted:#786e8c; --pm-accent:#7c3aed; --pm-green:#0a8f78; --pm-red:#dc2626;
         }
+        .pm-layout { background: var(--pm-bg) !important; }
+        /* Fondos */
+        .pm-layout [style*="background:#171c22"] { background: var(--pm-card) !important; }
+        .pm-layout [style*="background:#1d232a"] { background: var(--pm-card2) !important; }
+        .pm-layout [style*="background:#0f1419"] { background: var(--pm-card2) !important; }
+        .pm-layout [style*="background:#282e36"],
+        .pm-layout [style*="background:#282e35"],
+        .pm-layout [style*="background:#333942"],
+        .pm-layout [style*="background:#344957"] { background: var(--pm-card-hi) !important; }
+        .pm-layout [style*="linear-gradient(135deg,#171c22,#282e36)"] { background: linear-gradient(135deg, var(--pm-card), var(--pm-card-hi)) !important; }
+        /* Bordes */
+        .pm-layout [style*="#43474b"],
+        .pm-layout [style*="1px solid #282e35"] { border-color: var(--pm-border) !important; }
+        /* Texto */
+        .pm-layout [style*="color:#e1e3e4"],
+        .pm-layout [style*="color:#f8f9fa"],
+        .pm-layout [style*="color:#fff"] { color: var(--pm-text) !important; }
+        .pm-layout [style*="color:#c3c7cb"],
+        .pm-layout [style*="color:#8d9196"] { color: var(--pm-muted) !important; }
+        .pm-layout [style*="color:#cee6f7"],
+        .pm-layout [style*="color:#b3cada"] { color: var(--pm-accent) !important; }
+        .pm-layout [style*="color:#25D366"],
+        .pm-layout [style*="color:#3de273"] { color: var(--pm-green) !important; }
+        .pm-layout [style*="color:#ffb4ab"] { color: var(--pm-red) !important; }
+        /* Toggle activo (Movimientos/Anticipos) → pill de acento del tema */
+        .pm-layout [style*="background:#ffffff"] { background: var(--pm-accent) !important; color: #fff !important; }
+        /* Tarjeta bancaria: SIEMPRE oscura (no sigue el tema) */
+        .pm-layout #pmBalanceTarjeta [style*="color:#fff"] { color: #fff !important; }
         :root[data-theme="rosa"] .tema-btn.active {
             border-color: #db2777 !important;
             box-shadow: 0 0 0 3px rgba(219,39,119,0.18);

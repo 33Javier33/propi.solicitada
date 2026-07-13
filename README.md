@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Dashboard: ahora SÍ sigue el tema (claro/oscuro/rosa/aqua/lavanda) (SW v72)
+- Antes el Dashboard forzaba una paleta oscura fija y elegir un tema casi no cambiaba nada. Ahora el **layout Dashboard sigue completamente el tema de color**: con temas claros se ve claro, con Oscuro se ve oscuro, y con Rosa/Aqua/Lavanda toma esos colores.
+- Se implementó con variables `--pm-*` (fondo, tarjeta, texto, acento, verde, rojo, borde) definidas por tema, y reglas `.pm-layout [style*=...]` que mapean los colores fijos del layout premium a esas variables. Las secciones con skin (Estadísticas/Mensajes/Perfil) ahora siguen el tema por su cuenta (se quitó el forzado oscuro `data-premium`).
+- Las **tarjetas bancarias** se mantienen oscuras a propósito (como una tarjeta real), protegidas del mapeo.
+- Archivos: `app.css` (variables `--pm-*` + mapeo `.pm-layout`), `index.html` (clase `pm-layout` en `#homePremium` y `#historyPremium`). SW v72.
+
 #### 2026-07-09 — Dashboard: el acento sigue el tema de color elegido (SW v71)
 - Antes, en la versión Dashboard el skin premium tenía una paleta fija y **elegir un tema no cambiaba nada**. Ahora el **acento premium sigue el tema de color** (Rosa, Aqua, Lavanda) manteniendo el fondo oscuro.
 - Se hace con reglas `:root[data-premium][data-premium][data-theme="X"]` que cambian las variables de acento (`--lm-primary`/`--lm-accent`/`--lm-secondary`) para las secciones con skin, y overridean los colores de acento fijos del layout premium (`#cee6f7` celeste y `#6366f1` índigo de los íconos del Perfil) al color del tema. Oscuro y Claro mantienen el acento azul/celeste por defecto.
