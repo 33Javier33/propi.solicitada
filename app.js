@@ -438,6 +438,10 @@
         const titular = (getDisplayName() || '—').toUpperCase();
         _set('tarjetaTitular', titular);
         _set('tarjetaTitularPm', titular);
+        const pp = document.getElementById('perfilPuntos');
+        const puntos = (pp && pp.textContent && pp.textContent !== '—') ? (pp.textContent + ' pts') : '—';
+        _set('tarjetaPuntos', puntos);
+        _set('tarjetaPuntosPm', puntos);
         if (typeof currentUser !== 'undefined' && currentUser) {
             const id = String(currentUser.ID || '').replace(/\D/g, '');
             const num = '•••• •••• •••• ' + (id.slice(-4) || '0000');

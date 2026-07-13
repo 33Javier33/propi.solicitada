@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Dashboard: tarjeta "Valor Punto" + Mis Puntos dentro de la tarjeta bancaria (SW v70)
+- La tarjeta de stat que decía **"Mis Puntos"** ahora se titula **"Valor Punto"** y muestra ese valor ($ del punto a hoy) como número grande (verde).
+- **Mis Puntos** se movió **dentro de la tarjeta bancaria** (vista tarjeta del balance): aparece en la fila inferior, al centro (Titular · Mis Puntos · Miembro desde), en dorado. Aplica a la tarjeta clásica y a la premium.
+- Se pobla en `_refrescarTarjeta` leyendo los puntos del socio (`#perfilPuntos`). IDs nuevos: `tarjetaPuntos` / `tarjetaPuntosPm`.
+- Archivos: `index.html` (tarjeta Valor Punto + columna Mis Puntos en ambas tarjetas bancarias), `app.js` (`_refrescarTarjeta`). SW v70.
+
 #### 2026-07-09 — Dashboard: "Mis Puntos" y "Remanente" lado a lado (SW v69)
 - En la home de la versión Dashboard, las tarjetas **Mis Puntos** y **Remanente** pasaron de estar apiladas (una debajo de otra) a estar **lado a lado** en dos columnas, ocupando menos espacio. Se rediseñaron como tarjetas compactas verticales (ícono + título arriba, valor grande, y un dato secundario abajo: "Valor punto" / "Pasa al próximo mes"). IDs sin cambios (`pmPuntos`, `pmValorPunto`, `pmRemanente`).
 - Archivos: `index.html` (grid de stats premium a 2 columnas). SW v69.
