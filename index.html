@@ -1317,19 +1317,16 @@
                 navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
                     console.log('[SW] Registrado:', reg.scope);
 
-                    // Si ya hay un SW esperando al cargar (ej: venía de otra pestaña)
-                    if (reg.waiting) {
+                    // Si ya hay un SW esperando o instalándose al cargar → mostrar/preparar banner
+                    if (reg.waiting && navigator.serviceWorker.controller) {
                         showUpdateBanner(reg.waiting);
+                    } else if (reg.installing) {
+                        _seguirWorker(reg.installing);
                     }
 
                     // Escuchar cuando hay un nuevo SW instalándose
                     reg.addEventListener('updatefound', () => {
-                        const newWorker = reg.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                showUpdateBanner(newWorker);
-                            }
-                        });
+                        if (reg.installing) _seguirWorker(reg.installing);
                     });
 
                     // Forzar chequeo de actualización cada vez que la app vuelve al frente
@@ -1347,13 +1344,29 @@
 
                 }).catch(e => console.warn('[SW] Error:', e));
 
-                // Recargar SOLO cuando el usuario pidió actualizar (botón). El auto-update
-                // es silencioso: activa el nuevo SW en segundo plano sin recargar.
+                // Cuando el SW nuevo toma el control, recargar UNA vez para aplicar la versión.
+                // (Guardia: no recargar en la instalación inicial, cuando aún no había controlador.)
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    if (_updateApplying) { _updateApplying = false; window.location.reload(); }
+                    if (!_swHadController) { _swHadController = true; return; }
+                    if (_swRefreshing) return;
+                    _swRefreshing = true;
+                    window.location.reload();
                 });
             });
         }
+
+        // Sigue el estado de un worker: cuando queda "installed" con un controlador ya activo,
+        // significa que hay una versión nueva lista → mostrar el banner.
+        function _seguirWorker(worker) {
+            if (!worker) return;
+            worker.addEventListener('statechange', () => {
+                if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                    showUpdateBanner(worker);
+                }
+            });
+        }
+        var _swRefreshing = false;
+        var _swHadController = ('serviceWorker' in navigator) && !!navigator.serviceWorker.controller;
 
         // Novedades de esta versión (se muestran en el aviso). Actualizar en cada release.
         var APP_NOVEDADES = 'Nueva versión Dashboard y mejoras';
@@ -1373,9 +1386,10 @@
             if (_updTimer) { clearInterval(_updTimer); _updTimer = null; }
             const banner = document.getElementById('updateBanner');
             if (banner) { banner.classList.add('hidden'); banner.classList.remove('flex'); }
-            if (_updWorker) { _updateApplying = true; _updWorker.postMessage({ type: 'SKIP_WAITING' }); }
-            // Red de seguridad: solo si controllerchange no dispara en 3.5 s
-            setTimeout(function () { if (_updateApplying) { _updateApplying = false; try { window.location.reload(); } catch (e) {} } }, 3500);
+            // Activar el SW nuevo → controllerchange recargará una vez.
+            if (_updWorker) _updWorker.postMessage({ type: 'SKIP_WAITING' });
+            // Red de seguridad: si controllerchange no dispara (o no había worker), recargar igual.
+            setTimeout(function () { if (!_swRefreshing) { _swRefreshing = true; try { window.location.reload(); } catch (e) {} } }, 2500);
         }
 
         function showUpdateBanner(worker) {

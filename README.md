@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Fix robusto de actualización: banner + recarga garantizada (SW v76)
+- **Recarga garantizada al activar el SW nuevo**: se cambió a un patrón estándar con guardia — cuando el SW nuevo toma control (`controllerchange`) la app recarga UNA vez para aplicar la versión (sin recargar en la instalación inicial). Antes dependía de una bandera (`_updateApplying`) que podía no dispararse.
+- **Detección más amplia**: ahora también se sigue el SW que ya está `installing` al cargar (no solo `waiting`), así el banner aparece en más casos. Red de seguridad: si `controllerchange` no dispara en 2.5 s, recarga igual.
+- **Contenido siempre fresco**: en el Service Worker los archivos core (html/js/css y navegaciones) se piden con `cache:'no-store'`, así el navegador/CDN no puede servir una copia vieja → la versión nueva baja de verdad.
+- Nota: como con los fixes anteriores, esto recién toma efecto tras cargar esta versión una vez.
+- Archivos: `index.html` (`_seguirWorker`, controllerchange con guardia, `_aplicarActualizacion`), `sw.js` (fetch `no-store` para core). SW v76.
+
 #### 2026-07-09 — Correo del socio: se solicita al ingresar, se guarda en Supabase y se muestra en el perfil (SW v75)
 - Al ingresar a la app, si el socio **no tiene correo**, aparece un aviso: "Se solicita agregar tu correo electrónico para completar tu información" (modal `#correoModal`, ~3s después de entrar; espera si el modal de RUT/ayuda está abierto).
 - El correo se **guarda en Supabase** (nueva columna `socios.correo`, acción `guardarCorreoSocio` en `supabase-api.js`, con auditoría). El mapeo `getSocios` ahora incluye `Correo`.

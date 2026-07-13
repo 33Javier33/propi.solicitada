@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boveda-personal-v75';
+const CACHE_NAME = 'boveda-personal-v76';
 
 const urlsToCache = [
     'index.html',
@@ -83,9 +83,13 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Archivos propios → network-first para garantizar versión nueva
+    // Archivos propios → network-first. Para los archivos "core" (html/js/css y
+    // navegaciones) se pide SIN caché HTTP (cache:'no-store'), así siempre baja la
+    // versión recién publicada aunque el navegador/CDN tenga una copia vieja.
+    const esCore = event.request.mode === 'navigate' || /\.(html|js|css)(\?.*)?$/.test(url);
+    const req = esCore ? new Request(event.request.url, { cache: 'no-store', credentials: 'same-origin' }) : event.request;
     event.respondWith(
-        fetch(event.request).then(response => {
+        fetch(req).then(response => {
             if (response && response.status === 200) {
                 const clone = response.clone();
                 caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
