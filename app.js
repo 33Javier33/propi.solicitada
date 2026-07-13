@@ -398,6 +398,7 @@
         _sincronizarTemaBtns();
         _aplicarBalanceEstilo(_balanceEstiloGuardado());
         _aplicarHomeVersion(_homeVersionGuardada());
+        _aplicarLoginShape(_loginShapeGuardada());
         _pushRefrescarEstado();
     }
 

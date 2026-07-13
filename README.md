@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Forma de la foto movida a Ajustes + foto de login más grande (SW v74)
+- El selector **"Forma de la foto"** se movió del login a **Perfil → ⚙️ Ajustes** (junto a Tema y Versión de inicio). Cambia la forma del avatar del login (Círculo/Redondeado/Cuadrado/Hexágono) y se guarda por dispositivo. El resaltado del chip activo se sincroniza al abrir el perfil.
+- La **foto del login se hizo más grande** (de 80px a 128px, `w-20`→`w-32`), con el ícono/placeholder acorde.
+- El **ojito para ver el PIN** se mantiene en el login (es un botón del propio campo).
+- Archivos: `index.html` (selector movido al modal, avatar login `w-32`), `app.js` (`_aplicarLoginShape` en `renderPerfil`). SW v74.
+
 #### 2026-07-09 — Login: ojito para ver el PIN + elegir forma de la foto (SW v73)
 - **Ojito (ver PIN)**: se agregó un botón 👁 en los campos de PIN (acceso rápido `#fastPIN` y "Crear PIN" `#setupPIN`) para mostrar/ocultar el PIN. Alterna `type` password/text y el ícono visibility/visibility_off.
 - **Forma de la foto del login**: en el acceso rápido se agregó un selector "Forma de la foto" con 4 opciones — **Círculo, Redondeado, Cuadrado, Hexágono**. Se aplica al avatar del login y se guarda por dispositivo (`propi_login_shape`).

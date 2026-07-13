@@ -948,8 +948,8 @@
     <!-- FAST ACCESS / PIN -->
     <div id="fastAccessBox" class="w-full max-w-sm hidden">
         <div class="text-center mb-10">
-            <div id="fastAvatarBox" onclick="verFotoGrande(_authFoto())" class="w-20 h-20 rounded-full bg-lm-high border-2 border-lm-primary/20 mx-auto mb-5 flex items-center justify-center shadow-xl shadow-lm-primary/10 overflow-hidden cursor-pointer" style="background-size:cover;background-position:center;">
-                <span id="fastAvatarIcon" class="text-3xl font-bold text-lm-primary font-headline">?</span>
+            <div id="fastAvatarBox" onclick="verFotoGrande(_authFoto())" class="w-32 h-32 rounded-full bg-lm-high border-2 border-lm-primary/20 mx-auto mb-5 flex items-center justify-center shadow-xl shadow-lm-primary/10 overflow-hidden cursor-pointer" style="background-size:cover;background-position:center;">
+                <span id="fastAvatarIcon" class="text-5xl font-bold text-lm-primary font-headline">?</span>
             </div>
             <h2 id="fastName" class="font-headline text-2xl font-bold text-lm-primary">...</h2>
             <p id="fastIDLabel" class="text-sm text-lm-muted mt-1">ID: ...</p>
@@ -976,24 +976,6 @@
             <button onclick="cambiarUsuario()" class="text-sm text-lm-muted font-medium hover:text-lm-primary transition-colors text-center">
                 Cambiar de Usuario
             </button>
-        </div>
-        <!-- Selector de forma de la foto del login -->
-        <div class="mt-7 pt-5" style="border-top:1px solid var(--color-subtle,#f1f5f9);">
-            <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider text-center mb-3">Forma de la foto</p>
-            <div class="flex justify-center gap-3">
-                <button type="button" onclick="setLoginAvatarShape('circle')" data-shape="circle" class="login-shape-btn" title="Círculo">
-                    <span style="display:block;width:26px;height:26px;background:currentColor;border-radius:50%;"></span>
-                </button>
-                <button type="button" onclick="setLoginAvatarShape('rounded')" data-shape="rounded" class="login-shape-btn" title="Redondeado">
-                    <span style="display:block;width:26px;height:26px;background:currentColor;border-radius:9px;"></span>
-                </button>
-                <button type="button" onclick="setLoginAvatarShape('square')" data-shape="square" class="login-shape-btn" title="Cuadrado">
-                    <span style="display:block;width:26px;height:26px;background:currentColor;border-radius:3px;"></span>
-                </button>
-                <button type="button" onclick="setLoginAvatarShape('hex')" data-shape="hex" class="login-shape-btn" title="Hexágono">
-                    <span style="display:block;width:26px;height:26px;background:currentColor;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);"></span>
-                </button>
-            </div>
         </div>
     </div>
 
@@ -1782,6 +1764,33 @@
                         </div>
                     </div>
 
+                    <!-- FORMA DE LA FOTO DEL LOGIN -->
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">account_circle</span>
+                            </div>
+                            <div style="min-width:0;">
+                                <p style="font-size:14px;font-weight:800;color:#001723;margin:0;">Forma de la foto (login)</p>
+                                <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;line-height:1.4;">Cómo se ve tu foto en la pantalla de ingreso.</p>
+                            </div>
+                        </div>
+                        <div style="display:flex;justify-content:center;gap:12px;">
+                            <button type="button" onclick="setLoginAvatarShape('circle')" data-shape="circle" class="login-shape-btn" title="Círculo">
+                                <span style="display:block;width:28px;height:28px;background:currentColor;border-radius:50%;"></span>
+                            </button>
+                            <button type="button" onclick="setLoginAvatarShape('rounded')" data-shape="rounded" class="login-shape-btn" title="Redondeado">
+                                <span style="display:block;width:28px;height:28px;background:currentColor;border-radius:9px;"></span>
+                            </button>
+                            <button type="button" onclick="setLoginAvatarShape('square')" data-shape="square" class="login-shape-btn" title="Cuadrado">
+                                <span style="display:block;width:28px;height:28px;background:currentColor;border-radius:3px;"></span>
+                            </button>
+                            <button type="button" onclick="setLoginAvatarShape('hex')" data-shape="hex" class="login-shape-btn" title="Hexágono">
+                                <span style="display:block;width:28px;height:28px;background:currentColor;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);"></span>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- MIS DOCUMENTOS -->
                     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
@@ -2314,6 +2323,7 @@
         _sincronizarTemaBtns();
         _aplicarBalanceEstilo(_balanceEstiloGuardado());
         _aplicarHomeVersion(_homeVersionGuardada());
+        _aplicarLoginShape(_loginShapeGuardada());
         _pushRefrescarEstado();
     }
 
