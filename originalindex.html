@@ -3742,6 +3742,13 @@
             // Nota destacada para este socio (Soporte): resaltar
             const esDestacado = currentChatMode==='ADMIN' && n.destacados && currentUser &&
                 String(n.destacados).split(',').map(s=>s.trim()).includes(String(currentUser.ID));
+            // Nombres de los socios destacados (para mostrar a todos "Destacado para: …")
+            let destNombres = '';
+            if(currentChatMode==='ADMIN' && n.destacados){
+                const _ids = String(n.destacados).split(',').map(s=>s.trim()).filter(Boolean);
+                const _noms = _ids.map(id=>{ const s=(allSocios||[]).find(u=>String(u.ID)===id); return s ? (s.Nombre||id) : id; });
+                destNombres = _noms.length<=3 ? _noms.join(', ') : _noms.slice(0,3).join(', ')+' y '+(_noms.length-3)+' más';
+            }
 
             const showAvatar=!isMine&&isFirstInGroup;
             const colorIdx=authorName.charCodeAt(0)%avatarPalette.length;
@@ -3763,6 +3770,7 @@
                 if(n.pinned) pinHtml = '<span style="font-size:0.7em;background:#f59e0b;color:#fff;padding:1px 6px;border-radius:10px;margin-bottom:3px;display:inline-block">📌 FIJADA</span><br>';
                 if(isNewMsg) pinHtml += '<span style="font-size:0.7em;background:#3b82f6;color:#fff;padding:1px 6px;border-radius:10px;margin-bottom:3px;display:inline-block">NUEVO</span><br>';
                 if(esDestacado) pinHtml += '<span style="font-size:0.7em;background:linear-gradient(135deg,#f59e0b,#f7d774);color:#3b1d00;padding:1px 8px;border-radius:10px;margin-bottom:3px;display:inline-block;font-weight:800">⭐ PARA TI</span><br>';
+                else if(destNombres) pinHtml += '<span style="font-size:0.7em;background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:1px 8px;border-radius:10px;margin-bottom:3px;display:inline-block;font-weight:700">⭐ Destacado para: '+escHtml(destNombres)+'</span><br>';
                 const meIdRx = currentUser ? (currentUser.Nombre + ' ' + currentUser.Apellido).trim() : '';
                 rxHtml = `<div style="display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap">
                     <button onclick="_chatPin('${msgId}',${!n.pinned})" style="background:none;border:none;cursor:pointer;font-size:0.85em;padding:0;opacity:0.65">${n.pinned?'📌':'📍'}</button>

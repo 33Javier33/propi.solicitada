@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Notas destacadas: "Destacado para: …" visible para todos en Soporte (SW v83)
+- Antes, en el chat **Soporte** de propi solo el socio destacado veía algo ("⭐ PARA TI"); el resto veía la nota sin ninguna marca de destacado. Ahora **todos** ven un badge **"⭐ Destacado para: [nombres]"** en la nota (resuelve IDs → nombres con `allSocios`), y el socio destacado sigue viendo **"⭐ PARA TI"** + anillo dorado.
+- Nota: la nota destacada se guarda y muestra correctamente en Supabase (`notas_recaudacion.destacados`). Solo aparece en **Soporte** (que es donde viven las notas admin), no en Equipo/Admin (son otros sistemas de mensajes).
+- Archivos: `app.js` (badge "Destacado para" en render del chat Soporte). SW v83.
+
 #### 2026-07-09 — Fix deploy: vercel.json con rutas exactas (los cambios no se reflejaban) (SW v82)
 - **Causa probable**: el `vercel.json` usaba un `source` con grupo/alternación `"/(index.html|app.js|app.css|supabase-api.js|originalindex.html)"`. Ese patrón puede **fallar la validación de Vercel y romper el deploy**, dejando la app servida en la última versión buena (por eso desde ~v78 los cambios no se reflejaban en el dispositivo).
 - **Fix**: se reescribió `vercel.json` con **una regla por archivo con ruta exacta** (`/index.html`, `/app.js`, `/app.css`, `/supabase-api.js`, `/`), 100% válidas para Vercel. Mismo arreglo en `diario.propi`. (`socios-comicion` ya usaba `/js/(.*)`, patrón válido, y sí desplegaba.)
