@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Scroll Dashboard a prueba de balas: espaciador al final (SW v79)
+- Refuerzo del fix de scroll de la versión Dashboard: además del padding inferior con `env(safe-area-inset-bottom)`, se agregó un **div espaciador** (`90px + área segura`) al final de `#homePremium` (tras "Últimos Movimientos") y de `#historyPremium`. Así el último ítem (ej. el primer anticipo con su fecha) **nunca queda tapado por la barra inferior** en ningún teléfono, incluso en casos límite de flex/scroll.
+- Archivos: `index.html` (espaciadores). SW v79.
+
 #### 2026-07-09 — Vercel: no-cache para HTML/JS core (destraba versiones viejas) (SW v78)
 - **Causa**: dispositivos quedaban "pegados" en una versión vieja porque el navegador/CDN servía copias cacheadas de `index.html`/`app.js`/`app.css`/`supabase-api.js`, y el updater viejo no lograba refrescarlas.
 - **Fix**: se ampliaron los headers en `vercel.json` para servir esos archivos core (y `/`) con `Cache-Control: no-cache, must-revalidate` (antes solo `sw.js`). Así el navegador revalida siempre y baja la versión nueva en la próxima apertura, sin necesidad de recarga forzada.
