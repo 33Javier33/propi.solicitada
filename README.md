@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Acceso al Diario de Recaudación desde Ajustes (SW v81)
+- En **Perfil → ⚙️ Ajustes** se agregó un acceso **"Diario de Recaudación"** que abre `diario.propi` en una pestaña nueva (`https://diario-propi.vercel.app/`).
+- Nota: la URL está hardcodeada en `index.html` (marcada con comentario) — ajustar si el dominio de despliegue es distinto.
+- Archivos: `index.html` (enlace en el modal de Ajustes). SW v81.
+
 #### 2026-07-09 — Notas destacadas: "⭐ Para ti" en el chat Soporte (SW v80)
 - Cuando la administración crea una nota **destacada para un socio** (desde socios-comicion), a ese socio le aparece en el chat **Soporte** con un **anillo dorado** y la etiqueta **⭐ PARA TI**, para que no se le pase.
 - Se lee de `notas_recaudacion.destacados` (IDs de socio); si el `currentUser.ID` está en la lista, se resalta la burbuja.
