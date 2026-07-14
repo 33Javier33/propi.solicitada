@@ -497,7 +497,7 @@ async function _recHandler(url, options) {
                 mensaje: m.mensaje, nota: m.mensaje,
                 destinatario: 'ADMIN', editado: false,
                 pinned: m.pinned || false, reactions: m.reactions || {},
-                foto: m.foto_url || ''
+                foto: m.foto_url || '', destacados: m.destacados || ''
             }));
             _lastNotasRec = mapped;
             mapped.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));

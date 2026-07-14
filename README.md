@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Notas destacadas: "⭐ Para ti" en el chat Soporte (SW v80)
+- Cuando la administración crea una nota **destacada para un socio** (desde socios-comicion), a ese socio le aparece en el chat **Soporte** con un **anillo dorado** y la etiqueta **⭐ PARA TI**, para que no se le pase.
+- Se lee de `notas_recaudacion.destacados` (IDs de socio); si el `currentUser.ID` está en la lista, se resalta la burbuja.
+- Archivos: `supabase-api.js` (getNotes REC devuelve `destacados`), `app.js` (resaltado en el render del chat ADMIN/Soporte). SW v80.
+
 #### 2026-07-09 — Scroll Dashboard a prueba de balas: espaciador al final (SW v79)
 - Refuerzo del fix de scroll de la versión Dashboard: además del padding inferior con `env(safe-area-inset-bottom)`, se agregó un **div espaciador** (`90px + área segura`) al final de `#homePremium` (tras "Últimos Movimientos") y de `#historyPremium`. Así el último ítem (ej. el primer anticipo con su fecha) **nunca queda tapado por la barra inferior** en ningún teléfono, incluso en casos límite de flex/scroll.
 - Archivos: `index.html` (espaciadores). SW v79.
