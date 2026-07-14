@@ -12,6 +12,24 @@
           "value": "/"
         }
       ]
+    },
+    {
+      "source": "/(index.html|app.js|app.css|supabase-api.js|originalindex.html)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
     }
   ]
 }

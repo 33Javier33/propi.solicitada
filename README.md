@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Vercel: no-cache para HTML/JS core (destraba versiones viejas) (SW v78)
+- **Causa**: dispositivos quedaban "pegados" en una versión vieja porque el navegador/CDN servía copias cacheadas de `index.html`/`app.js`/`app.css`/`supabase-api.js`, y el updater viejo no lograba refrescarlas.
+- **Fix**: se ampliaron los headers en `vercel.json` para servir esos archivos core (y `/`) con `Cache-Control: no-cache, must-revalidate` (antes solo `sw.js`). Así el navegador revalida siempre y baja la versión nueva en la próxima apertura, sin necesidad de recarga forzada.
+- Esto, junto al fix de scroll (v77, que sí está aplicado en el código pero no había llegado a los dispositivos), resuelve el problema del scroll una vez que baje la versión.
+- Archivos: `vercel.json`. SW v78.
+
 #### 2026-07-09 — Fix scroll versión Dashboard + guía de ayuda actualizada (SW v77)
 - **Fix scroll en versión Dashboard**: en `#homePremium` y `#historyPremium` se cambió `min-height:calc(100vh - 120px)` (el `100vh` varía en iPhone/Android y descuadraba el scroll) por `min-height:100%`, y el padding inferior pasó a `calc(110px + env(safe-area-inset-bottom))`. Así el contenido siempre llega al final y libra la barra inferior en todos los modelos (iPhone con notch, Redmi, etc.).
 - **Guía de ayuda actualizada**: se agregaron slides para **Versión de inicio (Clásica/Dashboard)**, **Correo electrónico** y **Personalizar el ingreso (ojito del PIN + forma de la foto)**; y el slide de Temas ahora menciona los 5 temas (Claro/Oscuro/Rosa/Aqua/Lavanda) y el botón ⚙️ Ajustes.
