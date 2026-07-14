@@ -353,6 +353,9 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Contador de pedidos descriptivo (SW v85)
+- El contador de Últimos Movimientos ahora dice **"Llevas N pedidos · te restan X · máximo 8"** (antes "N / 8"). El número que resta se pinta verde/ámbar/rojo según cuánto queda. Clásico y Dashboard.
+
 #### 2026-07-09 — Contador de movimientos "N / 8" en Últimos Movimientos (SW v84)
 - Junto al título **"Últimos Movimientos"** (Balance) se agregó un **contador** con la cantidad de movimientos del período y el **máximo** (por defecto **8**), formato **"5 / 8"**. Aplica a la versión clásica y a la Dashboard.
 - Cambia de color al llegar/pasar el máximo: ámbar si iguala 8, rojo si lo supera.

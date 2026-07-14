@@ -1255,16 +1255,15 @@
             // Últimos movimientos
             const listaContainer=document.getElementById('anticiposList');
             const merged=[...userAnticipos,...userExtras.filter(e=>e.tipo==='DESCUENTO_PERSONAL')].sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
-            // Contador de movimientos / máximo (mismo en clásico y premium)
+            // Contador de pedidos: "Llevas N pedidos · te restan X · máximo 8" (clásico y premium)
             (function(){
-                const MOVS_MAX = 8;            // máximo de movimientos/anticipos por período
+                const MOVS_MAX = 8;            // máximo de pedidos/anticipos por período
                 const cnt = merged.length;
-                const txt = cnt + ' / ' + MOVS_MAX;
-                const col = cnt > MOVS_MAX ? '#ef4444' : (cnt === MOVS_MAX ? '#f59e0b' : null);
+                const restan = Math.max(0, MOVS_MAX - cnt);
+                const restanCol = restan === 0 ? '#ef4444' : (restan <= 2 ? '#f59e0b' : '#16a34a');
+                const html = `Llevas <b>${cnt}</b> pedido${cnt===1?'':'s'} · te restan <b style="color:${restanCol}">${restan}</b> · máximo ${MOVS_MAX}`;
                 ['anticiposCount','pmMovsCount'].forEach(id=>{
-                    const e=document.getElementById(id); if(!e) return;
-                    e.textContent = txt;
-                    e.style.color = col || (id==='pmMovsCount' ? '#c3c7cb' : '');
+                    const e=document.getElementById(id); if(e) e.innerHTML = html;
                 });
             })();
             if(merged.length>0){
