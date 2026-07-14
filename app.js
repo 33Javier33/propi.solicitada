@@ -1255,6 +1255,18 @@
             // Últimos movimientos
             const listaContainer=document.getElementById('anticiposList');
             const merged=[...userAnticipos,...userExtras.filter(e=>e.tipo==='DESCUENTO_PERSONAL')].sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+            // Contador de movimientos / máximo (mismo en clásico y premium)
+            (function(){
+                const MOVS_MAX = 8;            // máximo de movimientos/anticipos por período
+                const cnt = merged.length;
+                const txt = cnt + ' / ' + MOVS_MAX;
+                const col = cnt > MOVS_MAX ? '#ef4444' : (cnt === MOVS_MAX ? '#f59e0b' : null);
+                ['anticiposCount','pmMovsCount'].forEach(id=>{
+                    const e=document.getElementById(id); if(!e) return;
+                    e.textContent = txt;
+                    e.style.color = col || (id==='pmMovsCount' ? '#c3c7cb' : '');
+                });
+            })();
             if(merged.length>0){
                 listaContainer.innerHTML=merged.map(a=>`
                 <div class="movement-row">

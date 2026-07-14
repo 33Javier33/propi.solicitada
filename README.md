@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Contador de movimientos "N / 8" en Últimos Movimientos (SW v84)
+- Junto al título **"Últimos Movimientos"** (Balance) se agregó un **contador** con la cantidad de movimientos del período y el **máximo** (por defecto **8**), formato **"5 / 8"**. Aplica a la versión clásica y a la Dashboard.
+- Cambia de color al llegar/pasar el máximo: ámbar si iguala 8, rojo si lo supera.
+- El máximo está en la constante `MOVS_MAX` (app.js) — fácil de ajustar.
+- Archivos: `index.html` (badges `#anticiposCount` / `#pmMovsCount`), `app.js` (actualiza los contadores con `merged.length`). SW v84.
+
 #### 2026-07-09 — Notas destacadas: "Destacado para: …" visible para todos en Soporte (SW v83)
 - Antes, en el chat **Soporte** de propi solo el socio destacado veía algo ("⭐ PARA TI"); el resto veía la nota sin ninguna marca de destacado. Ahora **todos** ven un badge **"⭐ Destacado para: [nombres]"** en la nota (resuelve IDs → nombres con `allSocios`), y el socio destacado sigue viendo **"⭐ PARA TI"** + anillo dorado.
 - Nota: la nota destacada se guarda y muestra correctamente en Supabase (`notas_recaudacion.destacados`). Solo aparece en **Soporte** (que es donde viven las notas admin), no en Equipo/Admin (son otros sistemas de mensajes).
