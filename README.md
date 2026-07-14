@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Fix deploy: vercel.json con rutas exactas (los cambios no se reflejaban) (SW v82)
+- **Causa probable**: el `vercel.json` usaba un `source` con grupo/alternación `"/(index.html|app.js|app.css|supabase-api.js|originalindex.html)"`. Ese patrón puede **fallar la validación de Vercel y romper el deploy**, dejando la app servida en la última versión buena (por eso desde ~v78 los cambios no se reflejaban en el dispositivo).
+- **Fix**: se reescribió `vercel.json` con **una regla por archivo con ruta exacta** (`/index.html`, `/app.js`, `/app.css`, `/supabase-api.js`, `/`), 100% válidas para Vercel. Mismo arreglo en `diario.propi`. (`socios-comicion` ya usaba `/js/(.*)`, patrón válido, y sí desplegaba.)
+- Al corregir el deploy, todas las versiones acumuladas (v78–v82) quedan disponibles. SW v82.
+
 #### 2026-07-09 — Acceso al Diario de Recaudación desde Ajustes (SW v81)
 - En **Perfil → ⚙️ Ajustes** se agregó un acceso **"Diario de Recaudación"** que abre `diario.propi` en una pestaña nueva (`https://diario-propi.vercel.app/`).
 - Nota: la URL está hardcodeada en `index.html` (marcada con comentario) — ajustar si el dominio de despliegue es distinto.
