@@ -3778,7 +3778,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'palette',
             color: '#db2777',
             title: 'Personaliza tu App — Temas',
-            body: '¿Quieres que la app se vea a tu gusto? En <b>Perfil → Tema de la app</b> puedes elegir entre tres estilos:<br><br>☀️ <b>Claro:</b> el estilo clásico, claro y limpio.<br>🌙 <b>Oscuro:</b> ideal para la noche o poca luz; cuida la vista.<br>🌸 <b>Rosa:</b> un tema en tonos rosados.<br><br>El tema que elijas <b>queda guardado en tu celular</b> y se aplica cada vez que abres la app. Puedes cambiarlo las veces que quieras.',
+            body: '¿Quieres que la app se vea a tu gusto? En <b>Perfil → ⚙️ Ajustes → Tema de la app</b> puedes elegir entre <b>cinco estilos</b>:<br><br>☀️ <b>Claro</b> · 🌙 <b>Oscuro</b> · 🌸 <b>Rosa</b> · 💧 <b>Aqua</b> · 🌿 <b>Lavanda</b>.<br><br>El tema que elijas <b>queda guardado en tu celular</b> y se aplica cada vez que abres la app. Puedes cambiarlo las veces que quieras — y ahora todo se agrupa dentro del botón <b>⚙️ Ajustes</b> del Perfil.',
             preview: `
               <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
@@ -3835,6 +3835,50 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
                 <div style="background:#fff;border:1px solid #c2c7cc;border-radius:14px;padding:12px;font-size:22px;color:#191c1d;letter-spacing:0.5em;text-align:center;margin-bottom:12px;">••••</div>
                 <div style="background:#001723;border-radius:12px;padding:10px;font-size:13px;font-weight:600;color:#fff;">Ingresar</div>
                 <div style="margin-top:10px;font-size:10px;color:#264b5f;font-weight:600;">¿Olvidó su PIN?</div>
+              </div>`
+        },
+        {
+            icon: 'dashboard',
+            color: '#001723',
+            title: 'Elige tu estilo — Clásica o Dashboard',
+            body: 'Ahora puedes elegir <b>cómo se ve tu app</b>. Anda a <b>Perfil → ⚙️ Ajustes → Versión de inicio</b>:<br><br>📱 <b>Clásica:</b> la vista de siempre.<br><br>✨ <b>Dashboard:</b> una vista más moderna tipo panel — con tu balance, accesos rápidos y movimientos.<br><br>💳 Además, en el balance puedes tocar el botón de tarjeta para ver tu saldo como una <b>tarjeta bancaria</b>.<br><br>🎨 Todo se adapta al <b>tema de color</b> que elijas (claro, oscuro, rosa, aqua o lavanda).',
+            preview: `
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;background:#f8f9fa;border:1px solid #e1e3e4;border-radius:14px;padding:12px;text-align:center;">
+                  <span class="material-symbols-outlined" style="font-size:22px;color:#264b5f;">wallet</span>
+                  <div style="font-size:11px;font-weight:700;color:#001723;margin-top:4px;">Clásica</div>
+                </div>
+                <div style="flex:1;background:linear-gradient(135deg,#171c22,#282e36);border:1px solid #43474b;border-radius:14px;padding:12px;text-align:center;">
+                  <span class="material-symbols-outlined" style="font-size:22px;color:#cee6f7;">dashboard</span>
+                  <div style="font-size:11px;font-weight:700;color:#e1e3e4;margin-top:4px;">Dashboard</div>
+                </div>
+              </div>`
+        },
+        {
+            icon: 'mail',
+            color: '#001723',
+            title: 'Tu correo electrónico',
+            body: 'La primera vez que entres, la app te pedirá tu <b>correo electrónico</b> para completar tu información. Queda guardado en tu perfil.<br><br>✏️ Puedes agregarlo o cambiarlo cuando quieras desde <b>Perfil → Información Laboral → Correo</b>.<br><br>Sirve para que la administración pueda tener tus datos completos y contactarte si lo necesita.',
+            preview: `
+              <div style="background:#f8f9fa;border:1px solid #e1e3e4;border-radius:18px;padding:18px;">
+                <div style="width:48px;height:48px;border-radius:14px;background:rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+                  <span class="material-symbols-outlined" style="font-size:24px;color:#6366f1">mail</span>
+                </div>
+                <div style="font-size:12px;font-weight:700;color:#001723;text-align:center;margin-bottom:8px;">Agrega tu correo</div>
+                <div style="background:#fff;border:1px solid #c2c7cc;border-radius:12px;padding:10px;font-size:12px;color:#64748b;text-align:center;">nombre@correo.com</div>
+              </div>`
+        },
+        {
+            icon: 'account_circle',
+            color: '#001723',
+            title: 'Personaliza tu ingreso',
+            body: '👁 En la pantalla de ingreso, toca el <b>ojito</b> del PIN para ver o esconder los números mientras los escribes.<br><br>🖼 Y en <b>Perfil → ⚙️ Ajustes → Forma de la foto</b> eliges cómo se ve tu foto en el login: <b>círculo, redondeado, cuadrado o hexágono</b>.',
+            preview: `
+              <div style="background:#f8f9fa;border:1px solid #e1e3e4;border-radius:18px;padding:18px;display:flex;justify-content:center;gap:12px;align-items:center;">
+                <span style="width:34px;height:34px;background:#264b5f;border-radius:50%;"></span>
+                <span style="width:34px;height:34px;background:#264b5f;border-radius:10px;"></span>
+                <span style="width:34px;height:34px;background:#264b5f;border-radius:3px;"></span>
+                <span style="width:34px;height:34px;background:#264b5f;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);"></span>
               </div>`
         },
         {

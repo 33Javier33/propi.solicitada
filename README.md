@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-09 — Fix scroll versión Dashboard + guía de ayuda actualizada (SW v77)
+- **Fix scroll en versión Dashboard**: en `#homePremium` y `#historyPremium` se cambió `min-height:calc(100vh - 120px)` (el `100vh` varía en iPhone/Android y descuadraba el scroll) por `min-height:100%`, y el padding inferior pasó a `calc(110px + env(safe-area-inset-bottom))`. Así el contenido siempre llega al final y libra la barra inferior en todos los modelos (iPhone con notch, Redmi, etc.).
+- **Guía de ayuda actualizada**: se agregaron slides para **Versión de inicio (Clásica/Dashboard)**, **Correo electrónico** y **Personalizar el ingreso (ojito del PIN + forma de la foto)**; y el slide de Temas ahora menciona los 5 temas (Claro/Oscuro/Rosa/Aqua/Lavanda) y el botón ⚙️ Ajustes.
+- Archivos: `index.html` (padding/min-height premium + novedades del banner), `app.js` (helpSlides). SW v77.
+
 #### 2026-07-09 — Fix robusto de actualización: banner + recarga garantizada (SW v76)
 - **Recarga garantizada al activar el SW nuevo**: se cambió a un patrón estándar con guardia — cuando el SW nuevo toma control (`controllerchange`) la app recarga UNA vez para aplicar la versión (sin recargar en la instalación inicial). Antes dependía de una bandera (`_updateApplying`) que podía no dispararse.
 - **Detección más amplia**: ahora también se sigue el SW que ya está `installing` al cargar (no solo `waiting`), así el banner aparece en más casos. Red de seguridad: si `controllerchange` no dispara en 2.5 s, recarga igual.

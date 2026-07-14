@@ -544,7 +544,7 @@
             </div><!-- /homeClasico -->
 
             <!-- ═══════ VERSIÓN PREMIUM (Dashboard oscuro) ═══════ -->
-            <div id="homePremium" class="pm-layout" style="display:none;padding:16px 16px 40px;background:#0f1419;min-height:calc(100vh - 120px);">
+            <div id="homePremium" class="pm-layout" style="display:none;padding:16px 16px calc(110px + env(safe-area-inset-bottom));background:#0f1419;min-height:100%;">
                 <!-- Saludo -->
                 <div style="margin-bottom:20px;">
                     <h1 id="pmSaludo" style="font-family:Manrope,sans-serif;font-size:24px;font-weight:700;color:#e1e3e4;margin:0 0 3px;">Bienvenido</h1>
@@ -692,7 +692,7 @@
             </div><!-- /historyClasico -->
 
             <!-- ═══════ HISTORIAL PREMIUM (Dashboard oscuro) ═══════ -->
-            <div id="historyPremium" class="pm-layout" style="display:none;background:#0f1419;min-height:calc(100vh - 120px);padding:16px 16px 40px;">
+            <div id="historyPremium" class="pm-layout" style="display:none;background:#0f1419;min-height:100%;padding:16px 16px calc(110px + env(safe-area-inset-bottom));">
                 <div style="margin-bottom:16px;">
                     <p style="font-size:13px;color:#c3c7cb;margin:0 0 3px;">Resumen Contable</p>
                     <h2 style="font-family:Manrope,sans-serif;font-size:24px;font-weight:700;color:#ffffff;margin:0;">Historial de Movimientos</h2>
@@ -1369,7 +1369,7 @@
         var _swHadController = ('serviceWorker' in navigator) && !!navigator.serviceWorker.controller;
 
         // Novedades de esta versión (se muestran en el aviso). Actualizar en cada release.
-        var APP_NOVEDADES = 'Nueva versión Dashboard y mejoras';
+        var APP_NOVEDADES = 'Correo, versión Dashboard y mejoras';
         var _updWorker = null, _updTimer = null, _updateApplying = false;
 
         // AUTO (15 s): silencioso — activa el nuevo SW sin recargar. Se aplica al reabrir la app.
