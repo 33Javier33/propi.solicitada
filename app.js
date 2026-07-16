@@ -545,7 +545,7 @@
             </div>`).join('');
             return `<div style="background:#171c22;border:1px solid #43474b;border-radius:14px;margin-bottom:12px;overflow:hidden;">
                 <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;background:#1d232a;">
-                    <span style="font-size:13px;font-weight:700;color:#fff;">${periodo.periodo || 'Período'}</span>
+                    <span style="font-size:13px;font-weight:700;color:#fff;">${_fmtPeriodoLabel(periodo.periodo)}</span>
                     <span style="font-size:14px;font-weight:800;color:#ffb4ab;">-${formatMoney(total)}</span>
                 </div>
                 ${regs}
@@ -2603,6 +2603,23 @@
         return null;
     }
 
+    // Etiqueta legible del período (los archivados pueden venir como
+    // "CIERRE_JULIO_DE 2026", "JULIO_2026" o "2026-06-15").
+    function _fmtPeriodoLabel(periodo) {
+        const s = String(periodo || '').trim();
+        if (!s || s === 'Activo' || s === 'Archivado') return s || 'Período';
+        const md = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+        if (md) { const mo = parseInt(md[2], 10); if (mo >= 1 && mo <= 12) return `${MESES_ES[mo - 1]} ${md[1]}`; }
+        const t = s.replace(/^CIERRE[_\s]*/i, '')
+            .replace(/_/g, ' ')
+            .replace(/\bde\b/gi, ' ')
+            .replace(/\s+/g, ' ')
+            .toLowerCase()
+            .replace(/\b\w/g, c => c.toUpperCase())
+            .trim();
+        return t || s;
+    }
+
     function buildFiltroMeses(anio, data) {
         const bar = document.getElementById('antFiltroMeses');
         const filtered = anio === 'Todos' ? data : data.filter(p => _extraerAnio(p.periodo) === anio);
@@ -2697,7 +2714,7 @@
                         class="w-full flex justify-between items-center px-4 py-3 active:bg-lm-subtle transition-colors">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-lm-accent text-[16px]">folder_open</span>
-                            <span class="text-sm font-bold text-lm-primary">${periodo.periodo}</span>
+                            <span class="text-sm font-bold text-lm-primary">${_fmtPeriodoLabel(periodo.periodo)}</span>
                             <span class="text-[10px] text-lm-muted">${periodo.registros.length} anticipo${periodo.registros.length !== 1 ? 's' : ''}</span>
                         </div>
                         <div class="flex items-center gap-2">

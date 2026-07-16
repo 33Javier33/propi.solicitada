@@ -422,17 +422,32 @@ async function _sociosHandler(url, options) {
                 }).catch(() => {});
             }
 
-            const [historico, actRes] = await Promise.all([
+            const [historico, actRes, histRes] = await Promise.all([
                 gasPromise,
                 dbSV.from('anticipos').select('fecha, monto, responsable, periodo')
+                    .eq('socio_id', String(idSocio)).order('fecha'),
+                // Histórico archivado en Supabase: el archivado actual (al marcar
+                // Cobrado o al cerrar el mes en socios-comicion) guarda aquí, no en GAS.
+                dbSV.from('anticipos_historial').select('fecha, monto, responsable, periodo')
                     .eq('socio_id', String(idSocio)).order('fecha')
             ]);
 
             const byPeriod = {};
+            const periodosGas = new Set();
 
-            // Histórico archivado: solo desde GAS (fuente única, naming consistente)
+            // Histórico archivado desde GAS (fuente antigua)
             for (const p of (Array.isArray(historico) ? historico : [])) {
                 byPeriod[p.periodo] = { periodo: p.periodo, registros: [...(p.registros || [])] };
+                periodosGas.add(p.periodo);
+            }
+
+            // Histórico archivado desde Supabase (anticipos_historial). Se evita
+            // duplicar los períodos que ya vinieron de GAS.
+            for (const a of (histRes.data || [])) {
+                const p = a.periodo || 'Archivado';
+                if (periodosGas.has(p)) continue;
+                if (!byPeriod[p]) byPeriod[p] = { periodo: p, registros: [] };
+                byPeriod[p].registros.push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
             }
 
             // Anticipos activos del período actual: solo desde Supabase (instantáneo)

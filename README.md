@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — Fix: los anticipos anteriores del mes no aparecían (SW v86)
+- **Bug:** los anticipos anteriores del socio no mostraban los períodos recién archivados (ej. el mes en curso). Causa: `getHistorialCompletoSocio` leía el histórico **solo desde GAS**, pero el archivado actual (al marcar Cobrado o al cerrar el mes en socios-comicion) se guarda en la tabla Supabase `anticipos_historial`, no en GAS.
+- **Fix:** ahora también se lee `anticipos_historial` de Supabase y se fusiona con lo de GAS (evitando duplicar períodos que ya vengan de GAS).
+- **Extra:** las etiquetas de período se muestran legibles (`_fmtPeriodoLabel`): "CIERRE_JULIO_DE 2026", "JULIO_2026" o "2026-06-15" → "Julio 2026".
+- Archivos: `supabase-api.js` (lectura de `anticipos_historial`), `app.js` (`_fmtPeriodoLabel` en las 2 vistas de anticipos anteriores). SW v86.
+
 #### 2026-07-09 — Contador de pedidos descriptivo (SW v85)
 - El contador de Últimos Movimientos ahora dice **"Llevas N pedidos · te restan X · máximo 8"** (antes "N / 8"). El número que resta se pinta verde/ámbar/rojo según cuánto queda. Clásico y Dashboard.
 
