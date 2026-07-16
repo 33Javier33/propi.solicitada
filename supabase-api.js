@@ -432,12 +432,20 @@ async function _sociosHandler(url, options) {
                     .eq('socio_id', String(idSocio)).order('fecha')
             ]);
 
-            // Clave canónica del período (año-mes) para NO repetir un mismo mes
-            // que venga con nombres distintos ("Julio 2026", "CIERRE_JULIO_DE 2026",
-            // "2026-06-15"). Así se agrupa por mes real, sin duplicar fechas.
             const _MESES_L = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
             const _MESES_C = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-            const _canon = (p) => {
+            // Período (año-mes) derivado de la fecha con la regla 15→14:
+            // el período se nombra por el mes donde cae el día 14.
+            const _canonFromFecha = (fecha) => {
+                const d = new Date(String(fecha || '').slice(0, 10) + 'T12:00:00');
+                if (isNaN(d.getTime())) return null;
+                let yy = d.getFullYear(), mm = d.getMonth() + 1;
+                if (d.getDate() >= 15) { mm += 1; if (mm > 12) { mm = 1; yy += 1; } }
+                return yy + '-' + String(mm).padStart(2, '0');
+            };
+            // Clave canónica del período (año-mes) para agrupar un mismo mes aunque
+            // venga con nombres distintos ("Julio 2026", "CIERRE_JULIO_DE 2026", "2026-06-15").
+            const _canon = (p, fecha) => {
                 const s = String(p || '').toLowerCase();
                 const y = (s.match(/\b(20\d{2})\b/) || [])[1];
                 let mo = null;
@@ -445,40 +453,52 @@ async function _sociosHandler(url, options) {
                 if (num) mo = parseInt(num[1], 10);
                 else for (let i = 0; i < 12; i++) if (s.includes(_MESES_L[i])) { mo = i + 1; break; }
                 if (y && mo >= 1 && mo <= 12) return y + '-' + String(mo).padStart(2, '0');
-                return 'raw:' + (s.trim() || 'activo');
+                return _canonFromFecha(fecha) || ('raw:' + (s.trim() || 'sin-periodo'));
             };
             const _label = (canon, raw) => {
                 const m = /^(\d{4})-(\d{2})$/.exec(canon);
                 if (m) return _MESES_C[parseInt(m[2], 10) - 1] + ' ' + m[1];
                 return raw || 'Período';
             };
-            const _mapReg = (a) => ({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
+            // Firma (fecha+monto) para deduplicar el MISMO anticipo entre fuentes.
+            // No incluye responsable a propósito: GAS y Supabase pueden diferir en
+            // ese campo. Es seguro porque solo se filtran registros de GAS contra
+            // Supabase (nunca se deduplica dentro de Supabase, así no se sub-cuenta).
+            const _sig = (r) => String(r.fecha || '').slice(0, 10) + '|' + Number(r.monto);
 
-            // Un mes = una sola fuente para NO duplicar: GAS como base, y Supabase
-            // (fuente de verdad del archivado actual) reemplaza el mes completo.
-            const archByCanon = {};
-            for (const p of (Array.isArray(historico) ? historico : [])) {
-                const c = _canon(p.periodo);
-                archByCanon[c] = { label: p.periodo, registros: (p.registros || []).map(_mapReg) };
-            }
-            const sbByCanon = {};
-            for (const a of (histRes.data || [])) {
-                const c = _canon(a.periodo);
-                if (!sbByCanon[c]) sbByCanon[c] = { label: a.periodo || 'Archivado', registros: [] };
-                sbByCanon[c].registros.push(_mapReg(a));
-            }
-            for (const c in sbByCanon) archByCanon[c] = sbByCanon[c]; // Supabase gana por mes
+            // Supabase (anticipos_historial) es la fuente de verdad del archivado.
+            const sbRecords = (histRes.data || []).map(a => ({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '', periodo: a.periodo }));
+            const sbSigs = new Set(sbRecords.map(_sig));
 
-            // Anticipos activos del período actual (aún sin archivar)
-            for (const a of (actRes.data || [])) {
-                const c = _canon(a.periodo || 'Activo');
-                if (!archByCanon[c]) archByCanon[c] = { label: a.periodo || 'Activo', registros: [] };
-                archByCanon[c].registros.push(_mapReg(a));
+            // GAS: agregar SOLO los registros que no estén ya en Supabase. Así el
+            // mismo anticipo no se duplica entre fuentes, sin importar cómo se
+            // llame el período; y no se deduplica dentro de una misma fuente (no se
+            // pierden dos anticipos iguales legítimos del mismo día).
+            const gasRecords = [];
+            for (const p of (Array.isArray(historico) ? historico : []))
+                for (const r of (p.registros || [])) {
+                    const rec = { fecha: r.fecha, monto: Number(r.monto), responsable: r.responsable || '', periodo: p.periodo };
+                    if (!sbSigs.has(_sig(rec))) gasRecords.push(rec);
+                }
+
+            // Anticipos activos del período actual (aún sin archivar).
+            const actRecords = (actRes.data || []).map(a => ({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '', periodo: a.periodo || null }));
+
+            // Agrupar todo por mes canónico.
+            const groups = {};
+            for (const r of [...sbRecords, ...gasRecords, ...actRecords]) {
+                const c = _canon(r.periodo, r.fecha);
+                if (!groups[c]) groups[c] = { rawLabel: r.periodo || '', registros: [] };
+                if (!groups[c].rawLabel && r.periodo) groups[c].rawLabel = r.periodo;
+                groups[c].registros.push({ fecha: r.fecha, monto: r.monto, responsable: r.responsable });
             }
 
-            const data = Object.keys(archByCanon)
+            const data = Object.keys(groups)
                 .sort((x, y) => String(y).localeCompare(String(x)))
-                .map(c => ({ periodo: _label(c, archByCanon[c].label), registros: archByCanon[c].registros }));
+                .map(c => ({
+                    periodo: _label(c, groups[c].rawLabel),
+                    registros: groups[c].registros.sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)))
+                }));
             return _mockRes({ data });
         }
 

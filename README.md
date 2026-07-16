@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — Fix: anticipos anteriores AÚN repetían fechas — dedup por registro (SW v88)
+- La agrupación por mes no bastaba: si un mismo anticipo venía de GAS y de Supabase con etiquetas de período distintas, seguía apareciendo dos veces.
+- **Fix definitivo:** ahora se deduplica **por registro** (`fecha`+`monto`): Supabase es la fuente de verdad y de GAS solo se agregan los anticipos que **no** estén ya en Supabase. No se deduplica dentro de una misma fuente, así que no se pierden dos anticipos iguales legítimos del mismo día.
+- Además, los registros con período nulo se agrupan por el mes real derivado de la fecha (regla 15→14), y cada grupo se ordena por fecha.
+- Archivos: `supabase-api.js` (`getHistorialCompletoSocio`). SW v88.
+
 #### 2026-07-16 — Fix: anticipos anteriores repetían fechas/meses (SW v87)
 - **Bug:** tras leer el histórico de GAS y Supabase, un mismo mes podía aparecer **duplicado** porque venía con nombres distintos ("Julio 2026" en GAS vs "CIERRE_JULIO_DE 2026" en Supabase), repitiendo las fechas.
 - **Fix:** ahora los períodos se agrupan por **mes canónico (año-mes)** y cada mes usa **una sola fuente** (Supabase reemplaza el mes completo si lo tiene; GAS solo para meses que Supabase no tenga). Se evita duplicar sin riesgo de sub-contar (no se hace dedup por registro, que podría borrar dos anticipos iguales del mismo día).
