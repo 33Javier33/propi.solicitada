@@ -432,33 +432,53 @@ async function _sociosHandler(url, options) {
                     .eq('socio_id', String(idSocio)).order('fecha')
             ]);
 
-            const byPeriod = {};
-            const periodosGas = new Set();
+            // Clave canónica del período (año-mes) para NO repetir un mismo mes
+            // que venga con nombres distintos ("Julio 2026", "CIERRE_JULIO_DE 2026",
+            // "2026-06-15"). Así se agrupa por mes real, sin duplicar fechas.
+            const _MESES_L = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+            const _MESES_C = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            const _canon = (p) => {
+                const s = String(p || '').toLowerCase();
+                const y = (s.match(/\b(20\d{2})\b/) || [])[1];
+                let mo = null;
+                const num = s.match(/20\d{2}[-\/](\d{1,2})/);
+                if (num) mo = parseInt(num[1], 10);
+                else for (let i = 0; i < 12; i++) if (s.includes(_MESES_L[i])) { mo = i + 1; break; }
+                if (y && mo >= 1 && mo <= 12) return y + '-' + String(mo).padStart(2, '0');
+                return 'raw:' + (s.trim() || 'activo');
+            };
+            const _label = (canon, raw) => {
+                const m = /^(\d{4})-(\d{2})$/.exec(canon);
+                if (m) return _MESES_C[parseInt(m[2], 10) - 1] + ' ' + m[1];
+                return raw || 'Período';
+            };
+            const _mapReg = (a) => ({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
 
-            // Histórico archivado desde GAS (fuente antigua)
+            // Un mes = una sola fuente para NO duplicar: GAS como base, y Supabase
+            // (fuente de verdad del archivado actual) reemplaza el mes completo.
+            const archByCanon = {};
             for (const p of (Array.isArray(historico) ? historico : [])) {
-                byPeriod[p.periodo] = { periodo: p.periodo, registros: [...(p.registros || [])] };
-                periodosGas.add(p.periodo);
+                const c = _canon(p.periodo);
+                archByCanon[c] = { label: p.periodo, registros: (p.registros || []).map(_mapReg) };
             }
-
-            // Histórico archivado desde Supabase (anticipos_historial). Se evita
-            // duplicar los períodos que ya vinieron de GAS.
+            const sbByCanon = {};
             for (const a of (histRes.data || [])) {
-                const p = a.periodo || 'Archivado';
-                if (periodosGas.has(p)) continue;
-                if (!byPeriod[p]) byPeriod[p] = { periodo: p, registros: [] };
-                byPeriod[p].registros.push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
+                const c = _canon(a.periodo);
+                if (!sbByCanon[c]) sbByCanon[c] = { label: a.periodo || 'Archivado', registros: [] };
+                sbByCanon[c].registros.push(_mapReg(a));
             }
+            for (const c in sbByCanon) archByCanon[c] = sbByCanon[c]; // Supabase gana por mes
 
-            // Anticipos activos del período actual: solo desde Supabase (instantáneo)
+            // Anticipos activos del período actual (aún sin archivar)
             for (const a of (actRes.data || [])) {
-                const p = a.periodo || 'Activo';
-                if (!byPeriod[p]) byPeriod[p] = { periodo: p, registros: [] };
-                byPeriod[p].registros.push({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '' });
+                const c = _canon(a.periodo || 'Activo');
+                if (!archByCanon[c]) archByCanon[c] = { label: a.periodo || 'Activo', registros: [] };
+                archByCanon[c].registros.push(_mapReg(a));
             }
 
-            const data = Object.values(byPeriod)
-                .sort((a, b) => String(b.periodo).localeCompare(String(a.periodo)));
+            const data = Object.keys(archByCanon)
+                .sort((x, y) => String(y).localeCompare(String(x)))
+                .map(c => ({ periodo: _label(c, archByCanon[c].label), registros: archByCanon[c].registros }));
             return _mockRes({ data });
         }
 

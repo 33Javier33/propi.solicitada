@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — Fix: anticipos anteriores repetían fechas/meses (SW v87)
+- **Bug:** tras leer el histórico de GAS y Supabase, un mismo mes podía aparecer **duplicado** porque venía con nombres distintos ("Julio 2026" en GAS vs "CIERRE_JULIO_DE 2026" en Supabase), repitiendo las fechas.
+- **Fix:** ahora los períodos se agrupan por **mes canónico (año-mes)** y cada mes usa **una sola fuente** (Supabase reemplaza el mes completo si lo tiene; GAS solo para meses que Supabase no tenga). Se evita duplicar sin riesgo de sub-contar (no se hace dedup por registro, que podría borrar dos anticipos iguales del mismo día).
+- Archivos: `supabase-api.js` (`getHistorialCompletoSocio`). SW v87.
+
 #### 2026-07-16 — Fix: los anticipos anteriores del mes no aparecían (SW v86)
 - **Bug:** los anticipos anteriores del socio no mostraban los períodos recién archivados (ej. el mes en curso). Causa: `getHistorialCompletoSocio` leía el histórico **solo desde GAS**, pero el archivado actual (al marcar Cobrado o al cerrar el mes en socios-comicion) se guarda en la tabla Supabase `anticipos_historial`, no en GAS.
 - **Fix:** ahora también se lee `anticipos_historial` de Supabase y se fusiona con lo de GAS (evitando duplicar períodos que ya vengan de GAS).
