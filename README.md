@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — Logo de marca "CarlosPN Interactive" en el modal Acerca de (SW v89)
+- Se agregó el logo oficial (`img/carlospn-logo.png`) arriba de la marca en el modal **Acerca de**, reemplazando el ícono `code` placeholder. Debajo queda el subtítulo "Sistema Profesional de Gestión · 2026".
+- Archivos: `index.html`, `img/carlospn-logo.png` (nuevo). SW v89.
+
 #### 2026-07-16 — Fix: anticipos anteriores AÚN repetían fechas — dedup por registro (SW v88)
 - La agrupación por mes no bastaba: si un mismo anticipo venía de GAS y de Supabase con etiquetas de período distintas, seguía apareciendo dos veces.
 - **Fix definitivo:** ahora se deduplica **por registro** (`fecha`+`monto`): Supabase es la fuente de verdad y de GAS solo se agregan los anticipos que **no** estén ya en Supabase. No se deduplica dentro de una misma fuente, así que no se pierden dos anticipos iguales legítimos del mismo día.
