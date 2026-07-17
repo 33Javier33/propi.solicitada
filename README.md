@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — Login: botón "Contactar Comisión" chico arriba (ya no tapa "Activar Dispositivo") (SW v90)
+- **Problema:** el botón "Contactar a La Comisión Propina" (`#loginCTA`) estaba `absolute bottom-8` ocupando todo el ancho abajo, y se interponía con el botón "Activar Dispositivo" del setup.
+- **Fix:** ahora es un **botón pequeño tipo pill arriba-centro** (con safe-area), texto corto "Contactar Comisión", ícono de WhatsApp reducido. No ocupa toda la pantalla ni tapa el formulario.
+- Archivos: `index.html`. SW v90.
+
 #### 2026-07-16 — Logo de marca "CarlosPN Interactive" en el modal Acerca de (SW v89)
 - Se agregó el logo oficial (`img/carlospn-logo.png`) arriba de la marca en el modal **Acerca de**, reemplazando el ícono `code` placeholder. Debajo queda el subtítulo "Sistema Profesional de Gestión · 2026".
 - Archivos: `index.html`, `img/carlospn-logo.png` (nuevo). SW v89.
