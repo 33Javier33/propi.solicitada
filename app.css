@@ -90,6 +90,36 @@
             --chat-bg:       #0b141a;
         }
 
+        /* ── TEMA NEGRO (OLED) ──
+           Se aplica como el tema Oscuro (data-theme="oscuro") + el atributo
+           data-negro, que empuja los fondos a negro puro. Así reutiliza todo el
+           restyle del tema oscuro sin duplicarlo. */
+        :root[data-negro] {
+            --lm-bg:      0 0 0;
+            --lm-subtle:  20 20 20;
+            --lm-high:    30 30 30;
+            --app-bg:     #000000;
+            --nav-bg:     rgba(0,0,0,0.96);
+            --glass-bg:   rgba(0,0,0,0.92);
+            --chat-bg:    #000000;
+            --pm-bg:      #000000;
+            --pm-card2:   #000000;
+        }
+        :root[data-negro] body { background: #000 !important; }
+        /* El fondo de página oscuro (#0f172a) del tema oscuro → negro puro */
+        :root[data-negro] [style*="background:#0f172a"],
+        :root[data-negro] [style*="background:#0b141a"] { background: #000 !important; }
+
+        /* ── Logo de marca: se mimetiza con el fondo del tema ──
+           Temas claros: multiply funde el fondo blanco del logo con el fondo.
+           Tema oscuro/negro: invert+hue-rotate vuelve oscuro el fondo del logo
+           (se mimetiza) y claro el diseño (queda visible). */
+        .marca-logo { mix-blend-mode: multiply; }
+        :root[data-theme="oscuro"] .marca-logo {
+            mix-blend-mode: normal;
+            filter: invert(1) hue-rotate(180deg);
+        }
+
         /* ── TEMA AQUA (turquesa, claro) ── */
         :root[data-theme="aqua"] {
             --lm-bg:          236 254 255;

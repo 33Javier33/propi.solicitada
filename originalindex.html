@@ -145,6 +145,36 @@
             --chat-bg:       #0b141a;
         }
 
+        /* ── TEMA NEGRO (OLED) ──
+           Se aplica como el tema Oscuro (data-theme="oscuro") + el atributo
+           data-negro, que empuja los fondos a negro puro. Así reutiliza todo el
+           restyle del tema oscuro sin duplicarlo. */
+        :root[data-negro] {
+            --lm-bg:      0 0 0;
+            --lm-subtle:  20 20 20;
+            --lm-high:    30 30 30;
+            --app-bg:     #000000;
+            --nav-bg:     rgba(0,0,0,0.96);
+            --glass-bg:   rgba(0,0,0,0.92);
+            --chat-bg:    #000000;
+            --pm-bg:      #000000;
+            --pm-card2:   #000000;
+        }
+        :root[data-negro] body { background: #000 !important; }
+        /* El fondo de página oscuro (#0f172a) del tema oscuro → negro puro */
+        :root[data-negro] [style*="background:#0f172a"],
+        :root[data-negro] [style*="background:#0b141a"] { background: #000 !important; }
+
+        /* ── Logo de marca: se mimetiza con el fondo del tema ──
+           Temas claros: multiply funde el fondo blanco del logo con el fondo.
+           Tema oscuro/negro: invert+hue-rotate vuelve oscuro el fondo del logo
+           (se mimetiza) y claro el diseño (queda visible). */
+        .marca-logo { mix-blend-mode: multiply; }
+        :root[data-theme="oscuro"] .marca-logo {
+            mix-blend-mode: normal;
+            filter: invert(1) hue-rotate(180deg);
+        }
+
         /* ── TEMA AQUA (turquesa, claro) ── */
         :root[data-theme="aqua"] {
             --lm-bg:          236 254 255;
@@ -687,9 +717,10 @@
         (function () {
             try {
                 var t = localStorage.getItem('propi_tema') || 'claro';
-                if (!['claro', 'oscuro', 'rosa'].includes(t)) t = 'claro';
-                document.documentElement.setAttribute('data-theme', t);
-                var tc = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d' };
+                if (!['claro', 'oscuro', 'negro', 'rosa', 'aqua', 'lavanda'].includes(t)) t = 'claro';
+                document.documentElement.setAttribute('data-theme', t === 'negro' ? 'oscuro' : t);
+                if (t === 'negro') document.documentElement.setAttribute('data-negro', '1');
+                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
                 var m = document.querySelector('meta[name="theme-color"]');
                 if (m) m.setAttribute('content', tc[t] || '#001723');
             } catch (e) {}
@@ -835,7 +866,7 @@
 
             <!-- Marca -->
             <div style="text-align:center;margin-bottom:28px;">
-                <img src="img/carlospn-logo.png?v=89" alt="CarlosPN Interactive" style="width:100%;max-width:250px;height:auto;display:block;margin:0 auto 10px;">
+                <img src="img/carlospn-logo.png?v=89" alt="CarlosPN Interactive" class="marca-logo" style="width:100%;max-width:250px;height:auto;display:block;margin:0 auto 10px;">
                 <div style="font-size:12px;color:#72787d;font-weight:500;margin-top:2px;letter-spacing:0.04em;">SISTEMA PROFESIONAL DE GESTIÓN · 2026</div>
             </div>
 
@@ -1736,6 +1767,12 @@
                                 </span>
                                 <span style="font-size:11px;font-weight:700;color:#334155">Oscuro</span>
                             </button>
+                            <button type="button" data-tema="negro" onclick="aplicarTema('negro')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1a1a1a,#000);border:1px solid #262626;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#e5e5e5">contrast</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Negro</span>
+                            </button>
                             <button type="button" data-tema="rosa" onclick="aplicarTema('rosa')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
                                 <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#fbcfe8,#db2777);border:1px solid #f5d6e2;display:flex;align-items:center;justify-content:center;">
                                     <span class="material-symbols-outlined" style="font-size:18px;color:#fff">favorite</span>
@@ -2362,8 +2399,8 @@
     }
 
     // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
-    const _TEMAS = ['claro', 'oscuro', 'rosa', 'aqua', 'lavanda'];
-    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
+    const _TEMAS = ['claro', 'oscuro', 'negro', 'rosa', 'aqua', 'lavanda'];
+    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
     function _temaActual() {
         let t = 'claro';
         try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}
@@ -2377,7 +2414,11 @@
     }
     window.aplicarTema = function (nombre) {
         if (!_TEMAS.includes(nombre)) nombre = 'claro';
-        document.documentElement.setAttribute('data-theme', nombre);
+        // "negro" = base oscuro + atributo data-negro (fondos a negro puro).
+        const base = nombre === 'negro' ? 'oscuro' : nombre;
+        document.documentElement.setAttribute('data-theme', base);
+        if (nombre === 'negro') document.documentElement.setAttribute('data-negro', '1');
+        else document.documentElement.removeAttribute('data-negro');
         try { localStorage.setItem('propi_tema', nombre); } catch (e) {}
         const m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', _TEMA_COLOR[nombre] || '#001723');

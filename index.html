@@ -58,9 +58,10 @@
         (function () {
             try {
                 var t = localStorage.getItem('propi_tema') || 'claro';
-                if (!['claro', 'oscuro', 'rosa'].includes(t)) t = 'claro';
-                document.documentElement.setAttribute('data-theme', t);
-                var tc = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d' };
+                if (!['claro', 'oscuro', 'negro', 'rosa', 'aqua', 'lavanda'].includes(t)) t = 'claro';
+                document.documentElement.setAttribute('data-theme', t === 'negro' ? 'oscuro' : t);
+                if (t === 'negro') document.documentElement.setAttribute('data-negro', '1');
+                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
                 var m = document.querySelector('meta[name="theme-color"]');
                 if (m) m.setAttribute('content', tc[t] || '#001723');
             } catch (e) {}
@@ -206,7 +207,7 @@
 
             <!-- Marca -->
             <div style="text-align:center;margin-bottom:28px;">
-                <img src="img/carlospn-logo.png?v=89" alt="CarlosPN Interactive" style="width:100%;max-width:250px;height:auto;display:block;margin:0 auto 10px;">
+                <img src="img/carlospn-logo.png?v=89" alt="CarlosPN Interactive" class="marca-logo" style="width:100%;max-width:250px;height:auto;display:block;margin:0 auto 10px;">
                 <div style="font-size:12px;color:#72787d;font-weight:500;margin-top:2px;letter-spacing:0.04em;">SISTEMA PROFESIONAL DE GESTIÓN · 2026</div>
             </div>
 
@@ -1106,6 +1107,12 @@
                                     <span class="material-symbols-outlined" style="font-size:18px;color:#60a5fa">dark_mode</span>
                                 </span>
                                 <span style="font-size:11px;font-weight:700;color:#334155">Oscuro</span>
+                            </button>
+                            <button type="button" data-tema="negro" onclick="aplicarTema('negro')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1a1a1a,#000);border:1px solid #262626;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#e5e5e5">contrast</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Negro</span>
                             </button>
                             <button type="button" data-tema="rosa" onclick="aplicarTema('rosa')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
                                 <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#fbcfe8,#db2777);border:1px solid #f5d6e2;display:flex;align-items:center;justify-content:center;">

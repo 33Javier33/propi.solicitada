@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — Tema "Negro" (OLED) + logo de marca que se mimetiza con el tema (SW v91)
+- **Nuevo tema "Negro"** en Perfil → Ajustes → Tema de la app (además de Oscuro/noche). Se aplica como el tema Oscuro + atributo `data-negro` que empuja los fondos a **negro puro** (OLED), reutilizando todo el restyle oscuro sin duplicar CSS.
+- **Logo de marca adaptativo:** el logo del modal Acerca de ahora se **mimetiza con el fondo del tema**. En temas claros su fondo blanco se funde (`mix-blend-mode:multiply`); en Oscuro/Negro se invierte (`invert + hue-rotate`) para que el fondo del logo se vuelva oscuro (mimetizado) y el diseño quede claro y visible.
+- Se corrigió también el script pre-render de tema (antes solo aceptaba claro/oscuro/rosa; ahora los 6 temas, evitando parpadeo con aqua/lavanda/negro).
+- Archivos: `app.css` (tema negro + logo), `app.js` (`aplicarTema`, `_TEMAS`, `_TEMA_COLOR`), `index.html` (botón, script pre-render, clase `marca-logo`). SW v91.
+
 #### 2026-07-16 — Login: botón "Contactar Comisión" chico arriba (ya no tapa "Activar Dispositivo") (SW v90)
 - **Problema:** el botón "Contactar a La Comisión Propina" (`#loginCTA`) estaba `absolute bottom-8` ocupando todo el ancho abajo, y se interponía con el botón "Activar Dispositivo" del setup.
 - **Fix:** ahora es un **botón pequeño tipo pill arriba-centro** (con safe-area), texto corto "Contactar Comisión", ícono de WhatsApp reducido. No ocupa toda la pantalla ni tapa el formulario.

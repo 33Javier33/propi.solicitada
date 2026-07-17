@@ -409,8 +409,8 @@
     }
 
     // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
-    const _TEMAS = ['claro', 'oscuro', 'rosa', 'aqua', 'lavanda'];
-    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
+    const _TEMAS = ['claro', 'oscuro', 'negro', 'rosa', 'aqua', 'lavanda'];
+    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
     function _temaActual() {
         let t = 'claro';
         try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}
@@ -424,7 +424,11 @@
     }
     window.aplicarTema = function (nombre) {
         if (!_TEMAS.includes(nombre)) nombre = 'claro';
-        document.documentElement.setAttribute('data-theme', nombre);
+        // "negro" = base oscuro + atributo data-negro (fondos a negro puro).
+        const base = nombre === 'negro' ? 'oscuro' : nombre;
+        document.documentElement.setAttribute('data-theme', base);
+        if (nombre === 'negro') document.documentElement.setAttribute('data-negro', '1');
+        else document.documentElement.removeAttribute('data-negro');
         try { localStorage.setItem('propi_tema', nombre); } catch (e) {}
         const m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', _TEMA_COLOR[nombre] || '#001723');
