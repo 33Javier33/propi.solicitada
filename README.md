@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — El socio puede cancelar su solicitud de egreso pendiente (SW v95)
+- Se agregó un botón **"Cancelar solicitud"** en la tarjeta de egreso pendiente (en ambas versiones, clásica y premium). Sirve para cuando el socio la hizo por error o se arrepiente.
+- Nueva acción `cancelarEgreso` (Supabase): borra **solo** las solicitudes con estado `PENDIENTE` del socio (nunca las ya procesadas) y avisa a socios-comicion por realtime, así deja de aparecer en el panel de administración.
+- Archivos: `supabase-api.js` (acción `cancelarEgreso`), `app.js` (botón + `cancelarEgreso()`). SW v95.
+
 #### 2026-07-16 — Congruencia versión Premium: Resumen Contable (Saldo Anterior) y egreso pendiente (SW v94)
 - **Problema:** en la versión **Premium/Dashboard** no aparecían el **Resumen Contable** (con "Saldo Anterior") ni el estado de la **solicitud de egreso pendiente** — solo estaban en la versión Clásica.
 - **Fix:** se agregaron al dashboard premium los contenedores `#pmDetallesContables` (Resumen Contable con estilo oscuro) y `#pmEgresoEstadoBox` (egreso pendiente). El JS ahora **llena ambas versiones** (clásica y premium) con la misma información: Total Bruto, Saldo Anterior, Descuentos/Anticipos, y la tarjeta de egreso pendiente.

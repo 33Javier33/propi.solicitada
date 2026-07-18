@@ -109,6 +109,17 @@ async function _sociosHandler(url, options) {
             return _mockRes({ success: !error, error: error && error.message, id });
         }
 
+        // El socio cancela su(s) solicitud(es) de egreso PENDIENTE(s) (por error o
+        // arrepentimiento). Solo borra las PENDIENTES — nunca las ya procesadas.
+        case 'cancelarEgreso': {
+            const sid = String(b.socioId || '');
+            if (!sid) return _mockRes({ success: false, error: 'socioId requerido' });
+            const { error } = await dbSV.from('solicitudes_egreso')
+                .delete().eq('socio_id', sid).eq('estado', 'PENDIENTE');
+            if (!error) dbSV.channel('sv-egresos').send({ type: 'broadcast', event: 'cancelada', payload: {} }).catch(() => {});
+            return _mockRes({ success: !error, error: error && error.message });
+        }
+
         // Última solicitud de egreso PENDIENTE del socio (para mostrar el estado en la app)
         case 'miSolicitudEgreso': {
             const { data } = await dbSV.from('solicitudes_egreso')

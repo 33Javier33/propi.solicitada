@@ -2402,34 +2402,64 @@
             // Clásico (claro, con clases de tema)
             if (box) {
                 box.innerHTML = `
-                  <div style="background:#e0f2fe;border:1px solid #7dd3fc;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-                    <div style="width:36px;height:36px;border-radius:10px;background:rgba(2,132,199,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                      <span class="material-symbols-outlined" style="font-size:20px;color:#0284c7">hourglass_top</span>
+                  <div style="background:#e0f2fe;border:1px solid #7dd3fc;border-radius:16px;padding:12px 14px;">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <div style="width:36px;height:36px;border-radius:10px;background:rgba(2,132,199,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <span class="material-symbols-outlined" style="font-size:20px;color:#0284c7">hourglass_top</span>
+                      </div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:12px;font-weight:800;color:#075985">Egreso solicitado · pendiente</div>
+                        <div style="font-size:11px;color:#0369a1;margin-top:1px">${montoTxt} — a la espera de que la administración lo procese</div>
+                      </div>
                     </div>
-                    <div style="flex:1;min-width:0">
-                      <div style="font-size:12px;font-weight:800;color:#075985">Egreso solicitado · pendiente</div>
-                      <div style="font-size:11px;color:#0369a1;margin-top:1px">${montoTxt} — a la espera de que la administración lo procese</div>
-                    </div>
+                    <button onclick="cancelarEgreso()" style="width:100%;margin-top:10px;padding:9px;background:#fff;border:1px solid #fca5a5;border-radius:11px;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                      <span class="material-symbols-outlined" style="font-size:16px;">cancel</span> Cancelar solicitud
+                    </button>
                   </div>`;
                 box.classList.remove('hidden');
             }
             // Premium (dashboard oscuro)
             if (boxPm) {
                 boxPm.innerHTML = `
-                  <div style="background:#0b2a3a;border:1px solid #0e7490;border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px">
-                    <div style="width:38px;height:38px;border-radius:10px;background:rgba(14,116,144,0.35);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                      <span class="material-symbols-outlined" style="font-size:20px;color:#67e8f9">hourglass_top</span>
+                  <div style="background:#0b2a3a;border:1px solid #0e7490;border-radius:16px;padding:14px;">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <div style="width:38px;height:38px;border-radius:10px;background:rgba(14,116,144,0.35);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <span class="material-symbols-outlined" style="font-size:20px;color:#67e8f9">hourglass_top</span>
+                      </div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:13px;font-weight:800;color:#a5f3fc">Egreso solicitado · pendiente</div>
+                        <div style="font-size:11px;color:#7dd3fc;margin-top:2px">${montoTxt} — a la espera de que la administración lo procese</div>
+                      </div>
                     </div>
-                    <div style="flex:1;min-width:0">
-                      <div style="font-size:13px;font-weight:800;color:#a5f3fc">Egreso solicitado · pendiente</div>
-                      <div style="font-size:11px;color:#7dd3fc;margin-top:2px">${montoTxt} — a la espera de que la administración lo procese</div>
-                    </div>
+                    <button onclick="cancelarEgreso()" style="width:100%;margin-top:12px;padding:10px;background:#2a1618;border:1px solid #7f1d1d;border-radius:12px;color:#ffb4ab;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                      <span class="material-symbols-outlined" style="font-size:16px;">cancel</span> Cancelar solicitud
+                    </button>
                   </div>`;
                 boxPm.style.display = 'block';
             }
         } catch (e) { /* silencioso */ }
     }
     window.renderEgresoEstado = renderEgresoEstado;
+
+    // El socio cancela su solicitud de egreso pendiente (por error / arrepentimiento).
+    window.cancelarEgreso = async function () {
+        if (!currentUser) return;
+        if (!confirm('¿Cancelar tu solicitud de egreso pendiente?\n\nSe eliminará y la administración ya no la verá.')) return;
+        try {
+            const res = await fetch(SCRIPT_URL_SOCIOS, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'cancelarEgreso', socioId: String(currentUser.ID) })
+            });
+            const r = await res.json();
+            if (r && r.success) {
+                if (typeof showToast === 'function') showToast('Egreso', 'Solicitud cancelada ✓');
+                renderEgresoEstado();
+            } else {
+                alert('No se pudo cancelar. Intenta de nuevo.');
+            }
+        } catch (e) { alert('No se pudo cancelar. Revisa tu conexión.'); }
+    };
 
     // ── NOTIFICACIONES PUSH (Web Push) ─────────────────────────
     const VAPID_PUBLIC_KEY = 'BFzJrgZgoGMHxdHbqCyiftayb-JINxQNy3ek3h1YRH9yoZQIBp7zfFgr8IG72rLkzRpBsLPY2XVvy5k4G_gA6RI';
