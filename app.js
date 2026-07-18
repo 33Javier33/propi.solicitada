@@ -3535,7 +3535,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'add_circle',
             color: '#6366f1',
             title: 'Registrar la Recaudación del Día',
-            body: 'En el Balance hay un botón morado <b>"Recaudación del Día"</b>. Sirve para registrar lo recaudado en la noche <b>directamente desde tu app</b>, aunque no tengas la app de Recaudaciones Diarias instalada.<br><br>Al tocarlo se abre un formulario donde eliges:<br><br>🏷️ <b>Categoría:</b> TarjetaMDA, EfectivoMDA, SalaDeJuegos o Bóveda.<br>📅 <b>Fecha</b> y 💵 <b>Monto</b> recaudado.<br>➗ <b>Divisor</b> (opcional): si no lo sabes, déjalo en blanco.<br><br>Arriba verás el <b>total de puntos</b> del reparto como dato de referencia. Así entre todos mantienen la información al día.',
+            body: 'En el Balance hay un botón morado <b>"Recaudación del Día"</b>. Sirve para registrar lo recaudado en la noche <b>directamente desde tu app</b>, aunque no tengas la app de Recaudaciones Diarias instalada.<br><br>Al tocarlo se abre un formulario donde eliges:<br><br>🏷️ <b>Categoría:</b> TarjetaMDA, EfectivoMDA, SalaDeJuegos o Bóveda.<br>📅 <b>Fecha</b> y 💵 <b>Monto</b> recaudado.<br>➗ <b>Divisor</b> (opcional): si no lo sabes, déjalo en blanco.<br><br>Arriba verás el <b>total de puntos</b> del reparto como dato de referencia.<br><br>📄 Dentro del mismo formulario hay un botón <b>"Abrir Diario de Recaudación"</b> que te lleva al <b>diario completo</b> de recaudaciones. Así entre todos mantienen la información al día.',
             preview: `
               <div>
                 <div style="display:flex;gap:8px;margin-bottom:12px;">
@@ -3822,7 +3822,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'palette',
             color: '#db2777',
             title: 'Personaliza tu App — Temas',
-            body: '¿Quieres que la app se vea a tu gusto? En <b>Perfil → ⚙️ Ajustes → Tema de la app</b> puedes elegir entre <b>cinco estilos</b>:<br><br>☀️ <b>Claro</b> · 🌙 <b>Oscuro</b> · 🌸 <b>Rosa</b> · 💧 <b>Aqua</b> · 🌿 <b>Lavanda</b>.<br><br>El tema que elijas <b>queda guardado en tu celular</b> y se aplica cada vez que abres la app. Puedes cambiarlo las veces que quieras — y ahora todo se agrupa dentro del botón <b>⚙️ Ajustes</b> del Perfil.',
+            body: '¿Quieres que la app se vea a tu gusto? En <b>Perfil → ⚙️ Ajustes → Tema de la app</b> puedes elegir entre <b>seis estilos</b>:<br><br>☀️ <b>Claro</b> · 🌙 <b>Oscuro</b> · ⚫ <b>Negro</b> · 🌸 <b>Rosa</b> · 💧 <b>Aqua</b> · 🌿 <b>Lavanda</b>.<br><br>El nuevo tema <b>Negro</b> es ideal para pantallas OLED — fondo totalmente negro. El logo de la marca <b>se adapta</b> al tema que elijas.<br><br>El tema queda <b>guardado en tu celular</b> y se aplica cada vez que abres la app. Puedes cambiarlo las veces que quieras.',
             preview: `
               <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:16px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
@@ -3955,6 +3955,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     function openHelp() {
         helpCurrentSlide = 0;
         renderHelpSlide();
+        helpToggleIndex(false); // asegurar que se muestra el contenido, no el índice
         const m = document.getElementById('helpModal');
         m.classList.remove('hidden');
         m.classList.add('flex');
@@ -3986,6 +3987,43 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         helpCurrentSlide = idx;
         renderHelpSlide();
     }
+
+    // ── Índice de temas (menú seleccionable que salta directo a cada ayuda) ──
+    function helpRenderIndex() {
+        const cont = document.getElementById('helpIndex');
+        if (!cont) return;
+        cont.innerHTML = helpSlides.map((s, i) => `
+            <button onclick="helpIndexGoTo(${i})" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:${i === helpCurrentSlide ? (s.color + '12') : 'transparent'};border:none;border-radius:12px;padding:11px 10px;cursor:pointer;">
+                <span style="width:38px;height:38px;flex-shrink:0;border-radius:12px;background:${s.color}14;display:flex;align-items:center;justify-content:center;">
+                    <span class="material-symbols-outlined" style="font-size:20px;color:${s.color};">${s.icon}</span>
+                </span>
+                <span style="flex:1;min-width:0;font-size:13.5px;font-weight:700;color:#001723;line-height:1.3;">${s.title}</span>
+                <span style="font-size:11px;color:#c2c7cc;font-weight:700;flex-shrink:0;">${i + 1}</span>
+            </button>`).join('');
+    }
+
+    function helpToggleIndex(force) {
+        const idx = document.getElementById('helpIndex');
+        const content = document.getElementById('helpContent');
+        const dots = document.getElementById('helpDots');
+        const nav = document.getElementById('helpNav');
+        if (!idx || !content) return;
+        const open = (force !== undefined) ? force : (idx.style.display === 'none');
+        if (open) helpRenderIndex();
+        idx.style.display = open ? 'block' : 'none';
+        content.style.display = open ? 'none' : 'block';
+        if (dots) dots.style.display = open ? 'none' : 'flex';
+        if (nav) nav.style.display = open ? 'none' : 'flex';
+        const bt = document.getElementById('helpIndexBtnTxt');
+        if (bt) bt.textContent = open ? 'Volver' : 'Temas';
+    }
+
+    function helpIndexGoTo(i) {
+        helpToggleIndex(false);
+        helpGoTo(i);
+    }
+    window.helpToggleIndex = helpToggleIndex;
+    window.helpIndexGoTo = helpIndexGoTo;
 
     function renderHelpSlide() {
         const s = helpSlides[helpCurrentSlide];

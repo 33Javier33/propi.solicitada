@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — Ayuda: menú índice seleccionable que salta directo a cada tema (SW v93)
+- La guía de ayuda ahora tiene un botón **"Temas"** (menú índice) arriba a la izquierda: abre una **lista seleccionable** de los 23 temas (ícono + título + número). Al tocar uno salta **directo** a esa ayuda (como en socios-comicion). El botón cambia a "Volver" para regresar al contenido.
+- **Contenido actualizado con lo último:** la ayuda de **Temas** ahora menciona los 6 estilos (incluido el nuevo **Negro** OLED) y que el logo se adapta al tema; la ayuda de **Recaudación del Día** menciona el botón **"Abrir Diario de Recaudación"**.
+- Archivos: `index.html` (botón Temas, contenedores `#helpIndex`/`#helpContent`/`#helpNav`), `app.js` (`helpToggleIndex`, `helpRenderIndex`, `helpIndexGoTo` + textos actualizados). SW v93.
+
 #### 2026-07-16 — Botón "Abrir Diario de Recaudación" en el modal Recaudación del Día (SW v92)
 - Se agregó un botón dentro del modal **Ingresar Recaudación** que abre **diario.propi** (`https://diario-propi.vercel.app/`) en una pestaña nueva, para acceder al diario completo de recaudaciones desde la app del socio.
 - Archivos: `index.html`. SW v92.
