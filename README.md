@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — Botón "Abrir Diario de Recaudación" en el modal Recaudación del Día (SW v92)
+- Se agregó un botón dentro del modal **Ingresar Recaudación** que abre **diario.propi** (`https://diario-propi.vercel.app/`) en una pestaña nueva, para acceder al diario completo de recaudaciones desde la app del socio.
+- Archivos: `index.html`. SW v92.
+
 #### 2026-07-16 — Tema "Negro" (OLED) + logo de marca que se mimetiza con el tema (SW v91)
 - **Nuevo tema "Negro"** en Perfil → Ajustes → Tema de la app (además de Oscuro/noche). Se aplica como el tema Oscuro + atributo `data-negro` que empuja los fondos a **negro puro** (OLED), reutilizando todo el restyle oscuro sin duplicar CSS.
 - **Logo de marca adaptativo:** el logo del modal Acerca de ahora se **mimetiza con el fondo del tema**. En temas claros su fondo blanco se funde (`mix-blend-mode:multiply`); en Oscuro/Negro se invierte (`invert + hue-rotate`) para que el fondo del logo se vuelva oscuro (mimetizado) y el diseño quede claro y visible.
