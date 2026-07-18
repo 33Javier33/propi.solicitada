@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-16 — Congruencia versión Premium: Resumen Contable (Saldo Anterior) y egreso pendiente (SW v94)
+- **Problema:** en la versión **Premium/Dashboard** no aparecían el **Resumen Contable** (con "Saldo Anterior") ni el estado de la **solicitud de egreso pendiente** — solo estaban en la versión Clásica.
+- **Fix:** se agregaron al dashboard premium los contenedores `#pmDetallesContables` (Resumen Contable con estilo oscuro) y `#pmEgresoEstadoBox` (egreso pendiente). El JS ahora **llena ambas versiones** (clásica y premium) con la misma información: Total Bruto, Saldo Anterior, Descuentos/Anticipos, y la tarjeta de egreso pendiente.
+- Archivos: `index.html` (contenedores premium), `app.js` (`renderEgresoEstado` y resumen contable llenan premium). SW v94.
+
 #### 2026-07-16 — Ayuda: menú índice seleccionable que salta directo a cada tema (SW v93)
 - La guía de ayuda ahora tiene un botón **"Temas"** (menú índice) arriba a la izquierda: abre una **lista seleccionable** de los 23 temas (ícono + título + número). Al tocar uno salta **directo** a esa ayuda (como en socios-comicion). El botón cambia a "Volver" para regresar al contenido.
 - **Contenido actualizado con lo último:** la ayuda de **Temas** ahora menciona los 6 estilos (incluido el nuevo **Negro** OLED) y que el logo se adapta al tema; la ayuda de **Recaudación del Día** menciona el botón **"Abrir Diario de Recaudación"**.

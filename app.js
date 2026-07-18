@@ -1256,6 +1256,26 @@
 
             if (isFirstLoad) animateIn(document.getElementById('detallesContables'), '60ms');
 
+            // Resumen contable — versión premium (dashboard oscuro)
+            const _pmDet = document.getElementById('pmDetallesContables');
+            if (_pmDet) {
+                const _row = (icon, iconColor, label, valor, valorColor) => `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #2a2f36;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:36px;height:36px;border-radius:10px;background:${iconColor}22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span class="material-symbols-outlined" style="font-size:16px;color:${iconColor};">${icon}</span>
+                            </div>
+                            <span style="font-size:13px;color:#e1e3e4;">${label}</span>
+                        </div>
+                        <b style="font-size:13px;font-weight:700;color:${valorColor || '#e1e3e4'};">${valor}</b>
+                    </div>`;
+                _pmDet.innerHTML =
+                    _row('percent', '#cee6f7', `Total Bruto (${pts} pts)`, formatMoney(propinaBruta)) +
+                    _row('account_balance', '#25D366', 'Saldo Anterior', formatMoney(sAnt)) +
+                    _row('remove_circle', '#ffb4ab', 'Descuentos / Anticipos', '-' + formatMoney(tAnt + tDesc), '#ffb4ab');
+                _pmDet.lastElementChild && (_pmDet.lastElementChild.style.borderBottom = 'none');
+            }
+
             // Últimos movimientos
             const listaContainer=document.getElementById('anticiposList');
             const merged=[...userAnticipos,...userExtras.filter(e=>e.tipo==='DESCUENTO_PERSONAL')].sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
@@ -2364,7 +2384,12 @@
     // Muestra la tarjeta con la solicitud de egreso pendiente del socio (si la hay)
     async function renderEgresoEstado() {
         const box = document.getElementById('egresoEstadoBox');
-        if (!box || !currentUser) return;
+        const boxPm = document.getElementById('pmEgresoEstadoBox');
+        if ((!box && !boxPm) || !currentUser) return;
+        const _ocultar = () => {
+            if (box) { box.classList.add('hidden'); box.innerHTML = ''; }
+            if (boxPm) { boxPm.style.display = 'none'; boxPm.innerHTML = ''; }
+        };
         try {
             const res = await fetch(SCRIPT_URL_SOCIOS, {
                 method: 'POST',
@@ -2372,19 +2397,36 @@
                 body: JSON.stringify({ action: 'miSolicitudEgreso', socioId: String(currentUser.ID) })
             });
             const s = (await res.json()).data;
-            if (!s) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+            if (!s) { _ocultar(); return; }
             const montoTxt = '$' + (Number(s.monto) || 0).toLocaleString('es-CL');
-            box.innerHTML = `
-              <div style="background:#e0f2fe;border:1px solid #7dd3fc;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px">
-                <div style="width:36px;height:36px;border-radius:10px;background:rgba(2,132,199,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                  <span class="material-symbols-outlined" style="font-size:20px;color:#0284c7">hourglass_top</span>
-                </div>
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:12px;font-weight:800;color:#075985">Egreso solicitado · pendiente</div>
-                  <div style="font-size:11px;color:#0369a1;margin-top:1px">${montoTxt} — a la espera de que la administración lo procese</div>
-                </div>
-              </div>`;
-            box.classList.remove('hidden');
+            // Clásico (claro, con clases de tema)
+            if (box) {
+                box.innerHTML = `
+                  <div style="background:#e0f2fe;border:1px solid #7dd3fc;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:10px;background:rgba(2,132,199,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                      <span class="material-symbols-outlined" style="font-size:20px;color:#0284c7">hourglass_top</span>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:12px;font-weight:800;color:#075985">Egreso solicitado · pendiente</div>
+                      <div style="font-size:11px;color:#0369a1;margin-top:1px">${montoTxt} — a la espera de que la administración lo procese</div>
+                    </div>
+                  </div>`;
+                box.classList.remove('hidden');
+            }
+            // Premium (dashboard oscuro)
+            if (boxPm) {
+                boxPm.innerHTML = `
+                  <div style="background:#0b2a3a;border:1px solid #0e7490;border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px">
+                    <div style="width:38px;height:38px;border-radius:10px;background:rgba(14,116,144,0.35);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                      <span class="material-symbols-outlined" style="font-size:20px;color:#67e8f9">hourglass_top</span>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:13px;font-weight:800;color:#a5f3fc">Egreso solicitado · pendiente</div>
+                      <div style="font-size:11px;color:#7dd3fc;margin-top:2px">${montoTxt} — a la espera de que la administración lo procese</div>
+                    </div>
+                  </div>`;
+                boxPm.style.display = 'block';
+            }
         } catch (e) { /* silencioso */ }
     }
     window.renderEgresoEstado = renderEgresoEstado;
