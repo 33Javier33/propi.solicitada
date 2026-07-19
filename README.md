@@ -353,8 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-19 — Fix logo de marca: fusión correcta (el PNG tiene fondo BLANCO) (SW v104)
+- Corrección del intento anterior: el PNG del logo tiene fondo **blanco** (no negro), por eso en temas oscuros quedaba una "caja" blanca. Ahora: **temas claros** `mix-blend-mode: multiply` (el blanco se vuelve transparente, el logo azul marino se ve); **temas oscuros** (oscuro/negro/esmeralda) `filter: invert(1) hue-rotate(180deg)` + `mix-blend-mode: screen` (el blanco → negro → transparente, y el diseño queda claro y visible). Verificado numéricamente: el fondo se funde exacto con el color del tema y el logo queda como marca de agua.
+- Archivos: `app.css` (regla `.marca-logo`). SW v104.
+
 #### 2026-07-19 — Logo de marca: se funde con el fondo como marca de agua (SW v103)
-- El PNG del logo trae **fondo negro**, que en los temas oscuros (oscuro/negro/esmeralda) se veía como una "caja" negra. Ahora se usa `mix-blend-mode: screen` en temas oscuros → el negro se vuelve transparente y solo queda el diseño claro fundido con el fondo. En temas claros se usa `invert + hue-rotate + multiply` para volver transparente el fondo y dejar el logo con color. Resultado: el logo se integra como marca de agua en cualquier tema.
+- (Intento con supuesto equivocado de fondo negro — corregido en v104.)
 - Archivos: `app.css` (regla `.marca-logo`). SW v103.
 
 #### 2026-07-19 — Temas: tema Negro ahora ennegrece TODAS las tarjetas + nuevos temas (SW v102)
