@@ -353,6 +353,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-19 — Autogestión de días trabajados Part-Time (SW v96)
+- Los socios **Part-Time** ahora pueden **marcar sus días trabajados** tocando el día en su calendario ("Turnos Realizados"). El día queda **"por confirmar"** en un color ámbar distinto y muestra el **valor estimado** que ganarían (`~$…`, calculado con la recaudación de ese día × sus puntos).
+- Al marcar un día se crea una solicitud `PENDIENTE` en la tabla `dias_pt_solicitados` (proyecto socios). La administración recibe una **notificación push** ("Día Part-Time por confirmar") aunque tenga la app cerrada.
+- Cuando el encargado **valida** el día en socios-comicion, éste pasa a la planilla real (`dias_pt`) y en la app del socio cambia de ámbar a **verde (confirmado)** con su valor definitivo. Si lo **rechaza**, el socio ve el motivo y puede volver a marcarlo.
+- El socio puede **quitar** un día que aún esté por confirmar (solo mientras esté `PENDIENTE`). No se permite marcar días futuros ni días ya confirmados.
+- Realtime: el calendario del socio se actualiza solo cuando la comisión confirma/rechaza (suscripción a `dias_pt_solicitados` y `dias_pt`).
+- Archivos: `supabase-api.js` (acciones `marcarDiaPT`, `desmarcarDiaPT`, `misDiasPTSolicitados` + realtime), `app.js` (calendario interactivo, `togglePTDia`, `cargarDiasPTSolicitados`, detalle "por confirmar"/"rechazados"), `app.css` (estilos `.pt-pendiente` / `.pt-rechazado`), `index.html` (hint del calendario). Backend: tabla `dias_pt_solicitados` + trigger push, edge function `push-notify` v4. SW v96.
+
 #### 2026-07-16 — El socio puede cancelar su solicitud de egreso pendiente (SW v95)
 - Se agregó un botón **"Cancelar solicitud"** en la tarjeta de egreso pendiente (en ambas versiones, clásica y premium). Sirve para cuando el socio la hizo por error o se arrepiente.
 - Nueva acción `cancelarEgreso` (Supabase): borra **solo** las solicitudes con estado `PENDIENTE` del socio (nunca las ya procesadas) y avisa a socios-comicion por realtime, así deja de aparecer en el panel de administración.

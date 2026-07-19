@@ -7,6 +7,10 @@
         globalDiasCalendar=[], userTypeGlobal='', editingMessageId=null,
         adminPrivMsgs=[];
 
+    // Autogestión de días Part-Time: valor por punto por fecha, puntos del socio y
+    // días marcados por el socio (PENDIENTE/RECHAZADO) para pintarlos en el calendario.
+    let ptMapVP={}, ptPuntos=0, ptDiasSolicitados=[], ptCargandoDia=false;
+
     // Datos de balance guardados globalmente para el comprobante
     let _lastBalance = {
         liquido:0, remanente:0, propinaBruta:0, sAnt:0,
@@ -1170,6 +1174,9 @@
 
             globalDiasCalendar=[]; userTypeGlobal=esPT?'PT':'PLANTA';
 
+            // Exponer para la autogestión de días PT (calendario interactivo)
+            ptMapVP = mapVP; ptPuntos = pts;
+
             if(esPT){
                 let myDias=diasTrabajados[sID]||diasTrabajados[currentUser.ID]||[];
                 if(!myDias.length){const k=Object.keys(diasTrabajados).find(key=>String(key).trim()===sID);if(k)myDias=diasTrabajados[k];}
@@ -1178,6 +1185,8 @@
                     puntoGlobalTotal+=vp;
                     if(vp>0) globalDiasCalendar.push({fecha:fKey,valorPunto:vp,montoAsociado:vp*pts});
                 });
+                // Cargar los días que el socio marcó y aún están por confirmar/rechazados
+                cargarDiasPTSolicitados();
             } else {
                 Object.values(mapVP).forEach(v=>puntoGlobalTotal+=v.totalVP);
                 userExtras.filter(e=>String(e.tipo).toUpperCase()==='AUSENCIA').forEach(a=>{
@@ -2863,6 +2872,98 @@
         const modal = document.getElementById('calendarModal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        if (userTypeGlobal === 'PT') cargarDiasPTSolicitados();
+    }
+
+    // ── Autogestión de días Part-Time ────────────────────────
+    // Clave de período (15 → 14) a la que pertenece una fecha: "YYYY-MM-15_YYYY-MM-14"
+    function _periodKeyPT(fKey) {
+        const d = _parseLocalDate(fKey);
+        let y = d.getFullYear(), m = d.getMonth(); // 0-based
+        let iniY = y, iniM = m, finY = y, finM = m;
+        if (d.getDate() >= 15) { finM = m + 1; if (finM > 11) { finM = 0; finY = y + 1; } }
+        else { iniM = m - 1; if (iniM < 0) { iniM = 11; iniY = y - 1; } }
+        const p = (yy, mm, dd) => yy + '-' + String(mm + 1).padStart(2, '0') + '-' + dd;
+        return p(iniY, iniM, '15') + '_' + p(finY, finM, '14');
+    }
+
+    // Carga los días que el socio marcó y están PENDIENTE/RECHAZADO
+    async function cargarDiasPTSolicitados() {
+        if (!currentUser || userTypeGlobal !== 'PT') return;
+        try {
+            const res = await fetch(SCRIPT_URL_SOCIOS, {
+                method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'misDiasPTSolicitados', socioId: String(currentUser.ID) })
+            });
+            const j = await res.json();
+            ptDiasSolicitados = (j.data || []).map(x => ({
+                fecha: String(x.fecha).substring(0, 10),
+                estado: x.estado,
+                valor: Number(x.valor_estimado) || 0,
+                motivo: x.motivo_rechazo || ''
+            }));
+        } catch (e) { console.warn('[PT] misDiasPTSolicitados:', e.message); ptDiasSolicitados = []; }
+        const modal = document.getElementById('calendarModal');
+        if (modal && !modal.classList.contains('hidden')) renderCalendarGrid();
+    }
+
+    // El socio toca un día del calendario: lo marca (por confirmar) o lo quita.
+    async function togglePTDia(fKey) {
+        if (ptCargandoDia) return;
+        if (userTypeGlobal !== 'PT' || !currentUser) return;
+
+        // No permitir tocar un día ya confirmado (está en la planilla)
+        const yaConfirmado = globalDiasCalendar.some(d => String(d.fecha).split('T')[0].substring(0, 10) === fKey);
+        if (yaConfirmado) { showToast('Sistema', 'Este día ya fue confirmado por la comisión.'); return; }
+
+        // No permitir marcar días futuros
+        const hoyKey = (function () { const n = new Date(); return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0'); })();
+        if (fKey > hoyKey) { showToast('Sistema', 'No puedes marcar días futuros.'); return; }
+
+        const existente = ptDiasSolicitados.find(d => d.fecha === fKey);
+        ptCargandoDia = true;
+        try {
+            if (existente && existente.estado === 'PENDIENTE') {
+                // Quitar la marca
+                const res = await fetch(SCRIPT_URL_SOCIOS, {
+                    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'desmarcarDiaPT', socioId: String(currentUser.ID), fecha: fKey })
+                });
+                const j = await res.json();
+                if (j.success) {
+                    ptDiasSolicitados = ptDiasSolicitados.filter(d => d.fecha !== fKey);
+                    showToast('Turno', 'Día quitado.');
+                } else { showToast('Turno', 'No se pudo quitar el día.'); }
+            } else {
+                // Marcar el día (por confirmar). Valor estimado según la recaudación del día.
+                const vp = ptMapVP[fKey]?.totalVP || 0;
+                const valorEstimado = Math.round(vp * ptPuntos);
+                const res = await fetch(SCRIPT_URL_SOCIOS, {
+                    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'marcarDiaPT',
+                        socioId: String(currentUser.ID),
+                        socioNombre: ((currentUser.Nombre || '') + ' ' + (currentUser.Apellido || '')).trim(),
+                        area: currentUser.Area || '',
+                        fecha: fKey,
+                        periodo: _periodKeyPT(fKey),
+                        valorEstimado
+                    })
+                });
+                const j = await res.json();
+                if (j.success) {
+                    ptDiasSolicitados = ptDiasSolicitados.filter(d => d.fecha !== fKey);
+                    ptDiasSolicitados.push({ fecha: fKey, estado: 'PENDIENTE', valor: valorEstimado, motivo: '' });
+                    showToast('Turno', 'Día marcado — queda por confirmar por la comisión.');
+                } else { showToast('Turno', 'No se pudo marcar el día.'); }
+            }
+        } catch (e) {
+            console.warn('[PT] togglePTDia:', e.message);
+            showToast('Turno', 'Error de conexión.');
+        } finally {
+            ptCargandoDia = false;
+            renderCalendarGrid();
+        }
     }
 
     function calNavMes(dir) {
@@ -2895,11 +2996,35 @@
         firstDay = firstDay === 0 ? 6 : firstDay - 1;
         for (let i = 0; i < firstDay; i++) grid.innerHTML += '<div class="calendar-day"></div>';
         const daysInMonth = new Date(year, month+1, 0).getDate();
+        const esPT = userTypeGlobal === 'PT';
         for (let i = 1; i <= daysInMonth; i++) {
             const fKey = year + '-' + String(month+1).padStart(2,'0') + '-' + String(i).padStart(2,'0');
             const marked = globalDiasCalendar.find(d => String(d.fecha).split('T')[0].substring(0,10) === fKey);
-            const cls = marked ? (userTypeGlobal==='PT' ? 'worked' : 'absent') : 'bg-lm-subtle';
-            grid.innerHTML += '<div class="calendar-day ' + cls + '">' + i + '</div>';
+            let cls, attrs = '';
+            if (marked) {
+                cls = esPT ? 'worked' : 'absent';
+            } else if (esPT) {
+                // Día marcado por el socio, aún no confirmado (o rechazado)
+                const sol = ptDiasSolicitados.find(d => d.fecha === fKey);
+                cls = sol ? (sol.estado === 'RECHAZADO' ? 'pt-rechazado' : 'pt-pendiente') : 'bg-lm-subtle';
+            } else {
+                cls = 'bg-lm-subtle';
+            }
+            if (esPT) attrs = ' role="button" onclick="togglePTDia(\'' + fKey + '\')"';
+            grid.innerHTML += '<div class="calendar-day ' + cls + '"' + attrs + '>' + i + '</div>';
+        }
+        // Ayuda para el socio PT
+        if (esPT) {
+            const pend = ptDiasSolicitados.filter(d => d.estado === 'PENDIENTE');
+            const hint = document.getElementById('calPTHint');
+            if (hint) {
+                hint.style.display = 'block';
+                hint.innerHTML = 'Toca un día para marcar tu turno. Queda <b style="color:#b45309">por confirmar</b> hasta que la comisión lo valide.'
+                    + (pend.length ? ' <b>' + pend.length + '</b> día' + (pend.length > 1 ? 's' : '') + ' por confirmar.' : '');
+            }
+        } else {
+            const hint = document.getElementById('calPTHint');
+            if (hint) hint.style.display = 'none';
         }
 
         // Detalle: SIEMPRE muestra todos los registros del período completo
@@ -2932,6 +3057,38 @@
                     + (userTypeGlobal==='PT'?'+':'-') + formatMoney(d.montoAsociado)
                     + '</span></div>';
             }).join('');
+        }
+
+        // Días marcados por el socio PT que aún están por confirmar / rechazados
+        if (userTypeGlobal === 'PT') {
+            const pend = [...ptDiasSolicitados].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
+            const pendientes = pend.filter(d => d.estado === 'PENDIENTE');
+            const rechazados = pend.filter(d => d.estado === 'RECHAZADO');
+            if (pendientes.length) {
+                detalleHTML += '<p style="font-size:9px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 10px;">Por confirmar (' + pendientes.length + ')</p>';
+                detalleHTML += pendientes.map(function (d) {
+                    return '<div class="flex justify-between items-center rounded-2xl p-4" style="background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.35);">'
+                        + '<div>'
+                        + '<p class="text-xs font-semibold mb-0.5" style="color:#92400e;">' + formatDateText(d.fecha) + '</p>'
+                        + '<p class="text-[11px]" style="color:#b45309;">⏳ Esperando validación de la comisión</p>'
+                        + '</div>'
+                        + '<span class="font-bold text-base" style="color:#b45309;">~' + formatMoney(d.valor) + '</span>'
+                        + '</div>';
+                }).join('');
+            }
+            if (rechazados.length) {
+                detalleHTML += '<p style="font-size:9px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 10px;">Rechazados (' + rechazados.length + ')</p>';
+                detalleHTML += rechazados.map(function (d) {
+                    return '<div class="rounded-2xl p-4" style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.28);">'
+                        + '<div class="flex justify-between items-center">'
+                        + '<p class="text-xs font-semibold mb-0.5" style="color:#991b1b;">' + formatDateText(d.fecha) + '</p>'
+                        + '<span class="text-[11px] font-bold" style="color:#b91c1c;">Rechazado</span>'
+                        + '</div>'
+                        + (d.motivo ? '<p class="text-[11px] mt-1" style="color:#7f1d1d;">Motivo: ' + d.motivo + '</p>' : '')
+                        + '<p class="text-[10px] mt-1" style="color:#b91c1c;">Toca el día en el calendario para volver a marcarlo.</p>'
+                        + '</div>';
+                }).join('');
+            }
         }
 
         document.getElementById('calendarDetailsList').innerHTML = detalleHTML;

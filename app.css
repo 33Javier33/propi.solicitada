@@ -260,6 +260,12 @@
         }
         .calendar-day.worked { background: rgba(0,106,98,0.10); color: #006a62; border: 1px solid rgba(0,106,98,0.20); }
         .calendar-day.absent  { background: rgba(186,26,26,0.08); color: #ba1a1a; border: 1px solid rgba(186,26,26,0.18); }
+        /* Día marcado por el socio Part-Time, aún por confirmar (ámbar) */
+        .calendar-day.pt-pendiente { background: rgba(245,158,11,0.16); color: #b45309; border: 1px dashed rgba(245,158,11,0.65); font-weight: 700; }
+        /* Día rechazado por la comisión */
+        .calendar-day.pt-rechazado { background: rgba(239,68,68,0.10); color: #b91c1c; border: 1px solid rgba(239,68,68,0.35); }
+        .calendar-day[role="button"] { cursor: pointer; }
+        .calendar-day[role="button"]:active { transform: scale(0.92); }
 
         /* ── UNREAD DOT ── */
         .unread-dot { position: absolute; top: 0px; right: 22%; width: 9px; height: 9px; background: #ba1a1a; border-radius: 50%; border: 2px solid #f8f9fa; }

@@ -129,6 +129,54 @@ async function _sociosHandler(url, options) {
             return _mockRes({ data: (data || [])[0] || null });
         }
 
+        // ── DÍAS PART-TIME AUTOGESTIÓN ────────────────────────────────────────
+        // El socio Part-Time marca un día trabajado desde su calendario. Crea una
+        // solicitud PENDIENTE que la administración confirma en socios-comicion.
+        // Al confirmarse, el día pasa a la planilla real (tabla dias_pt).
+        case 'marcarDiaPT': {
+            const sid = String(b.socioId || '');
+            const fecha = String(b.fecha || '').substring(0, 10);
+            if (!sid || !fecha) return _mockRes({ success: false, error: 'Faltan datos' });
+            const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('DPT-' + Date.now());
+            // upsert por (socio_id, fecha): si estaba RECHAZADO vuelve a PENDIENTE
+            const { error } = await dbSV.from('dias_pt_solicitados').upsert({
+                id,
+                socio_id: sid,
+                socio_nombre: b.socioNombre || '',
+                area: b.area || '',
+                fecha,
+                periodo: b.periodo || '',
+                estado: 'PENDIENTE',
+                valor_estimado: Number(b.valorEstimado) || 0,
+                created_at: new Date().toISOString(),
+                confirmado_por: null,
+                confirmado_at: null
+            }, { onConflict: 'socio_id,fecha' });
+            if (!error) dbSV.channel('sv-dias-pt').send({ type: 'broadcast', event: 'nuevo', payload: {} }).catch(() => {});
+            return _mockRes({ success: !error, error: error && error.message });
+        }
+
+        // El socio quita un día que había marcado (solo si aún está PENDIENTE).
+        case 'desmarcarDiaPT': {
+            const sid = String(b.socioId || '');
+            const fecha = String(b.fecha || '').substring(0, 10);
+            if (!sid || !fecha) return _mockRes({ success: false, error: 'Faltan datos' });
+            const { error } = await dbSV.from('dias_pt_solicitados')
+                .delete().eq('socio_id', sid).eq('fecha', fecha).eq('estado', 'PENDIENTE');
+            if (!error) dbSV.channel('sv-dias-pt').send({ type: 'broadcast', event: 'quitado', payload: {} }).catch(() => {});
+            return _mockRes({ success: !error, error: error && error.message });
+        }
+
+        // Días marcados por el socio (PENDIENTE / RECHAZADO) para pintarlos en su calendario.
+        case 'misDiasPTSolicitados': {
+            const { data } = await dbSV.from('dias_pt_solicitados')
+                .select('fecha, estado, valor_estimado, motivo_rechazo')
+                .eq('socio_id', String(b.socioId || ''))
+                .in('estado', ['PENDIENTE', 'RECHAZADO'])
+                .order('fecha', { ascending: true });
+            return _mockRes({ data: data || [] });
+        }
+
         // Mensajes privados administrador ⇄ socio (tabla mensajes_admin)
         case 'getAdminMsgs': {
             let { data, error } = await dbSV.from('mensajes_admin')
@@ -696,6 +744,15 @@ window.addEventListener('load', () => {
             _rtChat = setTimeout(() => { if (typeof refreshChat === 'function') refreshChat(false); }, 400);
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'anticipos' }, () => {
+            clearTimeout(_rtAnts);
+            _rtAnts = setTimeout(() => { if (typeof refresh === 'function') refresh(); }, 600);
+        })
+        // Días PT: la comisión confirmó/rechazó un día marcado → refrescar para
+        // que el día pase a verde (confirmado) o cambie de estado en el calendario.
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'dias_pt_solicitados' }, () => {
+            if (typeof cargarDiasPTSolicitados === 'function') setTimeout(() => cargarDiasPTSolicitados(), 300);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'dias_pt' }, () => {
             clearTimeout(_rtAnts);
             _rtAnts = setTimeout(() => { if (typeof refresh === 'function') refresh(); }, 600);
         })
