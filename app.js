@@ -2918,6 +2918,9 @@
             const live = (ptMapVP[d.fecha]?.totalVP || 0) * ptPuntos;
             return a + (live > 0 ? live : (Number(d.valor) || 0));
         }, 0);
+        // Total estimado = lo ya confirmado (días en planilla) + lo que está por confirmar
+        const confirmado = globalDiasCalendar.reduce((a, b) => a + (Number(b.montoAsociado) || 0), 0);
+        const totalEst = confirmado + monto;
         const show = pend.length > 0;
         const diasTxt = pend.length + ' día' + (pend.length > 1 ? 's' : '') + ' marcado' + (pend.length > 1 ? 's' : '') + ' · a la espera de validación';
         if (cardCl) {
@@ -2925,13 +2928,15 @@
             if (show) {
                 const m = document.getElementById('ptConfPendMontoCl'); if (m) m.textContent = '+' + formatMoney(monto);
                 const d = document.getElementById('ptConfPendDiasCl'); if (d) d.textContent = diasTxt;
+                const t = document.getElementById('ptConfTotalEstCl'); if (t) t.textContent = formatMoney(totalEst);
             }
         }
         if (cardPm) {
-            cardPm.style.display = show ? 'flex' : 'none';
+            cardPm.style.display = show ? 'block' : 'none';
             if (show) {
                 const m = document.getElementById('ptConfPendMontoPm'); if (m) m.textContent = '+' + formatMoney(monto);
                 const d = document.getElementById('ptConfPendDiasPm'); if (d) d.textContent = diasTxt;
+                const t = document.getElementById('ptConfTotalEstPm'); if (t) t.textContent = formatMoney(totalEst);
             }
         }
     }

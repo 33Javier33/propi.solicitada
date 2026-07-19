@@ -1177,16 +1177,22 @@
 
             <!-- PT: "Por confirmar" en pantalla principal (solo socios Part-Time con días marcados) -->
             <div id="ptConfirmarCardClasica" class="px-4 mb-5" style="display:none;">
-                <div onclick="openCalendar()" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.14),rgba(217,119,6,0.10));border:1px solid rgba(245,158,11,0.38);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
-                    <div style="width:42px;height:42px;border-radius:12px;background:rgba(245,158,11,0.20);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <span class="material-symbols-outlined" style="color:#b45309;font-size:22px;">schedule</span>
+                <div onclick="openCalendar()" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.14),rgba(217,119,6,0.10));border:1px solid rgba(245,158,11,0.38);border-radius:20px;padding:14px 16px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:42px;height:42px;border-radius:12px;background:rgba(245,158,11,0.20);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <span class="material-symbols-outlined" style="color:#b45309;font-size:22px;">schedule</span>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <p style="font-size:9px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:0.1em;margin:0;">Por confirmar</p>
+                            <p style="margin:1px 0 0;"><span id="ptConfPendMontoCl" style="font-size:22px;font-weight:800;color:#b45309;">$0</span></p>
+                            <p id="ptConfPendDiasCl" style="font-size:11px;color:#92400e;margin:2px 0 0;">Ganarás esto cuando la comisión lo valide</p>
+                        </div>
+                        <span class="material-symbols-outlined" style="color:#b45309;flex-shrink:0;">chevron_right</span>
                     </div>
-                    <div style="flex:1;min-width:0;">
-                        <p style="font-size:9px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:0.1em;margin:0;">Por confirmar</p>
-                        <p style="margin:1px 0 0;"><span id="ptConfPendMontoCl" style="font-size:22px;font-weight:800;color:#b45309;">$0</span></p>
-                        <p id="ptConfPendDiasCl" style="font-size:11px;color:#92400e;margin:2px 0 0;">Ganarás esto cuando la comisión lo valide</p>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid rgba(245,158,11,0.30);">
+                        <span style="font-size:10px;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:0.06em;">Total estimado</span>
+                        <span id="ptConfTotalEstCl" style="font-size:18px;font-weight:800;color:#16a34a;">$0</span>
                     </div>
-                    <span class="material-symbols-outlined" style="color:#b45309;flex-shrink:0;">chevron_right</span>
                 </div>
             </div>
 
@@ -1358,7 +1364,7 @@
                     </div>
                 </div>
                 <!-- PT: "Por confirmar" (premium, solo socios Part-Time con días marcados) -->
-                <div id="ptConfirmarCardPm" onclick="openCalendar()" style="display:none;cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.16),rgba(217,119,6,0.10));border:1px solid rgba(245,158,11,0.40);border-radius:16px;padding:16px;margin-bottom:22px;align-items:center;gap:12px;">
+                <div id="ptConfirmarCardPm" onclick="openCalendar()" style="display:none;cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.16),rgba(217,119,6,0.10));border:1px solid rgba(245,158,11,0.40);border-radius:16px;padding:16px;margin-bottom:22px;">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <div style="width:44px;height:44px;border-radius:12px;background:rgba(245,158,11,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#fbbf24;">schedule</span></div>
                         <div style="flex:1;min-width:0;">
@@ -1367,6 +1373,10 @@
                             <p id="ptConfPendDiasPm" style="font-size:11px;color:#e7c993;margin:3px 0 0;">Ganarás esto cuando la comisión lo valide</p>
                         </div>
                         <span class="material-symbols-outlined" style="color:#fbbf24;flex-shrink:0;">chevron_right</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid rgba(245,158,11,0.30);">
+                        <span style="font-size:10px;font-weight:800;color:#25D366;text-transform:uppercase;letter-spacing:0.06em;">Total estimado</span>
+                        <span id="ptConfTotalEstPm" style="font-family:Manrope,sans-serif;font-size:20px;font-weight:800;color:#25D366;">$0</span>
                     </div>
                 </div>
 
@@ -4982,6 +4992,9 @@
             const live = (ptMapVP[d.fecha]?.totalVP || 0) * ptPuntos;
             return a + (live > 0 ? live : (Number(d.valor) || 0));
         }, 0);
+        // Total estimado = lo ya confirmado (días en planilla) + lo que está por confirmar
+        const confirmado = globalDiasCalendar.reduce((a, b) => a + (Number(b.montoAsociado) || 0), 0);
+        const totalEst = confirmado + monto;
         const show = pend.length > 0;
         const diasTxt = pend.length + ' día' + (pend.length > 1 ? 's' : '') + ' marcado' + (pend.length > 1 ? 's' : '') + ' · a la espera de validación';
         if (cardCl) {
@@ -4989,13 +5002,15 @@
             if (show) {
                 const m = document.getElementById('ptConfPendMontoCl'); if (m) m.textContent = '+' + formatMoney(monto);
                 const d = document.getElementById('ptConfPendDiasCl'); if (d) d.textContent = diasTxt;
+                const t = document.getElementById('ptConfTotalEstCl'); if (t) t.textContent = formatMoney(totalEst);
             }
         }
         if (cardPm) {
-            cardPm.style.display = show ? 'flex' : 'none';
+            cardPm.style.display = show ? 'block' : 'none';
             if (show) {
                 const m = document.getElementById('ptConfPendMontoPm'); if (m) m.textContent = '+' + formatMoney(monto);
                 const d = document.getElementById('ptConfPendDiasPm'); if (d) d.textContent = diasTxt;
+                const t = document.getElementById('ptConfTotalEstPm'); if (t) t.textContent = formatMoney(totalEst);
             }
         }
     }
