@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-19 — Días PT: mostrar monto estimado en el calendario (SW v97)
+- En el calendario del socio Part-Time se agregó un resumen **"Por confirmar" + "Total estimado"**: el socio ve cuánto ganaría con los días que marcó (aún por validar) y el total proyectado del período (confirmado + por confirmar).
+- El valor de cada día marcado se calcula **en vivo** con la recaudación de ese día × sus puntos (si aún no hay recaudación cargada, usa el valor guardado al marcar). Aplica tanto al resumen como al detalle "Por confirmar".
+- Archivos: `index.html` (bloque `#calPTResumen`), `app.js` (`_ptValorDia`, cálculo del resumen). SW v97.
+
 #### 2026-07-19 — Autogestión de días trabajados Part-Time (SW v96)
 - Los socios **Part-Time** ahora pueden **marcar sus días trabajados** tocando el día en su calendario ("Turnos Realizados"). El día queda **"por confirmar"** en un color ámbar distinto y muestra el **valor estimado** que ganarían (`~$…`, calculado con la recaudación de ese día × sus puntos).
 - Al marcar un día se crea una solicitud `PENDIENTE` en la tabla `dias_pt_solicitados` (proyecto socios). La administración recibe una **notificación push** ("Día Part-Time por confirmar") aunque tenga la app cerrada.

@@ -803,6 +803,20 @@
                     <p id="modalTotalGenerado" class="text-xl font-bold text-lm-green">$0</p>
                 </div>
             </div>
+            <!-- Resumen de lo que ganaría el socio PT con los días que marcó (por confirmar) -->
+            <div id="calPTResumen" style="display:none;background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.30);border-radius:16px;padding:12px 14px;margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                    <div>
+                        <p style="font-size:10px;color:#b45309;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Por confirmar</p>
+                        <p id="calPTPendMonto" style="font-size:18px;font-weight:800;color:#b45309;line-height:1.1;">$0</p>
+                        <p id="calPTPendDias" style="font-size:11px;color:#92400e;margin-top:2px;"></p>
+                    </div>
+                    <div style="text-align:right;">
+                        <p style="font-size:10px;color:#166534;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Total estimado</p>
+                        <p id="calPTTotalEst" style="font-size:22px;font-weight:800;color:#16a34a;line-height:1.1;">$0</p>
+                    </div>
+                </div>
+            </div>
             <div class="grid grid-cols-7 gap-1.5 mb-2 text-center text-[10px] text-lm-muted font-semibold uppercase tracking-wider">
                 <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div><div>Do</div>
             </div>
@@ -5004,6 +5018,28 @@
         document.getElementById('modalTotalDias').textContent     = globalDiasCalendar.length;
         document.getElementById('modalTotalGenerado').textContent = formatMoney(totalPeriodo);
 
+        // Valor estimado en vivo de un día marcado (según la recaudación de ese día × puntos).
+        // Si aún no hay recaudación cargada, cae al valor guardado al marcar.
+        const _ptValorDia = d => {
+            const live = (ptMapVP[d.fecha]?.totalVP || 0) * ptPuntos;
+            return live > 0 ? live : (Number(d.valor) || 0);
+        };
+
+        // Resumen "por confirmar" + total estimado para el socio Part-Time
+        const _resumenPT = document.getElementById('calPTResumen');
+        if (_resumenPT) {
+            const _pend = (userTypeGlobal === 'PT') ? ptDiasSolicitados.filter(d => d.estado === 'PENDIENTE') : [];
+            const _pendMonto = _pend.reduce((a, d) => a + _ptValorDia(d), 0);
+            if (_pend.length > 0) {
+                _resumenPT.style.display = 'block';
+                document.getElementById('calPTPendMonto').textContent = '+' + formatMoney(_pendMonto);
+                document.getElementById('calPTPendDias').textContent = _pend.length + ' día' + (_pend.length > 1 ? 's' : '') + ' marcado' + (_pend.length > 1 ? 's' : '') + ' · a la espera de validación';
+                document.getElementById('calPTTotalEst').textContent = formatMoney(totalPeriodo + _pendMonto);
+            } else {
+                _resumenPT.style.display = 'none';
+            }
+        }
+
         // Dibujar grid del mes visible
         const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
@@ -5087,7 +5123,7 @@
                         + '<p class="text-xs font-semibold mb-0.5" style="color:#92400e;">' + formatDateText(d.fecha) + '</p>'
                         + '<p class="text-[11px]" style="color:#b45309;">⏳ Esperando validación de la comisión</p>'
                         + '</div>'
-                        + '<span class="font-bold text-base" style="color:#b45309;">~' + formatMoney(d.valor) + '</span>'
+                        + '<span class="font-bold text-base" style="color:#b45309;">~' + formatMoney(_ptValorDia(d)) + '</span>'
                         + '</div>';
                 }).join('');
             }

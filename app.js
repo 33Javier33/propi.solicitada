@@ -2989,6 +2989,28 @@
         document.getElementById('modalTotalDias').textContent     = globalDiasCalendar.length;
         document.getElementById('modalTotalGenerado').textContent = formatMoney(totalPeriodo);
 
+        // Valor estimado en vivo de un día marcado (según la recaudación de ese día × puntos).
+        // Si aún no hay recaudación cargada, cae al valor guardado al marcar.
+        const _ptValorDia = d => {
+            const live = (ptMapVP[d.fecha]?.totalVP || 0) * ptPuntos;
+            return live > 0 ? live : (Number(d.valor) || 0);
+        };
+
+        // Resumen "por confirmar" + total estimado para el socio Part-Time
+        const _resumenPT = document.getElementById('calPTResumen');
+        if (_resumenPT) {
+            const _pend = (userTypeGlobal === 'PT') ? ptDiasSolicitados.filter(d => d.estado === 'PENDIENTE') : [];
+            const _pendMonto = _pend.reduce((a, d) => a + _ptValorDia(d), 0);
+            if (_pend.length > 0) {
+                _resumenPT.style.display = 'block';
+                document.getElementById('calPTPendMonto').textContent = '+' + formatMoney(_pendMonto);
+                document.getElementById('calPTPendDias').textContent = _pend.length + ' día' + (_pend.length > 1 ? 's' : '') + ' marcado' + (_pend.length > 1 ? 's' : '') + ' · a la espera de validación';
+                document.getElementById('calPTTotalEst').textContent = formatMoney(totalPeriodo + _pendMonto);
+            } else {
+                _resumenPT.style.display = 'none';
+            }
+        }
+
         // Dibujar grid del mes visible
         const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
@@ -3072,7 +3094,7 @@
                         + '<p class="text-xs font-semibold mb-0.5" style="color:#92400e;">' + formatDateText(d.fecha) + '</p>'
                         + '<p class="text-[11px]" style="color:#b45309;">⏳ Esperando validación de la comisión</p>'
                         + '</div>'
-                        + '<span class="font-bold text-base" style="color:#b45309;">~' + formatMoney(d.valor) + '</span>'
+                        + '<span class="font-bold text-base" style="color:#b45309;">~' + formatMoney(_ptValorDia(d)) + '</span>'
                         + '</div>';
                 }).join('');
             }
