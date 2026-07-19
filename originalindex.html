@@ -777,14 +777,14 @@
 ══════════════════════════════════════════ -->
 <div id="calendarModal" class="fixed inset-0 z-[60] bg-black/40 backdrop-blur-md flex flex-col items-center justify-center p-4 hidden">
     <div class="bank-modal w-full max-w-sm relative flex flex-col max-h-[88vh] shadow-2xl">
-        <div class="p-6 pb-4 shrink-0 border-b border-lm-border">
+        <div class="p-5 pb-3 shrink-0 border-b border-lm-border">
             <button onclick="closeCalendar()" class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center rounded-full bg-lm-subtle text-lm-muted hover:text-lm-primary">
                 <span class="material-symbols-outlined text-lg">close</span>
             </button>
             <p class="text-[10px] text-lm-accent font-semibold tracking-widest uppercase mb-1">Calendario</p>
             <h3 id="calendarTitle" class="text-xl font-bold text-lm-primary mb-0.5">...</h3>
             <!-- Navegación de meses -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;margin-top:4px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;margin-top:4px;">
                 <button onclick="calNavMes(-1)" style="width:36px;height:36px;border-radius:50%;background:var(--color-subtle,#f1f5f9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <span class="material-symbols-outlined" style="font-size:20px;color:#64748b">chevron_left</span>
                 </button>
@@ -793,35 +793,42 @@
                     <span class="material-symbols-outlined" style="font-size:20px;color:#64748b">chevron_right</span>
                 </button>
             </div>
-            <div class="grid grid-cols-2 gap-3 mb-5">
-                <div class="bg-lm-subtle rounded-2xl p-4 border border-lm-border">
-                    <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider mb-1">Días</p>
-                    <p id="modalTotalDias" class="text-2xl font-bold text-lm-primary">0</p>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div class="bg-lm-subtle rounded-2xl p-3 border border-lm-border">
+                    <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider mb-0.5">Días</p>
+                    <p id="modalTotalDias" class="text-xl font-bold text-lm-primary">0</p>
                 </div>
-                <div class="bg-lm-subtle rounded-2xl p-4 border border-lm-border">
-                    <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider mb-1">Monto</p>
-                    <p id="modalTotalGenerado" class="text-xl font-bold text-lm-green">$0</p>
+                <div class="bg-lm-subtle rounded-2xl p-3 border border-lm-border">
+                    <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider mb-0.5">Monto</p>
+                    <p id="modalTotalGenerado" class="text-lg font-bold text-lm-green">$0</p>
                 </div>
             </div>
             <!-- Resumen de lo que ganaría el socio PT con los días que marcó (por confirmar) -->
-            <div id="calPTResumen" style="display:none;background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.30);border-radius:16px;padding:12px 14px;margin-bottom:20px;">
+            <div id="calPTResumen" style="display:none;background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.30);border-radius:14px;padding:10px 12px;margin-bottom:12px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
                     <div>
                         <p style="font-size:10px;color:#b45309;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Por confirmar</p>
-                        <p id="calPTPendMonto" style="font-size:18px;font-weight:800;color:#b45309;line-height:1.1;">$0</p>
+                        <p id="calPTPendMonto" style="font-size:17px;font-weight:800;color:#b45309;line-height:1.1;">$0</p>
                         <p id="calPTPendDias" style="font-size:11px;color:#92400e;margin-top:2px;"></p>
                     </div>
                     <div style="text-align:right;">
                         <p style="font-size:10px;color:#166534;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Total estimado</p>
-                        <p id="calPTTotalEst" style="font-size:22px;font-weight:800;color:#16a34a;line-height:1.1;">$0</p>
+                        <p id="calPTTotalEst" style="font-size:20px;font-weight:800;color:#16a34a;line-height:1.1;">$0</p>
                     </div>
                 </div>
             </div>
-            <div class="grid grid-cols-7 gap-1.5 mb-2 text-center text-[10px] text-lm-muted font-semibold uppercase tracking-wider">
-                <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div><div>Do</div>
+            <!-- Botón para minimizar/expandir el calendario y dar más espacio al detalle -->
+            <button id="calMinBtn" onclick="toggleCalMinimize()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--color-subtle,#f1f5f9);border:1px solid var(--lm-border,#e5e9ee);border-radius:10px;padding:7px;margin-bottom:10px;cursor:pointer;font-size:11px;font-weight:700;color:#64748b;">
+                <span id="calMinBtnIcon" class="material-symbols-outlined" style="font-size:16px;">expand_less</span>
+                <span id="calMinBtnTxt">Minimizar calendario</span>
+            </button>
+            <div id="calGridWrap">
+                <div class="grid grid-cols-7 gap-1.5 mb-2 text-center text-[10px] text-lm-muted font-semibold uppercase tracking-wider">
+                    <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div><div>Do</div>
+                </div>
+                <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
+                <p id="calPTHint" style="display:none;font-size:11px;color:#92400e;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:8px 10px;margin-top:10px;line-height:1.5;"></p>
             </div>
-            <div id="calendarGrid" class="grid grid-cols-7 gap-1.5"></div>
-            <p id="calPTHint" style="display:none;font-size:11px;color:#92400e;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:8px 10px;margin-top:10px;line-height:1.5;"></p>
         </div>
         <div class="flex-1 overflow-y-auto p-5 pt-4">
             <p class="text-[10px] text-lm-muted font-semibold uppercase tracking-wider mb-3">Detalle Mensual</p>
@@ -1168,6 +1175,21 @@
                 </div>
             </div>
 
+            <!-- PT: "Por confirmar" en pantalla principal (solo socios Part-Time con días marcados) -->
+            <div id="ptConfirmarCardClasica" class="px-4 mb-5" style="display:none;">
+                <div onclick="openCalendar()" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.14),rgba(217,119,6,0.10));border:1px solid rgba(245,158,11,0.38);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+                    <div style="width:42px;height:42px;border-radius:12px;background:rgba(245,158,11,0.20);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <span class="material-symbols-outlined" style="color:#b45309;font-size:22px;">schedule</span>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <p style="font-size:9px;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:0.1em;margin:0;">Por confirmar</p>
+                        <p style="margin:1px 0 0;"><span id="ptConfPendMontoCl" style="font-size:22px;font-weight:800;color:#b45309;">$0</span></p>
+                        <p id="ptConfPendDiasCl" style="font-size:11px;color:#92400e;margin:2px 0 0;">Ganarás esto cuando la comisión lo valide</p>
+                    </div>
+                    <span class="material-symbols-outlined" style="color:#b45309;flex-shrink:0;">chevron_right</span>
+                </div>
+            </div>
+
             <!-- REMANENTE + VALOR PUNTO POR NOCHE CARDS -->
             <div class="px-4 mb-5 flex gap-3">
                 <div class="flex-1 rounded-[20px] bg-lm-card border border-lm-border p-4 shadow-sm">
@@ -1335,6 +1357,19 @@
                         <p style="font-size:11px;color:#c3c7cb;margin:4px 0 0;">Pasa al próximo mes</p>
                     </div>
                 </div>
+                <!-- PT: "Por confirmar" (premium, solo socios Part-Time con días marcados) -->
+                <div id="ptConfirmarCardPm" onclick="openCalendar()" style="display:none;cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.16),rgba(217,119,6,0.10));border:1px solid rgba(245,158,11,0.40);border-radius:16px;padding:16px;margin-bottom:22px;align-items:center;gap:12px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:44px;height:44px;border-radius:12px;background:rgba(245,158,11,0.22);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#fbbf24;">schedule</span></div>
+                        <div style="flex:1;min-width:0;">
+                            <p style="font-size:9px;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:0.1em;margin:0;">Por confirmar</p>
+                            <p id="ptConfPendMontoPm" style="font-family:Manrope,sans-serif;font-size:24px;font-weight:800;color:#fbbf24;margin:2px 0 0;">$0</p>
+                            <p id="ptConfPendDiasPm" style="font-size:11px;color:#e7c993;margin:3px 0 0;">Ganarás esto cuando la comisión lo valide</p>
+                        </div>
+                        <span class="material-symbols-outlined" style="color:#fbbf24;flex-shrink:0;">chevron_right</span>
+                    </div>
+                </div>
+
                 <!-- Estado de la solicitud de egreso pendiente (premium) -->
                 <div id="pmEgresoEstadoBox" style="margin-bottom:22px;display:none;"></div>
                 <!-- Resumen Contable (premium) -->
@@ -4934,6 +4969,35 @@
         } catch (e) { console.warn('[PT] misDiasPTSolicitados:', e.message); ptDiasSolicitados = []; }
         const modal = document.getElementById('calendarModal');
         if (modal && !modal.classList.contains('hidden')) renderCalendarGrid();
+        renderPTConfirmarCard();
+    }
+
+    // Tarjeta "Por confirmar" en la pantalla principal (clásica + premium).
+    // Muestra cuánto ganará el socio PT con los días que marcó y aún no se validan.
+    function renderPTConfirmarCard() {
+        const cardCl = document.getElementById('ptConfirmarCardClasica');
+        const cardPm = document.getElementById('ptConfirmarCardPm');
+        const pend = (userTypeGlobal === 'PT') ? ptDiasSolicitados.filter(d => d.estado === 'PENDIENTE') : [];
+        const monto = pend.reduce((a, d) => {
+            const live = (ptMapVP[d.fecha]?.totalVP || 0) * ptPuntos;
+            return a + (live > 0 ? live : (Number(d.valor) || 0));
+        }, 0);
+        const show = pend.length > 0;
+        const diasTxt = pend.length + ' día' + (pend.length > 1 ? 's' : '') + ' marcado' + (pend.length > 1 ? 's' : '') + ' · a la espera de validación';
+        if (cardCl) {
+            cardCl.style.display = show ? 'block' : 'none';
+            if (show) {
+                const m = document.getElementById('ptConfPendMontoCl'); if (m) m.textContent = '+' + formatMoney(monto);
+                const d = document.getElementById('ptConfPendDiasCl'); if (d) d.textContent = diasTxt;
+            }
+        }
+        if (cardPm) {
+            cardPm.style.display = show ? 'flex' : 'none';
+            if (show) {
+                const m = document.getElementById('ptConfPendMontoPm'); if (m) m.textContent = '+' + formatMoney(monto);
+                const d = document.getElementById('ptConfPendDiasPm'); if (d) d.textContent = diasTxt;
+            }
+        }
     }
 
     // El socio toca un día del calendario: lo marca (por confirmar) o lo quita.
@@ -4992,6 +5056,7 @@
         } finally {
             ptCargandoDia = false;
             renderCalendarGrid();
+            renderPTConfirmarCard();
         }
     }
 
@@ -5146,6 +5211,18 @@
     }
 
     function closeCalendar() { document.getElementById('calendarModal').classList.add('hidden'); }
+
+    // Minimiza/expande la cuadrícula del calendario para dar más espacio al detalle de abajo.
+    let calMinimized = false;
+    function toggleCalMinimize() {
+        calMinimized = !calMinimized;
+        const wrap = document.getElementById('calGridWrap');
+        const icon = document.getElementById('calMinBtnIcon');
+        const txt  = document.getElementById('calMinBtnTxt');
+        if (wrap) wrap.style.display = calMinimized ? 'none' : 'block';
+        if (icon) icon.textContent = calMinimized ? 'expand_more' : 'expand_less';
+        if (txt)  txt.textContent  = calMinimized ? 'Mostrar calendario' : 'Minimizar calendario';
+    }
 
     function descargarComprobante() {
         if (!currentUser || _lastBalance.liquido === 0 && _lastBalance.propinaBruta === 0) {

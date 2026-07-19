@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-19 — Días PT: tarjeta "Por confirmar" en pantalla principal + calendario minimizable (SW v98)
+- **Tarjeta "Por confirmar" en la pantalla principal** (clásica y premium): el socio Part-Time ve, sin abrir el calendario, cuánto ganará cuando la comisión valide los días que marcó (monto + N días). Al tocarla abre el calendario.
+- **Calendario minimizable:** botón "Minimizar calendario / Mostrar calendario" que colapsa la cuadrícula para dejar más espacio al detalle de abajo (el modal quedaba muy apretado en pantallas chicas). Se compactaron márgenes y tarjetas del encabezado del modal.
+- Archivos: `index.html` (`#ptConfirmarCardClasica`, `#ptConfirmarCardPm`, botón `#calMinBtn`, `#calGridWrap`), `app.js` (`renderPTConfirmarCard`, `toggleCalMinimize`). SW v98.
+
 #### 2026-07-19 — Días PT: mostrar monto estimado en el calendario (SW v97)
 - En el calendario del socio Part-Time se agregó un resumen **"Por confirmar" + "Total estimado"**: el socio ve cuánto ganaría con los días que marcó (aún por validar) y el total proyectado del período (confirmado + por confirmar).
 - El valor de cada día marcado se calcula **en vivo** con la recaudación de ese día × sus puntos (si aún no hay recaudación cargada, usa el valor guardado al marcar). Aplica tanto al resumen como al detalle "Por confirmar".

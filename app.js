@@ -2905,6 +2905,35 @@
         } catch (e) { console.warn('[PT] misDiasPTSolicitados:', e.message); ptDiasSolicitados = []; }
         const modal = document.getElementById('calendarModal');
         if (modal && !modal.classList.contains('hidden')) renderCalendarGrid();
+        renderPTConfirmarCard();
+    }
+
+    // Tarjeta "Por confirmar" en la pantalla principal (clásica + premium).
+    // Muestra cuánto ganará el socio PT con los días que marcó y aún no se validan.
+    function renderPTConfirmarCard() {
+        const cardCl = document.getElementById('ptConfirmarCardClasica');
+        const cardPm = document.getElementById('ptConfirmarCardPm');
+        const pend = (userTypeGlobal === 'PT') ? ptDiasSolicitados.filter(d => d.estado === 'PENDIENTE') : [];
+        const monto = pend.reduce((a, d) => {
+            const live = (ptMapVP[d.fecha]?.totalVP || 0) * ptPuntos;
+            return a + (live > 0 ? live : (Number(d.valor) || 0));
+        }, 0);
+        const show = pend.length > 0;
+        const diasTxt = pend.length + ' día' + (pend.length > 1 ? 's' : '') + ' marcado' + (pend.length > 1 ? 's' : '') + ' · a la espera de validación';
+        if (cardCl) {
+            cardCl.style.display = show ? 'block' : 'none';
+            if (show) {
+                const m = document.getElementById('ptConfPendMontoCl'); if (m) m.textContent = '+' + formatMoney(monto);
+                const d = document.getElementById('ptConfPendDiasCl'); if (d) d.textContent = diasTxt;
+            }
+        }
+        if (cardPm) {
+            cardPm.style.display = show ? 'flex' : 'none';
+            if (show) {
+                const m = document.getElementById('ptConfPendMontoPm'); if (m) m.textContent = '+' + formatMoney(monto);
+                const d = document.getElementById('ptConfPendDiasPm'); if (d) d.textContent = diasTxt;
+            }
+        }
     }
 
     // El socio toca un día del calendario: lo marca (por confirmar) o lo quita.
@@ -2963,6 +2992,7 @@
         } finally {
             ptCargandoDia = false;
             renderCalendarGrid();
+            renderPTConfirmarCard();
         }
     }
 
@@ -3117,6 +3147,18 @@
     }
 
     function closeCalendar() { document.getElementById('calendarModal').classList.add('hidden'); }
+
+    // Minimiza/expande la cuadrícula del calendario para dar más espacio al detalle de abajo.
+    let calMinimized = false;
+    function toggleCalMinimize() {
+        calMinimized = !calMinimized;
+        const wrap = document.getElementById('calGridWrap');
+        const icon = document.getElementById('calMinBtnIcon');
+        const txt  = document.getElementById('calMinBtnTxt');
+        if (wrap) wrap.style.display = calMinimized ? 'none' : 'block';
+        if (icon) icon.textContent = calMinimized ? 'expand_more' : 'expand_less';
+        if (txt)  txt.textContent  = calMinimized ? 'Mostrar calendario' : 'Minimizar calendario';
+    }
 
     function descargarComprobante() {
         if (!currentUser || _lastBalance.liquido === 0 && _lastBalance.propinaBruta === 0) {
