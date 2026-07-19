@@ -110,14 +110,16 @@
         :root[data-negro] [style*="background:#0f172a"],
         :root[data-negro] [style*="background:#0b141a"] { background: #000 !important; }
 
-        /* ── Logo de marca: se mimetiza con el fondo del tema ──
-           Temas claros: multiply funde el fondo blanco del logo con el fondo.
-           Tema oscuro/negro: invert+hue-rotate vuelve oscuro el fondo del logo
-           (se mimetiza) y claro el diseño (queda visible). */
-        .marca-logo { mix-blend-mode: multiply; }
+        /* ── Logo de marca: se funde con el fondo como marca de agua ──
+           El PNG trae fondo NEGRO. Para que no se note la "caja":
+           · Temas oscuros (oscuro/negro/esmeralda): `screen` hace transparente
+             el negro → solo queda el diseño claro, fundido con el fondo.
+           · Temas claros: invert+hue-rotate vuelve blanco el fondo negro y
+             `multiply` lo hace transparente → logo con color sobre fondo claro. */
+        .marca-logo { filter: invert(1) hue-rotate(180deg); mix-blend-mode: multiply; }
         :root[data-theme="oscuro"] .marca-logo {
-            mix-blend-mode: normal;
-            filter: invert(1) hue-rotate(180deg);
+            filter: none;
+            mix-blend-mode: screen;
         }
 
         /* ── TEMA AQUA (turquesa, claro) ── */

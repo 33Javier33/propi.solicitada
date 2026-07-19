@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-19 — Logo de marca: se funde con el fondo como marca de agua (SW v103)
+- El PNG del logo trae **fondo negro**, que en los temas oscuros (oscuro/negro/esmeralda) se veía como una "caja" negra. Ahora se usa `mix-blend-mode: screen` en temas oscuros → el negro se vuelve transparente y solo queda el diseño claro fundido con el fondo. En temas claros se usa `invert + hue-rotate + multiply` para volver transparente el fondo y dejar el logo con color. Resultado: el logo se integra como marca de agua en cualquier tema.
+- Archivos: `app.css` (regla `.marca-logo`). SW v103.
+
 #### 2026-07-19 — Temas: tema Negro ahora ennegrece TODAS las tarjetas + nuevos temas (SW v102)
 - **Fix tema Negro:** antes solo cambiaba el fondo; las tarjetas (clásicas, premium e inline) se quedaban azul-grisáceas del tema oscuro porque `--lm-card` y las variables premium (`--pm-card`, etc.) no se sobreescribían y algunas reglas de negro quedaban pisadas por las de oscuro. Ahora un bloque al final de `app.css` (gana por orden de fuente) pone **todas las tarjetas negras (#141414) con borde y texto de contraste**. También se corrigió el contraste de las tarjetas ámbar/verde de días PT en temas oscuros (texto más claro).
 - **Temas nuevos con contraste:** **Esmeralda** (verde oscuro, base oscuro + `data-tinte`), **Menta** (verde-agua claro) y **Durazno** (cálido claro). Total: 9 temas.
