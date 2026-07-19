@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-19 — Días PT: notificar a las DOS apps al marcar un día (Edge Function push-notify v5)
+- Al marcar un día, ahora se notifica por push a **ambas aplicaciones**: al **administrador** (socios-comicion) *"Día Part-Time por confirmar"* y al **socio** (propi.solicitada) *"Día enviado — en proceso"* confirmándole que su turno quedó registrado y está en espera de validación. Antes solo se avisaba al administrador.
+- El trigger de BD ahora dispara con **INSERT o UPDATE a PENDIENTE**, así también avisa cuando un socio **vuelve a marcar** un día que le habían rechazado (sin generar avisos de más al confirmar/rechazar, gracias a la cláusula `WHEN NEW.estado='PENDIENTE'`).
+- Backend: Edge Function `push-notify` v5 (helper `push()` reutilizable, doble envío para `dias_pt_solicitados`), trigger `trg_notify_push_dia_pt` (INSERT OR UPDATE). Requiere que el socio tenga las notificaciones activadas en su app.
+
 #### 2026-07-19 — Días PT: total estimado del valor punto por noche en la tarjeta (SW v101)
 - La tarjeta "Por confirmar" (clásica y premium) ahora muestra también **"Valor punto x noche (est.)"** = el VP acumulado de los días confirmados + el VP de los días por confirmar. Así el socio ve el total estimado del valor punto por noche, además del monto.
 - Archivos: `index.html` (`#ptConfTotalVPCl` / `#ptConfTotalVPPm`), `app.js` (`renderPTConfirmarCard` suma VP confirmado + pendiente). SW v101.
