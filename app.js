@@ -2921,6 +2921,10 @@
         // Total estimado = lo ya confirmado (días en planilla) + lo que está por confirmar
         const confirmado = globalDiasCalendar.reduce((a, b) => a + (Number(b.montoAsociado) || 0), 0);
         const totalEst = confirmado + monto;
+        // Total del "valor punto por noche": VP acumulado de días confirmados + VP de los días por confirmar
+        const vpConfirmado = globalDiasCalendar.reduce((a, b) => a + (Number(b.valorPunto) || 0), 0);
+        const vpPend = pend.reduce((a, d) => a + (ptMapVP[d.fecha]?.totalVP || 0), 0);
+        const vpTotal = vpConfirmado + vpPend;
         const show = pend.length > 0;
         const diasTxt = pend.length + ' día' + (pend.length > 1 ? 's' : '') + ' marcado' + (pend.length > 1 ? 's' : '') + ' · a la espera de validación';
         if (cardCl) {
@@ -2929,6 +2933,7 @@
                 const m = document.getElementById('ptConfPendMontoCl'); if (m) m.textContent = '+' + formatMoney(monto);
                 const d = document.getElementById('ptConfPendDiasCl'); if (d) d.textContent = diasTxt;
                 const t = document.getElementById('ptConfTotalEstCl'); if (t) t.textContent = formatMoney(totalEst);
+                const v = document.getElementById('ptConfTotalVPCl'); if (v) v.textContent = formatMoney(vpTotal);
             }
         }
         if (cardPm) {
@@ -2937,6 +2942,7 @@
                 const m = document.getElementById('ptConfPendMontoPm'); if (m) m.textContent = '+' + formatMoney(monto);
                 const d = document.getElementById('ptConfPendDiasPm'); if (d) d.textContent = diasTxt;
                 const t = document.getElementById('ptConfTotalEstPm'); if (t) t.textContent = formatMoney(totalEst);
+                const v = document.getElementById('ptConfTotalVPPm'); if (v) v.textContent = formatMoney(vpTotal);
             }
         }
     }

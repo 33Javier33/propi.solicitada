@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boveda-personal-v100';
+const CACHE_NAME = 'boveda-personal-v101';
 
 const urlsToCache = [
     'index.html',
