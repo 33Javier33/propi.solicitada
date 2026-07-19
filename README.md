@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-19 — Días PT: mostrar el "VP por noche" en cada día por confirmar (SW v100)
+- En el detalle "Por confirmar" del calendario, cada día ahora muestra su **VP por noche** (valor de 1 punto esa noche, según la recaudación del día), igual que los días ya confirmados. Si aún no hay recaudación cargada para ese día, indica "sin recaudación aún".
+- Archivos: `app.js` (línea VP en el detalle de días pendientes). SW v100.
+
 #### 2026-07-19 — Días PT: "Total estimado" también en la tarjeta de inicio (SW v99)
 - La tarjeta "Por confirmar" de la pantalla principal (clásica y premium) ahora muestra además el **Total estimado** = lo ya confirmado (días en planilla) + lo que está por confirmar. Así el socio ve de una sola vez **todo lo que obtendrá**, sin abrir el calendario.
 - Archivos: `index.html` (`#ptConfTotalEstCl` / `#ptConfTotalEstPm`), `app.js` (`renderPTConfirmarCard` calcula el total). SW v99.

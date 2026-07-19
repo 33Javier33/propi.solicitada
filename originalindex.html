@@ -5198,9 +5198,11 @@
             if (pendientes.length) {
                 detalleHTML += '<p style="font-size:9px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 10px;">Por confirmar (' + pendientes.length + ')</p>';
                 detalleHTML += pendientes.map(function (d) {
+                    const vpNoche = ptMapVP[d.fecha]?.totalVP || 0;
                     return '<div class="flex justify-between items-center rounded-2xl p-4" style="background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.35);">'
                         + '<div>'
                         + '<p class="text-xs font-semibold mb-0.5" style="color:#92400e;">' + formatDateText(d.fecha) + '</p>'
+                        + '<p class="text-[11px]" style="color:#b45309;">VP por noche: ' + (vpNoche > 0 ? formatMoney(vpNoche) : 'sin recaudación aún') + '</p>'
                         + '<p class="text-[11px]" style="color:#b45309;">⏳ Esperando validación de la comisión</p>'
                         + '</div>'
                         + '<span class="font-bold text-base" style="color:#b45309;">~' + formatMoney(_ptValorDia(d)) + '</span>'
