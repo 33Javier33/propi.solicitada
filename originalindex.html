@@ -717,16 +717,198 @@
         :root[data-theme="oscuro"] #chatInput { color: #e9edef !important; }
         :root[data-theme="oscuro"] #chatInput:empty:before { color: #8696a0 !important; }
 
+        /* ══════════════════════════════════════════════════════════════
+           TEMA NEGRO — override completo: TODAS las tarjetas negras con
+           contraste. Va al final para ganar por orden de fuente a las
+           reglas del tema oscuro (misma especificidad).
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-negro] {
+            --lm-bg:       0 0 0;
+            --lm-surface:  15 15 15;
+            --lm-card:     20 20 20;
+            --lm-border:   42 42 42;
+            --lm-subtle:   24 24 24;
+            --lm-high:     34 34 34;
+            --color-card:  #141414;
+            --color-subtle:#1f1f1f;
+            /* Layout premium → negro con contraste */
+            --pm-bg:      #000000;
+            --pm-card:    #141414;
+            --pm-card2:   #000000;
+            --pm-card-hi: #1f1f1f;
+            --pm-border:  #2a2a2a;
+            --pm-text:    #f2f2f2;
+            --pm-muted:   #a3a3a3;
+        }
+        /* Superficies claras inline → negras (gana a la regla del tema oscuro) */
+        :root[data-negro] [style*="background:#fff;"],
+        :root[data-negro] [style*="background:#ffffff"],
+        :root[data-negro] [style*="background:#f8fafc"],
+        :root[data-negro] [style*="background:#f8f9fa"],
+        :root[data-negro] [style*="background:#f0f2f5"],
+        :root[data-negro] [style*="background:#f9fafb"] {
+            background: #141414 !important;
+            border-color: #2a2a2a !important;
+        }
+        :root[data-negro] [style*="background:#f3f4f5"],
+        :root[data-negro] [style*="background:#f1f5f9"] { background: #1f1f1f !important; }
+        :root[data-negro] [style*="border:1px solid #e2e8f0"],
+        :root[data-negro] [style*="border:1px solid #e1e3e4"],
+        :root[data-negro] [style*="border-bottom:1px solid #f1f5f9"] { border-color: #2a2a2a !important; }
+        :root[data-negro] input { background: #1a1a1a !important; border-color: #333 !important; color: #f2f2f2 !important; }
+        :root[data-negro] .tema-btn { background: #141414 !important; border-color: #2a2a2a !important; }
+
+        /* ── Contraste de las tarjetas ámbar/verde de días PT en temas oscuros ──
+           (aplica a oscuro y a todos sus derivados: negro, esmeralda) */
+        :root[data-theme="oscuro"] [style*="color:#b45309"],
+        :root[data-theme="oscuro"] [style*="color:#d97706"] { color: #fbbf24 !important; }
+        :root[data-theme="oscuro"] [style*="color:#92400e"] { color: #fcd34d !important; }
+        :root[data-theme="oscuro"] [style*="color:#166534"] { color: #4ade80 !important; }
+        :root[data-theme="oscuro"] [style*="color:#16a34a"] { color: #34d399 !important; }
+        :root[data-theme="oscuro"] [style*="color:#b91c1c"],
+        :root[data-theme="oscuro"] [style*="color:#991b1b"] { color: #f87171 !important; }
+
+        /* ══════════════════════════════════════════════════════════════
+           TEMA ESMERALDA (verde oscuro, alto contraste)
+           = base oscuro + data-tinte="esmeralda" (reutiliza el restyle oscuro).
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-tinte="esmeralda"] {
+            --lm-bg:          4 18 13;
+            --lm-surface:     9 30 23;
+            --lm-card:        12 38 29;
+            --lm-border:      20 58 45;
+            --lm-primary:     110 231 183;
+            --lm-primary-mid: 52 211 153;
+            --lm-accent:      16 185 129;
+            --lm-secondary:   52 211 153;
+            --lm-tertiary:    251 191 36;
+            --lm-green:       52 211 153;
+            --lm-subtle:      12 34 27;
+            --lm-high:        18 50 40;
+            --wa-bg:          4 18 13;
+            --wa-mine:        6 78 59;
+            --wa-other:       12 38 29;
+            --color-card:    #0c261d;
+            --color-subtle:  #14342a;
+            --app-bg:        #04120d;
+            --pm-bg:         #04120d;
+            --pm-card:       #0c261d;
+            --pm-card2:      #081f18;
+            --pm-card-hi:    #14342a;
+            --pm-border:     #16402f;
+            --pm-accent:     #34d399;
+            --nav-bg:        rgba(4,18,13,0.94);
+            --glass-bg:      rgba(4,18,13,0.92);
+            --chat-bg:       #081f18;
+        }
+        :root[data-tinte="esmeralda"] [style*="background:#fff;"],
+        :root[data-tinte="esmeralda"] [style*="background:#ffffff"],
+        :root[data-tinte="esmeralda"] [style*="background:#f8fafc"],
+        :root[data-tinte="esmeralda"] [style*="background:#f8f9fa"],
+        :root[data-tinte="esmeralda"] [style*="background:#f0f2f5"],
+        :root[data-tinte="esmeralda"] [style*="background:#f9fafb"] { background: #0c261d !important; border-color: #16402f !important; }
+        :root[data-tinte="esmeralda"] [style*="background:#f3f4f5"],
+        :root[data-tinte="esmeralda"] [style*="background:#f1f5f9"] { background: #14342a !important; }
+        :root[data-tinte="esmeralda"] input { background: #0f2b21 !important; border-color: #1e5a45 !important; color: #d1fae5 !important; }
+        :root[data-tinte="esmeralda"] .tema-btn { background: #0c261d !important; border-color: #16402f !important; }
+        :root[data-tinte="esmeralda"] .tema-btn.active { border-color: #34d399 !important; box-shadow: 0 0 0 3px rgba(52,211,153,0.22); }
+
+        /* ══════════════════════════════════════════════════════════════
+           TEMA DURAZNO (cálido, claro, alto contraste)
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-theme="durazno"] {
+            --lm-bg:          255 247 237;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      254 215 170;
+            --lm-primary:     124 45 18;
+            --lm-primary-mid: 234 88 12;
+            --lm-accent:      249 115 22;
+            --lm-secondary:   217 70 39;
+            --lm-tertiary:    154 52 18;
+            --lm-green:       13 148 136;
+            --lm-red:         220 38 38;
+            --lm-yellow:      161 98 7;
+            --lm-muted:       146 110 90;
+            --lm-subtle:      255 247 237;
+            --lm-high:        255 237 213;
+            --wa-bg:          255 237 213;
+            --wa-mine:        255 228 204;
+            --wa-other:       255 255 255;
+            --color-card:    #ffffff;
+            --color-subtle:  #fff7ed;
+            --app-bg:        #fff7ed;
+            --pm-bg:         #fff3e9;
+            --pm-card:       #ffffff;
+            --pm-card2:      #fff7ed;
+            --pm-card-hi:    #ffedd5;
+            --pm-border:     #fed7aa;
+            --pm-text:       #7c2d12;
+            --pm-muted:      #9a6b52;
+            --pm-accent:     #ea580c;
+            --pm-green:      #0a8f78;
+            --pm-red:        #dc2626;
+            --nav-bg:        rgba(255,247,237,0.94);
+            --nav-border:    rgba(124,45,18,0.10);
+            --glass-bg:      rgba(255,247,237,0.92);
+            --chat-bg:       #ffe9d6;
+        }
+        :root[data-theme="durazno"] .tema-btn.active { border-color: #ea580c !important; box-shadow: 0 0 0 3px rgba(234,88,12,0.18); }
+
+        /* ══════════════════════════════════════════════════════════════
+           TEMA MENTA (verde-agua, claro, alto contraste)
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-theme="menta"] {
+            --lm-bg:          236 253 245;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      167 243 208;
+            --lm-primary:     6 78 59;
+            --lm-primary-mid: 5 150 105;
+            --lm-accent:      16 185 129;
+            --lm-secondary:   4 120 87;
+            --lm-tertiary:    6 95 70;
+            --lm-green:       5 150 105;
+            --lm-red:         220 38 38;
+            --lm-yellow:      161 98 7;
+            --lm-muted:       82 122 104;
+            --lm-subtle:      236 253 245;
+            --lm-high:        209 250 229;
+            --wa-bg:          209 250 229;
+            --wa-mine:        187 247 208;
+            --wa-other:       255 255 255;
+            --color-card:    #ffffff;
+            --color-subtle:  #ecfdf5;
+            --app-bg:        #ecfdf5;
+            --pm-bg:         #e7fbf1;
+            --pm-card:       #ffffff;
+            --pm-card2:      #f0fdf6;
+            --pm-card-hi:    #d1fae5;
+            --pm-border:     #a7f3d0;
+            --pm-text:       #064e3b;
+            --pm-muted:      #5a8272;
+            --pm-accent:     #059669;
+            --pm-green:      #0a8f78;
+            --pm-red:        #dc2626;
+            --nav-bg:        rgba(236,253,245,0.94);
+            --nav-border:    rgba(6,78,59,0.10);
+            --glass-bg:      rgba(236,253,245,0.92);
+            --chat-bg:       #d7f0e4;
+        }
+        :root[data-theme="menta"] .tema-btn.active { border-color: #059669 !important; box-shadow: 0 0 0 3px rgba(5,150,105,0.18); }
+
     </style>
     <!-- Aplicar tema guardado antes del render para evitar parpadeo -->
     <script>
         (function () {
             try {
                 var t = localStorage.getItem('propi_tema') || 'claro';
-                if (!['claro', 'oscuro', 'negro', 'rosa', 'aqua', 'lavanda'].includes(t)) t = 'claro';
-                document.documentElement.setAttribute('data-theme', t === 'negro' ? 'oscuro' : t);
+                if (!['claro', 'oscuro', 'negro', 'esmeralda', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'].includes(t)) t = 'claro';
+                var esDerivadoOscuro = (t === 'negro' || t === 'esmeralda');
+                document.documentElement.setAttribute('data-theme', esDerivadoOscuro ? 'oscuro' : t);
                 if (t === 'negro') document.documentElement.setAttribute('data-negro', '1');
-                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
+                if (t === 'esmeralda') document.documentElement.setAttribute('data-tinte', 'esmeralda');
+                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
                 var m = document.querySelector('meta[name="theme-color"]');
                 if (m) m.setAttribute('content', tc[t] || '#001723');
             } catch (e) {}
@@ -1880,6 +2062,24 @@
                                 </span>
                                 <span style="font-size:11px;font-weight:700;color:#334155">Lavanda</span>
                             </button>
+                            <button type="button" data-tema="esmeralda" onclick="aplicarTema('esmeralda')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#065f46,#022c22);border:1px solid #14342a;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#34d399">forest</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Esmeralda</span>
+                            </button>
+                            <button type="button" data-tema="menta" onclick="aplicarTema('menta')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6ee7b7,#059669);border:1px solid #a7f3d0;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff">eco</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Menta</span>
+                            </button>
+                            <button type="button" data-tema="durazno" onclick="aplicarTema('durazno')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#fdba74,#ea580c);border:1px solid #fed7aa;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff">wb_sunny</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Durazno</span>
+                            </button>
                         </div>
                     </div>
 
@@ -2499,8 +2699,10 @@
     }
 
     // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
-    const _TEMAS = ['claro', 'oscuro', 'negro', 'rosa', 'aqua', 'lavanda'];
-    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
+    const _TEMAS = ['claro', 'oscuro', 'negro', 'esmeralda', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'];
+    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
+    // Temas oscuros que reutilizan la base "oscuro" con un tinte de color (data-tinte)
+    const _TEMA_TINTE = { negro: null, esmeralda: 'esmeralda' };
     function _temaActual() {
         let t = 'claro';
         try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}
@@ -2514,11 +2716,16 @@
     }
     window.aplicarTema = function (nombre) {
         if (!_TEMAS.includes(nombre)) nombre = 'claro';
-        // "negro" = base oscuro + atributo data-negro (fondos a negro puro).
-        const base = nombre === 'negro' ? 'oscuro' : nombre;
+        // Temas oscuros derivados: "negro" y "esmeralda" usan la base "oscuro"
+        // + un atributo extra (data-negro / data-tinte) que reutiliza su restyle.
+        const esDerivadoOscuro = (nombre === 'negro' || nombre === 'esmeralda');
+        const base = esDerivadoOscuro ? 'oscuro' : nombre;
         document.documentElement.setAttribute('data-theme', base);
         if (nombre === 'negro') document.documentElement.setAttribute('data-negro', '1');
         else document.documentElement.removeAttribute('data-negro');
+        const tinte = _TEMA_TINTE[nombre];
+        if (tinte) document.documentElement.setAttribute('data-tinte', tinte);
+        else document.documentElement.removeAttribute('data-tinte');
         try { localStorage.setItem('propi_tema', nombre); } catch (e) {}
         const m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', _TEMA_COLOR[nombre] || '#001723');

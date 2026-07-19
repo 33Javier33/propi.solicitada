@@ -58,10 +58,12 @@
         (function () {
             try {
                 var t = localStorage.getItem('propi_tema') || 'claro';
-                if (!['claro', 'oscuro', 'negro', 'rosa', 'aqua', 'lavanda'].includes(t)) t = 'claro';
-                document.documentElement.setAttribute('data-theme', t === 'negro' ? 'oscuro' : t);
+                if (!['claro', 'oscuro', 'negro', 'esmeralda', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'].includes(t)) t = 'claro';
+                var esDerivadoOscuro = (t === 'negro' || t === 'esmeralda');
+                document.documentElement.setAttribute('data-theme', esDerivadoOscuro ? 'oscuro' : t);
                 if (t === 'negro') document.documentElement.setAttribute('data-negro', '1');
-                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
+                if (t === 'esmeralda') document.documentElement.setAttribute('data-tinte', 'esmeralda');
+                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
                 var m = document.querySelector('meta[name="theme-color"]');
                 if (m) m.setAttribute('content', tc[t] || '#001723');
             } catch (e) {}
@@ -1214,6 +1216,24 @@
                                     <span class="material-symbols-outlined" style="font-size:18px;color:#fff">spa</span>
                                 </span>
                                 <span style="font-size:11px;font-weight:700;color:#334155">Lavanda</span>
+                            </button>
+                            <button type="button" data-tema="esmeralda" onclick="aplicarTema('esmeralda')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#065f46,#022c22);border:1px solid #14342a;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#34d399">forest</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Esmeralda</span>
+                            </button>
+                            <button type="button" data-tema="menta" onclick="aplicarTema('menta')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6ee7b7,#059669);border:1px solid #a7f3d0;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff">eco</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Menta</span>
+                            </button>
+                            <button type="button" data-tema="durazno" onclick="aplicarTema('durazno')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#fdba74,#ea580c);border:1px solid #fed7aa;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff">wb_sunny</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Durazno</span>
                             </button>
                         </div>
                     </div>

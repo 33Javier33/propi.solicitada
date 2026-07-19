@@ -413,8 +413,10 @@
     }
 
     // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
-    const _TEMAS = ['claro', 'oscuro', 'negro', 'rosa', 'aqua', 'lavanda'];
-    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6' };
+    const _TEMAS = ['claro', 'oscuro', 'negro', 'esmeralda', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'];
+    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
+    // Temas oscuros que reutilizan la base "oscuro" con un tinte de color (data-tinte)
+    const _TEMA_TINTE = { negro: null, esmeralda: 'esmeralda' };
     function _temaActual() {
         let t = 'claro';
         try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}
@@ -428,11 +430,16 @@
     }
     window.aplicarTema = function (nombre) {
         if (!_TEMAS.includes(nombre)) nombre = 'claro';
-        // "negro" = base oscuro + atributo data-negro (fondos a negro puro).
-        const base = nombre === 'negro' ? 'oscuro' : nombre;
+        // Temas oscuros derivados: "negro" y "esmeralda" usan la base "oscuro"
+        // + un atributo extra (data-negro / data-tinte) que reutiliza su restyle.
+        const esDerivadoOscuro = (nombre === 'negro' || nombre === 'esmeralda');
+        const base = esDerivadoOscuro ? 'oscuro' : nombre;
         document.documentElement.setAttribute('data-theme', base);
         if (nombre === 'negro') document.documentElement.setAttribute('data-negro', '1');
         else document.documentElement.removeAttribute('data-negro');
+        const tinte = _TEMA_TINTE[nombre];
+        if (tinte) document.documentElement.setAttribute('data-tinte', tinte);
+        else document.documentElement.removeAttribute('data-tinte');
         try { localStorage.setItem('propi_tema', nombre); } catch (e) {}
         const m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', _TEMA_COLOR[nombre] || '#001723');

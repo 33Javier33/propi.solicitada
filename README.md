@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-19 — Temas: tema Negro ahora ennegrece TODAS las tarjetas + nuevos temas (SW v102)
+- **Fix tema Negro:** antes solo cambiaba el fondo; las tarjetas (clásicas, premium e inline) se quedaban azul-grisáceas del tema oscuro porque `--lm-card` y las variables premium (`--pm-card`, etc.) no se sobreescribían y algunas reglas de negro quedaban pisadas por las de oscuro. Ahora un bloque al final de `app.css` (gana por orden de fuente) pone **todas las tarjetas negras (#141414) con borde y texto de contraste**. También se corrigió el contraste de las tarjetas ámbar/verde de días PT en temas oscuros (texto más claro).
+- **Temas nuevos con contraste:** **Esmeralda** (verde oscuro, base oscuro + `data-tinte`), **Menta** (verde-agua claro) y **Durazno** (cálido claro). Total: 9 temas.
+- Archivos: `app.css` (overrides de negro + 3 temas nuevos + contraste PT oscuro), `app.js` (`_TEMAS`, `_TEMA_TINTE`, `aplicarTema` maneja `data-tinte`), `index.html` (botones de tema + script anti-parpadeo actualizado). SW v102.
+
 #### 2026-07-19 — Días PT: notificar a las DOS apps al marcar un día (Edge Function push-notify v5)
 - Al marcar un día, ahora se notifica por push a **ambas aplicaciones**: al **administrador** (socios-comicion) *"Día Part-Time por confirmar"* y al **socio** (propi.solicitada) *"Día enviado — en proceso"* confirmándole que su turno quedó registrado y está en espera de validación. Antes solo se avisaba al administrador.
 - El trigger de BD ahora dispara con **INSERT o UPDATE a PENDIENTE**, así también avisa cuando un socio **vuelve a marcar** un día que le habían rechazado (sin generar avisos de más al confirmar/rechazar, gracias a la cláusula `WHEN NEW.estado='PENDIENTE'`).
