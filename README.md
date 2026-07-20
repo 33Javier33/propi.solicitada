@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-19 — Puntos Bóveda: base 2 en la fórmula de respaldo (SW v105)
+- Alineación con socios-comicion: la fórmula de respaldo de puntos (usada solo cuando el puntaje del socio aún no está guardado) ahora usa **base 2 para Bóveda** (antes 4), +2 por año, tope 10. No afecta a socios con puntaje guardado.
+- Archivos: `app.js`. SW v105.
+
 #### 2026-07-19 — Fix logo de marca: fusión correcta (el PNG tiene fondo BLANCO) (SW v104)
 - Corrección del intento anterior: el PNG del logo tiene fondo **blanco** (no negro), por eso en temas oscuros quedaba una "caja" blanca. Ahora: **temas claros** `mix-blend-mode: multiply` (el blanco se vuelve transparente, el logo azul marino se ve); **temas oscuros** (oscuro/negro/esmeralda) `filter: invert(1) hue-rotate(180deg)` + `mix-blend-mode: screen` (el blanco → negro → transparente, y el diseño queda claro y visible). Verificado numéricamente: el fondo se funde exacto con el color del tema y el logo queda como marca de agua.
 - Archivos: `app.css` (regla `.marca-logo`). SW v104.

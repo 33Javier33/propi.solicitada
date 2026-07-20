@@ -3457,7 +3457,8 @@
             let anos=hoy.getFullYear()-dIng.getFullYear();
             if(hoy.getMonth()<dIng.getMonth()||(hoy.getMonth()===dIng.getMonth()&&hoy.getDate()<dIng.getDate())) anos--;
             const areaN=String(currentUser.Area||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-            const ptsF=Math.min(4+(Math.max(0,anos)*2),(areaN.includes('mesa')?20:areaN.includes('cambist')?8:areaN.includes('boveda')?10:12));
+            const _baseF=areaN.includes('boveda')?2:4; // Bóveda comienza en 2; el resto en 4
+            const ptsF=Math.min(_baseF+(Math.max(0,anos)*2),(areaN.includes('mesa')?20:areaN.includes('cambist')?8:areaN.includes('boveda')?10:12));
             const ptsSBb=Number(currentUser.Puntos);
             const pts=(Number.isFinite(ptsSBb)&&ptsSBb>0)?ptsSBb:ptsF;
 
