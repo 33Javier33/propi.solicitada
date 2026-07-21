@@ -109,6 +109,19 @@
     </div>
 </div>
 
+<!-- Modal: nueva versión (migración única de la versión clásica a la premium) -->
+<div id="nuevaVersionModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:22px;">
+    <div style="max-width:360px;width:100%;background:linear-gradient(160deg,#171c22,#0f1419);border:1px solid #43474b;border-radius:24px;padding:28px 22px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.55);">
+        <div style="width:66px;height:66px;border-radius:19px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 10px 26px rgba(99,102,241,0.5);">
+            <span class="material-symbols-outlined" style="font-size:36px;color:#fff;">auto_awesome</span>
+        </div>
+        <h2 style="margin:0 0 8px;font-size:20px;font-weight:800;color:#fff;">Nueva versión disponible</h2>
+        <p style="margin:0 0 6px;font-size:13px;color:#c3c7cb;line-height:1.5;">Estrenamos un diseño renovado: tu <b style="color:#fff;">tarjeta</b> con el balance, accesos rápidos y todo más claro.</p>
+        <p style="margin:0 0 20px;font-size:12px;color:#8d9196;">La versión clásica se retira.</p>
+        <button onclick="_activarNuevaVersion()" style="width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:14px;padding:14px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 6px 18px rgba(99,102,241,0.45);">✨ Activar nueva versión</button>
+    </div>
+</div>
+
 <!-- Banner: activar notificaciones (aparece solo si el socio aún no decidió) -->
 <div id="notifPrompt" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));width:calc(100% - 28px);max-width:420px;z-index:130;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 12px 34px rgba(2,132,199,0.45);">
     <div style="display:flex;align-items:center;gap:12px;">
@@ -1253,8 +1266,8 @@
                         </div>
                     </div>
 
-                    <!-- VERSIÓN DE INICIO -->
-                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <!-- VERSIÓN DE INICIO — retirada: la app usa solo la versión nueva (premium) -->
+                    <div style="display:none;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
                             <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                 <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">dashboard</span>

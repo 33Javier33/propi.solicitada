@@ -844,3 +844,11 @@
             --chat-bg:       #d7f0e4;
         }
         :root[data-theme="menta"] .tema-btn.active { border-color: #059669 !important; box-shadow: 0 0 0 3px rgba(5,150,105,0.18); }
+
+        /* Efecto al estrenar la nueva versión (migración clásica → premium) */
+        @keyframes pmSwitchFx {
+            0%   { opacity: 0.15; transform: scale(0.985); filter: blur(5px); }
+            60%  { opacity: 1; filter: blur(0); }
+            100% { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+        .pm-switch-fx { animation: pmSwitchFx 0.75s cubic-bezier(0.22, 1, 0.36, 1); }

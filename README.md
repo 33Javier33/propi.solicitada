@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-20 — Solo versión nueva (premium): se retira la clásica + migración con efecto (SW v107)
+- La app usa **solo la versión nueva (premium)**. `_homeVersionGuardada()` siempre devuelve `premium` y el selector "Versión de inicio" en Ajustes quedó oculto (la clásica se retira).
+- **Migración única:** a los socios que tenían la clásica les aparece un **modal "Nueva versión disponible"**; al tocar **"✨ Activar nueva versión"** cambian a la **tarjeta nueva** (balance estilo tarjeta) y a toda la versión premium, con un **efecto de transición** (`.pm-switch-fx`). Se marca `propi_premium_migrado` para no repetirlo. Quienes ya estaban en premium pasan directo, sin modal.
+- Archivos: `index.html` (modal `#nuevaVersionModal`, selector de versión oculto), `app.js` (`_maybeMigrarPremium`, `_activarNuevaVersion`, `_homeVersionGuardada`/`setHomeVersion` forzados a premium), `app.css` (animación `pmSwitchFx`). SW v107.
+
 #### 2026-07-20 — Banner "Activar notificaciones" en la pantalla principal (SW v106)
 - Aparece un **banner automático** (abajo, sobre la nav) invitando a activar las notificaciones, **solo si el socio aún no decidió** (permiso `default`) y no lo pospuso. Botón **"Activar"** → pide el permiso y, al aceptar, **queda suscrito automáticamente** (llama a `activarNotificaciones`). Botón **"Ahora no"** lo pospone 3 días.
 - Se oculta solo cuando el permiso ya fue concedido o bloqueado. (El botón de Ajustes sigue disponible para activar/desactivar manualmente.)

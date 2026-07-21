@@ -407,7 +407,7 @@
         cargarDocumentos();
         _sincronizarTemaBtns();
         _aplicarBalanceEstilo(_balanceEstiloGuardado());
-        _aplicarHomeVersion(_homeVersionGuardada());
+        _maybeMigrarPremium();
         _aplicarLoginShape(_loginShapeGuardada());
         _pushRefrescarEstado();
     }
@@ -492,11 +492,9 @@
         _aplicarBalanceEstilo(nuevo);
     };
 
-    // ── VERSIÓN DE INICIO (clásica / dashboard premium) ──────────────
-    function _homeVersionGuardada() {
-        try { return localStorage.getItem('propi_home_version') === 'premium' ? 'premium' : 'clasico'; }
-        catch (e) { return 'clasico'; }
-    }
+    // ── VERSIÓN DE INICIO ────────────────────────────────────────────
+    // La versión CLÁSICA fue retirada: la app usa siempre la versión nueva (premium).
+    function _homeVersionGuardada() { return 'premium'; }
     function _sincronizarHomeverBtns() {
         const actual = _homeVersionGuardada();
         document.querySelectorAll('.homever-btn').forEach(b => {
@@ -538,10 +536,41 @@
         _sincronizarHomeverBtns();
         if (esPremium) _refrescarPremium();
     }
-    window.setHomeVersion = function (v) {
-        v = (v === 'premium') ? 'premium' : 'clasico';
-        try { localStorage.setItem('propi_home_version', v); } catch (e) {}
-        _aplicarHomeVersion(v);
+    window.setHomeVersion = function () {
+        // Clásica retirada: siempre premium.
+        try { localStorage.setItem('propi_home_version', 'premium'); } catch (e) {}
+        _aplicarHomeVersion('premium');
+    };
+
+    // ── Migración única de la versión clásica → nueva (premium) ──────────
+    // A los socios que tenían la clásica se les muestra un modal de "nueva versión";
+    // al activarla, cambia a la tarjeta nueva con un efecto. A los demás, premium directo.
+    function _maybeMigrarPremium() {
+        let migrado = false, eraClasico = true;
+        try {
+            migrado = localStorage.getItem('propi_premium_migrado') === '1';
+            eraClasico = localStorage.getItem('propi_home_version') !== 'premium';
+        } catch (e) {}
+        if (!migrado && eraClasico && currentUser) {
+            const m = document.getElementById('nuevaVersionModal');
+            if (m) { m.style.display = 'flex'; return; }
+        }
+        // Ya migrado, ya estaba en premium, o sin modal disponible → aplicar premium
+        try { localStorage.setItem('propi_premium_migrado', '1'); localStorage.setItem('propi_home_version', 'premium'); } catch (e) {}
+        _aplicarHomeVersion('premium');
+    }
+    window._activarNuevaVersion = function () {
+        try {
+            localStorage.setItem('propi_premium_migrado', '1');
+            localStorage.setItem('propi_home_version', 'premium');
+            localStorage.setItem('propi_balance_estilo', 'tarjeta');
+        } catch (e) {}
+        const m = document.getElementById('nuevaVersionModal'); if (m) m.style.display = 'none';
+        _aplicarBalanceEstilo('tarjeta');
+        _aplicarHomeVersion('premium');
+        // Efecto de transición al estrenar la nueva versión
+        const app = document.getElementById('appContainer');
+        if (app) { app.classList.add('pm-switch-fx'); setTimeout(() => app.classList.remove('pm-switch-fx'), 750); }
     };
 
     // Historial premium: render de "Anticipos Anteriores" (estilo oscuro)

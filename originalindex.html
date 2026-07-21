@@ -900,6 +900,14 @@
         }
         :root[data-theme="menta"] .tema-btn.active { border-color: #059669 !important; box-shadow: 0 0 0 3px rgba(5,150,105,0.18); }
 
+        /* Efecto al estrenar la nueva versión (migración clásica → premium) */
+        @keyframes pmSwitchFx {
+            0%   { opacity: 0.15; transform: scale(0.985); filter: blur(5px); }
+            60%  { opacity: 1; filter: blur(0); }
+            100% { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+        .pm-switch-fx { animation: pmSwitchFx 0.75s cubic-bezier(0.22, 1, 0.36, 1); }
+
     </style>
     <!-- Aplicar tema guardado antes del render para evitar parpadeo -->
     <script>
@@ -954,6 +962,19 @@
             </div>
         </div>
         <div id="usersListContent" class="flex-1 overflow-y-auto p-3 space-y-1"></div>
+    </div>
+</div>
+
+<!-- Modal: nueva versión (migración única de la versión clásica a la premium) -->
+<div id="nuevaVersionModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:22px;">
+    <div style="max-width:360px;width:100%;background:linear-gradient(160deg,#171c22,#0f1419);border:1px solid #43474b;border-radius:24px;padding:28px 22px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.55);">
+        <div style="width:66px;height:66px;border-radius:19px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 10px 26px rgba(99,102,241,0.5);">
+            <span class="material-symbols-outlined" style="font-size:36px;color:#fff;">auto_awesome</span>
+        </div>
+        <h2 style="margin:0 0 8px;font-size:20px;font-weight:800;color:#fff;">Nueva versión disponible</h2>
+        <p style="margin:0 0 6px;font-size:13px;color:#c3c7cb;line-height:1.5;">Estrenamos un diseño renovado: tu <b style="color:#fff;">tarjeta</b> con el balance, accesos rápidos y todo más claro.</p>
+        <p style="margin:0 0 20px;font-size:12px;color:#8d9196;">La versión clásica se retira.</p>
+        <button onclick="_activarNuevaVersion()" style="width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:14px;padding:14px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 6px 18px rgba(99,102,241,0.45);">✨ Activar nueva versión</button>
     </div>
 </div>
 
@@ -2101,8 +2122,8 @@
                         </div>
                     </div>
 
-                    <!-- VERSIÓN DE INICIO -->
-                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <!-- VERSIÓN DE INICIO — retirada: la app usa solo la versión nueva (premium) -->
+                    <div style="display:none;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
                             <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                 <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">dashboard</span>
@@ -2711,7 +2732,7 @@
         cargarDocumentos();
         _sincronizarTemaBtns();
         _aplicarBalanceEstilo(_balanceEstiloGuardado());
-        _aplicarHomeVersion(_homeVersionGuardada());
+        _maybeMigrarPremium();
         _aplicarLoginShape(_loginShapeGuardada());
         _pushRefrescarEstado();
     }
@@ -2796,11 +2817,9 @@
         _aplicarBalanceEstilo(nuevo);
     };
 
-    // ── VERSIÓN DE INICIO (clásica / dashboard premium) ──────────────
-    function _homeVersionGuardada() {
-        try { return localStorage.getItem('propi_home_version') === 'premium' ? 'premium' : 'clasico'; }
-        catch (e) { return 'clasico'; }
-    }
+    // ── VERSIÓN DE INICIO ────────────────────────────────────────────
+    // La versión CLÁSICA fue retirada: la app usa siempre la versión nueva (premium).
+    function _homeVersionGuardada() { return 'premium'; }
     function _sincronizarHomeverBtns() {
         const actual = _homeVersionGuardada();
         document.querySelectorAll('.homever-btn').forEach(b => {
@@ -2842,10 +2861,41 @@
         _sincronizarHomeverBtns();
         if (esPremium) _refrescarPremium();
     }
-    window.setHomeVersion = function (v) {
-        v = (v === 'premium') ? 'premium' : 'clasico';
-        try { localStorage.setItem('propi_home_version', v); } catch (e) {}
-        _aplicarHomeVersion(v);
+    window.setHomeVersion = function () {
+        // Clásica retirada: siempre premium.
+        try { localStorage.setItem('propi_home_version', 'premium'); } catch (e) {}
+        _aplicarHomeVersion('premium');
+    };
+
+    // ── Migración única de la versión clásica → nueva (premium) ──────────
+    // A los socios que tenían la clásica se les muestra un modal de "nueva versión";
+    // al activarla, cambia a la tarjeta nueva con un efecto. A los demás, premium directo.
+    function _maybeMigrarPremium() {
+        let migrado = false, eraClasico = true;
+        try {
+            migrado = localStorage.getItem('propi_premium_migrado') === '1';
+            eraClasico = localStorage.getItem('propi_home_version') !== 'premium';
+        } catch (e) {}
+        if (!migrado && eraClasico && currentUser) {
+            const m = document.getElementById('nuevaVersionModal');
+            if (m) { m.style.display = 'flex'; return; }
+        }
+        // Ya migrado, ya estaba en premium, o sin modal disponible → aplicar premium
+        try { localStorage.setItem('propi_premium_migrado', '1'); localStorage.setItem('propi_home_version', 'premium'); } catch (e) {}
+        _aplicarHomeVersion('premium');
+    }
+    window._activarNuevaVersion = function () {
+        try {
+            localStorage.setItem('propi_premium_migrado', '1');
+            localStorage.setItem('propi_home_version', 'premium');
+            localStorage.setItem('propi_balance_estilo', 'tarjeta');
+        } catch (e) {}
+        const m = document.getElementById('nuevaVersionModal'); if (m) m.style.display = 'none';
+        _aplicarBalanceEstilo('tarjeta');
+        _aplicarHomeVersion('premium');
+        // Efecto de transición al estrenar la nueva versión
+        const app = document.getElementById('appContainer');
+        if (app) { app.classList.add('pm-switch-fx'); setTimeout(() => app.classList.remove('pm-switch-fx'), 750); }
     };
 
     // Historial premium: render de "Anticipos Anteriores" (estilo oscuro)
