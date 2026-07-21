@@ -2531,7 +2531,33 @@
             if (sub && currentUser) _guardarPushSub(sub); // mantener fresca la suscripción
         } catch (e) {}
         _pushPintarBtn(activa, Notification.permission === 'denied');
+        // Refrescar también el banner (si acaba de activar/desactivar, ocultarlo)
+        _maybeShowNotifPrompt();
     }
+
+    // ── Banner "Activar notificaciones" en la pantalla principal ─────────────
+    // Aparece solo si el socio aún NO decidió (permiso 'default') y no lo pospuso.
+    function _maybeShowNotifPrompt() {
+        const el = document.getElementById('notifPrompt'); if (!el) return;
+        try {
+            if (!currentUser) { el.style.display = 'none'; return; }
+            if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) { el.style.display = 'none'; return; }
+            if (Notification.permission !== 'default') { el.style.display = 'none'; return; } // ya aceptó o bloqueó
+            const snooze = parseInt(localStorage.getItem('notif_prompt_snooze') || '0');
+            if (snooze && Date.now() < snooze) { el.style.display = 'none'; return; }
+            el.style.display = 'block';
+        } catch (e) {}
+    }
+    window._notifPromptActivar = async function () {
+        const el = document.getElementById('notifPrompt'); if (el) el.style.display = 'none';
+        if (typeof activarNotificaciones === 'function') await activarNotificaciones();
+    };
+    window._notifPromptCerrar = function () {
+        const el = document.getElementById('notifPrompt'); if (el) el.style.display = 'none';
+        // No molestar: posponer 3 días
+        try { localStorage.setItem('notif_prompt_snooze', String(Date.now() + 3 * 24 * 60 * 60 * 1000)); } catch (e) {}
+    };
+
     window.activarNotificaciones = async function () {
         const btn = document.getElementById('btnNotif');
         if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {

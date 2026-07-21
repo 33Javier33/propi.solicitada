@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-20 — Banner "Activar notificaciones" en la pantalla principal (SW v106)
+- Aparece un **banner automático** (abajo, sobre la nav) invitando a activar las notificaciones, **solo si el socio aún no decidió** (permiso `default`) y no lo pospuso. Botón **"Activar"** → pide el permiso y, al aceptar, **queda suscrito automáticamente** (llama a `activarNotificaciones`). Botón **"Ahora no"** lo pospone 3 días.
+- Se oculta solo cuando el permiso ya fue concedido o bloqueado. (El botón de Ajustes sigue disponible para activar/desactivar manualmente.)
+- Archivos: `index.html` (`#notifPrompt`), `app.js` (`_maybeShowNotifPrompt`, `_notifPromptActivar`, `_notifPromptCerrar`; se refresca desde `_pushRefrescarEstado`). SW v106.
+
 #### 2026-07-19 — Puntos Bóveda: base 2 en la fórmula de respaldo (SW v105)
 - Alineación con socios-comicion: la fórmula de respaldo de puntos (usada solo cuando el puntaje del socio aún no está guardado) ahora usa **base 2 para Bóveda** (antes 4), +2 por año, tope 10. No afecta a socios con puntaje guardado.
 - Archivos: `app.js`. SW v105.

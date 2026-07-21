@@ -957,6 +957,21 @@
     </div>
 </div>
 
+<!-- Banner: activar notificaciones (aparece solo si el socio aún no decidió) -->
+<div id="notifPrompt" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));width:calc(100% - 28px);max-width:420px;z-index:130;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 12px 34px rgba(2,132,199,0.45);">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <span class="material-symbols-outlined" style="font-size:26px;flex-shrink:0;">notifications_active</span>
+        <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-weight:800;font-size:14px;">Activa las notificaciones</p>
+            <p style="margin:2px 0 0;font-size:12px;opacity:0.92;line-height:1.35;">Recibe avisos de la comisión aunque tengas la app cerrada.</p>
+        </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="_notifPromptActivar()" style="flex:1;background:#fff;color:#0284c7;border:none;border-radius:10px;padding:10px;font-weight:800;font-size:13px;cursor:pointer;">Activar</button>
+        <button onclick="_notifPromptCerrar()" style="background:rgba(255,255,255,0.22);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;cursor:pointer;">Ahora no</button>
+    </div>
+</div>
+
 <!-- ══════════════════════════════════════════
      MODAL: CALENDARIO
 ══════════════════════════════════════════ -->
@@ -4820,7 +4835,33 @@
             if (sub && currentUser) _guardarPushSub(sub); // mantener fresca la suscripción
         } catch (e) {}
         _pushPintarBtn(activa, Notification.permission === 'denied');
+        // Refrescar también el banner (si acaba de activar/desactivar, ocultarlo)
+        _maybeShowNotifPrompt();
     }
+
+    // ── Banner "Activar notificaciones" en la pantalla principal ─────────────
+    // Aparece solo si el socio aún NO decidió (permiso 'default') y no lo pospuso.
+    function _maybeShowNotifPrompt() {
+        const el = document.getElementById('notifPrompt'); if (!el) return;
+        try {
+            if (!currentUser) { el.style.display = 'none'; return; }
+            if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) { el.style.display = 'none'; return; }
+            if (Notification.permission !== 'default') { el.style.display = 'none'; return; } // ya aceptó o bloqueó
+            const snooze = parseInt(localStorage.getItem('notif_prompt_snooze') || '0');
+            if (snooze && Date.now() < snooze) { el.style.display = 'none'; return; }
+            el.style.display = 'block';
+        } catch (e) {}
+    }
+    window._notifPromptActivar = async function () {
+        const el = document.getElementById('notifPrompt'); if (el) el.style.display = 'none';
+        if (typeof activarNotificaciones === 'function') await activarNotificaciones();
+    };
+    window._notifPromptCerrar = function () {
+        const el = document.getElementById('notifPrompt'); if (el) el.style.display = 'none';
+        // No molestar: posponer 3 días
+        try { localStorage.setItem('notif_prompt_snooze', String(Date.now() + 3 * 24 * 60 * 60 * 1000)); } catch (e) {}
+    };
+
     window.activarNotificaciones = async function () {
         const btn = document.getElementById('btnNotif');
         if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
