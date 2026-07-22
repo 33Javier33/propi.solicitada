@@ -94,7 +94,53 @@
         // Ping silencioso para que el cold start ocurra mientras el
         // usuario escribe su PIN, no cuando aprieta Ingresar.
         fetch(`${SCRIPT_URL_RECAUDACIONES}?action=ping`).catch(()=>{});
+
+        // ── 3. Guía de instalación: si es la 1ª vez y NO está instalada,
+        //     mostrarla antes de ingresar (para asegurar que la instalen).
+        _maybeMostrarGuiaInstalar();
     };
+
+    // ── GUÍA DE INSTALACIÓN (PWA) ─────────────────────────────
+    let _deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        _deferredInstallPrompt = e; // Android/Chrome: permite instalar con un botón
+        const b = document.getElementById('btnInstalarNativo');
+        if (b && document.getElementById('installGuideModal')?.style.display === 'flex') b.style.display = 'block';
+    });
+    function _appEstaInstalada() {
+        try {
+            return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+        } catch (e) { return false; }
+    }
+    window.abrirGuiaInstalar = function () {
+        const m = document.getElementById('installGuideModal'); if (!m) return;
+        m.style.display = 'flex';
+        const b = document.getElementById('btnInstalarNativo');
+        if (b) b.style.display = _deferredInstallPrompt ? 'block' : 'none';
+    };
+    window.cerrarGuiaInstalar = function () {
+        const m = document.getElementById('installGuideModal'); if (m) m.style.display = 'none';
+        try { localStorage.setItem('propi_install_seen', '1'); } catch (e) {}
+    };
+    window._instalarPWA = async function () {
+        if (!_deferredInstallPrompt) return;
+        try { _deferredInstallPrompt.prompt(); await _deferredInstallPrompt.userChoice; } catch (e) {}
+        _deferredInstallPrompt = null;
+        const b = document.getElementById('btnInstalarNativo'); if (b) b.style.display = 'none';
+        cerrarGuiaInstalar();
+    };
+    function _maybeMostrarGuiaInstalar() {
+        try {
+            if (_appEstaInstalada()) return;                       // ya instalada / abierta como app
+            if (localStorage.getItem('propi_install_seen') === '1') return; // ya la vio
+            // Solo si el login está visible (no auto-entró con sesión)
+            setTimeout(() => {
+                const login = document.getElementById('loginOverlay');
+                if (login && !login.classList.contains('hidden')) abrirGuiaInstalar();
+            }, 700);
+        } catch (e) {}
+    }
 
     // Muestra el botón "Contactar a La Comisión Propina" SOLO cuando no hay
     // una cuenta activa vinculada en el dispositivo (usuario nuevo sin acceso).

@@ -109,6 +109,37 @@
     </div>
 </div>
 
+<!-- Modal: guía de instalación (Android / iPhone) -->
+<div id="installGuideModal" style="display:none;position:fixed;inset:0;z-index:210;background:rgba(0,0,0,0.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px;">
+    <div style="max-width:400px;width:100%;background:#fff;border-radius:22px;padding:22px;box-shadow:0 24px 64px rgba(0,0,0,0.4);max-height:92vh;overflow-y:auto;">
+        <div style="text-align:center;margin-bottom:16px;">
+            <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 8px 22px rgba(99,102,241,0.4);"><span class="material-symbols-outlined" style="font-size:30px;color:#fff;">install_mobile</span></div>
+            <h2 style="margin:0;font-size:19px;font-weight:800;color:#0f172a;">Instala la app</h2>
+            <p style="margin:6px 0 0;font-size:12.5px;color:#94a3b8;line-height:1.45;">Instálala en tu teléfono para abrirla como una app y recibir notificaciones aunque esté cerrada.</p>
+        </div>
+        <button id="btnInstalarNativo" onclick="_instalarPWA()" style="display:none;width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:14px;cursor:pointer;margin-bottom:16px;box-shadow:0 6px 16px rgba(99,102,241,0.4);">⬇️ Instalar ahora</button>
+        <div style="border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin-bottom:12px;">
+            <div style="font-weight:800;color:#0f172a;font-size:14px;margin-bottom:8px;">🤖 Android (Chrome)</div>
+            <ol style="margin:0;padding-left:18px;color:#334155;font-size:12.8px;line-height:1.7;">
+                <li>Toca el menú <b>⋮</b> (arriba a la derecha).</li>
+                <li>Elige <b>“Instalar aplicación”</b> o <b>“Agregar a pantalla principal”</b>.</li>
+                <li>Confirma <b>“Instalar”</b>.</li>
+                <li>Ábrela desde el nuevo ícono en tu pantalla.</li>
+            </ol>
+        </div>
+        <div style="border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin-bottom:16px;">
+            <div style="font-weight:800;color:#0f172a;font-size:14px;margin-bottom:8px;">🍎 iPhone (Safari)</div>
+            <ol style="margin:0;padding-left:18px;color:#334155;font-size:12.8px;line-height:1.7;">
+                <li>Toca <b>Compartir</b> <span style="display:inline-block;vertical-align:middle;">⬆️</span> (el cuadrito con la flecha, abajo).</li>
+                <li>Baja y elige <b>“Agregar a inicio”</b>.</li>
+                <li>Toca <b>“Agregar”</b> (arriba a la derecha).</li>
+                <li>Abre la app desde el nuevo ícono. <b>Importante:</b> en iPhone las notificaciones solo funcionan abriéndola desde ahí.</li>
+            </ol>
+        </div>
+        <button onclick="cerrarGuiaInstalar()" style="width:100%;background:#0f172a;color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:14px;cursor:pointer;">Entendido</button>
+    </div>
+</div>
+
 <!-- Modal: nueva versión (migración única de la versión clásica a la premium) -->
 <div id="nuevaVersionModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:22px;">
     <div style="max-width:360px;width:100%;background:linear-gradient(160deg,#171c22,#0f1419);border:1px solid #43474b;border-radius:24px;padding:28px 22px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.55);">
@@ -402,6 +433,10 @@
             </button>
             <button onclick="cambiarUsuario()" class="text-sm text-lm-muted font-medium hover:text-lm-primary transition-colors text-center">
                 Cambiar de Usuario
+            </button>
+            <button onclick="abrirGuiaInstalar()" class="w-full mt-1 flex items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-sm border transition-all active:scale-[0.98]" style="background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);color:#6366f1;">
+                <span class="material-symbols-outlined" style="font-size:19px;">install_mobile</span>
+                ¿Cómo instalar la app?
             </button>
         </div>
     </div>

@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-20 — Guía de instalación en el login (Android / iPhone) (SW v108)
+- En la pantalla de **login** hay un botón **"¿Cómo instalar la app?"** que abre una guía con pasos para **Android (Chrome)** y **iPhone (Safari)**. En Android, si el navegador lo permite, aparece un botón **"⬇️ Instalar ahora"** (captura `beforeinstallprompt`).
+- **Primera vez:** si la app **no está instalada** (no corre como PWA) y no se vio antes la guía, se muestra **automáticamente antes de ingresar** el PIN, para asegurar que la instalen. Si ya está instalada o ya la vieron, no se auto-muestra; el botón queda siempre disponible.
+- Archivos: `index.html` (botón + `#installGuideModal`), `app.js` (`abrirGuiaInstalar`, `_instalarPWA`, `_maybeMostrarGuiaInstalar`, `beforeinstallprompt`). SW v108.
+
 #### 2026-07-20 — Solo versión nueva (premium): se retira la clásica + migración con efecto (SW v107)
 - La app usa **solo la versión nueva (premium)**. `_homeVersionGuardada()` siempre devuelve `premium` y el selector "Versión de inicio" en Ajustes quedó oculto (la clásica se retira).
 - **Migración única:** a los socios que tenían la clásica les aparece un **modal "Nueva versión disponible"**; al tocar **"✨ Activar nueva versión"** cambian a la **tarjeta nueva** (balance estilo tarjeta) y a toda la versión premium, con un **efecto de transición** (`.pm-switch-fx`). Se marca `propi_premium_migrado` para no repetirlo. Quienes ya estaban en premium pasan directo, sin modal.
