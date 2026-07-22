@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-20 — Modal "Acerca de": la raya (asa) ahora cierra (tocar o deslizar) (SW v110)
+- La barra/asa del modal "Acerca de" no tenía función. Ahora **al tocarla se cierra** y **al deslizarla hacia abajo también** (con animación). Además, tocar el fondo oscuro fuera de la tarjeta cierra el modal.
+- Archivos: `index.html` (`#aboutHandleZone` con onclick + `#aboutSheet`), `app.js` (`_initAboutSwipe` con gestos touch). SW v110.
+
 #### 2026-07-20 — Marca (logo CarlosPN) al pie del login (SW v109)
 - Se agregó el **logo de marca** (`carlospn-logo.png`, clase `.marca-logo` que se funde con el tema) al **pie de la pantalla de login**, con la línea "© 2026 · Todos los derechos reservados". No interfiere con el ingreso (`pointer-events:none`).
 - Archivos: `index.html` (bloque marca en `#loginOverlay`). SW v109.

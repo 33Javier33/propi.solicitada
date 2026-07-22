@@ -3403,8 +3403,35 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
 
     function toggleAbout(show) {
         const m = document.getElementById('aboutModal');
-        if (show) { m.classList.remove('hidden'); m.classList.add('flex'); }
-        else       { m.classList.add('hidden');    m.classList.remove('flex'); }
+        if (show) { m.classList.remove('hidden'); m.classList.add('flex'); _initAboutSwipe(); }
+        else       { m.classList.add('hidden');    m.classList.remove('flex');
+            const sheet = document.getElementById('aboutSheet'); if (sheet) { sheet.style.transform = ''; sheet.style.transition = ''; } }
+    }
+    // El asa (raya) del modal "Acerca de": tocarla cierra (onclick en el HTML) y
+    // deslizarla hacia abajo también cierra.
+    let _aboutSwipeInit = false;
+    function _initAboutSwipe() {
+        if (_aboutSwipeInit) return;
+        const zone = document.getElementById('aboutHandleZone');
+        const sheet = document.getElementById('aboutSheet');
+        if (!zone || !sheet) return;
+        _aboutSwipeInit = true;
+        let startY = null, dy = 0;
+        zone.addEventListener('touchstart', e => { startY = e.touches[0].clientY; dy = 0; sheet.style.transition = 'none'; }, { passive: true });
+        zone.addEventListener('touchmove', e => {
+            if (startY === null) return;
+            dy = Math.max(0, e.touches[0].clientY - startY);
+            sheet.style.transform = 'translateY(' + dy + 'px)';
+        }, { passive: true });
+        const _fin = () => {
+            if (startY === null) return;
+            sheet.style.transition = 'transform 0.25s ease';
+            if (dy > 80) { sheet.style.transform = 'translateY(100%)'; setTimeout(() => toggleAbout(false), 220); }
+            else { sheet.style.transform = ''; }
+            startY = null; dy = 0;
+        };
+        zone.addEventListener('touchend', _fin);
+        zone.addEventListener('touchcancel', _fin);
     }
 
 
