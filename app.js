@@ -3404,34 +3404,25 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     function toggleAbout(show) {
         const m = document.getElementById('aboutModal');
         if (show) { m.classList.remove('hidden'); m.classList.add('flex'); _initAboutSwipe(); }
-        else       { m.classList.add('hidden');    m.classList.remove('flex');
-            const sheet = document.getElementById('aboutSheet'); if (sheet) { sheet.style.transform = ''; sheet.style.transition = ''; } }
+        else       { m.classList.add('hidden');    m.classList.remove('flex'); }
     }
     // El asa (raya) del modal "Acerca de": tocarla cierra (onclick en el HTML) y
-    // deslizarla hacia abajo también cierra.
+    // deslizarla hacia abajo también cierra. IMPORTANTE: no se aplica `transform`
+    // al sheet — eso rompía la fusión (mix-blend-mode) del logo y lo volvía blanco.
     let _aboutSwipeInit = false;
     function _initAboutSwipe() {
         if (_aboutSwipeInit) return;
         const zone = document.getElementById('aboutHandleZone');
-        const sheet = document.getElementById('aboutSheet');
-        if (!zone || !sheet) return;
+        if (!zone) return;
         _aboutSwipeInit = true;
-        let startY = null, dy = 0;
-        zone.addEventListener('touchstart', e => { startY = e.touches[0].clientY; dy = 0; sheet.style.transition = 'none'; }, { passive: true });
+        let startY = null;
+        zone.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
         zone.addEventListener('touchmove', e => {
             if (startY === null) return;
-            dy = Math.max(0, e.touches[0].clientY - startY);
-            sheet.style.transform = 'translateY(' + dy + 'px)';
+            if ((e.touches[0].clientY - startY) > 55) { startY = null; toggleAbout(false); } // deslizó hacia abajo → cerrar
         }, { passive: true });
-        const _fin = () => {
-            if (startY === null) return;
-            sheet.style.transition = 'transform 0.25s ease';
-            if (dy > 80) { sheet.style.transform = 'translateY(100%)'; setTimeout(() => toggleAbout(false), 220); }
-            else { sheet.style.transform = ''; }
-            startY = null; dy = 0;
-        };
-        zone.addEventListener('touchend', _fin);
-        zone.addEventListener('touchcancel', _fin);
+        zone.addEventListener('touchend', () => { startY = null; });
+        zone.addEventListener('touchcancel', () => { startY = null; });
     }
 
 

@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-20 — Fix: el logo se volvía blanco al tocar la raya (SW v112)
+- **Causa:** el gesto de deslizar aplicaba un `transform` al sheet del modal; eso, junto al `mix-blend-mode` del logo, rompía la composición y volvía el logo (y su zona) **blanco** en tema oscuro. El `isolation:isolate` agregado en v111 lo empeoraba.
+- **Fix:** se quitó el `transform` del sheet y el `isolation`. Ahora **tocar la raya cierra** y **deslizarla hacia abajo también** (detección de gesto sin animar el sheet), así el logo **nunca se rompe** y sigue fundiéndose con el tema como antes.
+- Archivos: `index.html` (sin `isolation` en `#aboutSheet`/`#loginOverlay`), `app.js` (`_initAboutSwipe` sin transform). SW v112.
+
 #### 2026-07-20 — Fusión del logo a prueba de fallos (isolation) (SW v111)
 - El logo (`.marca-logo`) usa `mix-blend-mode` para fundirse con el tema. En algunos dispositivos, con el `backdrop-blur` del modal, la fusión no resolvía bien y el logo podía "perderse". Se agregó `isolation:isolate` al **sheet del modal Acerca de** y al **login**, para que el logo se funda de forma confiable contra el fondo de la tarjeta en todos los temas. (El logo no se había quitado; solo se blindó su fusión.)
 - Archivos: `index.html` (`#aboutSheet`, `#loginOverlay`). SW v111.
