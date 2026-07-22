@@ -1142,7 +1142,7 @@
      MODAL: ACERCA DE
 ══════════════════════════════════════════ -->
 <div id="aboutModal" class="fixed inset-0 z-[200] bg-black/50 backdrop-blur-md hidden items-end justify-center" onclick="if(event.target===this)toggleAbout(false)">
-    <div id="aboutSheet" style="background:#ffffff;border-radius:28px 28px 0 0;width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 -24px 64px rgba(0,0,0,0.15);overflow:hidden;">
+    <div id="aboutSheet" style="background:#ffffff;border-radius:28px 28px 0 0;width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 -24px 64px rgba(0,0,0,0.15);overflow:hidden;isolation:isolate;">
 
         <!-- Handle: tócalo o deslízalo hacia abajo para cerrar -->
         <div id="aboutHandleZone" onclick="toggleAbout(false)" title="Cerrar" style="flex-shrink:0;padding:12px 0 8px;cursor:pointer;display:flex;justify-content:center;touch-action:none;">
@@ -1222,7 +1222,7 @@
 <!-- ══════════════════════════════════════════
      LOGIN OVERLAY
 ══════════════════════════════════════════ -->
-<div id="loginOverlay" class="fixed inset-0 z-[150] bg-lm-bg login-glow flex flex-col items-center justify-center p-6">
+<div id="loginOverlay" class="fixed inset-0 z-[150] bg-lm-bg login-glow flex flex-col items-center justify-center p-6" style="isolation:isolate;">
 
     <!-- SETUP / VINCULAR -->
     <div id="setupBox" class="w-full max-w-sm hidden">

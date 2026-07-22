@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-20 — Fusión del logo a prueba de fallos (isolation) (SW v111)
+- El logo (`.marca-logo`) usa `mix-blend-mode` para fundirse con el tema. En algunos dispositivos, con el `backdrop-blur` del modal, la fusión no resolvía bien y el logo podía "perderse". Se agregó `isolation:isolate` al **sheet del modal Acerca de** y al **login**, para que el logo se funda de forma confiable contra el fondo de la tarjeta en todos los temas. (El logo no se había quitado; solo se blindó su fusión.)
+- Archivos: `index.html` (`#aboutSheet`, `#loginOverlay`). SW v111.
+
 #### 2026-07-20 — Modal "Acerca de": la raya (asa) ahora cierra (tocar o deslizar) (SW v110)
 - La barra/asa del modal "Acerca de" no tenía función. Ahora **al tocarla se cierra** y **al deslizarla hacia abajo también** (con animación). Además, tocar el fondo oscuro fuera de la tarjeta cierra el modal.
 - Archivos: `index.html` (`#aboutHandleZone` con onclick + `#aboutSheet`), `app.js` (`_initAboutSwipe` con gestos touch). SW v110.
