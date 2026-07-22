@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-20 — Marca (logo CarlosPN) al pie del login (SW v109)
+- Se agregó el **logo de marca** (`carlospn-logo.png`, clase `.marca-logo` que se funde con el tema) al **pie de la pantalla de login**, con la línea "© 2026 · Todos los derechos reservados". No interfiere con el ingreso (`pointer-events:none`).
+- Archivos: `index.html` (bloque marca en `#loginOverlay`). SW v109.
+
 #### 2026-07-20 — Guía de instalación en el login (Android / iPhone) (SW v108)
 - En la pantalla de **login** hay un botón **"¿Cómo instalar la app?"** que abre una guía con pasos para **Android (Chrome)** y **iPhone (Safari)**. En Android, si el navegador lo permite, aparece un botón **"⬇️ Instalar ahora"** (captura `beforeinstallprompt`).
 - **Primera vez:** si la app **no está instalada** (no corre como PWA) y no se vio antes la guía, se muestra **automáticamente antes de ingresar** el PIN, para asegurar que la instalen. Si ya está instalada o ya la vieron, no se auto-muestra; el botón queda siempre disponible.
