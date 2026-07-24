@@ -27,6 +27,16 @@ function _mockRes(data) {
     return { ok: true, status: 200, json: async () => data, text: async () => JSON.stringify(data) };
 }
 
+// Corre una promesa con límite de tiempo. Si expira (o falla), resuelve con `fallback`.
+// Se usa para que el arranque en frío del GAS (~30s) NUNCA congele la app: si el GAS
+// no responde en pocos segundos, seguimos con lo que hay y él se actualiza en background.
+function _conTimeout(promesa, ms, fallback) {
+    return Promise.race([
+        Promise.resolve(promesa).catch(() => fallback),
+        new Promise(resolve => setTimeout(() => resolve(fallback), ms))
+    ]);
+}
+
 async function _body(options) {
     if (!options || !options.body) return {};
     try { return typeof options.body === 'string' ? JSON.parse(options.body) : options.body; } catch(e) { return {}; }
@@ -243,10 +253,12 @@ async function _sociosHandler(url, options) {
 
         // Anticipos + extras desde Supabase (GAS escribe en Supabase en cada registro)
         case 'getAllDataDesdeSheets': {
-            const [antRes, extRes] = await Promise.all([
+            // Con timeout: si la conexión Supabase quedó "dormida" al volver a la app,
+            // no colgar; se resuelve rápido y sigue el flujo (evita el freeze al reanudar).
+            const [antRes, extRes] = await _conTimeout(Promise.all([
                 dbSV.from('anticipos').select('socio_id, fecha, monto, responsable'),
                 dbSV.from('extras').select('socio_id, fecha, tipo, monto, detalle')
-            ]);
+            ]), 8000, [{ data: [] }, { data: [] }]);
             const anticipos = {};
             for (const a of (antRes.data || [])) {
                 if (!anticipos[a.socio_id]) anticipos[a.socio_id] = [];
@@ -262,16 +274,11 @@ async function _sociosHandler(url, options) {
                     tipo: e.tipo, monto: Number(e.monto), fecha: e.fecha, detalle: e.detalle || ''
                 });
             }
-            // Supabase vacío → GAS + migración automática en segundo plano
+            // Supabase vacío → GAS + migración automática en segundo plano.
+            // Con timeout: si el GAS arranca en frío, no bloquea el balance más de 6s.
             if (Object.keys(anticipos).length === 0 && Object.keys(extras).length === 0) {
-                let gasJson = null;
-                try {
-                    const gasResp = await _origFetch(url, options);
-                    gasJson = await gasResp.json();
-                } catch(e) { console.warn('[SB-V] GAS error:', e.message); }
-                if (gasJson && gasJson.status === 'success') {
-                    _migrarASupabase(gasJson); // no-await: segundo plano
-                }
+                const gasJson = await _conTimeout(_origFetch(url, options).then(r => r.json()), 6000, null);
+                if (gasJson && gasJson.status === 'success') _migrarASupabase(gasJson); // no-await
                 return _mockRes(gasJson || { status: 'error', anticipos: {}, extras: {} });
             }
             return _mockRes({ data: { anticipos, extras } });
@@ -279,7 +286,8 @@ async function _sociosHandler(url, options) {
 
         // Saldos anteriores — Supabase primero (fast), GAS como fallback
         case 'getSaldosAnteriores': {
-            const { data: sbSaldos, error: sbErr } = await dbSV.from('saldos_socio').select('id, monto');
+            const _saRes = await _conTimeout(dbSV.from('saldos_socio').select('id, monto'), 8000, { data: null, error: true });
+            const sbSaldos = _saRes.data, sbErr = _saRes.error;
             if (!sbErr && sbSaldos && sbSaldos.length > 0) {
                 const dataMap = {};
                 for (const s of sbSaldos) dataMap[s.id] = Number(s.monto);
@@ -293,9 +301,9 @@ async function _sociosHandler(url, options) {
                 try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
             }).catch(() => {});
             if (cached) return _mockRes(cached);
-            const res = await _origFetch(url, options);
-            const d = await res.json();
-            try { localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
+            // GAS con timeout: nunca colgar el balance por el arranque en frío del GAS.
+            const d = await _conTimeout(_origFetch(url, options).then(r => r.json()), 6000, { status: 'success', data: {} });
+            try { if (d && d.data) localStorage.setItem(CK, JSON.stringify({ ts: Date.now(), d })); } catch(e) {}
             return _mockRes(d);
         }
 
@@ -579,10 +587,10 @@ async function _recHandler(url, options) {
 
         // Recaudaciones con divisores incorporados
         case 'get': {
-            const [recRes, divRes] = await Promise.all([
+            const [recRes, divRes] = await _conTimeout(Promise.all([
                 dbRV.from('recaudaciones').select('*').order('fecha', { ascending: true }),
                 dbRV.from('divisores').select('fecha, valor')
-            ]);
+            ]), 8000, [{ data: [] }, { data: [] }]);
             const divMap = {};
             for (const d of (divRes.data || [])) divMap[d.fecha] = Number(d.valor);
             const mapped = (recRes.data || []).map(r => ({

@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-20 — Fix: carga lenta (~30s) al volver a la app (SW v113)
+- **Causa:** al reanudar la app, si una consulta a Supabase venía vacía o la conexión quedaba "dormida", el interceptor **esperaba al GAS** (arranque en frío ~30s) y **bloqueaba todo el `Promise.all`** del balance → la app parecía pegada.
+- **Fix:** helper `_conTimeout` que limita cada llamada: las consultas Supabase del balance (`getAllDataDesdeSheets`, `getSaldosAnteriores`, `get` de recaudaciones) y sus respaldos al GAS ahora tienen **timeout (6–8s)**. En el caso normal Supabase responde al instante; si algo se demora, la app sigue con lo que hay y se actualiza en segundo plano — nunca se congela 30s.
+- Archivos: `supabase-api.js`. SW v113.
+
 #### 2026-07-20 — Fix: el logo se volvía blanco al tocar la raya (SW v112)
 - **Causa:** el gesto de deslizar aplicaba un `transform` al sheet del modal; eso, junto al `mix-blend-mode` del logo, rompía la composición y volvía el logo (y su zona) **blanco** en tema oscuro. El `isolation:isolate` agregado en v111 lo empeoraba.
 - **Fix:** se quitó el `transform` del sheet y el `isolation`. Ahora **tocar la raya cierra** y **deslizarla hacia abajo también** (detección de gesto sin animar el sheet), así el logo **nunca se rompe** y sigue fundiéndose con el tema como antes.
