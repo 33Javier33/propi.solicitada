@@ -7,6 +7,11 @@
         globalDiasCalendar=[], userTypeGlobal='', editingMessageId=null,
         adminPrivMsgs=[];
 
+    // Anti-freeze al volver a la app: evita que refrescos solapados (resume +
+    // intervalos + realtime) se acumulen, y conserva los últimos datos buenos
+    // para no pintar la pantalla en blanco si una fuente responde "stale".
+    let _refreshing=false, _refreshPending=false, _lastGood=null;
+
     // Autogestión de días Part-Time: valor por punto por fecha, puntos del socio y
     // días marcados por el socio (PENDIENTE/RECHAZADO) para pintarlos en el calendario.
     let ptMapVP={}, ptPuntos=0, ptDiasSolicitados=[], ptCargandoDia=false;
@@ -1198,6 +1203,10 @@
     const BALANCE_CACHE_TTL = 15000; // 15 segundos
 
     async function refresh(isFirstLoad=false) {
+        // Guard anti-solapamiento: si ya hay un refresh en curso, marcar pendiente
+        // y salir. Al terminar, se corre UNO solo de seguimiento (coalescing).
+        if (_refreshing) { _refreshPending = true; return; }
+        _refreshing = true;
         try {
             // ── FASE 1: Las 5 llamadas de balance en paralelo ────
             // Las notas NO bloquean — se cargan en background
@@ -1210,12 +1219,30 @@
                 fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`)
             ]);
 
-            const recData    = (await recRes.json()).data   || [];
+            const recJson    = await recRes.json();
             const fullSheets = await dataRes.json();
-            const sheetsData = fullSheets.data || fullSheets;
-            const saldosData = (await saldosRes.json()).data || {};
-            const cierreData = (await cierreRes.json()).data || {};
-            const diasTrabajados = (await diasRes.json()).data || {};
+            const saldosJson = await saldosRes.json();
+            const cierreJson = await cierreRes.json();
+            const diasJson   = await diasRes.json();
+
+            let recData        = recJson.data   || [];
+            let sheetsData     = fullSheets.data || fullSheets;
+            let saldosData     = saldosJson.data || {};
+            let cierreData     = cierreJson.data || {};
+            let diasTrabajados = diasJson.data || {};
+
+            // Anti-parpadeo: si una fuente respondió "stale" (timeout por conexión
+            // dormida al volver a la app), conservar los últimos datos buenos en
+            // lugar de mostrar la pantalla en blanco / saldo en $0.
+            if (_lastGood) {
+                if (recJson._stale   && _lastGood.recData)        recData        = _lastGood.recData;
+                if (fullSheets._stale&& _lastGood.sheetsData)     sheetsData     = _lastGood.sheetsData;
+                if (diasJson._stale  && _lastGood.diasTrabajados) diasTrabajados = _lastGood.diasTrabajados;
+            }
+            // Guardar snapshot bueno solo cuando los datos clave llegaron frescos.
+            if (!recJson._stale && !fullSheets._stale) {
+                _lastGood = { recData, sheetsData, diasTrabajados };
+            }
 
             // ── FASE 2: Notas en background (no bloquean el render) ─
             Promise.all([
@@ -1599,6 +1626,11 @@
                 checkNotifications();
             }
         } catch(e) { console.error("Refresh Error", e); }
+        finally {
+            _refreshing = false;
+            // Si llegó otra petición mientras corría, ejecutar UN solo seguimiento.
+            if (_refreshPending) { _refreshPending = false; setTimeout(() => refresh(false), 60); }
+        }
     }
 
     // ── LINKIFY ───────────────────────────────────────────────

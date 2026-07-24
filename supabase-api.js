@@ -239,7 +239,13 @@ async function _sociosHandler(url, options) {
 
         // Lista de socios activos (PascalCase para compatibilidad con app.js)
         case 'getSocios': {
-            const { data } = await dbSV.from('socios').select('*').eq('activo', true).order('apellido');
+            // Con timeout: al volver a la app en móvil la conexión puede quedar
+            // "dormida"; si no responde en 8s devolvemos vacío y el llamador
+            // conserva la caché (fetchSociosFromNetwork solo sobreescribe si hay datos).
+            const { data } = await _conTimeout(
+                dbSV.from('socios').select('*').eq('activo', true).order('apellido'),
+                8000, { data: null }
+            );
             const mapped = (data || []).map(s => ({
                 ID: s.id, Nombre: s.nombre, Apellido: s.apellido,
                 Area: s.area, TipoContrato: s.contrato,
@@ -255,10 +261,15 @@ async function _sociosHandler(url, options) {
         case 'getAllDataDesdeSheets': {
             // Con timeout: si la conexión Supabase quedó "dormida" al volver a la app,
             // no colgar; se resuelve rápido y sigue el flujo (evita el freeze al reanudar).
+            const _FB_ADS = [{ data: null, _to: true }, { data: null }];
             const [antRes, extRes] = await _conTimeout(Promise.all([
                 dbSV.from('anticipos').select('socio_id, fecha, monto, responsable'),
                 dbSV.from('extras').select('socio_id, fecha, tipo, monto, detalle')
-            ]), 8000, [{ data: [] }, { data: [] }]);
+            ]), 8000, _FB_ADS);
+            const _adsStale = !!(antRes && antRes._to);
+            // Si fue timeout (conexión dormida), avisar al front para que conserve
+            // los últimos datos buenos en vez de pintar la pantalla en blanco.
+            if (_adsStale) return _mockRes({ data: { anticipos: {}, extras: {} }, _stale: true });
             const anticipos = {};
             for (const a of (antRes.data || [])) {
                 if (!anticipos[a.socio_id]) anticipos[a.socio_id] = [];
@@ -325,7 +336,13 @@ async function _sociosHandler(url, options) {
         // Días trabajados Part-Time — Supabase responde inmediatamente (no bloquea balance)
         // GAS va en background: si encuentra socios faltantes los cachea y dispara un refresh.
         case 'getDiasPartTime': {
-            const { data: sbData } = await dbSV.from('dias_pt').select('socio_id, dias');
+            // Con timeout: evita que una conexión dormida (al volver a la app) cuelgue
+            // el Promise.all del balance ~30s. Si expira, marca _stale.
+            const _dptRes = await _conTimeout(
+                dbSV.from('dias_pt').select('socio_id, dias'), 8000, { data: null, _to: true }
+            );
+            const sbData = _dptRes.data;
+            const _dptStale = !!_dptRes._to;
             const r = {};
             const sbIds = new Set();
             for (const d of (sbData || [])) {
@@ -347,7 +364,7 @@ async function _sociosHandler(url, options) {
                     if (falta) setTimeout(() => { if (typeof refresh === 'function') refresh(); }, 200);
                 }).catch(() => {});
             }
-            return _mockRes({ data: r });
+            return _mockRes({ data: r, _stale: _dptStale });
         }
 
         // Mensajes del chat social (socios entre sí)
@@ -587,17 +604,20 @@ async function _recHandler(url, options) {
 
         // Recaudaciones con divisores incorporados
         case 'get': {
+            const _FB_GET = [{ data: null, _to: true }, { data: null }];
             const [recRes, divRes] = await _conTimeout(Promise.all([
                 dbRV.from('recaudaciones').select('*').order('fecha', { ascending: true }),
                 dbRV.from('divisores').select('fecha, valor')
-            ]), 8000, [{ data: [] }, { data: [] }]);
+            ]), 8000, _FB_GET);
+            const _getStale = !!(recRes && recRes._to);
             const divMap = {};
             for (const d of (divRes.data || [])) divMap[d.fecha] = Number(d.valor);
             const mapped = (recRes.data || []).map(r => ({
                 ...r,
                 divisor: divMap[r.fecha] || null
             }));
-            return _mockRes({ data: mapped });
+            // Timeout → marca _stale para que el front conserve lo último bueno.
+            return _mockRes({ data: mapped, _stale: _getStale });
         }
 
         // Notas del tablero ADMIN (notas_recaudacion)

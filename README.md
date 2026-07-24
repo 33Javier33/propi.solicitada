@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-24 — Fix definitivo: freeze de ~30s y datos que desaparecen al volver a la app (SW v114)
+- **Síntoma:** al salir sin cerrar la app y volver, los datos desaparecían y tardaban 30s o más en cargar.
+- **Causa 1 (freeze 30s):** dos consultas del balance **no tenían timeout** — `getSocios` y `getDiasPartTime`. Al reanudar en el móvil la conexión queda "dormida" y el **primer** `fetch` se cuelga hasta el timeout de red del sistema (~30s); como iban dentro del `Promise.all` del balance, **congelaban todo el refresh**. Fix: ambas ahora usan `_conTimeout` (8s) → nada bloquea más de 8s.
+- **Causa 2 (datos desaparecen):** cuando una consulta hacía timeout devolvía **datos vacíos**, y el front repintaba el balance en **$0 / "Sin movimientos"**. Fix: las respuestas por timeout se marcan `_stale`, y `refresh()` **conserva los últimos datos buenos** (`_lastGood`) en vez de pintar la pantalla en blanco → la data se queda visible y se actualiza sola.
+- **Causa 3 (refrescos apilados):** `refresh()` no tenía guardia; al volver, el evento de `visibilitychange` + el intervalo de 20s + el realtime disparaban varios refrescos a la vez. Fix: guardia de reentrada con *coalescing* (si ya hay uno corriendo, se marca pendiente y se ejecuta **uno solo** de seguimiento).
+- Archivos: `supabase-api.js` (timeouts + marca `_stale` en `get`, `getAllDataDesdeSheets`, `getDiasPartTime`, `getSocios`), `app.js` (`refresh` con guardia + `_lastGood`). SW v114.
+
 #### 2026-07-20 — Fix: carga lenta (~30s) al volver a la app (SW v113)
 - **Causa:** al reanudar la app, si una consulta a Supabase venía vacía o la conexión quedaba "dormida", el interceptor **esperaba al GAS** (arranque en frío ~30s) y **bloqueaba todo el `Promise.all`** del balance → la app parecía pegada.
 - **Fix:** helper `_conTimeout` que limita cada llamada: las consultas Supabase del balance (`getAllDataDesdeSheets`, `getSaldosAnteriores`, `get` de recaudaciones) y sus respaldos al GAS ahora tienen **timeout (6–8s)**. En el caso normal Supabase responde al instante; si algo se demora, la app sigue con lo que hay y se actualiza en segundo plano — nunca se congela 30s.
