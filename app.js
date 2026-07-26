@@ -868,6 +868,19 @@
     };
     window.cerrarAjustesModal = function() { /* no-op: ya no hay modal */ };
 
+    // ── MIS DOCUMENTOS (opción en Perfil → modal) ────────────
+    window.abrirDocumentosModal = function() {
+        const m = document.getElementById('documentosModal');
+        if (!m) return;
+        m.classList.remove('hidden'); m.classList.add('flex');
+        if (typeof cargarDocumentos === 'function') cargarDocumentos(); // refrescar la lista al abrir
+    };
+    window.cerrarDocumentosModal = function() {
+        const m = document.getElementById('documentosModal');
+        if (!m) return;
+        m.classList.add('hidden'); m.classList.remove('flex');
+    };
+
     // ── NOMBRE PERSONALIZADO ─────────────────────────────────
     function getDisplayName() {
         const key = `displayName_${currentUser.ID}`;

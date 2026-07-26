@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — "Mis Documentos" vuelve a Perfil como opción propia (SW v116)
+- **Qué se hizo:** se movió "Mis Documentos" desde *Configuración de app* a **Perfil**, como una **opción** (fila con ícono `folder` y chevron) debajo de la tarjeta de datos.
+- **Comportamiento:** al tocar la opción se abre un **modal "Mis Documentos"** con el botón *Subir documento* y la lista de archivos (mismos IDs `docFileInput`/`docUploadBtn`/`docsLista`, así que subir/listar/borrar funciona igual). La lista se refresca al abrir.
+- Archivos: `index.html` (opción en Perfil + `documentosModal`; se quita el bloque de Configuración), `app.js` (`abrirDocumentosModal`/`cerrarDocumentosModal`). SW v116.
+
 #### 2026-07-26 — "Ajustes" pasa a ser una sección de la barra: "Configuración de app" (SW v115)
 - **Qué se hizo:** el engranaje ⚙️ que abría un modal desde Perfil se **retiró**; todo su contenido (cambiar nombre, notificaciones, tema, forma de foto del login, acceso al Diario, Mis Documentos) ahora vive en una **sección propia de la barra inferior** llamada **"Configuración de app"** (ícono `settings`, pestaña `tab-config`).
 - **Por qué:** más accesible y visible que un modal escondido en Perfil; queda al mismo nivel que Balance, Historial, Stats, Mensajes y Perfil.

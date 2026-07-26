@@ -2056,6 +2056,18 @@
                         <p id="perfilAntigMsg" style="font-size:11px;color:#94a3b8;margin:12px 0 0;text-align:center;line-height:1.5"></p>
                     </div>
 
+                    <!-- Opción: Mis Documentos (abre modal) -->
+                    <button onclick="abrirDocumentosModal()" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+                        <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">folder</span>
+                        </div>
+                        <div style="text-align:left;flex:1;min-width:0;">
+                            <p style="font-size:13px;font-weight:700;color:#001723;margin:0">Mis Documentos</p>
+                            <p style="font-size:11px;color:#94a3b8;margin:2px 0 0">Tu contrato u otros archivos (PDF o imagen)</p>
+                        </div>
+                        <span class="material-symbols-outlined" style="font-size:18px;color:#cbd5e1;margin-left:auto">chevron_right</span>
+                    </button>
+
                 </div><!-- /Tarjetas de datos -->
             </div><!-- /px-4 -->
         </div><!-- /tab-perfil -->
@@ -2231,27 +2243,35 @@
                         <span class="material-symbols-outlined" style="font-size:18px;color:#cbd5e1;margin-left:auto">open_in_new</span>
                     </a>
 
-                    <!-- MIS DOCUMENTOS -->
-                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">folder</span>
-                            </div>
-                            <div style="min-width:0;">
-                                <p style="font-size:14px;font-weight:800;color:#001723;margin:0;">Mis Documentos</p>
-                                <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;line-height:1.4;">Adjunta tu contrato u otros documentos (PDF o imagen)</p>
-                            </div>
-                        </div>
-                        <input type="file" id="docFileInput" accept="application/pdf,image/*" style="display:none" onchange="subirDocumento(this)">
-                        <button id="docUploadBtn" onclick="document.getElementById('docFileInput').click()" style="width:100%;background:#6366f1;color:#fff;border:none;border-radius:12px;padding:12px;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                            <span class="material-symbols-outlined" style="font-size:18px;">upload_file</span> Subir documento
-                        </button>
-                        <div id="docsLista"></div>
-                    </div>
-
                 </div><!-- /Contenedor de opciones -->
             </div><!-- /px-4 -->
         </div><!-- /tab-config -->
+
+    <!-- MODAL MIS DOCUMENTOS (se abre desde la opción en Perfil) -->
+    <div id="documentosModal" class="hidden fixed inset-0 z-[340] bg-black/50 backdrop-blur-sm items-end justify-center" onclick="if(event.target===this)cerrarDocumentosModal()">
+        <div class="w-full max-w-sm rounded-t-[28px] p-5 shadow-2xl max-h-[88vh] overflow-y-auto" style="background:var(--color-card,#fff)">
+            <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">folder</span>
+                    </div>
+                    <div style="min-width:0;">
+                        <h3 class="font-headline text-lg font-bold text-lm-primary" style="margin:0;">Mis Documentos</h3>
+                        <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;line-height:1.4;">Adjunta tu contrato u otros documentos (PDF o imagen)</p>
+                    </div>
+                </div>
+                <button onclick="cerrarDocumentosModal()" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.06);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                    <span class="material-symbols-outlined" style="font-size:20px;color:#64748b;">close</span>
+                </button>
+            </div>
+            <input type="file" id="docFileInput" accept="application/pdf,image/*" style="display:none" onchange="subirDocumento(this)">
+            <button id="docUploadBtn" onclick="document.getElementById('docFileInput').click()" style="width:100%;background:#6366f1;color:#fff;border:none;border-radius:12px;padding:12px;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <span class="material-symbols-outlined" style="font-size:18px;">upload_file</span> Subir documento
+            </button>
+            <div id="docsLista"></div>
+        </div>
+    </div><!-- /documentosModal -->
 
     <!-- MODAL INGRESAR RECAUDACION -->
     <div id="modalRecaudacion" onclick="if(event.target===this)cerrarModalRec()" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-end">
@@ -3240,6 +3260,19 @@
         if (typeof switchTab === 'function') switchTab('tab-config');
     };
     window.cerrarAjustesModal = function() { /* no-op: ya no hay modal */ };
+
+    // ── MIS DOCUMENTOS (opción en Perfil → modal) ────────────
+    window.abrirDocumentosModal = function() {
+        const m = document.getElementById('documentosModal');
+        if (!m) return;
+        m.classList.remove('hidden'); m.classList.add('flex');
+        if (typeof cargarDocumentos === 'function') cargarDocumentos(); // refrescar la lista al abrir
+    };
+    window.cerrarDocumentosModal = function() {
+        const m = document.getElementById('documentosModal');
+        if (!m) return;
+        m.classList.add('hidden'); m.classList.remove('flex');
+    };
 
     // ── NOMBRE PERSONALIZADO ─────────────────────────────────
     function getDisplayName() {
