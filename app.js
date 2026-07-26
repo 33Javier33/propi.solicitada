@@ -861,16 +861,12 @@
     };
 
     // ── AJUSTES del perfil (modal): nombre, notificaciones, tema, documentos ──
+    // "Ajustes" ya no es un modal: es la sección tab-config en la barra inferior.
+    // Se conservan estas funciones por compatibilidad (llamadas antiguas).
     window.abrirAjustesModal = function() {
-        const m = document.getElementById('ajustesModal');
-        if (!m) return;
-        m.classList.remove('hidden'); m.classList.add('flex');
+        if (typeof switchTab === 'function') switchTab('tab-config');
     };
-    window.cerrarAjustesModal = function() {
-        const m = document.getElementById('ajustesModal');
-        if (!m) return;
-        m.classList.add('hidden'); m.classList.remove('flex');
-    };
+    window.cerrarAjustesModal = function() { /* no-op: ya no hay modal */ };
 
     // ── NOMBRE PERSONALIZADO ─────────────────────────────────
     function getDisplayName() {

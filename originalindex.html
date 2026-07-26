@@ -1953,11 +1953,6 @@
         <div id="tab-perfil" class="tab-section overflow-y-auto pb-32 pt-4 bg-lm-bg">
             <div class="px-4" style="position:relative;">
 
-                <!-- Engranaje: abre modal de Ajustes y personalización -->
-                <button onclick="abrirAjustesModal()" title="Ajustes y personalización" style="position:absolute;top:0;right:16px;z-index:5;width:42px;height:42px;border-radius:13px;background:#fff;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
-                    <span class="material-symbols-outlined" style="font-size:23px;color:#6366f1;">settings</span>
-                </button>
-
                 <!-- Avatar y nombre -->
                 <div style="text-align:center;margin-bottom:24px;padding-top:8px;">
                     <div style="position:relative;width:88px;margin:0 auto 12px;">
@@ -2061,19 +2056,28 @@
                         <p id="perfilAntigMsg" style="font-size:11px;color:#94a3b8;margin:12px 0 0;text-align:center;line-height:1.5"></p>
                     </div>
 
-                    <!-- MODAL AJUSTES Y PERSONALIZACIÓN (se abre desde el engranaje ⚙️ de arriba) -->
-                    <div id="ajustesModal" class="hidden fixed inset-0 z-[340] bg-black/50 backdrop-blur-sm items-end justify-center" onclick="if(event.target===this)cerrarAjustesModal()">
-                    <div class="w-full max-w-sm rounded-t-[28px] p-5 shadow-2xl max-h-[88vh] overflow-y-auto" style="background:var(--color-card,#fff)">
-                    <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                        <h3 class="font-headline text-lg font-bold text-lm-primary" style="margin:0;">Ajustes y personalización</h3>
-                        <button onclick="cerrarAjustesModal()" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.06);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
-                            <span class="material-symbols-outlined" style="font-size:20px;color:#64748b;">close</span>
-                        </button>
+                </div><!-- /Tarjetas de datos -->
+            </div><!-- /px-4 -->
+        </div><!-- /tab-perfil -->
+
+        <!-- ── TAB: CONFIGURACIÓN DE APP (antes era el modal del engranaje) ── -->
+        <div id="tab-config" class="tab-section overflow-y-auto pb-32 pt-4 bg-lm-bg">
+            <div class="px-4">
+                <!-- Encabezado de la sección -->
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+                    <div style="width:44px;height:44px;border-radius:13px;background:rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <span class="material-symbols-outlined" style="font-size:24px;color:#6366f1;font-variation-settings:'FILL' 1;">settings</span>
                     </div>
+                    <div style="min-width:0;">
+                        <h2 class="font-headline" style="font-size:19px;font-weight:800;color:var(--color-text,#001723);margin:0;line-height:1.15;">Configuración de app</h2>
+                        <p style="font-size:12px;color:#94a3b8;margin:3px 0 0;">Ajustes y personalización</p>
+                    </div>
+                </div>
+                <!-- Contenedor de opciones -->
+                <div>
 
                     <!-- Botón editar nombre -->
-                    <button onclick="cerrarAjustesModal();openEditNameModal()" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <button onclick="openEditNameModal()" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
                             <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">edit</span>
                         </div>
@@ -2245,12 +2249,9 @@
                         <div id="docsLista"></div>
                     </div>
 
-                    </div>
-                    </div><!-- /ajustesModal -->
-
-                </div>
-            </div>
-        </div>
+                </div><!-- /Contenedor de opciones -->
+            </div><!-- /px-4 -->
+        </div><!-- /tab-config -->
 
     <!-- MODAL INGRESAR RECAUDACION -->
     <div id="modalRecaudacion" onclick="if(event.target===this)cerrarModalRec()" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-end">
@@ -2332,27 +2333,31 @@
     </div>
 
     <nav id="bottomNav" class="fixed bottom-0 w-full z-[60] pb-safe-bottom">
-        <div class="flex justify-around items-center px-4 pt-3 pb-2">
-            <button onclick="switchTab('tab-home')" class="nav-btn active flex flex-col items-center gap-1.5 w-16">
-                <span class="nav-icon material-symbols-outlined text-[24px]">account_balance_wallet</span>
-                <span class="text-[10px] font-semibold tracking-wide">Balance</span>
+        <div class="flex justify-around items-center px-1 pt-3 pb-2">
+            <button onclick="switchTab('tab-home')" class="nav-btn active flex flex-col items-center gap-1 flex-1 min-w-0">
+                <span class="nav-icon material-symbols-outlined text-[22px]">account_balance_wallet</span>
+                <span class="text-[9px] font-semibold">Balance</span>
             </button>
-            <button onclick="switchTab('tab-history')" class="nav-btn flex flex-col items-center gap-1.5 w-16">
-                <span class="nav-icon material-symbols-outlined text-[24px]">receipt_long</span>
-                <span class="text-[10px] font-semibold tracking-wide">Historial</span>
+            <button onclick="switchTab('tab-history')" class="nav-btn flex flex-col items-center gap-1 flex-1 min-w-0">
+                <span class="nav-icon material-symbols-outlined text-[22px]">receipt_long</span>
+                <span class="text-[9px] font-semibold">Historial</span>
             </button>
-            <button onclick="switchTab('tab-stats')" class="nav-btn flex flex-col items-center gap-1.5 w-16">
-                <span class="nav-icon material-symbols-outlined text-[24px]">bar_chart</span>
-                <span class="text-[10px] font-semibold tracking-wide">Stats</span>
+            <button onclick="switchTab('tab-stats')" class="nav-btn flex flex-col items-center gap-1 flex-1 min-w-0">
+                <span class="nav-icon material-symbols-outlined text-[22px]">bar_chart</span>
+                <span class="text-[9px] font-semibold">Stats</span>
             </button>
-            <button onclick="switchTab('tab-chat')" class="nav-btn flex flex-col items-center gap-1.5 w-16 relative">
+            <button onclick="switchTab('tab-chat')" class="nav-btn flex flex-col items-center gap-1 flex-1 min-w-0 relative">
                 <div id="notifBadge" class="unread-dot hidden"></div>
-                <span class="nav-icon material-symbols-outlined text-[24px]">chat</span>
-                <span class="text-[10px] font-semibold tracking-wide">Mensajes</span>
+                <span class="nav-icon material-symbols-outlined text-[22px]">chat</span>
+                <span class="text-[9px] font-semibold">Mensajes</span>
             </button>
-            <button onclick="switchTab('tab-perfil')" class="nav-btn flex flex-col items-center gap-1.5 w-16">
-                <span class="nav-icon material-symbols-outlined text-[24px]">badge</span>
-                <span class="text-[10px] font-semibold tracking-wide">Perfil</span>
+            <button onclick="switchTab('tab-perfil')" class="nav-btn flex flex-col items-center gap-1 flex-1 min-w-0">
+                <span class="nav-icon material-symbols-outlined text-[22px]">badge</span>
+                <span class="text-[9px] font-semibold">Perfil</span>
+            </button>
+            <button onclick="switchTab('tab-config')" class="nav-btn flex flex-col items-center gap-1 flex-1 min-w-0">
+                <span class="nav-icon material-symbols-outlined text-[22px]">settings</span>
+                <span class="text-[9px] font-semibold">Ajustes</span>
             </button>
         </div>
         <!-- Crédito -->
@@ -3229,16 +3234,12 @@
     };
 
     // ── AJUSTES del perfil (modal): nombre, notificaciones, tema, documentos ──
+    // "Ajustes" ya no es un modal: es la sección tab-config en la barra inferior.
+    // Se conservan estas funciones por compatibilidad (llamadas antiguas).
     window.abrirAjustesModal = function() {
-        const m = document.getElementById('ajustesModal');
-        if (!m) return;
-        m.classList.remove('hidden'); m.classList.add('flex');
+        if (typeof switchTab === 'function') switchTab('tab-config');
     };
-    window.cerrarAjustesModal = function() {
-        const m = document.getElementById('ajustesModal');
-        if (!m) return;
-        m.classList.add('hidden'); m.classList.remove('flex');
-    };
+    window.cerrarAjustesModal = function() { /* no-op: ya no hay modal */ };
 
     // ── NOMBRE PERSONALIZADO ─────────────────────────────────
     function getDisplayName() {

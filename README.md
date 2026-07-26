@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — "Ajustes" pasa a ser una sección de la barra: "Configuración de app" (SW v115)
+- **Qué se hizo:** el engranaje ⚙️ que abría un modal desde Perfil se **retiró**; todo su contenido (cambiar nombre, notificaciones, tema, forma de foto del login, acceso al Diario, Mis Documentos) ahora vive en una **sección propia de la barra inferior** llamada **"Configuración de app"** (ícono `settings`, pestaña `tab-config`).
+- **Por qué:** más accesible y visible que un modal escondido en Perfil; queda al mismo nivel que Balance, Historial, Stats, Mensajes y Perfil.
+- **Detalles:** la barra ahora tiene 6 pestañas (se ajustó el ancho con `flex-1` para que quepan). Se conservan `abrirAjustesModal`/`cerrarAjustesModal` como compatibilidad (la primera ahora navega a la pestaña, la segunda es no-op). Los IDs internos no cambiaron, así que tema/notificaciones/documentos siguen sincronizándose igual desde `renderPerfil()`.
+- Archivos: `index.html` (mueve el bloque a `tab-config`, nuevo botón de nav), `app.js` (`abrirAjustesModal`→`switchTab('tab-config')`). SW v115.
+
 #### 2026-07-24 — Fix definitivo: freeze de ~30s y datos que desaparecen al volver a la app (SW v114)
 - **Síntoma:** al salir sin cerrar la app y volver, los datos desaparecían y tardaban 30s o más en cargar.
 - **Causa 1 (freeze 30s):** dos consultas del balance **no tenían timeout** — `getSocios` y `getDiasPartTime`. Al reanudar en el móvil la conexión queda "dormida" y el **primer** `fetch` se cuelga hasta el timeout de red del sistema (~30s); como iban dentro del `Promise.all` del balance, **congelaban todo el refresh**. Fix: ambas ahora usan `_conTimeout` (8s) → nada bloquea más de 8s.
