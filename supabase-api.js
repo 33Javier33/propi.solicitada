@@ -544,38 +544,32 @@ async function _sociosHandler(url, options) {
                 if (m) return _MESES_C[parseInt(m[2], 10) - 1] + ' ' + m[1];
                 return raw || 'Período';
             };
-            // Firma (fecha+monto) para deduplicar el MISMO anticipo entre fuentes.
-            // No incluye responsable a propósito: GAS y Supabase pueden diferir en
-            // ese campo. Es seguro porque solo se filtran registros de GAS contra
-            // Supabase (nunca se deduplica dentro de Supabase, así no se sub-cuenta).
-            const _sig = (r) => String(r.fecha || '').slice(0, 10) + '|' + Number(r.monto);
+            // ── FUENTE ÚNICA: SUPABASE. Sheets/GAS solo es RESPALDO ──────────────
+            // La app ya NO mezcla Supabase + Sheets (eso duplicaba fechas/montos).
+            // Se muestra únicamente lo que hay en Supabase:
+            //   • anticipos_historial → anticipos archivados (períodos cerrados)
+            //   • anticipos           → anticipos activos del período actual
+            // GAS/Sheets queda como respaldo: solo se usa si Supabase no tiene NADA
+            // para este socio (p. ej. datos que aún no se han migrado).
+            const sbRecords  = (histRes.data || []).map(a => ({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '', periodo: a.periodo }));
+            const actRecords = (actRes.data  || []).map(a => ({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '', periodo: a.periodo || null }));
 
-            // Supabase (anticipos_historial) es la fuente de verdad del archivado.
-            const sbRecords = (histRes.data || []).map(a => ({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '', periodo: a.periodo }));
-            const sbSigs = new Set(sbRecords.map(_sig));
+            let fuente = [...sbRecords, ...actRecords];
 
-            // GAS: agregar SOLO los registros que no estén ya en Supabase. Así el
-            // mismo anticipo no se duplica entre fuentes, sin importar cómo se
-            // llame el período; y no se deduplica dentro de una misma fuente (no se
-            // pierden dos anticipos iguales legítimos del mismo día).
-            const gasRecords = [];
-            for (const p of (Array.isArray(historico) ? historico : []))
-                for (const r of (p.registros || [])) {
-                    const rec = { fecha: r.fecha, monto: Number(r.monto), responsable: r.responsable || '', periodo: p.periodo };
-                    if (!sbSigs.has(_sig(rec))) gasRecords.push(rec);
-                }
+            // Respaldo (Sheets): SOLO si Supabase está totalmente vacío para el socio.
+            if (fuente.length === 0) {
+                const gasRecords = [];
+                for (const p of (Array.isArray(historico) ? historico : []))
+                    for (const r of (p.registros || []))
+                        gasRecords.push({ fecha: r.fecha, monto: Number(r.monto), responsable: r.responsable || '', periodo: p.periodo });
+                fuente = gasRecords;
+            }
 
-            // Anticipos activos del período actual (aún sin archivar).
-            const actRecords = (actRes.data || []).map(a => ({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '', periodo: a.periodo || null }));
-
-            // Dedup FINAL por fecha+monto: el MISMO anticipo puede llegar por varias
-            // fuentes (activo en `anticipos` + archivado en `anticipos_historial`, o
-            // archivado dos veces). Eso hacía que la misma fecha/monto se mostrara
-            // repetida en "Anticipos Anteriores". Se colapsa a una sola entrada por
-            // fecha+monto; si una fuente trae responsable y la conservada no, se
-            // completa ese dato (no se pierde información).
+            // Dedup por fecha+monto: un mismo anticipo puede quedar en `anticipos`
+            // (activo) y en `anticipos_historial` (archivado) a la vez. Se colapsa a
+            // una sola entrada; si una fuente trae responsable y la otra no, se completa.
             const _dedup = new Map();
-            for (const r of [...sbRecords, ...gasRecords, ...actRecords]) {
+            for (const r of fuente) {
                 const k = String(r.fecha || '').slice(0, 10) + '|' + Number(r.monto);
                 const prev = _dedup.get(k);
                 if (!prev) _dedup.set(k, r);

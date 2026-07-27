@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — "Anticipos Anteriores" lee SOLO de Supabase; Sheets es respaldo (SW v118)
+- **Por qué:** el historial mezclaba dos orígenes (Supabase + Sheets/GAS), y esa mezcla era la raíz de las fechas/montos repetidos.
+- **Qué se hizo:** `getHistorialCompletoSocio` ahora se arma **únicamente con Supabase** (`anticipos_historial` = archivado + `anticipos` = activo). **Sheets/GAS pasa a ser solo respaldo:** solo se usa si Supabase no tiene NINGÚN registro para el socio (datos aún no migrados). Se mantiene la dedup por fecha+monto por si un anticipo quedó en activo y archivado a la vez.
+- Archivos: `supabase-api.js`. SW v118.
+
 #### 2026-07-26 — Fix: fechas/montos repetidos en "Anticipos Anteriores" (SW v117)
 - **Síntoma:** en el historial → Anticipos Anteriores, una misma fecha (y monto) aparecía varias veces.
 - **Causa:** `getHistorialCompletoSocio` junta 3 fuentes (archivado `anticipos_historial` + activo `anticipos` + GAS). Deduplicaba GAS contra el archivado, pero **no** los activos contra el archivado, así que un anticipo que quedó en ambas tablas se mostraba dos veces (fecha+monto repetidos), inflando también el total del período.
