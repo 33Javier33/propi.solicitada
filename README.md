@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Fix: fechas/montos repetidos en "Anticipos Anteriores" (SW v117)
+- **Síntoma:** en el historial → Anticipos Anteriores, una misma fecha (y monto) aparecía varias veces.
+- **Causa:** `getHistorialCompletoSocio` junta 3 fuentes (archivado `anticipos_historial` + activo `anticipos` + GAS). Deduplicaba GAS contra el archivado, pero **no** los activos contra el archivado, así que un anticipo que quedó en ambas tablas se mostraba dos veces (fecha+monto repetidos), inflando también el total del período.
+- **Fix:** deduplicación final por **fecha+monto** sobre las tres fuentes antes de agrupar por mes; se conserva el `responsable` si alguna fuente lo trae. Corrige tanto la lista como el total del período.
+- Archivos: `supabase-api.js`. SW v117.
+
 #### 2026-07-26 — "Mis Documentos" vuelve a Perfil como opción propia (SW v116)
 - **Qué se hizo:** se movió "Mis Documentos" desde *Configuración de app* a **Perfil**, como una **opción** (fila con ícono `folder` y chevron) debajo de la tarjeta de datos.
 - **Comportamiento:** al tocar la opción se abre un **modal "Mis Documentos"** con el botón *Subir documento* y la lista de archivos (mismos IDs `docFileInput`/`docUploadBtn`/`docsLista`, así que subir/listar/borrar funciona igual). La lista se refresca al abrir.

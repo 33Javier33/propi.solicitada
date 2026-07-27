@@ -568,9 +568,23 @@ async function _sociosHandler(url, options) {
             // Anticipos activos del período actual (aún sin archivar).
             const actRecords = (actRes.data || []).map(a => ({ fecha: a.fecha, monto: Number(a.monto), responsable: a.responsable || '', periodo: a.periodo || null }));
 
+            // Dedup FINAL por fecha+monto: el MISMO anticipo puede llegar por varias
+            // fuentes (activo en `anticipos` + archivado en `anticipos_historial`, o
+            // archivado dos veces). Eso hacía que la misma fecha/monto se mostrara
+            // repetida en "Anticipos Anteriores". Se colapsa a una sola entrada por
+            // fecha+monto; si una fuente trae responsable y la conservada no, se
+            // completa ese dato (no se pierde información).
+            const _dedup = new Map();
+            for (const r of [...sbRecords, ...gasRecords, ...actRecords]) {
+                const k = String(r.fecha || '').slice(0, 10) + '|' + Number(r.monto);
+                const prev = _dedup.get(k);
+                if (!prev) _dedup.set(k, r);
+                else if (!prev.responsable && r.responsable) _dedup.set(k, { ...prev, responsable: r.responsable });
+            }
+
             // Agrupar todo por mes canónico.
             const groups = {};
-            for (const r of [...sbRecords, ...gasRecords, ...actRecords]) {
+            for (const r of _dedup.values()) {
                 const c = _canon(r.periodo, r.fecha);
                 if (!groups[c]) groups[c] = { rawLabel: r.periodo || '', registros: [] };
                 if (!groups[c].rawLabel && r.periodo) groups[c].rawLabel = r.periodo;
