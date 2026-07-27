@@ -1002,6 +1002,7 @@
         applyDisplayName();
         document.getElementById('userAreaLabel').textContent = currentUser.Area;
         renderPerfil();
+        _renderSonidoSelector();
         initChatInput();
         showSkeletons();
         pingConexion();
@@ -2154,9 +2155,77 @@
         const t=document.getElementById('toastNotification');
         document.getElementById('toastMessage').textContent=`${autor}: ${msg}`;
         t.classList.add('show');
-        try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
+        reproducirSonidoNotif();
         setTimeout(()=>t.classList.remove('show'),4000);
     }
+
+    // ── SONIDO DE NOTIFICACIÓN (sintetizado con Web Audio: sin archivos ni CDN) ──
+    let _audioCtx = null;
+    function _getAudioCtx() {
+        try {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return null;
+            if (!_audioCtx) _audioCtx = new AC();
+            if (_audioCtx.state === 'suspended') _audioCtx.resume();
+            return _audioCtx;
+        } catch(e) { return null; }
+    }
+    // Reproduce un tono con envolvente suave (evita "clicks")
+    function _tono(ctx, freq, startAt, dur, type, vol) {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = type || 'sine';
+        o.frequency.value = freq;
+        const t0 = ctx.currentTime + startAt;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.linearRampToValueAtTime(vol || 0.25, t0 + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t0); o.stop(t0 + dur + 0.03);
+    }
+    const SONIDOS_NOTIF = {
+        campana:  { nombre: 'Campanita', icon: 'notifications',   play: c => { _tono(c,1318,0,0.18,'sine',0.30); _tono(c,1760,0.09,0.24,'sine',0.24); } },
+        ding:     { nombre: 'Ding',      icon: 'doorbell',        play: c => { _tono(c,880,0,0.55,'sine',0.30); } },
+        pop:      { nombre: 'Pop',       icon: 'bubble_chart',    play: c => { _tono(c,520,0,0.12,'triangle',0.35); } },
+        bip:      { nombre: 'Doble bip', icon: 'graphic_eq',      play: c => { _tono(c,1000,0,0.09,'square',0.16); _tono(c,1000,0.14,0.09,'square',0.16); } },
+        marimba:  { nombre: 'Marimba',   icon: 'music_note',      play: c => { _tono(c,587,0,0.16,'sine',0.28); _tono(c,784,0.1,0.16,'sine',0.28); _tono(c,1047,0.2,0.26,'sine',0.28); } },
+        silencio: { nombre: 'Silencio',  icon: 'volume_off',      play: () => {} }
+    };
+    function _sonidoNotifGuardado() {
+        try { return localStorage.getItem('propi_sonido_notif') || 'campana'; } catch(e) { return 'campana'; }
+    }
+    function reproducirSonidoNotif(nombre) {
+        const key = nombre || _sonidoNotifGuardado();
+        if (key === 'silencio') return;
+        const snd = SONIDOS_NOTIF[key] || SONIDOS_NOTIF.campana;
+        const ctx = _getAudioCtx();
+        if (ctx) { try { snd.play(ctx); } catch(e) {} }
+    }
+    function _sincronizarSonidoBtns() {
+        const sel = _sonidoNotifGuardado();
+        document.querySelectorAll('[data-sonido]').forEach(b => {
+            const activo = b.getAttribute('data-sonido') === sel;
+            b.style.borderColor = activo ? '#6366f1' : '#e2e8f0';
+            b.style.background   = activo ? 'rgba(99,102,241,0.08)' : '#fff';
+        });
+    }
+    function _renderSonidoSelector() {
+        const cont = document.getElementById('sonidoNotifOpciones');
+        if (!cont) return;
+        cont.innerHTML = Object.keys(SONIDOS_NOTIF).map(key => {
+            const s = SONIDOS_NOTIF[key];
+            return `<button type="button" data-sonido="${key}" onclick="setSonidoNotif('${key}')"
+                style="border:2px solid #e2e8f0;border-radius:12px;padding:11px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <span class="material-symbols-outlined" style="font-size:20px;color:#6366f1;">${s.icon}</span>
+                <span style="font-size:11px;font-weight:700;color:#334155;">${s.nombre}</span>
+            </button>`;
+        }).join('');
+        _sincronizarSonidoBtns();
+    }
+    window.setSonidoNotif = function(key) {
+        try { localStorage.setItem('propi_sonido_notif', key); } catch(e) {}
+        _sincronizarSonidoBtns();
+        reproducirSonidoNotif(key); // vista previa al elegir
+    };
 
     // ── CHAT INPUT BEHAVIOR ────────────────────────────────────
     function getChatText() {

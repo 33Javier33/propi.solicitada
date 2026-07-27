@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Selector de sonido de notificación (Configuración de app) (SW v120)
+- **Qué se hizo:** en *Configuración de app* se agregó "Sonido de notificación": el usuario elige entre **Campanita, Ding, Pop, Doble bip, Marimba o Silencio**. Suena al recibir un mensaje con la app abierta; toca una opción para escucharla; se guarda por dispositivo (`localStorage: propi_sonido_notif`).
+- **Cómo:** los sonidos se **sintetizan con Web Audio** (osciladores) — no dependen de archivos ni del CDN externo (antes usaba `assets.mixkit.co`, que podía no sonar sin conexión). `showToast` ahora llama `reproducirSonidoNotif()`.
+- **Límite (aclarado en la UI):** el sonido de las notificaciones **con la app cerrada** lo controla el teléfono (Ajustes → Notificaciones), la web no puede cambiarlo.
+- Archivos: `index.html` (tarjeta + `#sonidoNotifOpciones`), `app.js` (motor de audio, selector, reemplaza el Audio de mixkit). SW v120.
+
 #### 2026-07-26 — "Anticipos Anteriores" (premium): colapsable + filtro por año y mes (SW v119)
 - **Qué se hizo:** la vista premium de Anticipos Anteriores ahora agrupa por período en **tarjetas colapsables** (acordeón, arrancan cerradas mostrando solo mes/año, cantidad y total; se expanden al tocar) y suma **dos filtros**: por **año** y por **mes/fecha** (se ocultan si solo hay un valor).
 - **Detalles:** filtros nuevos `pmFiltrarAntAnio`/`pmFiltrarAntMes` sobre `_histAnticiposData`, acordeón `pmTogglePeriodo`, chips de filtro en estilo oscuro. Reutiliza `_extraerAnio`/`_extraerMes`/`_fmtPeriodoLabel`. La versión clásica ya tenía estos filtros; ahora la premium también.
