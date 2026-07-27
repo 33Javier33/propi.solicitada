@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — "Anticipos Anteriores" (premium): colapsable + filtro por año y mes (SW v119)
+- **Qué se hizo:** la vista premium de Anticipos Anteriores ahora agrupa por período en **tarjetas colapsables** (acordeón, arrancan cerradas mostrando solo mes/año, cantidad y total; se expanden al tocar) y suma **dos filtros**: por **año** y por **mes/fecha** (se ocultan si solo hay un valor).
+- **Detalles:** filtros nuevos `pmFiltrarAntAnio`/`pmFiltrarAntMes` sobre `_histAnticiposData`, acordeón `pmTogglePeriodo`, chips de filtro en estilo oscuro. Reutiliza `_extraerAnio`/`_extraerMes`/`_fmtPeriodoLabel`. La versión clásica ya tenía estos filtros; ahora la premium también.
+- Archivos: `index.html` (barras de filtro en `pmHistAntView`), `app.js` (`pmRenderAntAnt` colapsable + lógica de filtros). SW v119.
+
 #### 2026-07-26 — "Anticipos Anteriores" lee SOLO de Supabase; Sheets es respaldo (SW v118)
 - **Por qué:** el historial mezclaba dos orígenes (Supabase + Sheets/GAS), y esa mezcla era la raíz de las fechas/montos repetidos.
 - **Qué se hizo:** `getHistorialCompletoSocio` ahora se arma **únicamente con Supabase** (`anticipos_historial` = archivado + `anticipos` = activo). **Sheets/GAS pasa a ser solo respaldo:** solo se usa si Supabase no tiene NINGÚN registro para el socio (datos aún no migrados). Se mantiene la dedup por fecha+monto por si un anticipo quedó en activo y archivado a la vez.

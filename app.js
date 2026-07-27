@@ -624,26 +624,98 @@
         if (app) { app.classList.add('pm-switch-fx'); setTimeout(() => app.classList.remove('pm-switch-fx'), 750); }
     };
 
-    // Historial premium: render de "Anticipos Anteriores" (estilo oscuro)
+    // ── Filtros (año / mes) para "Anticipos Anteriores" premium ──
+    let _pmAntAnio = 'Todos', _pmAntMes = 'Todos';
+
+    // Aplica los filtros activos sobre los datos ya cargados
+    function _pmAntFiltrar() {
+        let d = _histAnticiposData || [];
+        if (_pmAntAnio !== 'Todos') d = d.filter(p => _extraerAnio(p.periodo) === _pmAntAnio);
+        if (_pmAntMes  !== 'Todos') d = d.filter(p => _extraerMes(p.periodo) === _pmAntMes);
+        return d;
+    }
+
+    function _pmChipAnt(val, activo, onclick) {
+        return `<button onclick="${onclick}" style="flex-shrink:0;padding:6px 14px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;border:1px solid ${activo ? '#6366f1' : '#43474b'};background:${activo ? '#6366f1' : '#1d232a'};color:${activo ? '#fff' : '#c3c7cb'};">${val}</button>`;
+    }
+
+    function pmBuildAntFiltros() {
+        const data = _histAnticiposData || [];
+        const barA = document.getElementById('pmAntFiltroAnios');
+        if (barA) {
+            const anios = [...new Set(data.map(p => _extraerAnio(p.periodo)).filter(Boolean))].sort((a, b) => b - a);
+            if (anios.length <= 1) { barA.style.display = 'none'; }
+            else {
+                barA.style.display = 'flex';
+                barA.innerHTML = ['Todos', ...anios].map(a => _pmChipAnt(a, a === _pmAntAnio, `pmFiltrarAntAnio('${a}')`)).join('');
+            }
+        }
+        pmBuildAntMeses();
+    }
+
+    function pmBuildAntMeses() {
+        const barM = document.getElementById('pmAntFiltroMeses');
+        if (!barM) return;
+        const base = (_pmAntAnio === 'Todos') ? (_histAnticiposData || [])
+            : (_histAnticiposData || []).filter(p => _extraerAnio(p.periodo) === _pmAntAnio);
+        const set = new Set(base.map(p => _extraerMes(p.periodo)).filter(Boolean));
+        const meses = MESES_ES.filter(m => set.has(m));
+        if (meses.length <= 1) { barM.style.display = 'none'; return; }
+        barM.style.display = 'flex';
+        barM.innerHTML = ['Todos', ...meses].map(m => _pmChipAnt(m, m === _pmAntMes, `pmFiltrarAntMes('${m}')`)).join('');
+    }
+
+    window.pmFiltrarAntAnio = function (a) {
+        _pmAntAnio = a; _pmAntMes = 'Todos';
+        pmBuildAntFiltros();
+        pmRenderAntAnt(_pmAntFiltrar());
+    };
+    window.pmFiltrarAntMes = function (m) {
+        _pmAntMes = m;
+        pmBuildAntMeses();
+        pmRenderAntAnt(_pmAntFiltrar());
+    };
+
+    // Colapsar / expandir un período (acordeón)
+    window.pmTogglePeriodo = function (id) {
+        const body = document.getElementById('pmant-body-' + id);
+        const icon = document.getElementById('pmant-icon-' + id);
+        if (!body) return;
+        const abierto = body.style.display === 'block';
+        body.style.display = abierto ? 'none' : 'block';
+        if (icon) icon.style.transform = abierto ? 'rotate(0deg)' : 'rotate(180deg)';
+    };
+
+    // Historial premium: render de "Anticipos Anteriores" (estilo oscuro, colapsable)
     function pmRenderAntAnt(data) {
         const cont = document.getElementById('pmAntAntList');
         if (!cont) return;
         if (!data || !data.length) {
-            cont.innerHTML = '<div style="text-align:center;padding:40px 16px;color:#8d9196;font-size:13px;">Sin anticipos anteriores.</div>';
+            cont.innerHTML = '<div style="text-align:center;padding:40px 16px;color:#8d9196;font-size:13px;">Sin anticipos en este período.</div>';
             return;
         }
-        cont.innerHTML = data.map(periodo => {
-            const total = (periodo.registros || []).reduce((s, r) => s + (Number(r.monto) || 0), 0);
-            const regs = (periodo.registros || []).map(r => `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-top:1px solid #43474b;">
+        cont.innerHTML = data.map((periodo, idx) => {
+            const registros = periodo.registros || [];
+            const total = registros.reduce((s, r) => s + (Number(r.monto) || 0), 0);
+            const n = registros.length;
+            const id = 'pm' + idx;
+            const regs = registros.map(r => `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-top:1px solid #43474b;">
                 <div style="min-width:0;"><p style="font-size:13px;color:#e1e3e4;margin:0;">${r.fecha || ''}</p>${r.responsable ? `<p style="font-size:10px;color:#8d9196;margin:2px 0 0;">${r.responsable}</p>` : ''}</div>
                 <span style="font-size:13px;font-weight:700;color:#c3c7cb;flex-shrink:0;margin-left:10px;">-${formatMoney(Number(r.monto) || 0)}</span>
             </div>`).join('');
             return `<div style="background:#171c22;border:1px solid #43474b;border-radius:14px;margin-bottom:12px;overflow:hidden;">
-                <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;background:#1d232a;">
-                    <span style="font-size:13px;font-weight:700;color:#fff;">${_fmtPeriodoLabel(periodo.periodo)}</span>
-                    <span style="font-size:14px;font-weight:800;color:#ffb4ab;">-${formatMoney(total)}</span>
-                </div>
-                ${regs}
+                <button onclick="pmTogglePeriodo('${id}')" style="width:100%;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;background:#1d232a;border:none;cursor:pointer;text-align:left;">
+                    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                        <span class="material-symbols-outlined" style="font-size:16px;color:#93c5fd;flex-shrink:0;">folder_open</span>
+                        <span style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${_fmtPeriodoLabel(periodo.periodo)}</span>
+                        <span style="font-size:10px;color:#8d9196;flex-shrink:0;">${n} anticipo${n !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                        <span style="font-size:14px;font-weight:800;color:#ffb4ab;">-${formatMoney(total)}</span>
+                        <span id="pmant-icon-${id}" class="material-symbols-outlined" style="font-size:18px;color:#8d9196;transition:transform 0.2s;">expand_more</span>
+                    </div>
+                </button>
+                <div id="pmant-body-${id}" style="display:none;">${regs}</div>
             </div>`;
         }).join('');
     }
@@ -665,7 +737,9 @@
                 if (cont) cont.innerHTML = '<div style="text-align:center;padding:40px 16px;color:#c3c7cb;font-size:13px;">Cargando…</div>';
                 try { await loadHistorialAnticipos(); } catch (e) {}
             }
-            pmRenderAntAnt(_histAnticiposData);
+            _pmAntAnio = 'Todos'; _pmAntMes = 'Todos';
+            pmBuildAntFiltros();
+            pmRenderAntAnt(_pmAntFiltrar());
         }
     };
 
