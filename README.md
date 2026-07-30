@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Aviso "Ingreso faltante": tocar el día para ingresar el dato (SW v124)
+- **Qué se hizo:** en el aviso, cada día faltante ahora es un **botón tocable**: al tocarlo abre el modal de "Ingresar Recaudación" **con esa fecha ya puesta**, invitando a completar el dato si se conoce ("Si conoces el dato, toca el día para ingresarlo").
+- **Cómo:** `abrirModalRec(fecha)` acepta una fecha opcional (valida `YYYY-MM-DD`, si no, usa hoy); los chips del aviso llaman `abrirModalRec('YYYY-MM-DD')`.
+- Archivos: `app.js` (`abrirModalRec` con fecha, chips tocables en `_notaFaltantesHTML`). SW v124.
+
 #### 2026-07-26 — Aviso "Ingreso faltante" pasa debajo de la tarjeta de balance (SW v123)
 - **Por qué:** lo principal para el socio es el saldo; el aviso arriba de todo tapaba esa jerarquía.
 - **Qué se hizo:** el aviso se movió al `homePremium` **justo debajo de la tarjeta de balance** (antes de "Accesos Rápidos"). Como ese layout tiene fondo oscuro fijo, el aviso del home usa **siempre** la variante oscura. El historial clásico sigue adaptándose al tema.
