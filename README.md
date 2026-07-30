@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Aviso de "ingreso faltante" + día de la semana en el historial (SW v121)
+- **Días faltantes:** se detectan los días **sin ingreso (recaudación)** entre la fecha más antigua con ingreso y **ayer**, y se muestra una nota **"Ingreso faltante"** con los días (chip con día de semana + fecha). Aparece en el **historial** (clásico y premium) y en la **pantalla principal** (arriba del balance). Si no falta ninguno, no se muestra nada. Rango acotado a los últimos 45 días para no escanear de más.
+- **Día de la semana:** cada entrada del historial ahora muestra el día (ej: "Jueves · 30-07-2026") en clásico y premium.
+- **Cómo:** helpers `_diaSemana`, `_calcularDiasFaltantes`, `_notaFaltantesHTML`; contenedor `#faltantesAvisoHome` en `tab-home`. Se recalcula en cada `refresh()`.
+- Archivos: `index.html` (contenedor del aviso en home), `app.js` (helpers + inyección en historial/home + día de semana). SW v121.
+
 #### 2026-07-26 — Selector de sonido de notificación (Configuración de app) (SW v120)
 - **Qué se hizo:** en *Configuración de app* se agregó "Sonido de notificación": el usuario elige entre **Campanita, Ding, Pop, Doble bip, Marimba o Silencio**. Suena al recibir un mensaje con la app abierta; toca una opción para escucharla; se guarda por dispositivo (`localStorage: propi_sonido_notif`).
 - **Cómo:** los sonidos se **sintetizan con Web Audio** (osciladores) — no dependen de archivos ni del CDN externo (antes usaba `assets.mixkit.co`, que podía no sonar sin conexión). `showToast` ahora llama `reproducirSonidoNotif()`.

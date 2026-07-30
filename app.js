@@ -1211,6 +1211,56 @@
         return d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}).replace('.','');
     };
 
+    // Nombre del día de la semana (capitalizado) a partir de YYYY-MM-DD
+    const _capIni = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+    const _diaSemana = f => {
+        const d = new Date(String(f).substring(0,10) + 'T12:00:00');
+        if (isNaN(d.getTime())) return '';
+        return _capIni(d.toLocaleDateString('es-CL', { weekday: 'long' }));
+    };
+
+    // Calcula los días SIN ingreso (recaudación) entre la fecha más antigua con
+    // ingreso y AYER. `fechasConIngreso` es un Set de claves 'YYYY-MM-DD'.
+    function _calcularDiasFaltantes(fechasConIngreso) {
+        const keys = [...fechasConIngreso].sort();
+        if (!keys.length) return [];
+        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const ayer = new Date(hoy); ayer.setDate(ayer.getDate() - 1);
+        let cur = new Date(keys[0] + 'T00:00:00');
+        // No escanear rangos gigantes: como mucho, los últimos 45 días.
+        const tope = new Date(ayer); tope.setDate(tope.getDate() - 45);
+        if (cur < tope) cur = tope;
+        const faltan = [];
+        for (let d = new Date(cur); d <= ayer; d.setDate(d.getDate() + 1)) {
+            const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            if (!fechasConIngreso.has(k)) faltan.push(k);
+        }
+        return faltan;
+    }
+
+    // HTML de la nota "Ingreso faltante" (self-contained: se ve bien en cualquier tema)
+    function _notaFaltantesHTML(faltantes, dark) {
+        if (!faltantes || !faltantes.length) return '';
+        const bg = dark ? 'rgba(245,158,11,0.12)' : '#fffbeb';
+        const bd = dark ? 'rgba(245,158,11,0.35)' : '#fde68a';
+        const tx = dark ? '#fcd34d' : '#92400e';
+        const chipBg = dark ? 'rgba(245,158,11,0.18)' : '#fef3c7';
+        const chips = faltantes.map(k => {
+            const d = new Date(k + 'T12:00:00');
+            const txt = _capIni(d.toLocaleDateString('es-CL', { weekday:'short', day:'2-digit', month:'2-digit' }).replace(/\./g,''));
+            return `<span style="display:inline-block;background:${chipBg};color:${tx};font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin:4px 4px 0 0;white-space:nowrap;">${txt}</span>`;
+        }).join('');
+        const n = faltantes.length;
+        return `<div style="background:${bg};border:1px solid ${bd};border-radius:14px;padding:12px 14px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span class="material-symbols-outlined" style="font-size:18px;color:${tx};">event_busy</span>
+                <span style="font-size:13px;font-weight:800;color:${tx};">Ingreso faltante</span>
+            </div>
+            <p style="font-size:11px;color:${tx};opacity:0.9;margin:6px 0 0;">Hay ${n} día${n!==1?'s':''} sin ingreso registrado:</p>
+            <div style="margin-top:2px;">${chips}</div>
+        </div>`;
+    }
+
     // ── REFRESH CHAT ONLY (polling ligero) ───────────────────
     let chatRefreshing = false;
     function mergeOptimistas(newList, oldList) {
@@ -1543,7 +1593,13 @@
             // Ordenar fechas de más reciente a más antigua
             const fechasOrdenadas = Object.keys(porFecha).sort((a,b) => b.localeCompare(a));
 
-            document.getElementById('historyList').innerHTML = fechasOrdenadas.map(f => {
+            // Días sin ingreso (recaudación) → nota "Ingreso faltante"
+            const _diasFaltantes = _calcularDiasFaltantes(new Set(Object.keys(porFecha)));
+            // Pantalla principal: mostrar/limpiar el aviso
+            const _avisoHome = document.getElementById('faltantesAvisoHome');
+            if (_avisoHome) _avisoHome.innerHTML = _notaFaltantesHTML(_diasFaltantes, false);
+
+            document.getElementById('historyList').innerHTML = _notaFaltantesHTML(_diasFaltantes, false) + fechasOrdenadas.map(f => {
                 const entradas = porFecha[f];
                 const esAusencia = !esPT && ausenciasSet.has(f);
                 const esDiaTrabajado = esPT && diasTrabajadosSet && diasTrabajadosSet.has(f);
@@ -1594,7 +1650,7 @@
                                 + '<span class="material-symbols-outlined" style="font-size:18px;color:' + gananciaColor + '">' + (contaParaMi ? 'trending_up' : 'trending_flat') + '</span>'
                             + '</div>'
                             + '<div>'
-                                + '<p style="font-size:13px;font-weight:700;color:#001723">' + cleanDateStr(f) + '</p>'
+                                + '<p style="font-size:13px;font-weight:700;color:#001723">' + _diaSemana(f) + ' · ' + cleanDateStr(f) + '</p>'
                                 + '<p style="font-size:10px;color:#94a3b8;margin-top:1px">' + entradas.length + (entradas.length === 1 ? ' entrada' : ' entradas') + ' · Total: ' + formatMoney(totalDia) + '</p>'
                             + '</div>'
                         + '</div>'
@@ -1654,7 +1710,7 @@
                         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#1d232a;border-bottom:1px solid #43474b;">
                             <div style="display:flex;align-items:center;gap:10px;min-width:0;">
                                 <div style="width:36px;height:36px;border-radius:10px;background:rgba(179,202,218,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:18px;color:${col};">${cuenta ? 'trending_up' : 'trending_flat'}</span></div>
-                                <div style="min-width:0;"><p style="font-size:13px;font-weight:700;color:#f8f9fa;margin:0;">${cleanDateStr(f)}</p><p style="font-size:10px;color:#8d9196;margin:1px 0 0;">${entradas.length}${entradas.length === 1 ? ' entrada' : ' entradas'} · Total: ${formatMoney(totalDia)}</p></div>
+                                <div style="min-width:0;"><p style="font-size:13px;font-weight:700;color:#f8f9fa;margin:0;">${_diaSemana(f)} · ${cleanDateStr(f)}</p><p style="font-size:10px;color:#8d9196;margin:1px 0 0;">${entradas.length}${entradas.length === 1 ? ' entrada' : ' entradas'} · Total: ${formatMoney(totalDia)}</p></div>
                             </div>${badge}
                         </div>
                         <div style="padding:4px 14px 8px;">${tiposHTML}</div>
@@ -1670,7 +1726,7 @@
                 stat('pmHistPunto', formatMoney(Math.round(puntoGlobalTotal)));
                 const cont = document.getElementById('pmHistList');
                 if (cont) {
-                    cont.innerHTML = fechasOrdenadas.length ? cards : '<div style="text-align:center;padding:32px;color:#c3c7cb;font-size:13px;">Sin movimientos en este periodo</div>';
+                    cont.innerHTML = _notaFaltantesHTML(_diasFaltantes, true) + (fechasOrdenadas.length ? cards : '<div style="text-align:center;padding:32px;color:#c3c7cb;font-size:13px;">Sin movimientos en este periodo</div>');
                     const cnt = document.getElementById('pmHistCount');
                     if (cnt) cnt.textContent = fechasOrdenadas.length + (fechasOrdenadas.length === 1 ? ' día' : ' días');
                 }
