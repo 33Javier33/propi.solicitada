@@ -2888,6 +2888,11 @@
         try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}
         return _TEMAS.includes(t) ? t : 'claro';
     }
+    // Temas con fondo oscuro (para que avisos/tarjetas usen la variante oscura)
+    function _temaEsOscuro() {
+        const t = _temaActual();
+        return t === 'oscuro' || t === 'negro' || t === 'esmeralda';
+    }
     function _sincronizarTemaBtns() {
         const actual = _temaActual();
         document.querySelectorAll('.tema-btn').forEach(b => {
@@ -4010,11 +4015,12 @@
 
             // Días sin ingreso (recaudación) → nota "Ingreso faltante"
             const _diasFaltantes = _calcularDiasFaltantes(new Set(Object.keys(porFecha)));
+            const _avisoOscuro = _temaEsOscuro(); // adapta el color de la nota al tema
             // Pantalla principal: mostrar/limpiar el aviso
             const _avisoHome = document.getElementById('faltantesAvisoHome');
-            if (_avisoHome) _avisoHome.innerHTML = _notaFaltantesHTML(_diasFaltantes, false);
+            if (_avisoHome) _avisoHome.innerHTML = _notaFaltantesHTML(_diasFaltantes, _avisoOscuro);
 
-            document.getElementById('historyList').innerHTML = _notaFaltantesHTML(_diasFaltantes, false) + fechasOrdenadas.map(f => {
+            document.getElementById('historyList').innerHTML = _notaFaltantesHTML(_diasFaltantes, _avisoOscuro) + fechasOrdenadas.map(f => {
                 const entradas = porFecha[f];
                 const esAusencia = !esPT && ausenciasSet.has(f);
                 const esDiaTrabajado = esPT && diasTrabajadosSet && diasTrabajadosSet.has(f);

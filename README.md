@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Fix color del aviso "Ingreso faltante" en temas oscuros (SW v122)
+- **Síntoma:** en la pantalla principal, con tema oscuro/negro/esmeralda, el aviso "Ingreso faltante" salía en crema muy claro y resaltaba feo.
+- **Fix:** el aviso ahora **detecta el tema** (`_temaEsOscuro`: oscuro/negro/esmeralda) y usa la variante **oscura** (ámbar translúcido + texto dorado) en el home y en el historial clásico. En temas claros mantiene el ámbar claro. La vista premium ya usaba la variante oscura.
+- Archivos: `app.js` (`_temaEsOscuro`, aviso adaptativo). SW v122.
+
 #### 2026-07-26 — Aviso de "ingreso faltante" + día de la semana en el historial (SW v121)
 - **Días faltantes:** se detectan los días **sin ingreso (recaudación)** entre la fecha más antigua con ingreso y **ayer**, y se muestra una nota **"Ingreso faltante"** con los días (chip con día de semana + fecha). Aparece en el **historial** (clásico y premium) y en la **pantalla principal** (arriba del balance). Si no falta ninguno, no se muestra nada. Rango acotado a los últimos 45 días para no escanear de más.
 - **Día de la semana:** cada entrada del historial ahora muestra el día (ej: "Jueves · 30-07-2026") en clásico y premium.
