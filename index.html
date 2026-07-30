@@ -509,9 +509,6 @@
         <!-- ── TAB: HOME (BALANCE) ── -->
         <div id="tab-home" class="tab-section active overflow-y-auto pb-32 pt-1 bg-lm-bg">
 
-            <!-- Aviso de días sin ingreso (recaudación) — se llena desde refresh() -->
-            <div id="faltantesAvisoHome" class="px-4"></div>
-
             <div id="homeClasico">
             <!-- Indicador última actualización -->
             <div id="lastUpdateBar" style="display:flex;align-items:center;justify-content:flex-end;gap:5px;padding:0 16px 6px;opacity:0.6;">
@@ -740,6 +737,8 @@
                         </div>
                     </div>
                 </div>
+                <!-- Aviso de días sin ingreso (recaudación) — debajo de la tarjeta. Se llena desde refresh() -->
+                <div id="faltantesAvisoHome"></div>
                 <!-- Accesos rápidos -->
                 <h3 style="font-family:Manrope,sans-serif;font-size:18px;font-weight:700;color:#e1e3e4;margin:0 0 14px;">Accesos Rápidos</h3>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;">

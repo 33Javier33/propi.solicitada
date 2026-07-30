@@ -1600,10 +1600,10 @@
 
             // Días sin ingreso (recaudación) → nota "Ingreso faltante"
             const _diasFaltantes = _calcularDiasFaltantes(new Set(Object.keys(porFecha)));
-            const _avisoOscuro = _temaEsOscuro(); // adapta el color de la nota al tema
-            // Pantalla principal: mostrar/limpiar el aviso
+            const _avisoOscuro = _temaEsOscuro(); // el historial clásico sí sigue el tema
+            // Pantalla principal (homePremium): su fondo es oscuro fijo → aviso oscuro siempre
             const _avisoHome = document.getElementById('faltantesAvisoHome');
-            if (_avisoHome) _avisoHome.innerHTML = _notaFaltantesHTML(_diasFaltantes, _avisoOscuro);
+            if (_avisoHome) _avisoHome.innerHTML = _notaFaltantesHTML(_diasFaltantes, true);
 
             document.getElementById('historyList').innerHTML = _notaFaltantesHTML(_diasFaltantes, _avisoOscuro) + fechasOrdenadas.map(f => {
                 const entradas = porFecha[f];

@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Aviso "Ingreso faltante" pasa debajo de la tarjeta de balance (SW v123)
+- **Por qué:** lo principal para el socio es el saldo; el aviso arriba de todo tapaba esa jerarquía.
+- **Qué se hizo:** el aviso se movió al `homePremium` **justo debajo de la tarjeta de balance** (antes de "Accesos Rápidos"). Como ese layout tiene fondo oscuro fijo, el aviso del home usa **siempre** la variante oscura. El historial clásico sigue adaptándose al tema.
+- Archivos: `index.html` (contenedor movido dentro de `homePremium`), `app.js` (aviso home oscuro fijo). SW v123.
+
 #### 2026-07-26 — Fix color del aviso "Ingreso faltante" en temas oscuros (SW v122)
 - **Síntoma:** en la pantalla principal, con tema oscuro/negro/esmeralda, el aviso "Ingreso faltante" salía en crema muy claro y resaltaba feo.
 - **Fix:** el aviso ahora **detecta el tema** (`_temaEsOscuro`: oscuro/negro/esmeralda) y usa la variante **oscura** (ámbar translúcido + texto dorado) en el home y en el historial clásico. En temas claros mantiene el ámbar claro. La vista premium ya usaba la variante oscura.
