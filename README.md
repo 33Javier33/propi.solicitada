@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — 3 temas oscuros nuevos + preview de sonido robusto (SW v125)
+- **Temas oscuros nuevos:** Grafito (gris carbón neutro), Vino (borgoña cálido) e Índigo (violeta profundo). Se suman a Oscuro/Negro/Esmeralda. Reutilizan la base `data-theme="oscuro"` + un `data-tinte`, y definen sus variables `--lm-*`/`--pm-*` para que el dashboard premium también se re-tinte. Heredan `--pm-text` claro del tema oscuro → **buen contraste** (texto claro sobre fondo oscuro).
+- **Contraste:** se refuerza que el nombre en los botones de tema quede claro en temas oscuros.
+- **Preview de sonido:** al tocar un sonido en Ajustes ahora **suena** de forma fiable — se hace `resume()` del AudioContext (que en móvil arranca "suspended") antes de reproducir, así se escucha la muestra al seleccionar.
+- Archivos: `app.js` (temas + `_temaEsOscuro` + `reproducirSonidoNotif` con resume), `app.css` (tintes grafito/vino/indigo + regla de contraste), `index.html` (3 botones de tema). SW v125.
+
 #### 2026-07-26 — Aviso "Ingreso faltante": tocar el día para ingresar el dato (SW v124)
 - **Qué se hizo:** en el aviso, cada día faltante ahora es un **botón tocable**: al tocarlo abre el modal de "Ingresar Recaudación" **con esa fecha ya puesta**, invitando a completar el dato si se conoce ("Si conoces el dato, toca el día para ingresarlo").
 - **Cómo:** `abrirModalRec(fecha)` acepta una fecha opcional (valida `YYYY-MM-DD`, si no, usa hoy); los chips del aviso llaman `abrirModalRec('YYYY-MM-DD')`.

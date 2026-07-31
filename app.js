@@ -464,10 +464,10 @@
     }
 
     // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
-    const _TEMAS = ['claro', 'oscuro', 'negro', 'esmeralda', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'];
-    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
+    const _TEMAS = ['claro', 'oscuro', 'negro', 'esmeralda', 'grafito', 'vino', 'indigo', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'];
+    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', grafito: '#111113', vino: '#1a080e', indigo: '#0f0e1e', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
     // Temas oscuros que reutilizan la base "oscuro" con un tinte de color (data-tinte)
-    const _TEMA_TINTE = { negro: null, esmeralda: 'esmeralda' };
+    const _TEMA_TINTE = { negro: null, esmeralda: 'esmeralda', grafito: 'grafito', vino: 'vino', indigo: 'indigo' };
     function _temaActual() {
         let t = 'claro';
         try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}
@@ -476,7 +476,7 @@
     // Temas con fondo oscuro (para que avisos/tarjetas usen la variante oscura)
     function _temaEsOscuro() {
         const t = _temaActual();
-        return t === 'oscuro' || t === 'negro' || t === 'esmeralda';
+        return t === 'oscuro' || t === 'negro' || !!_TEMA_TINTE[t];
     }
     function _sincronizarTemaBtns() {
         const actual = _temaActual();
@@ -488,7 +488,8 @@
         if (!_TEMAS.includes(nombre)) nombre = 'claro';
         // Temas oscuros derivados: "negro" y "esmeralda" usan la base "oscuro"
         // + un atributo extra (data-negro / data-tinte) que reutiliza su restyle.
-        const esDerivadoOscuro = (nombre === 'negro' || nombre === 'esmeralda');
+        // negro + cualquier tema con tinte (esmeralda/grafito/vino/indigo) usan la base oscuro
+        const esDerivadoOscuro = (nombre === 'negro' || !!_TEMA_TINTE[nombre]);
         const base = esDerivadoOscuro ? 'oscuro' : nombre;
         document.documentElement.setAttribute('data-theme', base);
         if (nombre === 'negro') document.documentElement.setAttribute('data-negro', '1');
@@ -2263,7 +2264,12 @@
         if (key === 'silencio') return;
         const snd = SONIDOS_NOTIF[key] || SONIDOS_NOTIF.campana;
         const ctx = _getAudioCtx();
-        if (ctx) { try { snd.play(ctx); } catch(e) {} }
+        if (!ctx) return;
+        const go = () => { try { snd.play(ctx); } catch(e) {} };
+        // En móvil el contexto suele arrancar "suspended": esperar el resume
+        // (que se dispara con el toque) antes de sonar, para que el preview suene.
+        if (ctx.state === 'suspended') { ctx.resume().then(go).catch(go); }
+        else go();
     }
     function _sincronizarSonidoBtns() {
         const sel = _sonidoNotifGuardado();

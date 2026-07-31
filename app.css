@@ -219,6 +219,11 @@
         .nav-btn.active { color: rgb(var(--lm-primary)); }
         .nav-btn.active .nav-icon { font-variation-settings: 'FILL' 1; }
 
+        /* Contraste: en TODOS los temas oscuros (base data-theme="oscuro"),
+           el texto del nombre en los botones de tema debe ir claro (el inline
+           #334155 se ve muy apagado sobre fondo oscuro). :last-child = etiqueta. */
+        :root[data-theme="oscuro"] .tema-btn > span:last-child { color: #e2e8f0 !important; }
+
         /* ── Selector de forma de la foto del login ── */
         .login-shape-btn { padding: 8px; border-radius: 12px; border: 2px solid var(--color-subtle, #f1f5f9); background: transparent; cursor: pointer; color: #9ba3ab; transition: all .15s; display: flex; }
         .login-shape-btn:active { transform: scale(0.94); }
@@ -760,6 +765,141 @@
         :root[data-tinte="esmeralda"] input { background: #0f2b21 !important; border-color: #1e5a45 !important; color: #d1fae5 !important; }
         :root[data-tinte="esmeralda"] .tema-btn { background: #0c261d !important; border-color: #16402f !important; }
         :root[data-tinte="esmeralda"] .tema-btn.active { border-color: #34d399 !important; box-shadow: 0 0 0 3px rgba(52,211,153,0.22); }
+
+        /* ══════════════════════════════════════════════════════════════
+           TEMA GRAFITO (gris carbón neutro, alto contraste)
+           = base oscuro + data-tinte="grafito".
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-tinte="grafito"] {
+            --lm-bg:          17 17 19;
+            --lm-surface:     30 30 34;
+            --lm-card:        30 30 34;
+            --lm-border:      55 55 62;
+            --lm-primary:     226 232 240;
+            --lm-primary-mid: 148 163 184;
+            --lm-accent:      203 213 225;
+            --lm-secondary:   129 199 132;
+            --lm-tertiary:    250 204 21;
+            --lm-green:       74 222 128;
+            --lm-subtle:      30 30 34;
+            --lm-high:        44 44 50;
+            --wa-bg:          17 17 19;
+            --wa-mine:        40 48 58;
+            --wa-other:       30 30 34;
+            --color-card:    #1e1e22;
+            --color-subtle:  #2a2a30;
+            --app-bg:        #111113;
+            --pm-bg:         #111113;
+            --pm-card:       #1e1e22;
+            --pm-card2:      #17171a;
+            --pm-card-hi:    #2a2a30;
+            --pm-border:     #37373e;
+            --pm-accent:     #cbd5e1;
+            --nav-bg:        rgba(17,17,19,0.94);
+            --glass-bg:      rgba(17,17,19,0.92);
+            --chat-bg:       #17171a;
+        }
+        :root[data-tinte="grafito"] [style*="background:#fff;"],
+        :root[data-tinte="grafito"] [style*="background:#ffffff"],
+        :root[data-tinte="grafito"] [style*="background:#f8fafc"],
+        :root[data-tinte="grafito"] [style*="background:#f8f9fa"],
+        :root[data-tinte="grafito"] [style*="background:#f0f2f5"],
+        :root[data-tinte="grafito"] [style*="background:#f9fafb"] { background: #1e1e22 !important; border-color: #37373e !important; }
+        :root[data-tinte="grafito"] [style*="background:#f3f4f5"],
+        :root[data-tinte="grafito"] [style*="background:#f1f5f9"] { background: #2a2a30 !important; }
+        :root[data-tinte="grafito"] input { background: #1a1a1e !important; border-color: #45454e !important; color: #e2e8f0 !important; }
+        :root[data-tinte="grafito"] .tema-btn { background: #1e1e22 !important; border-color: #37373e !important; }
+        :root[data-tinte="grafito"] .tema-btn.active { border-color: #cbd5e1 !important; box-shadow: 0 0 0 3px rgba(203,213,225,0.22); }
+
+        /* ══════════════════════════════════════════════════════════════
+           TEMA VINO (borgoña cálido oscuro, alto contraste)
+           = base oscuro + data-tinte="vino".
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-tinte="vino"] {
+            --lm-bg:          26 8 14;
+            --lm-surface:     42 15 24;
+            --lm-card:        42 15 24;
+            --lm-border:      74 30 44;
+            --lm-primary:     253 164 175;
+            --lm-primary-mid: 251 113 133;
+            --lm-accent:      244 63 94;
+            --lm-secondary:   251 113 133;
+            --lm-tertiary:    251 191 36;
+            --lm-green:       74 222 128;
+            --lm-subtle:      42 15 24;
+            --lm-high:        58 22 34;
+            --wa-bg:          26 8 14;
+            --wa-mine:        74 30 44;
+            --wa-other:       42 15 24;
+            --color-card:    #2a0f18;
+            --color-subtle:  #3a1622;
+            --app-bg:        #1a080e;
+            --pm-bg:         #1a080e;
+            --pm-card:       #2a0f18;
+            --pm-card2:      #220b13;
+            --pm-card-hi:    #3a1622;
+            --pm-border:     #4a1e2c;
+            --pm-accent:     #fb7185;
+            --nav-bg:        rgba(26,8,14,0.94);
+            --glass-bg:      rgba(26,8,14,0.92);
+            --chat-bg:       #220b13;
+        }
+        :root[data-tinte="vino"] [style*="background:#fff;"],
+        :root[data-tinte="vino"] [style*="background:#ffffff"],
+        :root[data-tinte="vino"] [style*="background:#f8fafc"],
+        :root[data-tinte="vino"] [style*="background:#f8f9fa"],
+        :root[data-tinte="vino"] [style*="background:#f0f2f5"],
+        :root[data-tinte="vino"] [style*="background:#f9fafb"] { background: #2a0f18 !important; border-color: #4a1e2c !important; }
+        :root[data-tinte="vino"] [style*="background:#f3f4f5"],
+        :root[data-tinte="vino"] [style*="background:#f1f5f9"] { background: #3a1622 !important; }
+        :root[data-tinte="vino"] input { background: #250d14 !important; border-color: #5a2636 !important; color: #fde4e8 !important; }
+        :root[data-tinte="vino"] .tema-btn { background: #2a0f18 !important; border-color: #4a1e2c !important; }
+        :root[data-tinte="vino"] .tema-btn.active { border-color: #fb7185 !important; box-shadow: 0 0 0 3px rgba(251,113,133,0.22); }
+
+        /* ══════════════════════════════════════════════════════════════
+           TEMA ÍNDIGO (violeta profundo oscuro, alto contraste)
+           = base oscuro + data-tinte="indigo".
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-tinte="indigo"] {
+            --lm-bg:          15 14 30;
+            --lm-surface:     26 24 48;
+            --lm-card:        26 24 48;
+            --lm-border:      49 46 90;
+            --lm-primary:     165 180 252;
+            --lm-primary-mid: 129 140 248;
+            --lm-accent:      129 140 248;
+            --lm-secondary:   129 140 248;
+            --lm-tertiary:    251 191 36;
+            --lm-green:       52 211 153;
+            --lm-subtle:      26 24 48;
+            --lm-high:        38 34 66;
+            --wa-bg:          15 14 30;
+            --wa-mine:        49 46 90;
+            --wa-other:       26 24 48;
+            --color-card:    #1a1830;
+            --color-subtle:  #262244;
+            --app-bg:        #0f0e1e;
+            --pm-bg:         #0f0e1e;
+            --pm-card:       #1a1830;
+            --pm-card2:      #14122a;
+            --pm-card-hi:    #262244;
+            --pm-border:     #312e5a;
+            --pm-accent:     #818cf8;
+            --nav-bg:        rgba(15,14,30,0.94);
+            --glass-bg:      rgba(15,14,30,0.92);
+            --chat-bg:       #14122a;
+        }
+        :root[data-tinte="indigo"] [style*="background:#fff;"],
+        :root[data-tinte="indigo"] [style*="background:#ffffff"],
+        :root[data-tinte="indigo"] [style*="background:#f8fafc"],
+        :root[data-tinte="indigo"] [style*="background:#f8f9fa"],
+        :root[data-tinte="indigo"] [style*="background:#f0f2f5"],
+        :root[data-tinte="indigo"] [style*="background:#f9fafb"] { background: #1a1830 !important; border-color: #312e5a !important; }
+        :root[data-tinte="indigo"] [style*="background:#f3f4f5"],
+        :root[data-tinte="indigo"] [style*="background:#f1f5f9"] { background: #262244 !important; }
+        :root[data-tinte="indigo"] input { background: #16142a !important; border-color: #3d3a6e !important; color: #e0e0fb !important; }
+        :root[data-tinte="indigo"] .tema-btn { background: #1a1830 !important; border-color: #312e5a !important; }
+        :root[data-tinte="indigo"] .tema-btn.active { border-color: #818cf8 !important; box-shadow: 0 0 0 3px rgba(129,140,248,0.22); }
 
         /* ══════════════════════════════════════════════════════════════
            TEMA DURAZNO (cálido, claro, alto contraste)
