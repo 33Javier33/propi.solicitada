@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Fix: aviso "Ingreso faltante" no resaltaba en temas pastel (rosa, etc.) (SW v129)
+- **Causa:** en temas claros pastel (rosa `#fff1f6`, menta, durazno…) el aviso usaba un crema muy pálido (`#fffbeb`) casi idéntico al fondo → la tarjeta no se distinguía.
+- **Fix:** la variante clara ahora usa un **ámbar más marcado** (fondo `#fef3c7`, borde `#f59e0b`, texto `#7c2d12`) + sombra suave, para que resalte sobre cualquier fondo claro. La variante oscura se mantiene.
+- Archivos: `app.js` (`_notaFaltantesHTML`). SW v129.
+
 #### 2026-07-26 — Aviso "Ingreso faltante": recordatorio de fin de turno (SW v128)
 - Se agregó al final de la tarjeta un recordatorio: "Cuando termine el turno, consulta los montos e ingrésalos." (con ícono de reloj, color adaptado al tema).
 - Archivos: `app.js` (`_notaFaltantesHTML`). SW v128.

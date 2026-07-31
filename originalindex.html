@@ -3827,10 +3827,13 @@
     // HTML de la nota "Ingreso faltante" (self-contained: se ve bien en cualquier tema)
     function _notaFaltantesHTML(faltantes, dark) {
         if (!faltantes || !faltantes.length) return '';
-        const bg = dark ? 'rgba(245,158,11,0.12)' : '#fffbeb';
-        const bd = dark ? 'rgba(245,158,11,0.35)' : '#fde68a';
-        const tx = dark ? '#fcd34d' : '#92400e';
-        const chipBg = dark ? 'rgba(245,158,11,0.18)' : '#fef3c7';
+        // Variante clara con ámbar MARCADO: así resalta también sobre fondos
+        // pastel (rosa, menta, durazno, aqua…) donde un crema pálido se perdía.
+        const bg = dark ? 'rgba(245,158,11,0.12)' : '#fef3c7';
+        const bd = dark ? 'rgba(245,158,11,0.35)' : '#f59e0b';
+        const tx = dark ? '#fcd34d' : '#7c2d12';
+        const chipBg = dark ? 'rgba(245,158,11,0.18)' : '#fde68a';
+        const sombra = dark ? 'none' : '0 1px 6px rgba(120,80,0,0.14)';
         const chips = faltantes.map(k => {
             const d = new Date(k + 'T12:00:00');
             const txt = _capIni(d.toLocaleDateString('es-CL', { weekday:'short', day:'2-digit', month:'2-digit' }).replace(/\./g,''));
@@ -3840,7 +3843,7 @@
             </button>`;
         }).join('');
         const n = faltantes.length;
-        return `<div style="background:${bg};border:1px solid ${bd};border-radius:14px;padding:12px 14px;margin-bottom:12px;">
+        return `<div style="background:${bg};border:1.5px solid ${bd};border-radius:14px;padding:12px 14px;margin-bottom:12px;box-shadow:${sombra};">
             <div style="display:flex;align-items:center;gap:8px;">
                 <span class="material-symbols-outlined" style="font-size:18px;color:${tx};">event_busy</span>
                 <span style="font-size:13px;font-weight:800;color:${tx};">Ingreso faltante</span>
