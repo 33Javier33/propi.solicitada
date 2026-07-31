@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Estadísticas: gráfico legible en temas oscuros + detalle más claro (SW v126)
+- **Gráfico:** usaba colores fijos (línea `#001723` casi negra, grilla `#e7e8e9` clara) que en temas oscuros eran invisibles. Ahora el `renderStatsChart` **toma los colores del tema** (variables CSS `--lm-primary/accent/border/muted`), así se ve bien en claro y en todos los oscuros. También la leyenda de "Proyección" usa el acento del tema.
+- **Detalle del período:** se agregó una leyenda explicativa arriba de la tabla — **Real** = ganancia ya registrada, **Proyectado** = estimación de los días que faltan (promedio), **Sin recaudación** = ese día no hubo ingreso.
+- Archivos: `app.js` (colores del gráfico por variables de tema), `index.html` (leyenda del detalle + swatch de proyección theme-aware). SW v126.
+
 #### 2026-07-26 — 3 temas oscuros nuevos + preview de sonido robusto (SW v125)
 - **Temas oscuros nuevos:** Grafito (gris carbón neutro), Vino (borgoña cálido) e Índigo (violeta profundo). Se suman a Oscuro/Negro/Esmeralda. Reutilizan la base `data-theme="oscuro"` + un `data-tinte`, y definen sus variables `--lm-*`/`--pm-*` para que el dashboard premium también se re-tinte. Heredan `--pm-text` claro del tema oscuro → **buen contraste** (texto claro sobre fondo oscuro).
 - **Contraste:** se refuerza que el nombre en los botones de tema quede claro en temas oscuros.

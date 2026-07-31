@@ -3911,6 +3911,20 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         const W = canvas.offsetWidth, H = canvas.offsetHeight;
         ctx.clearRect(0,0,W,H);
 
+        // Colores tomados del TEMA (variables CSS) → se ven bien en claro y en oscuro.
+        const _cs = getComputedStyle(document.documentElement);
+        const _rgb = (name, a) => {
+            const v = (_cs.getPropertyValue(name) || '').trim().replace(/\s+/g, ',');
+            if (!v) return a != null ? `rgba(136,136,136,${a})` : '#888';
+            return a != null ? `rgba(${v},${a})` : `rgb(${v})`;
+        };
+        const C_LINE = _rgb('--lm-primary');        // línea real
+        const C_AREA = _rgb('--lm-primary', 0.12);  // área bajo la curva
+        const C_DOT  = _rgb('--lm-primary');        // puntos reales
+        const C_PROY = _rgb('--lm-accent');         // línea/punto proyección
+        const C_GRID = _rgb('--lm-border', 0.55);   // líneas de la grilla
+        const C_TXT  = _rgb('--lm-muted');          // etiquetas de ejes
+
         const allVals = [...valoresReales, ...valoresProyectados].filter(v => v !== null);
         const maxVal  = Math.max(...allVals, 1);
         const minVal  = 0;
@@ -3922,11 +3936,11 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         const yPos = v => padT + cH - ((v - minVal) / (maxVal - minVal)) * cH;
 
         // Grid lines
-        ctx.strokeStyle = '#e7e8e9'; ctx.lineWidth = 1;
+        ctx.strokeStyle = C_GRID; ctx.lineWidth = 1;
         [0, 0.25, 0.5, 0.75, 1].forEach(t => {
             const y = padT + cH * (1 - t);
             ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
-            ctx.fillStyle = '#9ba3ab'; ctx.font = '9px Inter';
+            ctx.fillStyle = C_TXT; ctx.font = '9px Inter';
             ctx.textAlign = 'right';
             ctx.fillText(formatMoney(Math.round(maxVal * t)).replace('$','$'), padL - 4, y + 3);
         });
@@ -3941,20 +3955,20 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             ctx.lineTo(xPos(realesIdx[realesIdx.length-1]), padT + cH);
             ctx.lineTo(xPos(realesIdx[0]), padT + cH);
             ctx.closePath();
-            ctx.fillStyle = 'rgba(0,23,35,0.07)';
+            ctx.fillStyle = C_AREA;
             ctx.fill();
 
             ctx.beginPath();
             ctx.moveTo(xPos(realesIdx[0]), yPos(valoresReales[realesIdx[0]]));
             realesIdx.forEach(i => ctx.lineTo(xPos(i), yPos(valoresReales[i])));
-            ctx.strokeStyle = '#001723'; ctx.lineWidth = 2.5;
+            ctx.strokeStyle = C_LINE; ctx.lineWidth = 2.5;
             ctx.lineJoin = 'round'; ctx.stroke();
 
             // Puntos
             realesIdx.forEach(i => {
                 ctx.beginPath();
                 ctx.arc(xPos(i), yPos(valoresReales[i]), 3.5, 0, Math.PI*2);
-                ctx.fillStyle = '#001723'; ctx.fill();
+                ctx.fillStyle = C_DOT; ctx.fill();
             });
         }
 
@@ -3971,7 +3985,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
                 ctx.moveTo(xPos(proyIdx[0]), yPos(valoresProyectados[proyIdx[0]]));
             }
             proyIdx.forEach(i => ctx.lineTo(xPos(i), yPos(valoresProyectados[i])));
-            ctx.strokeStyle = '#264b5f'; ctx.lineWidth = 2;
+            ctx.strokeStyle = C_PROY; ctx.lineWidth = 2;
             ctx.stroke();
             ctx.setLineDash([]);
 
@@ -3979,11 +3993,11 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             const last = proyIdx[proyIdx.length-1];
             ctx.beginPath();
             ctx.arc(xPos(last), yPos(valoresProyectados[last]), 4, 0, Math.PI*2);
-            ctx.fillStyle = '#264b5f'; ctx.fill();
+            ctx.fillStyle = C_PROY; ctx.fill();
         }
 
         // Etiquetas eje X
-        ctx.fillStyle = '#9ba3ab'; ctx.font = '9px Inter'; ctx.textAlign = 'center';
+        ctx.fillStyle = C_TXT; ctx.font = '9px Inter'; ctx.textAlign = 'center';
         const step = statsView === 'dia' ? Math.ceil(n / 8) : 1;
         labels.forEach((l, i) => {
             if (i % step === 0 || i === n-1) {

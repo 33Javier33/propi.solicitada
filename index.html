@@ -1006,14 +1006,22 @@
                             <span class="text-[10px] text-lm-muted font-semibold">Real</span>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <div class="w-3 h-0.5 bg-lm-accent" style="border-top:2px dashed #264b5f;"></div>
+                            <div class="w-3 h-0.5" style="border-top:2px dashed rgb(var(--lm-accent));"></div>
                             <span class="text-[10px] text-lm-muted font-semibold">Proyección</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Tabla de datos -->
-                <p class="text-[10px] font-bold text-lm-muted uppercase tracking-widest mb-3">Detalle del período</p>
+                <p class="text-[10px] font-bold text-lm-muted uppercase tracking-widest mb-2">Detalle del período</p>
+                <div class="bg-lm-card border border-lm-border rounded-2xl px-4 py-3 mb-3" style="line-height:1.6;">
+                    <p class="text-[11px] text-lm-muted" style="margin:0;">Tu ganancia día a día en el período:</p>
+                    <p class="text-[11px]" style="margin:4px 0 0;">
+                        <b style="color:rgb(var(--lm-green))">● Real</b> <span class="text-lm-muted">= ya registrada.</span>
+                        &nbsp;<b class="text-lm-primary">● Proyectado</b> <span class="text-lm-muted">= estimación de los días que faltan (promedio).</span>
+                        &nbsp;<b class="text-lm-muted">● Sin recaudación</b> <span class="text-lm-muted">= ese día no hubo ingreso.</span>
+                    </p>
+                </div>
                 <div id="stats-table" class="space-y-2 pb-6"></div>
             </div>
         </div>
