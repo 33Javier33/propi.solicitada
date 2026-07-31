@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Aviso "Ingreso faltante": recordatorio de fin de turno (SW v128)
+- Se agregó al final de la tarjeta un recordatorio: "Cuando termine el turno, consulta los montos e ingrésalos." (con ícono de reloj, color adaptado al tema).
+- Archivos: `app.js` (`_notaFaltantesHTML`). SW v128.
+
 #### 2026-07-26 — Fix: aviso "Ingreso faltante" ilegible en tema claro (SW v127)
 - **Causa:** se había fijado el aviso del home a la variante **oscura** siempre (creyendo que el home premium era oscuro fijo), pero el home premium **sí sigue el tema** (fondo claro en temas claros). Así el texto dorado claro quedaba ilegible sobre fondo claro.
 - **Fix:** el aviso (home y historial premium) ahora usa `_temaEsOscuro()`: **claro sobre fondo claro** (texto café oscuro) y **oscuro sobre fondo oscuro** (texto dorado). Legible en ambos.

@@ -1267,6 +1267,10 @@
             </div>
             <p style="font-size:11px;color:${tx};opacity:0.9;margin:6px 0 0;">Hay ${n} día${n!==1?'s':''} sin ingreso registrado. Si conoces el dato, toca el día para ingresarlo:</p>
             <div style="margin-top:2px;">${chips}</div>
+            <p style="font-size:11px;color:${tx};opacity:0.8;margin:10px 0 0;display:flex;align-items:flex-start;gap:6px;line-height:1.45;">
+                <span class="material-symbols-outlined" style="font-size:15px;flex-shrink:0;margin-top:1px;">schedule</span>
+                <span>Cuando termine el turno, consulta los montos e ingrésalos.</span>
+            </p>
         </div>`;
     }
 
