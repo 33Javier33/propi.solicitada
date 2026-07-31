@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Fix: banner de actualización que no desaparecía → actualización silenciosa (SW v130)
+- **Síntoma:** el banner "Nueva versión disponible" no desaparecía tras tocar "Actualizar" ni al terminar la cuenta regresiva (mismo patrón que se había quitado en diario.propi: ciclo `controllerchange`→reload + worker en "waiting" que reaparece).
+- **Fix:** se **elimina el banner** y toda su lógica (countdown, botón, recarga forzada). Ahora la actualización es **silenciosa**: el SW nuevo hace `skipWaiting()` en `install` y toma el control solo (`clients.claim`); la versión nueva se aplica **al reabrir la app**. Sin banner, nada que se quede pegado.
+- Archivos: `index.html` (registro SW minimal, se quita banner HTML+JS), `sw.js` (`skipWaiting()` en install). SW v130.
+
 #### 2026-07-26 — Fix: aviso "Ingreso faltante" no resaltaba en temas pastel (rosa, etc.) (SW v129)
 - **Causa:** en temas claros pastel (rosa `#fff1f6`, menta, durazno…) el aviso usaba un crema muy pálido (`#fffbeb`) casi idéntico al fondo → la tarjeta no se distinguía.
 - **Fix:** la variante clara ahora usa un **ámbar más marcado** (fondo `#fef3c7`, borde `#f59e0b`, texto `#7c2d12`) + sombra suave, para que resalte sobre cualquier fondo claro. La variante oscura se mantiene.

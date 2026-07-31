@@ -1591,106 +1591,18 @@
                 // updateViaCache:'none' → el navegador NUNCA usa caché HTTP para sw.js,
                 // así detecta la versión nueva apenas se publica.
                 navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
-                    console.log('[SW] Registrado:', reg.scope);
-
-                    // Si ya hay un SW esperando o instalándose al cargar → mostrar/preparar banner
-                    if (reg.waiting && navigator.serviceWorker.controller) {
-                        showUpdateBanner(reg.waiting);
-                    } else if (reg.installing) {
-                        _seguirWorker(reg.installing);
-                    }
-
-                    // Escuchar cuando hay un nuevo SW instalándose
-                    reg.addEventListener('updatefound', () => {
-                        if (reg.installing) _seguirWorker(reg.installing);
-                    });
-
-                    // Forzar chequeo de actualización cada vez que la app vuelve al frente
-                    document.addEventListener('visibilitychange', () => {
-                        if (document.visibilityState === 'visible') {
-                            reg.update().catch(() => {});
-                        }
-                    });
-
-                    // Chequear al cargar…
+                    // Actualización SILENCIOSA: el SW nuevo hace skipWaiting() en install
+                    // y toma el control solo (clients.claim). La versión nueva se aplica al
+                    // reabrir la app. Sin banner ni recarga forzada → nada que se quede "pegado".
                     reg.update().catch(() => {});
-                    // …y cada 45 s mientras la app esté abierta (aunque no cambie de foco),
-                    // para que el banner aparezca solo tras publicar una versión nueva.
-                    setInterval(() => { reg.update().catch(() => {}); }, 45000);
-
-                }).catch(e => console.warn('[SW] Error:', e));
-
-                // Cuando el SW nuevo toma el control, recargar UNA vez para aplicar la versión.
-                // (Guardia: no recargar en la instalación inicial, cuando aún no había controlador.)
-                navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    if (!_swHadController) { _swHadController = true; return; }
-                    if (_swRefreshing) return;
-                    _swRefreshing = true;
-                    window.location.reload();
-                });
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') reg.update().catch(() => {});
+                    });
+                    setInterval(() => { reg.update().catch(() => {}); }, 60000);
+                }).catch(() => {});
             });
         }
 
-        // Sigue el estado de un worker: cuando queda "installed" con un controlador ya activo,
-        // significa que hay una versión nueva lista → mostrar el banner.
-        function _seguirWorker(worker) {
-            if (!worker) return;
-            worker.addEventListener('statechange', () => {
-                if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-                    showUpdateBanner(worker);
-                }
-            });
-        }
-        var _swRefreshing = false;
-        var _swHadController = ('serviceWorker' in navigator) && !!navigator.serviceWorker.controller;
-
-        // Novedades de esta versión (se muestran en el aviso). Actualizar en cada release.
-        var APP_NOVEDADES = 'Correo, versión Dashboard y mejoras';
-        var _updWorker = null, _updTimer = null, _updateApplying = false;
-
-        // AUTO (15 s): silencioso — activa el nuevo SW sin recargar. Se aplica al reabrir la app.
-        function _actualizarSilencioso() {
-            if (_updTimer) { clearInterval(_updTimer); _updTimer = null; }
-            const banner = document.getElementById('updateBanner');
-            if (banner) { banner.classList.add('hidden'); banner.classList.remove('flex'); }
-            if (_updWorker) _updWorker.postMessage({ type: 'SKIP_WAITING' });
-        }
-
-        // BOTÓN "Actualizar": aplica ahora. Recarga UNA vez (vía controllerchange) y la app
-        // vuelve a entrar sola sin pedir el PIN (la sesión sigue viva). No reaparece el aviso.
-        function _aplicarActualizacion() {
-            if (_updTimer) { clearInterval(_updTimer); _updTimer = null; }
-            const banner = document.getElementById('updateBanner');
-            if (banner) { banner.classList.add('hidden'); banner.classList.remove('flex'); }
-            // Activar el SW nuevo → controllerchange recargará una vez.
-            if (_updWorker) _updWorker.postMessage({ type: 'SKIP_WAITING' });
-            // Red de seguridad: si controllerchange no dispara (o no había worker), recargar igual.
-            setTimeout(function () { if (!_swRefreshing) { _swRefreshing = true; try { window.location.reload(); } catch (e) {} } }, 2500);
-        }
-
-        function showUpdateBanner(worker) {
-            const banner = document.getElementById('updateBanner');
-            if (!banner) return;
-            _updWorker = worker;
-            banner.classList.remove('hidden');
-            banner.classList.add('flex');
-
-            const nov = document.getElementById('updateNovedades');
-            const cd = document.getElementById('updateCountdown');
-            // Cuenta regresiva: se actualiza sola a los 15 s si el usuario no acepta
-            let restante = 15;
-            if (cd) cd.textContent = restante + 's';
-            if (nov) nov.innerHTML = APP_NOVEDADES + ' · se aplica en <span id="updateCountdown">' + restante + 's</span>';
-            if (_updTimer) clearInterval(_updTimer);
-            _updTimer = setInterval(function () {
-                restante--;
-                const c = document.getElementById('updateCountdown');
-                if (c) c.textContent = restante + 's';
-                if (restante <= 0) { clearInterval(_updTimer); _updTimer = null; _aplicarActualizacion(); }
-            }, 1000);
-
-            document.getElementById('updateBannerBtn').onclick = _aplicarActualizacion;
-        }
     </script>
 
 <!-- MODAL EDITAR NOMBRE -->
@@ -1812,21 +1724,5 @@
 </div>
 
 <!-- BANNER NUEVA VERSIÓN -->
-<div id="updateBanner" class="hidden fixed top-0 left-0 right-0 z-[600] items-center justify-between gap-3"
-     style="background:#001723;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));box-shadow:0 4px 20px rgba(0,0,0,0.3);">
-    <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <span class="material-symbols-outlined" style="font-size:18px;color:#4ade80">system_update</span>
-        </div>
-        <div style="min-width:0;">
-            <p style="font-size:13px;font-weight:700;color:#fff;margin:0;">Nueva versión disponible</p>
-            <p id="updateNovedades" style="font-size:11px;color:rgba(255,255,255,0.6);margin:2px 0 0;line-height:1.3;">Se aplicará sola en <span id="updateCountdown">15s</span></p>
-        </div>
-    </div>
-    <button id="updateBannerBtn"
-        style="background:#4ade80;color:#001723;border:none;border-radius:12px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;">
-        Actualizar
-    </button>
-</div>
 </body>
 </html>
