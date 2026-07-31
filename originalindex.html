@@ -4184,10 +4184,11 @@
 
             // Días sin ingreso (recaudación) → nota "Ingreso faltante"
             const _diasFaltantes = _calcularDiasFaltantes(new Set(Object.keys(porFecha)));
-            const _avisoOscuro = _temaEsOscuro(); // el historial clásico sí sigue el tema
-            // Pantalla principal (homePremium): su fondo es oscuro fijo → aviso oscuro siempre
+            // El aviso sigue el tema: claro sobre fondo claro, oscuro sobre fondo
+            // oscuro (el home premium se re-tinta según el tema vía .pm-layout).
+            const _avisoOscuro = _temaEsOscuro();
             const _avisoHome = document.getElementById('faltantesAvisoHome');
-            if (_avisoHome) _avisoHome.innerHTML = _notaFaltantesHTML(_diasFaltantes, true);
+            if (_avisoHome) _avisoHome.innerHTML = _notaFaltantesHTML(_diasFaltantes, _avisoOscuro);
 
             document.getElementById('historyList').innerHTML = _notaFaltantesHTML(_diasFaltantes, _avisoOscuro) + fechasOrdenadas.map(f => {
                 const entradas = porFecha[f];
@@ -4316,7 +4317,7 @@
                 stat('pmHistPunto', formatMoney(Math.round(puntoGlobalTotal)));
                 const cont = document.getElementById('pmHistList');
                 if (cont) {
-                    cont.innerHTML = _notaFaltantesHTML(_diasFaltantes, true) + (fechasOrdenadas.length ? cards : '<div style="text-align:center;padding:32px;color:#c3c7cb;font-size:13px;">Sin movimientos en este periodo</div>');
+                    cont.innerHTML = _notaFaltantesHTML(_diasFaltantes, _avisoOscuro) + (fechasOrdenadas.length ? cards : '<div style="text-align:center;padding:32px;color:#c3c7cb;font-size:13px;">Sin movimientos en este periodo</div>');
                     const cnt = document.getElementById('pmHistCount');
                     if (cnt) cnt.textContent = fechasOrdenadas.length + (fechasOrdenadas.length === 1 ? ' día' : ' días');
                 }

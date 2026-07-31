@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Fix: aviso "Ingreso faltante" ilegible en tema claro (SW v127)
+- **Causa:** se había fijado el aviso del home a la variante **oscura** siempre (creyendo que el home premium era oscuro fijo), pero el home premium **sí sigue el tema** (fondo claro en temas claros). Así el texto dorado claro quedaba ilegible sobre fondo claro.
+- **Fix:** el aviso (home y historial premium) ahora usa `_temaEsOscuro()`: **claro sobre fondo claro** (texto café oscuro) y **oscuro sobre fondo oscuro** (texto dorado). Legible en ambos.
+- Archivos: `app.js`. SW v127.
+
 #### 2026-07-26 — Estadísticas: gráfico legible en temas oscuros + detalle más claro (SW v126)
 - **Gráfico:** usaba colores fijos (línea `#001723` casi negra, grilla `#e7e8e9` clara) que en temas oscuros eran invisibles. Ahora el `renderStatsChart` **toma los colores del tema** (variables CSS `--lm-primary/accent/border/muted`), así se ve bien en claro y en todos los oscuros. También la leyenda de "Proyección" usa el acento del tema.
 - **Detalle del período:** se agregó una leyenda explicativa arriba de la tabla — **Real** = ganancia ya registrada, **Proyectado** = estimación de los días que faltan (promedio), **Sin recaudación** = ese día no hubo ingreso.
