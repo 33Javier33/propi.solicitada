@@ -7382,25 +7382,61 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
 </script>
 
 
+    <!-- Banner de nueva versión (reescrito para que NUNCA se quede pegado):
+         · Solo aparece cuando hay un SW nuevo EN ESPERA.
+         · Sin cuenta regresiva automática (eso dejaba el "actualizando" colgado).
+         · Al tocar "Actualizar": aplica y recarga UNA sola vez (garantizado). -->
+    <div id="swBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#001723;color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 18px rgba(0,0,0,0.3);">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+            <span style="font-size:20px;">🔄</span>
+            <div style="font-size:13px;font-weight:800;">Nueva versión disponible</div>
+        </div>
+        <button id="swBtn" style="background:#4ade80;color:#001723;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;font-family:inherit;">Actualizar</button>
+    </div>
+
     <!-- PWA Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // updateViaCache:'none' → el navegador NUNCA usa caché HTTP para sw.js,
-                // así detecta la versión nueva apenas se publica.
-                navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
-                    // Actualización SILENCIOSA: el SW nuevo hace skipWaiting() en install
-                    // y toma el control solo (clients.claim). La versión nueva se aplica al
-                    // reabrir la app. Sin banner ni recarga forzada → nada que se quede "pegado".
-                    reg.update().catch(() => {});
-                    document.addEventListener('visibilitychange', () => {
-                        if (document.visibilityState === 'visible') reg.update().catch(() => {});
+            var _swWaiting = null, _swReloaded = false;
+            function _swShow(w) {
+                _swWaiting = w;
+                var b = document.getElementById('swBanner');
+                if (b) b.style.display = 'flex';
+            }
+            // Cuando el SW nuevo toma el control → recargar UNA sola vez.
+            navigator.serviceWorker.addEventListener('controllerchange', function () {
+                if (_swReloaded) return;
+                _swReloaded = true;
+                location.reload();
+            });
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(function (reg) {
+                    // Ya hay una versión nueva esperando al cargar
+                    if (reg.waiting && navigator.serviceWorker.controller) _swShow(reg.waiting);
+                    // Detectar cuando se instala una versión nueva mientras la app está abierta
+                    reg.addEventListener('updatefound', function () {
+                        var nw = reg.installing;
+                        if (!nw) return;
+                        nw.addEventListener('statechange', function () {
+                            if (nw.state === 'installed' && navigator.serviceWorker.controller) _swShow(nw);
+                        });
                     });
-                    setInterval(() => { reg.update().catch(() => {}); }, 60000);
-                }).catch(() => {});
+                    reg.update().catch(function () {});
+                    setInterval(function () { reg.update().catch(function () {}); }, 60000);
+                    document.addEventListener('visibilitychange', function () {
+                        if (document.visibilityState === 'visible') reg.update().catch(function () {});
+                    });
+                }).catch(function () {});
+
+                var btn = document.getElementById('swBtn');
+                if (btn) btn.onclick = function () {
+                    btn.textContent = 'Actualizando…'; btn.disabled = true;
+                    if (_swWaiting) { try { _swWaiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {} }
+                    // Respaldo: si controllerchange no dispara, recargar igual (una sola vez)
+                    setTimeout(function () { if (!_swReloaded) { _swReloaded = true; location.reload(); } }, 1500);
+                };
             });
         }
-
     </script>
 
 <!-- MODAL EDITAR NOMBRE -->

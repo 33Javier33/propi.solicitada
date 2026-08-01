@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-01 — Vuelve el banner "Actualizar" (reescrito para no quedar pegado) (SW v135)
+- **Qué se hizo:** vuelve el banner "Nueva versión disponible" con botón **Actualizar**, pero reescrito para que **nunca se quede pegado**.
+- **Cómo no se pega:** (1) solo aparece cuando hay un SW nuevo **en espera** (`reg.waiting`/`updatefound`→installed); (2) **sin cuenta regresiva automática** (eso era lo que dejaba el "actualizando" colgado); (3) al tocar Actualizar, aplica y **recarga UNA sola vez** garantizada (por `controllerchange` o respaldo de 1.5s), con guardia `_swReloaded`. Tras recargar ya no hay worker en espera → el banner no reaparece.
+- El SW vuelve a **no** hacer `skipWaiting()` en install (queda en espera para poder ofrecer el banner); solo activa al recibir `SKIP_WAITING` del botón.
+- Nota de transición: al venir de la versión silenciosa, puede requerir **un cierre/apertura** para quedar en la versión con banner.
+- Archivos: `index.html` (banner + registro SW), `sw.js` (install sin skipWaiting). SW v135.
+
 #### 2026-08-01 — Presencia: nombres dentro del modal + etiqueta "Bóveda Personal" (SW v134)
 - **Dentro del modal:** el modal "Ingresar Recaudación" ahora muestra un aviso verde con **quién más está en recaudaciones** (nombre + tipo + app), tanto de propi.solicitada como de diario.propi, actualizado en vivo (`#recPresenciaModal`).
 - **Etiqueta:** la app se identifica como **"Bóveda Personal"** en lugar de "Propi" en los avisos de presencia (las otras apps ya la muestran así).
