@@ -44,7 +44,10 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
         const m = document.getElementById('recPresenciaModal');
         if (m) {
             if (!otros.length) { m.style.display = 'none'; m.innerHTML = ''; }
-            else { m.innerHTML = html; m.style.display = 'block'; }
+            else {
+                m.innerHTML = '<div style="font-weight:800;margin-bottom:4px;">👥 Ahora mismo en recaudaciones:</div>' + html;
+                m.style.display = 'block';
+            }
         }
     }
     function _toast(msg) {
@@ -71,6 +74,8 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
         if (ch || typeof DB === 'undefined' || !DB) return;
         ch = DB.channel('rec-presencia', { config: { presence: { key: KEY } } });
         ch.on('presence', { event: 'sync' }, _render)
+          .on('presence', { event: 'join' }, _render)
+          .on('presence', { event: 'leave' }, _render)
           .on('broadcast', { event: 'rec-agregado' }, ({ payload }) => {
               if (payload && payload.key !== KEY) {
                   const t = payload.tipo ? (' (' + (TIPO_LABEL[payload.tipo] || payload.tipo) + ')') : '';
@@ -85,9 +90,13 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
               // (re)marca la presencia pendiente.
               listo = (status === 'SUBSCRIBED');
               if (listo && mio) { try { ch.track(mio); } catch (e) {} }
+              if (listo) _render();
           });
+        // Respaldo: re-pintar periódicamente por si algún evento de presencia se pierde
+        setInterval(_render, 4000);
     }
     window.recPresIniciar = iniciar;
+    window.recPresRender = _render;
     window.recPresEntrar = function (nombre, tipo) {
         iniciar();
         mio = { key: KEY, nombre: nombre || 'Alguien', app: APP, tipo: tipo || '', enModal: true };

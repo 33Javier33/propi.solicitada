@@ -1341,7 +1341,7 @@
                 </p>
                 <div style="display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
                     <span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.35)">update</span>
-                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 137 · 2026</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 138 · 2026</span>
                 </div>
             </div>
 
@@ -5243,6 +5243,9 @@
             const _nom = (typeof getDisplayName === 'function') ? getDisplayName() : ((currentUser.Nombre || '') + ' ' + (currentUser.Apellido || '')).trim();
             recPresEntrar(_nom, _recTipoSelected);
         }
+        // Pintar DE INMEDIATO dentro del modal quién más está en recaudaciones
+        // (sin esperar el próximo evento de presencia).
+        if (typeof recPresRender === 'function') { recPresRender(); setTimeout(recPresRender, 800); }
     };
 
     window.cerrarModalRec = () => {

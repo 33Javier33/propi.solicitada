@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-01 — Presencia: pintado inmediato en el modal + refuerzos (SW v138)
+- El modal "Ingresar Recaudación" ahora pinta **al instante** (al abrirse) quién está en recaudaciones en las otras apps, con encabezado **"👥 Ahora mismo en recaudaciones:"** — antes esperaba el próximo evento de presencia.
+- Refuerzos anti-pérdida: listeners `join`/`leave` además de `sync`, repintado de respaldo cada 4s, y render al confirmar la suscripción. `window.recPresRender` expuesto.
+- Archivos: `supabase-api.js`, `app.js`. SW v138 (visible 138).
+
 #### 2026-08-01 — Fix: la presencia en recaudación no aparecía (track antes de suscribir) (SW v137)
 - **Síntoma:** en propi.solicitada no aparecía nadie aunque un socio estuviera ingresando en diario.propi (y viceversa).
 - **Causa:** la marca de presencia (`ch.track`) se enviaba **antes** de que el canal `rec-presencia` terminara de suscribirse; en ese estado el track se **pierde en silencio**. En diario era sistemático: su panel "Agregar" es el inicial, así que el track salía justo al entrar (canal aún conectándose) y nunca llegaba.

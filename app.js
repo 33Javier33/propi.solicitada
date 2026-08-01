@@ -2657,6 +2657,9 @@
             const _nom = (typeof getDisplayName === 'function') ? getDisplayName() : ((currentUser.Nombre || '') + ' ' + (currentUser.Apellido || '')).trim();
             recPresEntrar(_nom, _recTipoSelected);
         }
+        // Pintar DE INMEDIATO dentro del modal quién más está en recaudaciones
+        // (sin esperar el próximo evento de presencia).
+        if (typeof recPresRender === 'function') { recPresRender(); setTimeout(recPresRender, 800); }
     };
 
     window.cerrarModalRec = () => {
