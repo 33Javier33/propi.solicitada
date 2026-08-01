@@ -20,13 +20,18 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
 // ============================================================
 (function () {
     const DB = dbRV;                 // cliente del proyecto de recaudaciones
-    const APP = 'Propi';             // etiqueta de esta app
+    const APP = 'Bóveda Personal';   // etiqueta de esta app
     const TIPO_LABEL = { TarjetaMDA: 'Tarjeta MDA', EfectivoMDA: 'Efectivo MDA', SalaDeJuegos: 'Sala de Juegos', Boveda: 'Bóveda' };
     const KEY = 'rp_' + Math.random().toString(36).slice(2) + Date.now();
     let ch = null, mio = null, toastT = null;
     const _esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 
     function _banner(otros) {
+        const html = otros.map(o => {
+            const t = o.tipo ? (' · ' + (TIPO_LABEL[o.tipo] || o.tipo)) : '';
+            return '🟢 <b>' + _esc(o.nombre || 'Alguien') + '</b> está en recaudaciones' + t + ' <span style="opacity:.7">(' + _esc(o.app || '') + ')</span>';
+        }).join('<br>');
+        // 1) Banner flotante (visible en toda la app, aunque no estés en el modal)
         let el = document.getElementById('recPresenciaBanner');
         if (!el) {
             el = document.createElement('div');
@@ -34,12 +39,13 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
             el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom));z-index:9000;max-width:92%;background:#0f766e;color:#fff;border-radius:14px;padding:9px 14px;font-size:12px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,0.28);display:none;text-align:center;line-height:1.35;';
             document.body.appendChild(el);
         }
-        if (!otros.length) { el.style.display = 'none'; return; }
-        el.innerHTML = otros.map(o => {
-            const t = o.tipo ? (' · ' + (TIPO_LABEL[o.tipo] || o.tipo)) : '';
-            return '🟢 <b>' + _esc(o.nombre || 'Alguien') + '</b> está en recaudaciones' + t + ' <span style="opacity:.7">(' + _esc(o.app || '') + ')</span>';
-        }).join('<br>');
-        el.style.display = 'block';
+        if (!otros.length) { el.style.display = 'none'; } else { el.innerHTML = html; el.style.display = 'block'; }
+        // 2) Indicador DENTRO del modal de recaudación (si existe el contenedor)
+        const m = document.getElementById('recPresenciaModal');
+        if (m) {
+            if (!otros.length) { m.style.display = 'none'; m.innerHTML = ''; }
+            else { m.innerHTML = html; m.style.display = 'block'; }
+        }
     }
     function _toast(msg) {
         let el = document.getElementById('recPresenciaToast');
