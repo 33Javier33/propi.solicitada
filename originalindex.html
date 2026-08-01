@@ -3086,6 +3086,11 @@
         _sincronizarTemaBtns();
     };
 
+    // Red de seguridad: re-aplicar el tema guardado con la lógica autoritativa de
+    // aplicarTema (fuente única). Así el tema queda bien aplicado aunque el init
+    // rápido del <head> fuera de una versión previa/incompleta.
+    try { window.aplicarTema(_temaActual()); } catch (e) {}
+
     // ── ESTILO DEL BALANCE (clásico / tarjeta bancaria) ──────────────
     function _balanceEstiloGuardado() {
         try { return localStorage.getItem('propi_balance_estilo') === 'tarjeta' ? 'tarjeta' : 'clasico'; }

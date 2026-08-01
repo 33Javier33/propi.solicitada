@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Tema: red de seguridad para que la selección persista siempre (SW v132)
+- **Refuerzo del fix v131:** además de corregir el init del `<head>`, ahora `app.js` **re-aplica el tema guardado** al cargar usando `aplicarTema(_temaActual())` (fuente única y autoritativa). Así el tema persiste aunque el init rápido del `<head>` fuera de una versión previa. Se verificó que nada borra `propi_tema` y que el indicador de botón activo existe.
+- Archivos: `app.js`. SW v132.
+
 #### 2026-07-26 — Fix: no se guardaban los temas nuevos (grafito/vino/índigo) (SW v131)
 - **Causa:** el script de init temprano del `<head>` (que aplica el tema antes de renderizar para evitar parpadeo) tenía una lista de temas válidos **desactualizada** — no incluía grafito/vino/índigo. Al recargar, esos temas eran rechazados y volvía a "claro" → parecía que no se guardaba la selección.
 - **Fix:** se actualizó ese init para que coincida con `app.js` (mismos `_TEMAS`/`_TEMA_TINTE`/`_TEMA_COLOR`): valida los 12 temas, aplica `data-tinte` para esmeralda/grafito/vino/índigo y `data-negro` para negro, y usa el color de barra correcto.
