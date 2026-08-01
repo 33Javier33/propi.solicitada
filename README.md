@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-07-26 — Fix: no se guardaban los temas nuevos (grafito/vino/índigo) (SW v131)
+- **Causa:** el script de init temprano del `<head>` (que aplica el tema antes de renderizar para evitar parpadeo) tenía una lista de temas válidos **desactualizada** — no incluía grafito/vino/índigo. Al recargar, esos temas eran rechazados y volvía a "claro" → parecía que no se guardaba la selección.
+- **Fix:** se actualizó ese init para que coincida con `app.js` (mismos `_TEMAS`/`_TEMA_TINTE`/`_TEMA_COLOR`): valida los 12 temas, aplica `data-tinte` para esmeralda/grafito/vino/índigo y `data-negro` para negro, y usa el color de barra correcto.
+- Archivos: `index.html` (init de tema en `<head>`). SW v131.
+
 #### 2026-07-26 — Fix: banner de actualización que no desaparecía → actualización silenciosa (SW v130)
 - **Síntoma:** el banner "Nueva versión disponible" no desaparecía tras tocar "Actualizar" ni al terminar la cuenta regresiva (mismo patrón que se había quitado en diario.propi: ciclo `controllerchange`→reload + worker en "waiting" que reaparece).
 - **Fix:** se **elimina el banner** y toda su lógica (countdown, botón, recarga forzada). Ahora la actualización es **silenciosa**: el SW nuevo hace `skipWaiting()` en `install` y toma el control solo (`clients.claim`); la versión nueva se aplica **al reabrir la app**. Sin banner, nada que se quede pegado.

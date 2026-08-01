@@ -57,13 +57,16 @@
     <script>
         (function () {
             try {
+                // Mantener sincronizado con app.js (_TEMAS / _TEMA_TINTE / _TEMA_COLOR).
+                var TINTES = { esmeralda: 'esmeralda', grafito: 'grafito', vino: 'vino', indigo: 'indigo' };
+                var VALID = ['claro', 'oscuro', 'negro', 'esmeralda', 'grafito', 'vino', 'indigo', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'];
                 var t = localStorage.getItem('propi_tema') || 'claro';
-                if (!['claro', 'oscuro', 'negro', 'esmeralda', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'].includes(t)) t = 'claro';
-                var esDerivadoOscuro = (t === 'negro' || t === 'esmeralda');
+                if (VALID.indexOf(t) === -1) t = 'claro';
+                var esDerivadoOscuro = (t === 'negro' || !!TINTES[t]);
                 document.documentElement.setAttribute('data-theme', esDerivadoOscuro ? 'oscuro' : t);
                 if (t === 'negro') document.documentElement.setAttribute('data-negro', '1');
-                if (t === 'esmeralda') document.documentElement.setAttribute('data-tinte', 'esmeralda');
-                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
+                if (TINTES[t]) document.documentElement.setAttribute('data-tinte', TINTES[t]);
+                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', grafito: '#111113', vino: '#1a080e', indigo: '#0f0e1e', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
                 var m = document.querySelector('meta[name="theme-color"]');
                 if (m) m.setAttribute('content', tc[t] || '#001723');
             } catch (e) {}
