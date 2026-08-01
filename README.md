@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-01 — Presencia GARANTIZADA: respaldo por base de datos (tabla `rec_presencia`) (SW v139)
+- **Por qué:** la presencia por canal realtime seguía sin verse en algunos escenarios (dispositivos con versión desigual, websocket caído). Se elimina esa dependencia.
+- **Cómo:** además del canal en vivo, cada app **escribe su presencia en la tabla `rec_presencia`** (proyecto REC) al entrar al módulo de recaudación, con **latido cada 20s**, y **todas las apps la leen cada 5s** y pintan la unión (canal + tabla, dedupe por key). Al salir se borra la fila; `pagehide` intenta borrarla; filas >45s se ignoran y >1h se limpian oportunistamente. Verificado con inserción/lectura real como rol anon.
+- Resultado: el nombre del socio aparece **siempre** (peor caso ~5s de retraso), en el modal de propi y en los banners de las 3 apps.
+- Archivos: `supabase-api.js`. Tabla nueva `rec_presencia` (REC). SW v139 (visible 139).
+
 #### 2026-08-01 — Presencia: pintado inmediato en el modal + refuerzos (SW v138)
 - El modal "Ingresar Recaudación" ahora pinta **al instante** (al abrirse) quién está en recaudaciones en las otras apps, con encabezado **"👥 Ahora mismo en recaudaciones:"** — antes esperaba el próximo evento de presencia.
 - Refuerzos anti-pérdida: listeners `join`/`leave` además de `sync`, repintado de respaldo cada 4s, y render al confirmar la suscripción. `window.recPresRender` expuesto.

@@ -23,7 +23,7 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
     const APP = 'Bóveda Personal';   // etiqueta de esta app
     const TIPO_LABEL = { TarjetaMDA: 'Tarjeta MDA', EfectivoMDA: 'Efectivo MDA', SalaDeJuegos: 'Sala de Juegos', Boveda: 'Bóveda' };
     const KEY = 'rp_' + Math.random().toString(36).slice(2) + Date.now();
-    let ch = null, mio = null, toastT = null, listo = false;
+    let ch = null, mio = null, toastT = null, listo = false, hbT = null, otrosDb = [];
     const _esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 
     function _banner(otros) {
@@ -63,13 +63,40 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
         clearTimeout(toastT);
         toastT = setTimeout(() => { el.style.display = 'none'; }, 5000);
     }
-    function _render() {
-        if (!ch) return;
-        const st = ch.presenceState();
-        const otros = [];
-        Object.keys(st).forEach(k => (st[k] || []).forEach(m => { if (m && m.key !== KEY && m.enModal) otros.push(m); }));
-        _banner(otros);
+    // Combina lo que llega por el canal en vivo + lo leído de la tabla (respaldo)
+    function _otrosActuales() {
+        const out = [], vistos = {};
+        if (ch) {
+            const st = ch.presenceState();
+            Object.keys(st).forEach(k => (st[k] || []).forEach(m => { if (m && m.key !== KEY && m.enModal && !vistos[m.key]) { vistos[m.key] = 1; out.push(m); } }));
+        }
+        otrosDb.forEach(m => { if (!vistos[m.key]) { vistos[m.key] = 1; out.push(m); } });
+        return out;
     }
+    function _render() { _banner(_otrosActuales()); }
+
+    // ── Respaldo por BASE DE DATOS: aunque el canal realtime falle en algún
+    // dispositivo, la presencia se escribe en la tabla rec_presencia (latido
+    // cada 20s) y TODAS las apps la leen cada 5s. Garantiza que el nombre
+    // SIEMPRE aparezca, sin depender del websocket. ──
+    function _dbUp() {
+        if (!mio) return;
+        try { DB.from('rec_presencia').upsert({ id: KEY, nombre: mio.nombre, app: APP, tipo: mio.tipo || '', updated_at: new Date().toISOString() }).then(() => {}, () => {}); } catch (e) {}
+    }
+    function _dbDel() {
+        try { DB.from('rec_presencia').delete().eq('id', KEY).then(() => {}, () => {}); } catch (e) {}
+    }
+    async function _dbPoll() {
+        try {
+            const desde = new Date(Date.now() - 45000).toISOString();
+            const { data } = await DB.from('rec_presencia').select('id, nombre, app, tipo').gt('updated_at', desde).neq('id', KEY);
+            otrosDb = (data || []).map(r => ({ key: r.id, nombre: r.nombre, app: r.app, tipo: r.tipo, enModal: true }));
+            // Limpieza oportunista de filas muertas (muy antigua = cliente que no alcanzó a borrar)
+            if (Math.random() < 0.02) { try { DB.from('rec_presencia').delete().lt('updated_at', new Date(Date.now() - 3600000).toISOString()).then(() => {}, () => {}); } catch (e2) {} }
+        } catch (e) {}
+        _render();
+    }
+    window.addEventListener('pagehide', () => { if (mio) _dbDel(); });
     function iniciar() {
         if (ch || typeof DB === 'undefined' || !DB) return;
         ch = DB.channel('rec-presencia', { config: { presence: { key: KEY } } });
@@ -92,8 +119,9 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
               if (listo && mio) { try { ch.track(mio); } catch (e) {} }
               if (listo) _render();
           });
-        // Respaldo: re-pintar periódicamente por si algún evento de presencia se pierde
-        setInterval(_render, 4000);
+        // Sondeo de respaldo vía tabla: lee presencias cada 5s y repinta
+        _dbPoll();
+        setInterval(_dbPoll, 5000);
     }
     window.recPresIniciar = iniciar;
     window.recPresRender = _render;
@@ -101,15 +129,20 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
         iniciar();
         mio = { key: KEY, nombre: nombre || 'Alguien', app: APP, tipo: tipo || '', enModal: true };
         if (ch && listo) { try { ch.track(mio); } catch (e) {} } // si no está listo, se envía al suscribir
+        _dbUp();                                    // respaldo por tabla (siempre)
+        clearInterval(hbT); hbT = setInterval(_dbUp, 20000); // latido: mantiene viva la fila
     };
     window.recPresTipo = function (tipo) {
         if (!mio) return;
         mio.tipo = tipo || '';
         if (ch && listo) { try { ch.track(mio); } catch (e) {} }
+        _dbUp();
     };
     window.recPresSalir = function () {
         mio = null;
+        clearInterval(hbT); hbT = null;
         if (ch && listo) { try { ch.untrack(); } catch (e) {} }
+        _dbDel();
     };
     window.recPresAgrego = function (nombre, tipo) {
         iniciar();
