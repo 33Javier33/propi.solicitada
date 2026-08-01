@@ -353,6 +353,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-01 — Versión visible en la barra inferior (SW v140)
+- El crédito de la barra inferior ahora incluye la versión de la app: "CarlosPN Interactive® · 2026 · **v140**" (= versión del SW). "Acerca de" sincronizado (140). Permite verificar de un vistazo si el dispositivo tomó la última versión.
+- Se verificó en la tabla `rec_presencia` que ambos dispositivos ya transmiten presencia con la versión nueva (filas de "Diario" y "Bóveda Personal").
+
 #### 2026-08-01 — Presencia GARANTIZADA: respaldo por base de datos (tabla `rec_presencia`) (SW v139)
 - **Por qué:** la presencia por canal realtime seguía sin verse en algunos escenarios (dispositivos con versión desigual, websocket caído). Se elimina esa dependencia.
 - **Cómo:** además del canal en vivo, cada app **escribe su presencia en la tabla `rec_presencia`** (proyecto REC) al entrar al módulo de recaudación, con **latido cada 20s**, y **todas las apps la leen cada 5s** y pintan la unión (canal + tabla, dedupe por key). Al salir se borra la fila; `pagehide` intenta borrarla; filas >45s se ignoran y >1h se limpian oportunistamente. Verificado con inserción/lectura real como rol anon.
