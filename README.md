@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-01 — Fix: el número de versión visible ("Acerca de") estaba congelado en 19 (SW v136)
+- **Causa:** el modal "Acerca de" mostraba "Versión 19" fijo; se venía bumpeando solo el `CACHE_NAME` del SW y ese número visible quedó desincronizado (parecía que "no se actualizaba la versión").
+- **Fix:** se puso la versión visible **en sincronía con el SW** → ahora muestra **"Versión 136 · 2026"** (= `boveda-personal-v136`). De aquí en adelante, ambos se suben juntos en cada release.
+- Archivos: `index.html` (versión en "Acerca de"), `sw.js`. SW v136.
+
 #### 2026-08-01 — Vuelve el banner "Actualizar" (reescrito para no quedar pegado) (SW v135)
 - **Qué se hizo:** vuelve el banner "Nueva versión disponible" con botón **Actualizar**, pero reescrito para que **nunca se quede pegado**.
 - **Cómo no se pega:** (1) solo aparece cuando hay un SW nuevo **en espera** (`reg.waiting`/`updatefound`→installed); (2) **sin cuenta regresiva automática** (eso era lo que dejaba el "actualizando" colgado); (3) al tocar Actualizar, aplica y **recarga UNA sola vez** garantizada (por `controllerchange` o respaldo de 1.5s), con guardia `_swReloaded`. Tras recargar ya no hay worker en espera → el banner no reaparece.
