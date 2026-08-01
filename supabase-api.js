@@ -23,7 +23,7 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
     const APP = 'Bóveda Personal';   // etiqueta de esta app
     const TIPO_LABEL = { TarjetaMDA: 'Tarjeta MDA', EfectivoMDA: 'Efectivo MDA', SalaDeJuegos: 'Sala de Juegos', Boveda: 'Bóveda' };
     const KEY = 'rp_' + Math.random().toString(36).slice(2) + Date.now();
-    let ch = null, mio = null, toastT = null;
+    let ch = null, mio = null, toastT = null, listo = false;
     const _esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 
     function _banner(otros) {
@@ -77,20 +77,30 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
                   _toast((payload.nombre || 'Alguien') + ' agregó a recaudaciones' + t);
               }
           })
-          .subscribe();
+          .subscribe((status) => {
+              // El track SOLO funciona con el canal YA suscrito. Antes se enviaba
+              // de inmediato y, si la suscripción no había terminado, la presencia
+              // se PERDÍA en silencio (por eso no aparecía nada en las otras apps).
+              // Ahora: al confirmarse la suscripción (y en cada reconexión) se
+              // (re)marca la presencia pendiente.
+              listo = (status === 'SUBSCRIBED');
+              if (listo && mio) { try { ch.track(mio); } catch (e) {} }
+          });
     }
     window.recPresIniciar = iniciar;
     window.recPresEntrar = function (nombre, tipo) {
         iniciar();
         mio = { key: KEY, nombre: nombre || 'Alguien', app: APP, tipo: tipo || '', enModal: true };
-        if (ch) { try { ch.track(mio); } catch (e) {} }
+        if (ch && listo) { try { ch.track(mio); } catch (e) {} } // si no está listo, se envía al suscribir
     };
     window.recPresTipo = function (tipo) {
-        if (mio && ch) { mio.tipo = tipo || ''; try { ch.track(mio); } catch (e) {} }
+        if (!mio) return;
+        mio.tipo = tipo || '';
+        if (ch && listo) { try { ch.track(mio); } catch (e) {} }
     };
     window.recPresSalir = function () {
         mio = null;
-        if (ch) { try { ch.untrack(); } catch (e) {} }
+        if (ch && listo) { try { ch.untrack(); } catch (e) {} }
     };
     window.recPresAgrego = function (nombre, tipo) {
         iniciar();

@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-01 — Fix: la presencia en recaudación no aparecía (track antes de suscribir) (SW v137)
+- **Síntoma:** en propi.solicitada no aparecía nadie aunque un socio estuviera ingresando en diario.propi (y viceversa).
+- **Causa:** la marca de presencia (`ch.track`) se enviaba **antes** de que el canal `rec-presencia` terminara de suscribirse; en ese estado el track se **pierde en silencio**. En diario era sistemático: su panel "Agregar" es el inicial, así que el track salía justo al entrar (canal aún conectándose) y nunca llegaba.
+- **Fix (en las 3 apps):** `subscribe(status)` con callback — la presencia pendiente se (re)marca **cuando el canal confirma `SUBSCRIBED`** y también en cada **reconexión** (al volver del segundo plano). `recPresEntrar/Tipo/Salir` solo trackean con el canal listo; si no, queda pendiente y se envía al suscribir.
+- Archivos: `supabase-api.js`. SW v137 (versión visible 137).
+
 #### 2026-08-01 — Fix: el número de versión visible ("Acerca de") estaba congelado en 19 (SW v136)
 - **Causa:** el modal "Acerca de" mostraba "Versión 19" fijo; se venía bumpeando solo el `CACHE_NAME` del SW y ese número visible quedó desincronizado (parecía que "no se actualizaba la versión").
 - **Fix:** se puso la versión visible **en sincronía con el SW** → ahora muestra **"Versión 136 · 2026"** (= `boveda-personal-v136`). De aquí en adelante, ambos se suben juntos en cada release.
