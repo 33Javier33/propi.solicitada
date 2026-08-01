@@ -1014,6 +1014,7 @@
         document.getElementById('userAreaLabel').textContent = currentUser.Area;
         renderPerfil();
         _renderSonidoSelector();
+        if (typeof recPresIniciar === 'function') recPresIniciar(); // presencia en recaudación
         initChatInput();
         showSkeletons();
         pingConexion();
@@ -2592,6 +2593,7 @@
             if (b.dataset.tipo === tipo) b.classList.add('active');
             else b.classList.remove('active');
         });
+        if (typeof recPresTipo === 'function') recPresTipo(tipo); // presencia: tipo en curso
     };
 
     // Calcula el total de puntos del reparto (mismo criterio que socios-comicion →
@@ -2650,10 +2652,16 @@
         if (elPP) elPP.textContent = _pts.planta.toLocaleString('es-CL') + ' pts';
         selRecTipo('TarjetaMDA');
         document.getElementById('modalRecaudacion').style.display = 'flex';
+        // Presencia: avisar a las otras apps que este socio está en recaudaciones
+        if (typeof recPresEntrar === 'function') {
+            const _nom = (typeof getDisplayName === 'function') ? getDisplayName() : ((currentUser.Nombre || '') + ' ' + (currentUser.Apellido || '')).trim();
+            recPresEntrar(_nom, _recTipoSelected);
+        }
     };
 
     window.cerrarModalRec = () => {
         document.getElementById('modalRecaudacion').style.display = 'none';
+        if (typeof recPresSalir === 'function') recPresSalir(); // presencia: salió del modal
     };
 
     window.fmtRecMonto = (inp) => {
@@ -2688,6 +2696,11 @@
             });
             const json = await res.json();
             if (json.success) {
+                // Presencia: avisar a las otras apps que se agregó un dato
+                if (typeof recPresAgrego === 'function') {
+                    const _nom = (typeof getDisplayName === 'function') ? getDisplayName() : ((currentUser.Nombre || '') + ' ' + (currentUser.Apellido || '')).trim();
+                    recPresAgrego(_nom, _recTipoSelected);
+                }
                 showToast('Recaudación registrada ✓', 'success');
                 cerrarModalRec();
             } else {

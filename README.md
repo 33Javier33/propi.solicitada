@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-01 — Presencia en recaudación en tiempo real entre apps (SW v133)
+- **Qué se hizo:** cuando un socio abre el modal "Recaudación del Día", las otras apps (propi.solicitada, diario.propi y socios-comicion) muestran un aviso en tiempo real: **🟢 [Nombre] está en recaudaciones · [tipo] (app)**. Y cuando alguien **agrega** un dato, aparece un toast **📊 [Nombre] agregó a recaudaciones ([tipo])**.
+- **Cómo:** módulo de **Supabase Realtime Presence** en un canal compartido `rec-presencia` (proyecto REC). `recPresEntrar/Tipo/Salir` (track presencia al abrir/cambiar tipo/cerrar el modal) y `recPresAgrego` (broadcast al guardar). Banner y toast autocontenidos. Wire: `abrirModalRec`/`selRecTipo`/`cerrarModalRec`/`enviarRec` + `recPresIniciar` en `initApp`.
+- Archivos: `supabase-api.js` (módulo de presencia), `app.js` (wire). SW v133.
+
 #### 2026-07-26 — Tema: red de seguridad para que la selección persista siempre (SW v132)
 - **Refuerzo del fix v131:** además de corregir el init del `<head>`, ahora `app.js` **re-aplica el tema guardado** al cargar usando `aplicarTema(_temaActual())` (fuente única y autoritativa). Así el tema persiste aunque el init rápido del `<head>` fuera de una versión previa. Se verificó que nada borra `propi_tema` y que el indicador de botón activo existe.
 - Archivos: `app.js`. SW v132.

@@ -12,6 +12,86 @@ const SUPABASE_KEY_REC_V    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJz
 const dbSV = supabase.createClient(SUPABASE_URL_SOCIOS_V, SUPABASE_KEY_SOCIOS_V);
 const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
 
+// ============================================================
+// PRESENCIA EN RECAUDACIÓN (tiempo real ENTRE apps)
+// Canal compartido 'rec-presencia' en el proyecto REC. Muestra quién está
+// en el módulo de recaudación (y qué tipo ingresa) y avisa cuando alguien
+// agrega un dato. Lo usan propi.solicitada, diario.propi y socios-comicion.
+// ============================================================
+(function () {
+    const DB = dbRV;                 // cliente del proyecto de recaudaciones
+    const APP = 'Propi';             // etiqueta de esta app
+    const TIPO_LABEL = { TarjetaMDA: 'Tarjeta MDA', EfectivoMDA: 'Efectivo MDA', SalaDeJuegos: 'Sala de Juegos', Boveda: 'Bóveda' };
+    const KEY = 'rp_' + Math.random().toString(36).slice(2) + Date.now();
+    let ch = null, mio = null, toastT = null;
+    const _esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+
+    function _banner(otros) {
+        let el = document.getElementById('recPresenciaBanner');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'recPresenciaBanner';
+            el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom));z-index:9000;max-width:92%;background:#0f766e;color:#fff;border-radius:14px;padding:9px 14px;font-size:12px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,0.28);display:none;text-align:center;line-height:1.35;';
+            document.body.appendChild(el);
+        }
+        if (!otros.length) { el.style.display = 'none'; return; }
+        el.innerHTML = otros.map(o => {
+            const t = o.tipo ? (' · ' + (TIPO_LABEL[o.tipo] || o.tipo)) : '';
+            return '🟢 <b>' + _esc(o.nombre || 'Alguien') + '</b> está en recaudaciones' + t + ' <span style="opacity:.7">(' + _esc(o.app || '') + ')</span>';
+        }).join('<br>');
+        el.style.display = 'block';
+    }
+    function _toast(msg) {
+        let el = document.getElementById('recPresenciaToast');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'recPresenciaToast';
+            el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top));z-index:9001;max-width:92%;background:#1e3a5f;color:#fff;border-radius:14px;padding:11px 16px;font-size:13px;font-weight:700;box-shadow:0 6px 22px rgba(0,0,0,0.32);display:none;text-align:center;';
+            document.body.appendChild(el);
+        }
+        el.innerHTML = '📊 ' + _esc(msg);
+        el.style.display = 'block';
+        clearTimeout(toastT);
+        toastT = setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+    function _render() {
+        if (!ch) return;
+        const st = ch.presenceState();
+        const otros = [];
+        Object.keys(st).forEach(k => (st[k] || []).forEach(m => { if (m && m.key !== KEY && m.enModal) otros.push(m); }));
+        _banner(otros);
+    }
+    function iniciar() {
+        if (ch || typeof DB === 'undefined' || !DB) return;
+        ch = DB.channel('rec-presencia', { config: { presence: { key: KEY } } });
+        ch.on('presence', { event: 'sync' }, _render)
+          .on('broadcast', { event: 'rec-agregado' }, ({ payload }) => {
+              if (payload && payload.key !== KEY) {
+                  const t = payload.tipo ? (' (' + (TIPO_LABEL[payload.tipo] || payload.tipo) + ')') : '';
+                  _toast((payload.nombre || 'Alguien') + ' agregó a recaudaciones' + t);
+              }
+          })
+          .subscribe();
+    }
+    window.recPresIniciar = iniciar;
+    window.recPresEntrar = function (nombre, tipo) {
+        iniciar();
+        mio = { key: KEY, nombre: nombre || 'Alguien', app: APP, tipo: tipo || '', enModal: true };
+        if (ch) { try { ch.track(mio); } catch (e) {} }
+    };
+    window.recPresTipo = function (tipo) {
+        if (mio && ch) { mio.tipo = tipo || ''; try { ch.track(mio); } catch (e) {} }
+    };
+    window.recPresSalir = function () {
+        mio = null;
+        if (ch) { try { ch.untrack(); } catch (e) {} }
+    };
+    window.recPresAgrego = function (nombre, tipo) {
+        iniciar();
+        if (ch) { try { ch.send({ type: 'broadcast', event: 'rec-agregado', payload: { key: KEY, nombre: nombre || 'Alguien', tipo: tipo || '', app: APP } }); } catch (e) {} }
+    };
+})();
+
 // Últimos mensajes leídos con éxito. Se usan como respaldo si una consulta a
 // Supabase falla de forma transitoria, para NO dejar el chat en blanco.
 let _lastNotasRec = null;   // chat Soporte (notas_recaudacion)
