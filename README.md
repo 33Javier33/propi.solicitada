@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-01 — Fix REAL de presencia: se perdía al salir de pantalla / cambiar de panel (SW v141)
+- **Diagnóstico:** el modal de propi.solicitada **sí funcionaba** (verificado: mostró una presencia de prueba insertada en la tabla). El fallo estaba en el emisor: diario.propi dejaba de anunciarse.
+- **Causa 1:** diario solo marcaba presencia estando en el panel "Agregar"; al mirar Historial/Notas desaparecía, aunque el socio siguiera trabajando en recaudaciones. **Fix:** estar dentro de diario.propi ya cuenta como estar en recaudaciones (el tipo se muestra solo si está en "Agregar").
+- **Causa 2:** el evento `pagehide` **borraba** la fila de presencia al apagar la pantalla o cambiar de app — la dinámica normal de la operación. **Fix:** ya no se borra en segundo plano; al volver al frente se re-marca y re-lee al instante. Ventana de vigencia ampliada de 45s a **3 minutos**.
+- socios-comicion además se anuncia al entrar a su pestaña Recaudación.
+- Archivos: `supabase-api.js`. SW v141 (visible v141 en la barra inferior y en "Acerca de").
+
 #### 2026-08-01 — Versión visible en la barra inferior (SW v140)
 - El crédito de la barra inferior ahora incluye la versión de la app: "CarlosPN Interactive® · 2026 · **v140**" (= versión del SW). "Acerca de" sincronizado (140). Permite verificar de un vistazo si el dispositivo tomó la última versión.
 - Se verificó en la tabla `rec_presencia` que ambos dispositivos ya transmiten presencia con la versión nueva (filas de "Diario" y "Bóveda Personal").
