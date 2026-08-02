@@ -81,7 +81,10 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
     // Combina lo que llega por el canal en vivo + lo leído de la tabla (respaldo)
     // Descarta mi propia sesión Y cualquier presencia del MISMO socio en otra app
     // (si el socio tiene propi y diario abiertos, no debe verse a sí mismo).
-    const _esMio = m => !m || m.key === KEY || (miSocioId && String(m.socioId || '') === String(miSocioId));
+    const _esMio = m => !m || m.key === KEY
+        || (miSocioId && String(m.socioId || '') === String(miSocioId))
+        // Red de seguridad para filas antiguas (sin socio_id): mismo nombre en ESTA misma app = soy yo
+        || (mio && m.app === APP && String(m.nombre || '') === String(mio.nombre || ''));
     function _otrosActuales() {
         const out = [], vistos = {};
         if (ch) {
@@ -97,17 +100,21 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
     // dispositivo, la presencia se escribe en la tabla rec_presencia (latido
     // cada 20s) y TODAS las apps la leen cada 5s. Garantiza que el nombre
     // SIEMPRE aparezca, sin depender del websocket. ──
+    // ID de fila FIJO por socio+app: al recargar la app se sobreescribe la MISMA
+    // fila en vez de crear una nueva. Así un socio nunca se ve a sí mismo por
+    // culpa de una sesión anterior que quedó viva.
+    const _rowId = () => miSocioId ? (APP + ':' + miSocioId) : KEY;
     function _dbUp() {
         if (!mio) return;
-        try { DB.from('rec_presencia').upsert({ id: KEY, nombre: mio.nombre, app: APP, tipo: mio.tipo || '', socio_id: miSocioId || '', updated_at: new Date().toISOString() }).then(() => {}, () => {}); } catch (e) {}
+        try { DB.from('rec_presencia').upsert({ id: _rowId(), nombre: mio.nombre, app: APP, tipo: mio.tipo || '', socio_id: miSocioId || '', updated_at: new Date().toISOString() }).then(() => {}, () => {}); } catch (e) {}
     }
     function _dbDel() {
-        try { DB.from('rec_presencia').delete().eq('id', KEY).then(() => {}, () => {}); } catch (e) {}
+        try { DB.from('rec_presencia').delete().eq('id', _rowId()).then(() => {}, () => {}); } catch (e) {}
     }
     async function _dbPoll() {
         try {
             const desde = new Date(Date.now() - 180000).toISOString(); // 3 min: cubre pantalla apagada / cambio de app
-            const { data } = await DB.from('rec_presencia').select('id, nombre, app, tipo, socio_id').gt('updated_at', desde).neq('id', KEY);
+            const { data } = await DB.from('rec_presencia').select('id, nombre, app, tipo, socio_id').gt('updated_at', desde).neq('id', _rowId());
             otrosDb = (data || []).map(r => ({ key: r.id, nombre: r.nombre, app: r.app, tipo: r.tipo, socioId: r.socio_id || '', enModal: true }));
             // Limpieza oportunista de filas muertas (muy antigua = cliente que no alcanzó a borrar)
             if (Math.random() < 0.02) { try { DB.from('rec_presencia').delete().lt('updated_at', new Date(Date.now() - 3600000).toISOString()).then(() => {}, () => {}); } catch (e2) {} }

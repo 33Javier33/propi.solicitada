@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Fix: el socio se veía a sí mismo en el modal (SW v143)
+- **Síntoma:** en el modal aparecía el propio socio ("CarlosJPerezN … (Bóveda Personal)") junto al socio real de diario.
+- **Causa:** cada carga de la app creaba una fila NUEVA de presencia (id aleatorio). La fila de una sesión anterior del mismo teléfono seguía viva y, al no tener el `socio_id` (versión previa), el filtro no la reconocía como propia.
+- **Fix:** el id de la fila ahora es **fijo por socio + app** (`app:socio_id`), así al recargar se **sobreescribe la misma fila** y nunca quedan duplicados. Además, red de seguridad para filas antiguas: mismo nombre en la misma app = soy yo. Se limpiaron las filas viejas de la tabla.
+- Archivos: `supabase-api.js`. SW v143 (visible v143).
+
 #### 2026-08-01 — Presencia: no verse a sí mismo + aviso arriba y temporal (SW v142)
 - **No verse a sí mismo:** la presencia ahora viaja con el `socio_id`. Si el mismo socio tiene propi.solicitada y diario.propi abiertas a la vez, **no se muestra a sí mismo** (antes aparecía como si fuera otra persona). Columna nueva `socio_id` en `rec_presencia`.
 - **Aviso flotante arriba y temporal:** el banner pasó de abajo a **arriba**, y ahora **solo avisa cuando alguien recién entra**, desapareciendo solo a los 6s (antes quedaba fijo abajo).
