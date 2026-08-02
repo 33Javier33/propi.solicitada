@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Fix: el filtro de "no verse a sí mismo" ocultaba al socio de la otra app (SW v144)
+- **Causa:** en la operación real el mismo `socio_id` puede estar en las dos apps (misma cuenta en propi y en diario). El filtro ocultaba **cualquier** presencia con mi mismo ID, así que borraba justo la línea de "(Diario)" que se quería ver.
+- **Fix:** ahora se oculta **solo mi propia línea de ESTA app** (mi sesión). Si el mismo socio está en **otra** app, **sí se muestra**. Se restaura la lista dentro del modal tal como estaba.
+- Archivos: `supabase-api.js`. SW v144 (visible v144).
+
 #### 2026-08-02 — Fix: el socio se veía a sí mismo en el modal (SW v143)
 - **Síntoma:** en el modal aparecía el propio socio ("CarlosJPerezN … (Bóveda Personal)") junto al socio real de diario.
 - **Causa:** cada carga de la app creaba una fila NUEVA de presencia (id aleatorio). La fila de una sesión anterior del mismo teléfono seguía viva y, al no tener el `socio_id` (versión previa), el filtro no la reconocía como propia.
