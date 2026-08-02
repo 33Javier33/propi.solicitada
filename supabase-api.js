@@ -24,22 +24,37 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
     const TIPO_LABEL = { TarjetaMDA: 'Tarjeta MDA', EfectivoMDA: 'Efectivo MDA', SalaDeJuegos: 'Sala de Juegos', Boveda: 'Bóveda' };
     const KEY = 'rp_' + Math.random().toString(36).slice(2) + Date.now();
     let ch = null, mio = null, toastT = null, listo = false, hbT = null, otrosDb = [];
+    let bannerT = null, anunciados = {};   // banner superior: solo avisa a los que RECIÉN llegan
+    let miSocioId = '';                    // para no mostrarme a mí mismo en otra app
     const _esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 
+    function _linea(o) {
+        const t = o.tipo ? (' · ' + (TIPO_LABEL[o.tipo] || o.tipo)) : '';
+        return '🟢 <b>' + _esc(o.nombre || 'Alguien') + '</b> está en recaudaciones' + t + ' <span style="opacity:.7">(' + _esc(o.app || '') + ')</span>';
+    }
     function _banner(otros) {
-        const html = otros.map(o => {
-            const t = o.tipo ? (' · ' + (TIPO_LABEL[o.tipo] || o.tipo)) : '';
-            return '🟢 <b>' + _esc(o.nombre || 'Alguien') + '</b> está en recaudaciones' + t + ' <span style="opacity:.7">(' + _esc(o.app || '') + ')</span>';
-        }).join('<br>');
-        // 1) Banner flotante (visible en toda la app, aunque no estés en el modal)
+        const html = otros.map(_linea).join('<br>');
+        // 1) Aviso flotante ARRIBA y TEMPORAL: solo cuando alguien RECIÉN entra;
+        //    se va solo a los 6s (la lista permanente vive dentro del modal).
+        const keys = otros.map(o => o.key);
+        Object.keys(anunciados).forEach(k => { if (keys.indexOf(k) === -1) delete anunciados[k]; });
+        const nuevos = otros.filter(o => !anunciados[o.key]);
+        otros.forEach(o => { anunciados[o.key] = true; });
         let el = document.getElementById('recPresenciaBanner');
         if (!el) {
             el = document.createElement('div');
             el.id = 'recPresenciaBanner';
-            el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom));z-index:9000;max-width:92%;background:#0f766e;color:#fff;border-radius:14px;padding:9px 14px;font-size:12px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,0.28);display:none;text-align:center;line-height:1.35;';
+            el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));z-index:9000;max-width:92%;background:#0f766e;color:#fff;border-radius:14px;padding:10px 16px;font-size:12px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,0.28);display:none;text-align:center;line-height:1.35;';
             document.body.appendChild(el);
         }
-        if (!otros.length) { el.style.display = 'none'; } else { el.innerHTML = html; el.style.display = 'block'; }
+        if (nuevos.length) {
+            el.innerHTML = nuevos.map(_linea).join('<br>');
+            el.style.display = 'block';
+            clearTimeout(bannerT);
+            bannerT = setTimeout(() => { el.style.display = 'none'; }, 6000);
+        } else if (!otros.length) {
+            clearTimeout(bannerT); el.style.display = 'none';
+        }
         // 2) Indicador DENTRO del modal de recaudación (si existe el contenedor)
         const m = document.getElementById('recPresenciaModal');
         if (m) {
@@ -64,13 +79,16 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
         toastT = setTimeout(() => { el.style.display = 'none'; }, 5000);
     }
     // Combina lo que llega por el canal en vivo + lo leído de la tabla (respaldo)
+    // Descarta mi propia sesión Y cualquier presencia del MISMO socio en otra app
+    // (si el socio tiene propi y diario abiertos, no debe verse a sí mismo).
+    const _esMio = m => !m || m.key === KEY || (miSocioId && String(m.socioId || '') === String(miSocioId));
     function _otrosActuales() {
         const out = [], vistos = {};
         if (ch) {
             const st = ch.presenceState();
-            Object.keys(st).forEach(k => (st[k] || []).forEach(m => { if (m && m.key !== KEY && m.enModal && !vistos[m.key]) { vistos[m.key] = 1; out.push(m); } }));
+            Object.keys(st).forEach(k => (st[k] || []).forEach(m => { if (m && !_esMio(m) && m.enModal && !vistos[m.key]) { vistos[m.key] = 1; out.push(m); } }));
         }
-        otrosDb.forEach(m => { if (!vistos[m.key]) { vistos[m.key] = 1; out.push(m); } });
+        otrosDb.forEach(m => { if (!vistos[m.key] && !_esMio(m)) { vistos[m.key] = 1; out.push(m); } });
         return out;
     }
     function _render() { _banner(_otrosActuales()); }
@@ -81,7 +99,7 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
     // SIEMPRE aparezca, sin depender del websocket. ──
     function _dbUp() {
         if (!mio) return;
-        try { DB.from('rec_presencia').upsert({ id: KEY, nombre: mio.nombre, app: APP, tipo: mio.tipo || '', updated_at: new Date().toISOString() }).then(() => {}, () => {}); } catch (e) {}
+        try { DB.from('rec_presencia').upsert({ id: KEY, nombre: mio.nombre, app: APP, tipo: mio.tipo || '', socio_id: miSocioId || '', updated_at: new Date().toISOString() }).then(() => {}, () => {}); } catch (e) {}
     }
     function _dbDel() {
         try { DB.from('rec_presencia').delete().eq('id', KEY).then(() => {}, () => {}); } catch (e) {}
@@ -89,8 +107,8 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
     async function _dbPoll() {
         try {
             const desde = new Date(Date.now() - 180000).toISOString(); // 3 min: cubre pantalla apagada / cambio de app
-            const { data } = await DB.from('rec_presencia').select('id, nombre, app, tipo').gt('updated_at', desde).neq('id', KEY);
-            otrosDb = (data || []).map(r => ({ key: r.id, nombre: r.nombre, app: r.app, tipo: r.tipo, enModal: true }));
+            const { data } = await DB.from('rec_presencia').select('id, nombre, app, tipo, socio_id').gt('updated_at', desde).neq('id', KEY);
+            otrosDb = (data || []).map(r => ({ key: r.id, nombre: r.nombre, app: r.app, tipo: r.tipo, socioId: r.socio_id || '', enModal: true }));
             // Limpieza oportunista de filas muertas (muy antigua = cliente que no alcanzó a borrar)
             if (Math.random() < 0.02) { try { DB.from('rec_presencia').delete().lt('updated_at', new Date(Date.now() - 3600000).toISOString()).then(() => {}, () => {}); } catch (e2) {} }
         } catch (e) {}
@@ -129,11 +147,14 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
         _dbPoll();
         setInterval(_dbPoll, 5000);
     }
-    window.recPresIniciar = iniciar;
+    // socioId opcional: se guarda aunque el socio aún no entre al modal, para
+    // filtrarse a sí mismo si tiene otra app abierta con su mismo ID.
+    window.recPresIniciar = function (socioId) { if (socioId) miSocioId = String(socioId); iniciar(); };
     window.recPresRender = _render;
-    window.recPresEntrar = function (nombre, tipo) {
+    window.recPresEntrar = function (nombre, tipo, socioId) {
         iniciar();
-        mio = { key: KEY, nombre: nombre || 'Alguien', app: APP, tipo: tipo || '', enModal: true };
+        if (socioId) miSocioId = String(socioId);
+        mio = { key: KEY, nombre: nombre || 'Alguien', app: APP, tipo: tipo || '', socioId: miSocioId, enModal: true };
         if (ch && listo) { try { ch.track(mio); } catch (e) {} } // si no está listo, se envía al suscribir
         _dbUp();                                    // respaldo por tabla (siempre)
         clearInterval(hbT); hbT = setInterval(_dbUp, 20000); // latido: mantiene viva la fila

@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-01 — Presencia: no verse a sí mismo + aviso arriba y temporal (SW v142)
+- **No verse a sí mismo:** la presencia ahora viaja con el `socio_id`. Si el mismo socio tiene propi.solicitada y diario.propi abiertas a la vez, **no se muestra a sí mismo** (antes aparecía como si fuera otra persona). Columna nueva `socio_id` en `rec_presencia`.
+- **Aviso flotante arriba y temporal:** el banner pasó de abajo a **arriba**, y ahora **solo avisa cuando alguien recién entra**, desapareciendo solo a los 6s (antes quedaba fijo abajo).
+- La lista permanente sigue **dentro del modal**, debajo de "Ingresar Recaudación" (sin cambios: quedó como estaba).
+- Archivos: `supabase-api.js`, `app.js`. SW v142 (visible v142).
+
 #### 2026-08-01 — Fix REAL de presencia: se perdía al salir de pantalla / cambiar de panel (SW v141)
 - **Diagnóstico:** el modal de propi.solicitada **sí funcionaba** (verificado: mostró una presencia de prueba insertada en la tabla). El fallo estaba en el emisor: diario.propi dejaba de anunciarse.
 - **Causa 1:** diario solo marcaba presencia estando en el panel "Agregar"; al mirar Historial/Notas desaparecía, aunque el socio siguiera trabajando en recaudaciones. **Fix:** estar dentro de diario.propi ya cuenta como estar en recaudaciones (el tipo se muestra solo si está en "Agregar").

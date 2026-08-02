@@ -1014,7 +1014,7 @@
         document.getElementById('userAreaLabel').textContent = currentUser.Area;
         renderPerfil();
         _renderSonidoSelector();
-        if (typeof recPresIniciar === 'function') recPresIniciar(); // presencia en recaudación
+        if (typeof recPresIniciar === 'function') recPresIniciar(String(currentUser.ID)); // presencia en recaudación
         initChatInput();
         showSkeletons();
         pingConexion();
@@ -2655,7 +2655,7 @@
         // Presencia: avisar a las otras apps que este socio está en recaudaciones
         if (typeof recPresEntrar === 'function') {
             const _nom = (typeof getDisplayName === 'function') ? getDisplayName() : ((currentUser.Nombre || '') + ' ' + (currentUser.Apellido || '')).trim();
-            recPresEntrar(_nom, _recTipoSelected);
+            recPresEntrar(_nom, _recTipoSelected, String(currentUser.ID)); // ID: para no verme a mí mismo
         }
         // Pintar DE INMEDIATO dentro del modal quién más está en recaudaciones
         // (sin esperar el próximo evento de presencia).
