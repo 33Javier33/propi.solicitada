@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Fix: el mismo socio aparecía DOS veces en la lista de presencia (SW v145)
+- **Causa:** la misma persona llega por **dos vías** (el canal en vivo, con clave aleatoria de sesión, y la tabla `rec_presencia`, con clave `app:socio`). Como las claves eran distintas, el filtro de duplicados no la reconocía y la mostraba dos veces.
+- **Fix:** se deduplica por una **identidad estable** (`app + socio_id`, o el nombre si no hay id). El aviso de "quién recién entró" usa la misma identidad.
+- Archivos: `supabase-api.js`. SW v145 (visible v145).
+
 #### 2026-08-02 — Fix: el filtro de "no verse a sí mismo" ocultaba al socio de la otra app (SW v144)
 - **Causa:** en la operación real el mismo `socio_id` puede estar en las dos apps (misma cuenta en propi y en diario). El filtro ocultaba **cualquier** presencia con mi mismo ID, así que borraba justo la línea de "(Diario)" que se quería ver.
 - **Fix:** ahora se oculta **solo mi propia línea de ESTA app** (mi sesión). Si el mismo socio está en **otra** app, **sí se muestra**. Se restaura la lista dentro del modal tal como estaba.

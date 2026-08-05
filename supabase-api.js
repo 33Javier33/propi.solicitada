@@ -28,6 +28,9 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
     let miSocioId = '';                    // para no mostrarme a mí mismo en otra app
     const _esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 
+    // Identidad estable de una presencia (misma persona por canal o por tabla)
+    const _idOf = m => String(m.app || '') + '|' + String(m.socioId || m.nombre || '');
+
     function _linea(o) {
         const t = o.tipo ? (' · ' + (TIPO_LABEL[o.tipo] || o.tipo)) : '';
         return '🟢 <b>' + _esc(o.nombre || 'Alguien') + '</b> está en recaudaciones' + t + ' <span style="opacity:.7">(' + _esc(o.app || '') + ')</span>';
@@ -36,10 +39,10 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
         const html = otros.map(_linea).join('<br>');
         // 1) Aviso flotante ARRIBA y TEMPORAL: solo cuando alguien RECIÉN entra;
         //    se va solo a los 6s (la lista permanente vive dentro del modal).
-        const keys = otros.map(o => o.key);
+        const keys = otros.map(_idOf);
         Object.keys(anunciados).forEach(k => { if (keys.indexOf(k) === -1) delete anunciados[k]; });
-        const nuevos = otros.filter(o => !anunciados[o.key]);
-        otros.forEach(o => { anunciados[o.key] = true; });
+        const nuevos = otros.filter(o => !anunciados[_idOf(o)]);
+        otros.forEach(o => { anunciados[_idOf(o)] = true; });
         let el = document.getElementById('recPresenciaBanner');
         if (!el) {
             el = document.createElement('div');
@@ -88,11 +91,18 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
         || (mio && m.app === APP && String(m.nombre || '') === String(mio.nombre || ''));
     function _otrosActuales() {
         const out = [], vistos = {};
+        const agregar = m => {
+            if (!m || _esMio(m)) return;
+            const id = _idOf(m);
+            if (vistos[id]) return;
+            vistos[id] = 1;
+            out.push(m);
+        };
         if (ch) {
             const st = ch.presenceState();
-            Object.keys(st).forEach(k => (st[k] || []).forEach(m => { if (m && !_esMio(m) && m.enModal && !vistos[m.key]) { vistos[m.key] = 1; out.push(m); } }));
+            Object.keys(st).forEach(k => (st[k] || []).forEach(m => { if (m && m.enModal) agregar(m); }));
         }
-        otrosDb.forEach(m => { if (!vistos[m.key] && !_esMio(m)) { vistos[m.key] = 1; out.push(m); } });
+        otrosDb.forEach(agregar);
         return out;
     }
     function _render() { _banner(_otrosActuales()); }
