@@ -1015,6 +1015,8 @@
         renderPerfil();
         _renderSonidoSelector();
         if (typeof recPresIniciar === 'function') recPresIniciar(String(currentUser.ID)); // presencia en recaudación
+        // Registro de actividad para socios-comicion (con fecha y hora)
+        if (typeof logActividad === 'function') logActividad('conectado', getDisplayName(), String(currentUser.ID), currentUser.Area || '');
         initChatInput();
         showSkeletons();
         pingConexion();
@@ -2656,6 +2658,10 @@
         if (typeof recPresEntrar === 'function') {
             const _nom = (typeof getDisplayName === 'function') ? getDisplayName() : ((currentUser.Nombre || '') + ' ' + (currentUser.Apellido || '')).trim();
             recPresEntrar(_nom, _recTipoSelected, String(currentUser.ID)); // ID: para no verme a mí mismo
+        }
+        if (typeof logActividad === 'function') {
+            const _n = (typeof getDisplayName === 'function') ? getDisplayName() : '';
+            logActividad('recaudacion', _n, String(currentUser.ID), 'Recaudación del Día');
         }
         // Pintar DE INMEDIATO dentro del modal quién más está en recaudaciones
         // (sin esperar el próximo evento de presencia).

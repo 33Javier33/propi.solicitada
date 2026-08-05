@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Registro de actividad para socios-comicion (SW v146)
+- La app ahora deja constancia (con fecha y hora) de dos momentos, para que la administración los vea en socios-comicion:
+  **(1)** cuando el socio **se conecta** a la app, y **(2)** cuando **entra a "Recaudación del Día"**.
+- Se escribe en la tabla `conexiones_log` mediante `logActividad(evento, nombre, socioId, detalle)`, con anti-duplicado de 1 minuto por evento para no llenar el registro.
+- Archivos: `supabase-api.js` (`logActividad`), `app.js` (login + apertura del modal). SW v146 (visible v146).
+
 #### 2026-08-02 — Fix: el mismo socio aparecía DOS veces en la lista de presencia (SW v145)
 - **Causa:** la misma persona llega por **dos vías** (el canal en vivo, con clave aleatoria de sesión, y la tabla `rec_presencia`, con clave `app:socio`). Como las claves eran distintas, el filtro de duplicados no la reconocía y la mostraba dos veces.
 - **Fix:** se deduplica por una **identidad estable** (`app + socio_id`, o el nombre si no hay id). El aviso de "quién recién entró" usa la misma identidad.

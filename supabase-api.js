@@ -12,6 +12,27 @@ const SUPABASE_KEY_REC_V    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJz
 const dbSV = supabase.createClient(SUPABASE_URL_SOCIOS_V, SUPABASE_KEY_SOCIOS_V);
 const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
 
+// ── REGISTRO DE ACTIVIDAD (lo ve socios-comicion, estilo Telegram) ──
+// Deja constancia con fecha y hora de: (1) cuando el socio se conecta a la app
+// y (2) cuando entra a "Recaudación del Día". Evita repetir el mismo evento
+// dentro de una ventana corta para no llenar el registro.
+const _logUltimo = {};
+window.logActividad = function (evento, nombre, socioId, detalle) {
+    try {
+        const k = evento + '|' + (socioId || '');
+        const ahora = Date.now();
+        if (_logUltimo[k] && (ahora - _logUltimo[k]) < 60000) return; // anti-duplicado 1 min
+        _logUltimo[k] = ahora;
+        dbSV.from('conexiones_log').insert({
+            socio_id: String(socioId || ''),
+            nombre: nombre || 'Socio',
+            evento: evento,
+            app: 'Bóveda Personal',
+            detalle: detalle || ''
+        }).then(() => {}, () => {});
+    } catch (e) {}
+};
+
 // ============================================================
 // PRESENCIA EN RECAUDACIÓN (tiempo real ENTRE apps)
 // Canal compartido 'rec-presencia' en el proyecto REC. Muestra quién está
