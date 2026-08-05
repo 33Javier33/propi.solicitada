@@ -17,11 +17,15 @@ const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
 // y (2) cuando entra a "Recaudación del Día". Evita repetir el mismo evento
 // dentro de una ventana corta para no llenar el registro.
 const _logUltimo = {};
+// Al cerrar sesión se limpia el anti-duplicado: si el socio vuelve a entrar
+// enseguida, su nueva conexión SÍ queda registrada (antes se omitía porque la
+// app no recarga al salir y el bloqueo de 1 min seguía vivo en memoria).
+window.logActividadReset = function () { for (const k in _logUltimo) delete _logUltimo[k]; };
 window.logActividad = function (evento, nombre, socioId, detalle) {
     try {
         const k = evento + '|' + (socioId || '');
         const ahora = Date.now();
-        if (_logUltimo[k] && (ahora - _logUltimo[k]) < 60000) return; // anti-duplicado 1 min
+        if (_logUltimo[k] && (ahora - _logUltimo[k]) < 15000) return; // anti-duplicado 15s
         _logUltimo[k] = ahora;
         dbSV.from('conexiones_log').insert({
             socio_id: String(socioId || ''),

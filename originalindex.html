@@ -1341,7 +1341,7 @@
                 </p>
                 <div style="display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
                     <span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.35)">update</span>
-                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 146 · 2026</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 147 · 2026</span>
                 </div>
             </div>
 
@@ -2575,7 +2575,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v146</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v147</span>
         </button>
     </nav>
 
@@ -5834,6 +5834,13 @@
 
     function logout() {
         if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
+        // Registrar la desconexión y limpiar el anti-duplicado para que un
+        // re-ingreso inmediato quede registrado en socios-comicion.
+        try {
+            if (currentUser && typeof logActividad === 'function') logActividad('desconectado', getDisplayName(), String(currentUser.ID), '');
+            if (typeof logActividadReset === 'function') setTimeout(logActividadReset, 300);
+        } catch (e) {}
+        try { if (typeof recPresSalir === 'function') recPresSalir(); } catch (e) {}
         // Avisar la desconexión (Telegram) ANTES de limpiar el usuario
         try { logoutConexion(); } catch(e) {}
         try { localStorage.removeItem(_INACT_KEY); } catch(e) {}

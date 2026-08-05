@@ -3248,6 +3248,13 @@
 
     function logout() {
         if (inactivityTimer) { clearInterval(inactivityTimer); inactivityTimer = null; }
+        // Registrar la desconexión y limpiar el anti-duplicado para que un
+        // re-ingreso inmediato quede registrado en socios-comicion.
+        try {
+            if (currentUser && typeof logActividad === 'function') logActividad('desconectado', getDisplayName(), String(currentUser.ID), '');
+            if (typeof logActividadReset === 'function') setTimeout(logActividadReset, 300);
+        } catch (e) {}
+        try { if (typeof recPresSalir === 'function') recPresSalir(); } catch (e) {}
         // Avisar la desconexión (Telegram) ANTES de limpiar el usuario
         try { logoutConexion(); } catch(e) {}
         try { localStorage.removeItem(_INACT_KEY); } catch(e) {}

@@ -353,6 +353,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Fix: el re-ingreso no quedaba registrado + evento de cierre de sesión (SW v147)
+- **Causa:** el anti-duplicado de 1 minuto vivía en memoria y la app **no recarga al cerrar sesión**, así que si el socio volvía a entrar enseguida, su nueva conexión **se omitía** y no aparecía en socios-comicion.
+- **Fix:** al cerrar sesión se limpia el anti-duplicado (`logActividadReset`) y la ventana bajó a 15s. Además ahora se registra el evento **'desconectado'** (cierre de sesión) y se libera la presencia.
+- Archivos: `supabase-api.js`, `app.js`. SW v147 (visible v147).
+
 #### 2026-08-02 — Registro de actividad para socios-comicion (SW v146)
 - La app ahora deja constancia (con fecha y hora) de dos momentos, para que la administración los vea en socios-comicion:
   **(1)** cuando el socio **se conecta** a la app, y **(2)** cuando **entra a "Recaudación del Día"**.
