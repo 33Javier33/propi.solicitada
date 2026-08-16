@@ -345,7 +345,7 @@
                 </p>
                 <div style="display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
                     <span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.35)">update</span>
-                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 147 · 2026</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 148 · 2026</span>
                 </div>
             </div>
 
@@ -431,6 +431,9 @@
         </div>
         <button onclick="handleFastLogin()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20">
             Ingresar
+        </button>
+        <button type="button" id="btnHuellaLogin" onclick="ingresarConHuella()" style="display:none;width:100%;margin-top:12px;background:#fff;border:1.5px solid #6366f1;color:#4338ca;border-radius:16px;padding:14px;font-weight:800;font-size:15px;cursor:pointer;align-items:center;justify-content:center;gap:10px;">
+            <span class="material-symbols-outlined" style="font-size:24px;">fingerprint</span> Ingresar con huella
         </button>
         <div class="flex flex-col gap-4 mt-8">
             <button onclick="recoverWithRUT()" class="text-sm text-lm-accent font-medium hover:text-lm-primary transition-colors text-center">
@@ -1360,6 +1363,18 @@
                         </div>
                     </div>
 
+                    <!-- ACCESO POR HUELLA / ROSTRO -->
+                    <div id="filaHuella" style="display:none;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);align-items:center;gap:12px;">
+                        <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <span class="material-symbols-outlined" style="font-size:20px;color:#6366f1">fingerprint</span>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <p id="huellaEstadoLabel" style="font-size:14px;font-weight:800;color:#001723;margin:0;">Activar acceso por huella</p>
+                            <p id="huellaEstadoSub" style="font-size:11px;color:#94a3b8;margin:2px 0 0;line-height:1.4;">Entra sin escribir el PIN, usando tu huella o rostro</p>
+                        </div>
+                        <button id="btnHuellaToggle" type="button" style="background:#dcfce7;color:#166534;border:none;border-radius:10px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer;flex-shrink:0;">Activar</button>
+                    </div>
+
                     <!-- SONIDO DE NOTIFICACIÓN -->
                     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
@@ -1579,7 +1594,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v147</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v148</span>
         </button>
     </nav>
 

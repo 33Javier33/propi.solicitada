@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Acceso por huella / rostro (WebAuthn) (SW v148)
+- **Qué se hizo:** el socio puede entrar con la **huella o el rostro** de su teléfono, sin escribir el PIN. Se activa en *Ajustes → "Activar acceso por huella"* (solo aparece si el dispositivo lo permite) y luego el login muestra el botón **"Ingresar con huella"**.
+- **Cómo:** API estándar **WebAuthn** (`navigator.credentials`) con autenticador de plataforma y `userVerification: 'required'`. La biometría la valida **el propio teléfono**; la app solo guarda el **identificador de la credencial** (no la huella).
+- **Sin guardar el PIN:** el ingreso post-verificación se extrajo a `_completarIngreso(auth)`, usado tanto por el PIN como por la huella. No se almacena el PIN en ninguna parte para habilitar esto.
+- **Requisitos y resguardos:** requiere HTTPS y biometría configurada en el equipo; si falta, la opción no se muestra. El **PIN sigue funcionando siempre** como alternativa. Se puede **desactivar** desde Ajustes. La credencial es por dispositivo (cada teléfono se activa por separado).
+- Archivos: `index.html` (botón en login + fila en Ajustes), `app.js` (módulo WebAuthn, `_completarIngreso`, `_bioRefrescarUI`). SW v148 (visible v148).
+
 #### 2026-08-02 — Fix: el re-ingreso no quedaba registrado + evento de cierre de sesión (SW v147)
 - **Causa:** el anti-duplicado de 1 minuto vivía en memoria y la app **no recarga al cerrar sesión**, así que si el socio volvía a entrar enseguida, su nueva conexión **se omitía** y no aparecía en socios-comicion.
 - **Fix:** al cerrar sesión se limpia el anti-duplicado (`logActividadReset`) y la ventana bajó a 15s. Además ahora se registra el evento **'desconectado'** (cierre de sesión) y se libera la presencia.

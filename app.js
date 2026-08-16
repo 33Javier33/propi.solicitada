@@ -174,6 +174,7 @@
         }
         document.getElementById('loginOverlay').classList.remove('hidden');
         _toggleLoginCTA();
+        try { _bioRefrescarUI(); } catch (e) {}
         if (auth.id && auth.rut) {
             document.getElementById('fastAccessBox').classList.remove('hidden');
             document.getElementById('setupBox').classList.add('hidden');
@@ -254,6 +255,156 @@
         } else { alert("Datos incorrectos. Verifique su ID y PIN."); }
     }
 
+    // Completa el ingreso una vez validada la identidad (PIN o huella).
+    async function _completarIngreso(auth) {
+        // ── Si ya tenemos socios en memoria o caché → entrar ya ──
+        if (allSocios.length === 0) {
+            const cached = getSociosFromCache();
+            if (cached) {
+                allSocios = cached;
+                // Refrescar en background
+                fetchSociosFromNetwork(true);
+            } else {
+                // Sin caché: hay que esperar (primera vez)
+                const spinner = document.getElementById('loadingState');
+                spinner.classList.remove('hidden');
+                await fetchSociosFromNetwork(false);
+                spinner.classList.add('hidden');
+                if (allSocios.length === 0) {
+                    alert("Error de conexión. Verifique su red e intente nuevamente.");
+                    return;
+                }
+            }
+        }
+
+        currentUser = allSocios.find(s => String(s.ID) === String(auth.id));
+        if (!currentUser) {
+            // Caché podría estar desactualizada — intentar red una vez
+            await fetchSociosFromNetwork(false);
+            currentUser = allSocios.find(s => String(s.ID) === String(auth.id));
+            if (!currentUser) {
+                alert("No se encontró su cuenta. Intente nuevamente.");
+                return;
+            }
+        }
+        initApp();
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // ACCESO POR HUELLA / ROSTRO (WebAuthn, biometría del dispositivo)
+    // No se guarda el PIN en ninguna parte: la huella la valida el propio
+    // teléfono y, si es correcta, se completa el ingreso con la cuenta ya
+    // registrada en este dispositivo.
+    // ══════════════════════════════════════════════════════════════
+    const BIO_KEY = 'propi_bio_cred';
+
+    function bioDisponible() {
+        return !!(window.PublicKeyCredential && navigator.credentials && location.protocol === 'https:');
+    }
+    function bioActiva() {
+        try { const c = JSON.parse(localStorage.getItem(BIO_KEY) || 'null'); return !!(c && c.id); }
+        catch (e) { return false; }
+    }
+    const _b64u = {
+        enc: buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+        dec: str => {
+            const s2 = str.replace(/-/g, '+').replace(/_/g, '/');
+            const bin = atob(s2 + '=='.slice(0, (4 - s2.length % 4) % 4));
+            return Uint8Array.from(bin, c => c.charCodeAt(0));
+        }
+    };
+
+    // Registrar la huella (requiere haber entrado con el PIN antes)
+    window.activarHuella = async function () {
+        const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
+        if (!auth.id) { showToast('Primero ingresa con tu PIN', 'error'); return; }
+        if (!bioDisponible()) { alert('Este dispositivo o navegador no permite el acceso por huella.'); return; }
+        try {
+            const disponible = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+            if (!disponible) { alert('No se detectó huella o reconocimiento facial configurado en este dispositivo.'); return; }
+            const reto = crypto.getRandomValues(new Uint8Array(32));
+            const idUsuario = new TextEncoder().encode(String(auth.id));
+            const cred = await navigator.credentials.create({
+                publicKey: {
+                    challenge: reto,
+                    rp: { name: 'Bóveda Personal', id: location.hostname },
+                    user: { id: idUsuario, name: String(auth.id), displayName: auth.name || 'Socio' },
+                    pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+                    authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
+                    timeout: 60000,
+                    attestation: 'none'
+                }
+            });
+            if (!cred) throw new Error('sin credencial');
+            localStorage.setItem(BIO_KEY, JSON.stringify({ id: _b64u.enc(cred.rawId), socioId: String(auth.id) }));
+            showToast('Acceso por huella activado ✓', 'success');
+            _bioRefrescarUI();
+        } catch (e) {
+            console.warn('[bio] registro:', e);
+            if (e && e.name === 'NotAllowedError') showToast('Registro cancelado', 'warning');
+            else showToast('No se pudo activar la huella', 'error');
+        }
+    };
+
+    window.desactivarHuella = function () {
+        localStorage.removeItem(BIO_KEY);
+        showToast('Acceso por huella desactivado', 'info');
+        _bioRefrescarUI();
+    };
+
+    // Entrar con la huella
+    window.ingresarConHuella = async function () {
+        const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
+        let cred = null;
+        try { cred = JSON.parse(localStorage.getItem(BIO_KEY) || 'null'); } catch (e) {}
+        if (!auth.id || !cred || !cred.id) { showToast('Activa primero el acceso por huella', 'warning'); return; }
+        try {
+            const reto = crypto.getRandomValues(new Uint8Array(32));
+            const res = await navigator.credentials.get({
+                publicKey: {
+                    challenge: reto,
+                    allowCredentials: [{ type: 'public-key', id: _b64u.dec(cred.id) }],
+                    userVerification: 'required',
+                    timeout: 60000
+                }
+            });
+            if (!res) throw new Error('sin respuesta');
+            // Huella válida: se completa el ingreso sin pedir el PIN.
+            await _completarIngreso(auth);
+        } catch (e) {
+            console.warn('[bio] ingreso:', e);
+            if (e && e.name === 'NotAllowedError') showToast('Huella no reconocida o cancelada', 'warning');
+            else showToast('No se pudo ingresar con huella', 'error');
+        }
+    };
+
+    // Muestra/oculta el botón de huella en el login y en Ajustes
+    function _bioRefrescarUI() {
+        const btnLogin = document.getElementById('btnHuellaLogin');
+        if (btnLogin) btnLogin.style.display = (bioDisponible() && bioActiva()) ? 'flex' : 'none';
+        const fila = document.getElementById('filaHuella');
+        if (fila) fila.style.display = bioDisponible() ? 'flex' : 'none';
+        const lbl = document.getElementById('huellaEstadoLabel');
+        const sub = document.getElementById('huellaEstadoSub');
+        const btn = document.getElementById('btnHuellaToggle');
+        if (lbl && btn) {
+            if (bioActiva()) {
+                lbl.textContent = 'Acceso por huella activado';
+                if (sub) sub.textContent = 'Puedes entrar con tu huella o rostro';
+                btn.textContent = 'Desactivar';
+                btn.onclick = window.desactivarHuella;
+                btn.style.background = '#fee2e2'; btn.style.color = '#dc2626';
+            } else {
+                lbl.textContent = 'Activar acceso por huella';
+                if (sub) sub.textContent = 'Entra sin escribir el PIN, usando tu huella o rostro';
+                btn.textContent = 'Activar';
+                btn.onclick = window.activarHuella;
+                btn.style.background = '#dcfce7'; btn.style.color = '#166534';
+            }
+        }
+    }
+    window._bioRefrescarUI = _bioRefrescarUI;
+
     async function handleFastLogin() {
         const pin = document.getElementById('fastPIN').value;
         const auth = JSON.parse(localStorage.getItem('visor_secure_auth') || '{}');
@@ -289,37 +440,7 @@
             return;
         }
 
-        // ── Si ya tenemos socios en memoria o caché → entrar ya ──
-        if (allSocios.length === 0) {
-            const cached = getSociosFromCache();
-            if (cached) {
-                allSocios = cached;
-                // Refrescar en background
-                fetchSociosFromNetwork(true);
-            } else {
-                // Sin caché: hay que esperar (primera vez)
-                const spinner = document.getElementById('loadingState');
-                spinner.classList.remove('hidden');
-                await fetchSociosFromNetwork(false);
-                spinner.classList.add('hidden');
-                if (allSocios.length === 0) {
-                    alert("Error de conexión. Verifique su red e intente nuevamente.");
-                    return;
-                }
-            }
-        }
-
-        currentUser = allSocios.find(s => String(s.ID) === String(auth.id));
-        if (!currentUser) {
-            // Caché podría estar desactualizada — intentar red una vez
-            await fetchSociosFromNetwork(false);
-            currentUser = allSocios.find(s => String(s.ID) === String(auth.id));
-            if (!currentUser) {
-                alert("No se encontró su cuenta. Intente nuevamente.");
-                return;
-            }
-        }
-        initApp();
+        await _completarIngreso(auth);
     }
 
     function recoverWithRUT() {
@@ -1014,6 +1135,7 @@
         document.getElementById('userAreaLabel').textContent = currentUser.Area;
         renderPerfil();
         _renderSonidoSelector();
+        try { _bioRefrescarUI(); } catch (e) {}
         if (typeof recPresIniciar === 'function') recPresIniciar(String(currentUser.ID)); // presencia en recaudación
         // Registro de actividad para socios-comicion (con fecha y hora)
         if (typeof logActividad === 'function') logActividad('conectado', getDisplayName(), String(currentUser.ID), currentUser.Area || '');
