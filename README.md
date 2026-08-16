@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Con la huella activa, el PIN queda oculto (SW v149)
+- **Antes:** se mostraban las dos opciones a la vez (PIN y huella), lo que sobraba si el socio ya activó la huella.
+- **Ahora:** si la huella está activa, el login muestra **solo "Ingresar con huella"**; el campo de PIN y su botón quedan ocultos.
+- **Respaldo automático:** si la huella **falla o se cancela**, aparece el PIN al instante con el aviso *"Huella no reconocida — ingresa con tu PIN"*. También hay un enlace discreto **"Usar PIN en vez de la huella"** por si lo prefiere.
+- Si la huella no está activa (o el dispositivo no la soporta), todo sigue igual que antes: solo el PIN.
+- Archivos: `index.html` (`#bloquePIN`, `#btnIngresarPIN`, `#btnUsarPIN`), `app.js` (`_bioRefrescarUI`, `mostrarIngresoPIN`). SW v149 (visible v149).
+
 #### 2026-08-02 — Acceso por huella / rostro (WebAuthn) (SW v148)
 - **Qué se hizo:** el socio puede entrar con la **huella o el rostro** de su teléfono, sin escribir el PIN. Se activa en *Ajustes → "Activar acceso por huella"* (solo aparece si el dispositivo lo permite) y luego el login muestra el botón **"Ingresar con huella"**.
 - **Cómo:** API estándar **WebAuthn** (`navigator.credentials`) con autenticador de plataforma y `userVerification: 'required'`. La biometría la valida **el propio teléfono**; la app solo guarda el **identificador de la credencial** (no la huella).

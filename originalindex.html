@@ -1341,7 +1341,7 @@
                 </p>
                 <div style="display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
                     <span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.35)">update</span>
-                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 148 · 2026</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 149 · 2026</span>
                 </div>
             </div>
 
@@ -1413,7 +1413,7 @@
             <h2 id="fastName" class="font-headline text-2xl font-bold text-lm-primary">...</h2>
             <p id="fastIDLabel" class="text-sm text-lm-muted mt-1">ID: ...</p>
         </div>
-        <div class="mb-6">
+        <div id="bloquePIN" class="mb-6">
             <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider text-center block mb-3">Ingrese su PIN</label>
             <div style="position:relative;">
                 <input type="password" id="fastPIN" maxlength="4" inputmode="numeric" placeholder="••••"
@@ -1425,11 +1425,14 @@
                 </button>
             </div>
         </div>
-        <button onclick="handleFastLogin()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20">
+        <button id="btnIngresarPIN" onclick="handleFastLogin()" class="w-full bg-lm-primary hover:bg-lm-primary-mid py-4 rounded-2xl font-semibold text-white transition-all shadow-lg shadow-lm-primary/20">
             Ingresar
         </button>
         <button type="button" id="btnHuellaLogin" onclick="ingresarConHuella()" style="display:none;width:100%;margin-top:12px;background:#fff;border:1.5px solid #6366f1;color:#4338ca;border-radius:16px;padding:14px;font-weight:800;font-size:15px;cursor:pointer;align-items:center;justify-content:center;gap:10px;">
             <span class="material-symbols-outlined" style="font-size:24px;">fingerprint</span> Ingresar con huella
+        </button>
+        <button type="button" id="btnUsarPIN" onclick="mostrarIngresoPIN()" style="display:none;width:100%;margin-top:12px;background:none;border:none;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;">
+            Usar PIN en vez de la huella
         </button>
         <div class="flex flex-col gap-4 mt-8">
             <button onclick="recoverWithRUT()" class="text-sm text-lm-accent font-medium hover:text-lm-primary transition-colors text-center">
@@ -2590,7 +2593,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v148</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v149</span>
         </button>
     </nav>
 
@@ -2974,15 +2977,38 @@
             await _completarIngreso(auth);
         } catch (e) {
             console.warn('[bio] ingreso:', e);
-            if (e && e.name === 'NotAllowedError') showToast('Huella no reconocida o cancelada', 'warning');
-            else showToast('No se pudo ingresar con huella', 'error');
+            if (e && e.name === 'NotAllowedError') showToast('Huella no reconocida — ingresa con tu PIN', 'warning');
+            else showToast('No se pudo ingresar con huella — usa tu PIN', 'error');
+            // Al fallar la huella, se muestra el PIN para que igual pueda entrar.
+            try { window.mostrarIngresoPIN(); } catch (e2) {}
         }
+    };
+
+    // Muestra el ingreso por PIN (cuando la huella falla o el socio lo prefiere)
+    window.mostrarIngresoPIN = function () {
+        const bloque = document.getElementById('bloquePIN');
+        const btnPin = document.getElementById('btnIngresarPIN');
+        const btnUsar = document.getElementById('btnUsarPIN');
+        if (bloque) bloque.style.display = '';
+        if (btnPin) btnPin.style.display = '';
+        if (btnUsar) btnUsar.style.display = 'none';
+        const fp = document.getElementById('fastPIN');
+        if (fp) setTimeout(() => fp.focus(), 100);
     };
 
     // Muestra/oculta el botón de huella en el login y en Ajustes
     function _bioRefrescarUI() {
+        const conHuella = bioDisponible() && bioActiva();
         const btnLogin = document.getElementById('btnHuellaLogin');
-        if (btnLogin) btnLogin.style.display = (bioDisponible() && bioActiva()) ? 'flex' : 'none';
+        if (btnLogin) btnLogin.style.display = conHuella ? 'flex' : 'none';
+        // Con la huella activa, el PIN queda oculto: aparece solo si la huella
+        // falla o si el socio elige "Usar PIN".
+        const bloque = document.getElementById('bloquePIN');
+        const btnPin = document.getElementById('btnIngresarPIN');
+        const btnUsar = document.getElementById('btnUsarPIN');
+        if (bloque) bloque.style.display = conHuella ? 'none' : '';
+        if (btnPin) btnPin.style.display = conHuella ? 'none' : '';
+        if (btnUsar) btnUsar.style.display = conHuella ? 'block' : 'none';
         const fila = document.getElementById('filaHuella');
         if (fila) fila.style.display = bioDisponible() ? 'flex' : 'none';
         const lbl = document.getElementById('huellaEstadoLabel');

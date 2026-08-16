@@ -373,15 +373,38 @@
             await _completarIngreso(auth);
         } catch (e) {
             console.warn('[bio] ingreso:', e);
-            if (e && e.name === 'NotAllowedError') showToast('Huella no reconocida o cancelada', 'warning');
-            else showToast('No se pudo ingresar con huella', 'error');
+            if (e && e.name === 'NotAllowedError') showToast('Huella no reconocida — ingresa con tu PIN', 'warning');
+            else showToast('No se pudo ingresar con huella — usa tu PIN', 'error');
+            // Al fallar la huella, se muestra el PIN para que igual pueda entrar.
+            try { window.mostrarIngresoPIN(); } catch (e2) {}
         }
+    };
+
+    // Muestra el ingreso por PIN (cuando la huella falla o el socio lo prefiere)
+    window.mostrarIngresoPIN = function () {
+        const bloque = document.getElementById('bloquePIN');
+        const btnPin = document.getElementById('btnIngresarPIN');
+        const btnUsar = document.getElementById('btnUsarPIN');
+        if (bloque) bloque.style.display = '';
+        if (btnPin) btnPin.style.display = '';
+        if (btnUsar) btnUsar.style.display = 'none';
+        const fp = document.getElementById('fastPIN');
+        if (fp) setTimeout(() => fp.focus(), 100);
     };
 
     // Muestra/oculta el botón de huella en el login y en Ajustes
     function _bioRefrescarUI() {
+        const conHuella = bioDisponible() && bioActiva();
         const btnLogin = document.getElementById('btnHuellaLogin');
-        if (btnLogin) btnLogin.style.display = (bioDisponible() && bioActiva()) ? 'flex' : 'none';
+        if (btnLogin) btnLogin.style.display = conHuella ? 'flex' : 'none';
+        // Con la huella activa, el PIN queda oculto: aparece solo si la huella
+        // falla o si el socio elige "Usar PIN".
+        const bloque = document.getElementById('bloquePIN');
+        const btnPin = document.getElementById('btnIngresarPIN');
+        const btnUsar = document.getElementById('btnUsarPIN');
+        if (bloque) bloque.style.display = conHuella ? 'none' : '';
+        if (btnPin) btnPin.style.display = conHuella ? 'none' : '';
+        if (btnUsar) btnUsar.style.display = conHuella ? 'block' : 'none';
         const fila = document.getElementById('filaHuella');
         if (fila) fila.style.display = bioDisponible() ? 'flex' : 'none';
         const lbl = document.getElementById('huellaEstadoLabel');
