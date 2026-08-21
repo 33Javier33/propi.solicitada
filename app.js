@@ -2869,8 +2869,42 @@
         if (!currentUser) return;
         document.getElementById('egresoMonto').value = '';
         document.getElementById('egresoNota').value = '';
+        const _se = document.getElementById('egresoEncargado');
+        const _so = document.getElementById('egresoEncargadoOtro');
+        if (_se) _se.value = '';
+        if (_so) { _so.value = ''; _so.style.display = 'none'; }
+        _cargarEncargados();
         document.getElementById('modalEgreso').style.display = 'flex';
     };
+
+    // Lista de encargados para el egreso. Se pide al servidor (RPC que NO expone
+    // los PIN) y se guarda en caché para que el modal abra al instante.
+    let _encargadosCache = null;
+    async function _cargarEncargados() {
+        const sel = document.getElementById('egresoEncargado');
+        if (!sel) return;
+        const pintar = lista => {
+            sel.innerHTML = '<option value="">— Selecciona el encargado —</option>'
+                + (lista || []).map(r => {
+                    const txt = (r.ini || '') + (r.area ? ' (' + r.area + ')' : '');
+                    return '<option value="' + txt.replace(/"/g, '&quot;') + '">' + txt + '</option>';
+                }).join('')
+                + '<option value="__otro__">Otro / no aparece en la lista</option>';
+            sel.onchange = () => {
+                const otro = document.getElementById('egresoEncargadoOtro');
+                if (!otro) return;
+                const esOtro = sel.value === '__otro__';
+                otro.style.display = esOtro ? 'block' : 'none';
+                if (esOtro) setTimeout(() => otro.focus(), 80);
+            };
+        };
+        if (_encargadosCache) { pintar(_encargadosCache); return; }
+        pintar([]);
+        try {
+            const { data } = await dbSV.rpc('rpc_responsables_lista');
+            if (Array.isArray(data) && data.length) { _encargadosCache = data; pintar(data); }
+        } catch (e) { /* si falla, queda solo la opción "Otro" */ }
+    }
     window.cerrarModalEgreso = () => {
         document.getElementById('modalEgreso').style.display = 'none';
     };
@@ -2883,6 +2917,10 @@
         if (!currentUser) return;
         const monto = parseInt((document.getElementById('egresoMonto').value || '').replace(/\D/g, '')) || 0;
         const nota = (document.getElementById('egresoNota').value || '').trim();
+        const _selEnc = document.getElementById('egresoEncargado');
+        const _otroEnc = document.getElementById('egresoEncargadoOtro');
+        let encargado = _selEnc ? _selEnc.value : '';
+        if (encargado === '__otro__') encargado = (_otroEnc ? _otroEnc.value : '').trim();
         const btn = document.getElementById('btnEnviarEgreso');
         if (!monto) { btn.textContent = 'Ingresa un monto'; setTimeout(() => btn.textContent = 'Enviar solicitud', 1600); return; }
         btn.disabled = true; btn.textContent = 'Enviando...';
@@ -2894,7 +2932,7 @@
                     action: 'solicitarEgreso',
                     socioId: String(currentUser.ID),
                     socioNombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim(),
-                    monto, nota
+                    monto, nota, encargado
                 })
             });
             const json = await res.json();

@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Solicitar Egreso: monto, detalle y encargado (SW v150)
+- El modal ahora tiene los tres datos en orden: **Monto solicitado** → **Detalle** *(opcional)* → **Encargado que te entregó el egreso** *(opcional)*.
+- El **encargado** se elige de una lista desplegable que se obtiene del servidor mediante `rpc_responsables_lista()` — la RPC que **no expone los PIN** —, con opción **"Otro / no aparece en la lista"** que habilita un campo libre. La lista queda en caché para que el modal abra al instante.
+- **Guardado resiliente:** se intenta guardar en la columna `encargado` de `solicitudes_egreso`; si esa columna aún no existe en la base, el dato **se anexa a la nota** (`Encargado: X`) para no perderlo.
+- socios-comicion muestra el dato en la tarjeta de egresos pendientes (**👤 Entregado por**).
+- Archivos: `index.html` (campos), `app.js` (`_cargarEncargados`, envío), `supabase-api.js` (guardado). SW v150 (visible v150).
+
 #### 2026-08-02 — Con la huella activa, el PIN queda oculto (SW v149)
 - **Antes:** se mostraban las dos opciones a la vez (PIN y huella), lo que sobraba si el socio ya activó la huella.
 - **Ahora:** si la huella está activa, el login muestra **solo "Ingresar con huella"**; el campo de PIN y su botón quedan ocultos.

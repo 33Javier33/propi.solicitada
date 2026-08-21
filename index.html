@@ -345,7 +345,7 @@
                 </p>
                 <div style="display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
                     <span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.35)">update</span>
-                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 149 · 2026</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 150 · 2026</span>
                 </div>
             </div>
 
@@ -1552,8 +1552,15 @@
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Monto solicitado</p>
             <input type="tel" id="egresoMonto" placeholder="$0" oninput="fmtEgresoMonto(this)" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:1.1rem;font-weight:700;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
 
-            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Motivo <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
-            <textarea id="egresoNota" rows="2" placeholder="Ej: gasto imprevisto" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:22px;resize:none;font-family:inherit"></textarea>
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
+            <textarea id="egresoNota" rows="2" placeholder="Ej: gasto imprevisto" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px;resize:none;font-family:inherit"></textarea>
+
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Encargado que te entregó el egreso <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
+            <select id="egresoEncargado" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:6px;font-family:inherit;">
+                <option value="">— Selecciona el encargado —</option>
+            </select>
+            <input type="text" id="egresoEncargadoOtro" placeholder="Escribe el nombre del encargado" style="display:none;width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:6px;font-family:inherit;">
+            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:22px;line-height:1.4;">Indica quién te entregó el dinero, para que la administración pueda verificarlo.</p>
 
             <button id="btnEnviarEgreso" onclick="enviarEgreso()" style="width:100%;padding:15px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
                 Enviar solicitud
@@ -1597,7 +1604,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v149</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v150</span>
         </button>
     </nav>
 

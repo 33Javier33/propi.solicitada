@@ -314,14 +314,25 @@ async function _sociosHandler(url, options) {
         // Crea un registro PENDIENTE que la administración ve en socios-comicion.
         case 'solicitarEgreso': {
             const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('EGR-' + Date.now());
-            const { error } = await dbSV.from('solicitudes_egreso').insert({
+            const _enc = String(b.encargado || '').trim();
+            const _base = {
                 id,
                 socio_id: String(b.socioId || ''),
                 socio_nombre: b.socioNombre || '',
                 monto: Number(b.monto) || 0,
                 nota: b.nota || '',
                 estado: 'PENDIENTE'
-            });
+            };
+            // Se intenta guardar el encargado en su columna; si aún no existe en
+            // la base, se anexa a la nota para no perder el dato.
+            let { error } = await dbSV.from('solicitudes_egreso')
+                .insert(_enc ? Object.assign({ encargado: _enc }, _base) : _base);
+            if (error && _enc && String(error.message || '').includes('encargado')) {
+                const conNota = Object.assign({}, _base, {
+                    nota: (_base.nota ? _base.nota + ' · ' : '') + 'Encargado: ' + _enc
+                });
+                ({ error } = await dbSV.from('solicitudes_egreso').insert(conNota));
+            }
             // Avisar en tiempo real a socios-comicion (si está escuchando)
             if (!error) dbSV.channel('sv-egresos').send({ type: 'broadcast', event: 'nueva', payload: {} }).catch(() => {});
             return _mockRes({ success: !error, error: error && error.message, id });
