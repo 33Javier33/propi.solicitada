@@ -1341,7 +1341,7 @@
                 </p>
                 <div style="display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
                     <span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.35)">update</span>
-                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 150 · 2026</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 151 · 2026</span>
                 </div>
             </div>
 
@@ -2556,7 +2556,12 @@
                 <option value="">— Selecciona el encargado —</option>
             </select>
             <input type="text" id="egresoEncargadoOtro" placeholder="Escribe el nombre del encargado" style="display:none;width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:6px;font-family:inherit;">
-            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:22px;line-height:1.4;">Indica quién te entregó el dinero, para que la administración pueda verificarlo.</p>
+            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:16px;line-height:1.4;">Indica quién te entregó el dinero, para que la administración pueda verificarlo.</p>
+
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle del dinero recibido <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
+            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px;line-height:1.4;">Cuántos billetes o monedas de cada valor te entregaron.</p>
+            <div id="egresoBilletes" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:10px 12px;margin-bottom:8px;"></div>
+            <div id="egresoBilletesTotal" style="font-size:0.8rem;font-weight:800;color:#1e293b;text-align:right;margin-bottom:22px;">Total desglose: $0</div>
 
             <button id="btnEnviarEgreso" onclick="enviarEgreso()" style="width:100%;padding:15px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
                 Enviar solicitud
@@ -2600,7 +2605,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v150</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v151</span>
         </button>
     </nav>
 
@@ -5476,6 +5481,58 @@
     };
 
     // ── SOLICITUD DE EGRESO (anticipo de propina) ─────────────
+    // ── Desglose del dinero recibido en el egreso ────────────────────
+    // Mismas denominaciones que usa el arqueo en socios-comicion.
+    const EGR_DENOMS = [20000, 10000, 5000, 2000, 1000, 500, 100, 50, 10];
+    function _egrRenderBilletes() {
+        const cont = document.getElementById('egresoBilletes');
+        if (!cont) return;
+        const fmtD = v => '$' + Number(v).toLocaleString('es-CL');
+        cont.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;">'
+            + EGR_DENOMS.map(d =>
+                '<div style="display:flex;align-items:center;gap:6px;">'
+                + '<span style="flex:1;font-size:0.78rem;font-weight:700;color:#475569;">' + fmtD(d) + '</span>'
+                + '<input type="tel" inputmode="numeric" id="egrBil-' + d + '" placeholder="0" '
+                +   'oninput="_egrTotalBilletes()" '
+                +   'style="width:52px;padding:6px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:0.85rem;'
+                +   'font-weight:700;text-align:center;color:#1e293b;background:#f8fafc;box-sizing:border-box;">'
+                + '</div>').join('')
+            + '</div>';
+        _egrTotalBilletes();
+    }
+    // Suma el desglose y avisa si no cuadra con el monto solicitado
+    window._egrTotalBilletes = function () {
+        let total = 0;
+        EGR_DENOMS.forEach(d => {
+            const el = document.getElementById('egrBil-' + d);
+            const n = Math.max(0, parseInt((el && el.value) || 0) || 0);
+            total += n * d;
+        });
+        const lbl = document.getElementById('egresoBilletesTotal');
+        if (!lbl) return total;
+        const monto = parseInt((document.getElementById('egresoMonto').value || '').replace(/\D/g, '')) || 0;
+        const fmtM = v => '$' + Number(v).toLocaleString('es-CL');
+        if (!total) {
+            lbl.innerHTML = '<span style="color:#94a3b8;font-weight:600;">Total desglose: $0</span>';
+        } else if (monto && total !== monto) {
+            lbl.innerHTML = 'Total desglose: <b style="color:#b45309;">' + fmtM(total) + '</b>'
+                + ' <span style="font-weight:600;color:#b45309;">· no coincide con el monto (' + fmtM(monto) + ')</span>';
+        } else {
+            lbl.innerHTML = 'Total desglose: <b style="color:#166534;">' + fmtM(total) + '</b>'
+                + (monto ? ' <span style="font-weight:600;color:#166534;">· coincide ✓</span>' : '');
+        }
+        return total;
+    };
+    function _egrLeerBilletes() {
+        const billetes = {};
+        EGR_DENOMS.forEach(d => {
+            const el = document.getElementById('egrBil-' + d);
+            const n = Math.max(0, parseInt((el && el.value) || 0) || 0);
+            if (n > 0) billetes[d] = n;
+        });
+        return billetes;
+    }
+
     window.abrirModalEgreso = () => {
         if (!currentUser) return;
         document.getElementById('egresoMonto').value = '';
@@ -5485,6 +5542,7 @@
         if (_se) _se.value = '';
         if (_so) { _so.value = ''; _so.style.display = 'none'; }
         _cargarEncargados();
+        _egrRenderBilletes();
         document.getElementById('modalEgreso').style.display = 'flex';
     };
 
@@ -5520,6 +5578,7 @@
         document.getElementById('modalEgreso').style.display = 'none';
     };
     window.fmtEgresoMonto = (inp) => {
+        setTimeout(() => { try { _egrTotalBilletes(); } catch (e) {} }, 0);
         const v = inp.value.replace(/\D/g, '');
         inp.value = v ? '$' + parseInt(v).toLocaleString('es-ES') : '';
     };
@@ -5532,6 +5591,7 @@
         const _otroEnc = document.getElementById('egresoEncargadoOtro');
         let encargado = _selEnc ? _selEnc.value : '';
         if (encargado === '__otro__') encargado = (_otroEnc ? _otroEnc.value : '').trim();
+        const billetes = _egrLeerBilletes();
         const btn = document.getElementById('btnEnviarEgreso');
         if (!monto) { btn.textContent = 'Ingresa un monto'; setTimeout(() => btn.textContent = 'Enviar solicitud', 1600); return; }
         btn.disabled = true; btn.textContent = 'Enviando...';
@@ -5543,7 +5603,7 @@
                     action: 'solicitarEgreso',
                     socioId: String(currentUser.ID),
                     socioNombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim(),
-                    monto, nota, encargado
+                    monto, nota, encargado, billetes
                 })
             });
             const json = await res.json();

@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Solicitar Egreso: detalle del dinero recibido, billete por billete (SW v151)
+- Se agregó al modal **Solicitar Egreso** un bloque **"Detalle del dinero recibido"** *(opcional)*: una grilla con las denominaciones ($20.000, $10.000, $5.000, $2.000, $1.000, $500, $100, $50, $10) donde el socio anota **cuántos billetes o monedas de cada valor** le entregaron.
+- **Total en vivo:** debajo de la grilla se muestra `Total desglose: $X`. Si el total coincide con el monto solicitado se marca en verde (**coincide ✓**); si no coincide, en ámbar (**no coincide con el monto**). Es solo un aviso, no bloquea el envío.
+- **Guardado resiliente:** se intenta guardar en la columna `billetes` (jsonb) de `solicitudes_egreso`; si esa columna aún no existe en la base, el desglose **se anexa a la nota** (`Desglose: 3×$20.000, 1×$10.000`) junto con el encargado, para no perder el dato.
+- socios-comicion muestra el desglose en la tarjeta de egresos pendientes (**💵 3×$20.000 · 1×$10.000 = $70.000**), con aviso si la suma no cuadra con lo solicitado.
+- Archivos: `index.html` (bloque de billetes), `app.js` (`EGR_DENOMS`, `_egrRenderBilletes`, `_egrTotalBilletes`, `_egrLeerBilletes`), `supabase-api.js` (guardado). SW v151 (visible v151).
+
 #### 2026-08-02 — Solicitar Egreso: monto, detalle y encargado (SW v150)
 - El modal ahora tiene los tres datos en orden: **Monto solicitado** → **Detalle** *(opcional)* → **Encargado que te entregó el egreso** *(opcional)*.
 - El **encargado** se elige de una lista desplegable que se obtiene del servidor mediante `rpc_responsables_lista()` — la RPC que **no expone los PIN** —, con opción **"Otro / no aparece en la lista"** que habilita un campo libre. La lista queda en caché para que el modal abra al instante.

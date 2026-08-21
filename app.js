@@ -2865,6 +2865,58 @@
     };
 
     // ── SOLICITUD DE EGRESO (anticipo de propina) ─────────────
+    // ── Desglose del dinero recibido en el egreso ────────────────────
+    // Mismas denominaciones que usa el arqueo en socios-comicion.
+    const EGR_DENOMS = [20000, 10000, 5000, 2000, 1000, 500, 100, 50, 10];
+    function _egrRenderBilletes() {
+        const cont = document.getElementById('egresoBilletes');
+        if (!cont) return;
+        const fmtD = v => '$' + Number(v).toLocaleString('es-CL');
+        cont.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;">'
+            + EGR_DENOMS.map(d =>
+                '<div style="display:flex;align-items:center;gap:6px;">'
+                + '<span style="flex:1;font-size:0.78rem;font-weight:700;color:#475569;">' + fmtD(d) + '</span>'
+                + '<input type="tel" inputmode="numeric" id="egrBil-' + d + '" placeholder="0" '
+                +   'oninput="_egrTotalBilletes()" '
+                +   'style="width:52px;padding:6px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:0.85rem;'
+                +   'font-weight:700;text-align:center;color:#1e293b;background:#f8fafc;box-sizing:border-box;">'
+                + '</div>').join('')
+            + '</div>';
+        _egrTotalBilletes();
+    }
+    // Suma el desglose y avisa si no cuadra con el monto solicitado
+    window._egrTotalBilletes = function () {
+        let total = 0;
+        EGR_DENOMS.forEach(d => {
+            const el = document.getElementById('egrBil-' + d);
+            const n = Math.max(0, parseInt((el && el.value) || 0) || 0);
+            total += n * d;
+        });
+        const lbl = document.getElementById('egresoBilletesTotal');
+        if (!lbl) return total;
+        const monto = parseInt((document.getElementById('egresoMonto').value || '').replace(/\D/g, '')) || 0;
+        const fmtM = v => '$' + Number(v).toLocaleString('es-CL');
+        if (!total) {
+            lbl.innerHTML = '<span style="color:#94a3b8;font-weight:600;">Total desglose: $0</span>';
+        } else if (monto && total !== monto) {
+            lbl.innerHTML = 'Total desglose: <b style="color:#b45309;">' + fmtM(total) + '</b>'
+                + ' <span style="font-weight:600;color:#b45309;">· no coincide con el monto (' + fmtM(monto) + ')</span>';
+        } else {
+            lbl.innerHTML = 'Total desglose: <b style="color:#166534;">' + fmtM(total) + '</b>'
+                + (monto ? ' <span style="font-weight:600;color:#166534;">· coincide ✓</span>' : '');
+        }
+        return total;
+    };
+    function _egrLeerBilletes() {
+        const billetes = {};
+        EGR_DENOMS.forEach(d => {
+            const el = document.getElementById('egrBil-' + d);
+            const n = Math.max(0, parseInt((el && el.value) || 0) || 0);
+            if (n > 0) billetes[d] = n;
+        });
+        return billetes;
+    }
+
     window.abrirModalEgreso = () => {
         if (!currentUser) return;
         document.getElementById('egresoMonto').value = '';
@@ -2874,6 +2926,7 @@
         if (_se) _se.value = '';
         if (_so) { _so.value = ''; _so.style.display = 'none'; }
         _cargarEncargados();
+        _egrRenderBilletes();
         document.getElementById('modalEgreso').style.display = 'flex';
     };
 
@@ -2909,6 +2962,7 @@
         document.getElementById('modalEgreso').style.display = 'none';
     };
     window.fmtEgresoMonto = (inp) => {
+        setTimeout(() => { try { _egrTotalBilletes(); } catch (e) {} }, 0);
         const v = inp.value.replace(/\D/g, '');
         inp.value = v ? '$' + parseInt(v).toLocaleString('es-ES') : '';
     };
@@ -2921,6 +2975,7 @@
         const _otroEnc = document.getElementById('egresoEncargadoOtro');
         let encargado = _selEnc ? _selEnc.value : '';
         if (encargado === '__otro__') encargado = (_otroEnc ? _otroEnc.value : '').trim();
+        const billetes = _egrLeerBilletes();
         const btn = document.getElementById('btnEnviarEgreso');
         if (!monto) { btn.textContent = 'Ingresa un monto'; setTimeout(() => btn.textContent = 'Enviar solicitud', 1600); return; }
         btn.disabled = true; btn.textContent = 'Enviando...';
@@ -2932,7 +2987,7 @@
                     action: 'solicitarEgreso',
                     socioId: String(currentUser.ID),
                     socioNombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim(),
-                    monto, nota, encargado
+                    monto, nota, encargado, billetes
                 })
             });
             const json = await res.json();

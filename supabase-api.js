@@ -315,6 +315,9 @@ async function _sociosHandler(url, options) {
         case 'solicitarEgreso': {
             const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('EGR-' + Date.now());
             const _enc = String(b.encargado || '').trim();
+            const _bil = (b.billetes && typeof b.billetes === 'object') ? b.billetes : null;
+            const _bilTxt = _bil ? Object.keys(_bil).sort((x, y) => y - x)
+                .map(d => _bil[d] + '×$' + Number(d).toLocaleString('es-CL')).join(', ') : '';
             const _base = {
                 id,
                 socio_id: String(b.socioId || ''),
@@ -325,11 +328,20 @@ async function _sociosHandler(url, options) {
             };
             // Se intenta guardar el encargado en su columna; si aún no existe en
             // la base, se anexa a la nota para no perder el dato.
+            const _extra = {};
+            if (_enc) _extra.encargado = _enc;
+            if (_bil && Object.keys(_bil).length) _extra.billetes = _bil;
             let { error } = await dbSV.from('solicitudes_egreso')
-                .insert(_enc ? Object.assign({ encargado: _enc }, _base) : _base);
-            if (error && _enc && String(error.message || '').includes('encargado')) {
+                .insert(Object.assign({}, _base, _extra));
+            // Si esas columnas aún no existen en la base, se anexa todo a la nota
+            // para no perder el dato.
+            if (error && Object.keys(_extra).length
+                && /encargado|billetes|column/i.test(String(error.message || ''))) {
+                const extras = [];
+                if (_enc) extras.push('Encargado: ' + _enc);
+                if (_bilTxt) extras.push('Desglose: ' + _bilTxt);
                 const conNota = Object.assign({}, _base, {
-                    nota: (_base.nota ? _base.nota + ' · ' : '') + 'Encargado: ' + _enc
+                    nota: (_base.nota ? _base.nota + ' · ' : '') + extras.join(' · ')
                 });
                 ({ error } = await dbSV.from('solicitudes_egreso').insert(conNota));
             }
