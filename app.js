@@ -2948,7 +2948,8 @@
                 const dif = Math.abs(monto - total);
                 avi.setAttribute('style', 'padding:6px 12px 9px;font-size:0.72rem;font-weight:700;line-height:1.35;color:#b45309;');
                 avi.textContent = '⚠ No coincide con el monto solicitado (' + _egrFmt(monto) + '). '
-                    + (total > monto ? 'Sobran ' : 'Faltan ') + _egrFmt(dif) + '.';
+                    + (total > monto ? 'Sobran ' : 'Faltan ') + _egrFmt(dif) + '. '
+                    + 'Corrígelo o deja el desglose en blanco para poder enviar.';
                 avi.style.display = 'block';
             }
         } else {
@@ -3063,7 +3064,28 @@
         if (encargado === '__otro__') encargado = (_otroEnc ? _otroEnc.value : '').trim();
         const billetes = _egrLeerBilletes();
         const btn = document.getElementById('btnEnviarEgreso');
-        if (!monto) { btn.textContent = 'Ingresa un monto'; setTimeout(() => btn.textContent = 'Enviar solicitud', 1600); return; }
+
+        // Validación: monto y encargado son obligatorios. El desglose es opcional,
+        // pero si el socio anota algo tiene que sumar exactamente el monto pedido.
+        const faltante = (txt, el) => {
+            btn.textContent = txt;
+            setTimeout(() => { btn.textContent = 'Enviar solicitud'; }, 2400);
+            if (el) {
+                try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+                setTimeout(() => { try { el.focus(); } catch (e) {} }, 120);
+            }
+        };
+        if (!monto) return faltante('Falta el monto solicitado', document.getElementById('egresoMonto'));
+        if (!encargado) {
+            const esOtro = _selEnc && _selEnc.value === '__otro__';
+            return faltante('Falta indicar el encargado', esOtro ? _otroEnc : _selEnc);
+        }
+        const totalDesglose = Object.keys(billetes)
+            .reduce((suma, d) => suma + Number(d) * Number(billetes[d]), 0);
+        if (totalDesglose && totalDesglose !== monto) {
+            return faltante('El desglose no cuadra con el monto', document.getElementById('egresoBilletes'));
+        }
+
         btn.disabled = true; btn.textContent = 'Enviando...';
         try {
             const res = await fetch(SCRIPT_URL_SOCIOS, {

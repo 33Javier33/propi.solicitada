@@ -353,6 +353,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Solicitar Egreso: campos obligatorios y desglose cuadrado (SW v154)
+- **Monto solicitado** y **Encargado** pasan a ser **obligatorios** — ambos marcados en rojo con *(obligatorio)*. Antes el encargado decía *(opcional)*.
+- **Desglose del dinero: sigue siendo opcional.** Se puede enviar la solicitud sin anotar ni un billete.
+- **Pero si se completa, tiene que cuadrar:** si el desglose suma distinto al monto solicitado, la solicitud **no se envía**. El aviso ámbar dentro de la tarjeta indica cuánto falta o sobra y agrega *"Corrígelo o deja el desglose en blanco para poder enviar"*.
+- Al faltar un dato, el botón lo nombra (*Falta el monto solicitado* / *Falta indicar el encargado* / *El desglose no cuadra con el monto*) y la pantalla **se desplaza al campo con el problema y lo enfoca**.
+- Casillas en cero cuentan como "sin desglose", así que no bloquean el envío.
+- Archivos: `index.html` (etiquetas), `app.js` (`enviarEgreso`, aviso de `_egrTotalBilletes`). SW v154 (visible v154).
+
 #### 2026-08-02 — Fix: en "Encargado" aparecía uno solo en vez de los tres (SW v153)
 - **Causa:** `rpc_responsables_lista()` leía únicamente la tabla `responsable_creds`, que contiene solo a los responsables **con PIN personal configurado**. La lista real y completa la administra socios-comicion y vive en `config_sistema` bajo la clave `responsables` (JSON `[{ini, area}]`), con los tres: **N.M (S.J), P.M (S.J), C.P (S.J)**.
 - **Fix (cliente):** `_cargarEncargados()` ahora consulta **las dos fuentes en paralelo** y las fusiona eliminando duplicados por `ini|area`, ordenadas alfabéticamente. Si una de las dos falla, se usa la otra; nunca se pide el PIN.

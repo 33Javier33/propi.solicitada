@@ -1341,7 +1341,7 @@
                 </p>
                 <div style="display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
                     <span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.35)">update</span>
-                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 153 · 2026</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 154 · 2026</span>
                 </div>
             </div>
 
@@ -2545,13 +2545,13 @@
             </div>
             <p style="font-size:0.8rem;color:#64748b;line-height:1.45;margin-bottom:18px">Solicita un <b>anticipo de propina</b>. La administración recibirá tu solicitud como <b>pendiente</b> para procesarla.</p>
 
-            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Monto solicitado</p>
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Monto solicitado <span style="font-size:0.85em;color:#dc2626;font-weight:800;text-transform:none;">(obligatorio)</span></p>
             <input type="tel" id="egresoMonto" placeholder="$0" oninput="fmtEgresoMonto(this)" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:1.1rem;font-weight:700;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
 
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
             <textarea id="egresoNota" rows="2" placeholder="Ej: gasto imprevisto" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px;resize:none;font-family:inherit"></textarea>
 
-            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Encargado que te entregó el egreso <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Encargado que te entregó el egreso <span style="font-size:0.85em;color:#dc2626;font-weight:800;text-transform:none;">(obligatorio)</span></p>
             <select id="egresoEncargado" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:6px;font-family:inherit;">
                 <option value="">— Selecciona el encargado —</option>
             </select>
@@ -2559,7 +2559,7 @@
             <p style="font-size:0.72em;color:#94a3b8;margin-bottom:16px;line-height:1.4;">Indica quién te entregó el dinero, para que la administración pueda verificarlo.</p>
 
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle del dinero recibido <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
-            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px;line-height:1.4;">Anota <b>cuántos</b> billetes o monedas de cada valor te entregaron. El total se suma solo.</p>
+            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px;line-height:1.4;">Anota <b>cuántos</b> billetes o monedas de cada valor te entregaron. Puedes dejarlo en blanco, pero <b>si lo completas, el total debe ser igual al monto solicitado.</b></p>
             <div id="egresoBilletes" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:0;margin-bottom:22px;overflow:hidden;"></div>
 
             <button id="btnEnviarEgreso" onclick="enviarEgreso()" style="width:100%;padding:15px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
@@ -2604,7 +2604,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v153</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v154</span>
         </button>
     </nav>
 
@@ -5563,7 +5563,8 @@
                 const dif = Math.abs(monto - total);
                 avi.setAttribute('style', 'padding:6px 12px 9px;font-size:0.72rem;font-weight:700;line-height:1.35;color:#b45309;');
                 avi.textContent = '⚠ No coincide con el monto solicitado (' + _egrFmt(monto) + '). '
-                    + (total > monto ? 'Sobran ' : 'Faltan ') + _egrFmt(dif) + '.';
+                    + (total > monto ? 'Sobran ' : 'Faltan ') + _egrFmt(dif) + '. '
+                    + 'Corrígelo o deja el desglose en blanco para poder enviar.';
                 avi.style.display = 'block';
             }
         } else {
@@ -5678,7 +5679,28 @@
         if (encargado === '__otro__') encargado = (_otroEnc ? _otroEnc.value : '').trim();
         const billetes = _egrLeerBilletes();
         const btn = document.getElementById('btnEnviarEgreso');
-        if (!monto) { btn.textContent = 'Ingresa un monto'; setTimeout(() => btn.textContent = 'Enviar solicitud', 1600); return; }
+
+        // Validación: monto y encargado son obligatorios. El desglose es opcional,
+        // pero si el socio anota algo tiene que sumar exactamente el monto pedido.
+        const faltante = (txt, el) => {
+            btn.textContent = txt;
+            setTimeout(() => { btn.textContent = 'Enviar solicitud'; }, 2400);
+            if (el) {
+                try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+                setTimeout(() => { try { el.focus(); } catch (e) {} }, 120);
+            }
+        };
+        if (!monto) return faltante('Falta el monto solicitado', document.getElementById('egresoMonto'));
+        if (!encargado) {
+            const esOtro = _selEnc && _selEnc.value === '__otro__';
+            return faltante('Falta indicar el encargado', esOtro ? _otroEnc : _selEnc);
+        }
+        const totalDesglose = Object.keys(billetes)
+            .reduce((suma, d) => suma + Number(d) * Number(billetes[d]), 0);
+        if (totalDesglose && totalDesglose !== monto) {
+            return faltante('El desglose no cuadra con el monto', document.getElementById('egresoBilletes'));
+        }
+
         btn.disabled = true; btn.textContent = 'Enviando...';
         try {
             const res = await fetch(SCRIPT_URL_SOCIOS, {
