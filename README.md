@@ -353,6 +353,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Solicitar Egreso: el desglose del dinero queda ordenado y legible (SW v152)
+- El bloque **"Detalle del dinero recibido"** se rediseñó como **tabla de tres columnas**: **Valor · Cant. · Subtotal**, con encabezado fijo, para que cada número quede debajo de su título.
+- Se separó en dos grupos: **💵 Billetes** ($20.000 a $1.000) y **🪙 Monedas** ($500 a $10). Antes eran 9 casillas en dos columnas, con la etiqueta lejos de su casilla y una fila suelta al final.
+- **Subtotal por fila:** al escribir una cantidad, la fila muestra a la derecha cuánto suma ese valor (`3` en $20.000 → **$60.000**). Las filas en cero quedan con un guion atenuado.
+- **Total dentro de la misma tarjeta** (antes flotaba suelto a la derecha), en verde si coincide con el monto solicitado y en ámbar si no, con una línea que dice **cuánto falta o cuánto sobra**.
+- Contraste: se ajustaron los colores a los tokens que los temas oscuros ya reconvierten y los separadores pasaron a `rgba`, así el bloque se lee bien en los 12 temas.
+- Archivos: `index.html` (contenedor), `app.js` (`EGR_GRUPOS`, `_egrRenderBilletes`, `_egrTotalBilletes`). SW v152 (visible v152).
+
 #### 2026-08-02 — Solicitar Egreso: detalle del dinero recibido, billete por billete (SW v151)
 - Se agregó al modal **Solicitar Egreso** un bloque **"Detalle del dinero recibido"** *(opcional)*: una grilla con las denominaciones ($20.000, $10.000, $5.000, $2.000, $1.000, $500, $100, $50, $10) donde el socio anota **cuántos billetes o monedas de cada valor** le entregaron.
 - **Total en vivo:** debajo de la grilla se muestra `Total desglose: $X`. Si el total coincide con el monto solicitado se marca en verde (**coincide ✓**); si no coincide, en ámbar (**no coincide con el monto**). Es solo un aviso, no bloquea el envío.

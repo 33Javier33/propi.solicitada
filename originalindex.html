@@ -1341,7 +1341,7 @@
                 </p>
                 <div style="display:flex;align-items:center;gap:6px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
                     <span class="material-symbols-outlined" style="font-size:14px;color:rgba(255,255,255,0.35)">update</span>
-                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 151 · 2026</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,0.35);">Versión 152 · 2026</span>
                 </div>
             </div>
 
@@ -2559,9 +2559,8 @@
             <p style="font-size:0.72em;color:#94a3b8;margin-bottom:16px;line-height:1.4;">Indica quién te entregó el dinero, para que la administración pueda verificarlo.</p>
 
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle del dinero recibido <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
-            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px;line-height:1.4;">Cuántos billetes o monedas de cada valor te entregaron.</p>
-            <div id="egresoBilletes" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:10px 12px;margin-bottom:8px;"></div>
-            <div id="egresoBilletesTotal" style="font-size:0.8rem;font-weight:800;color:#1e293b;text-align:right;margin-bottom:22px;">Total desglose: $0</div>
+            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px;line-height:1.4;">Anota <b>cuántos</b> billetes o monedas de cada valor te entregaron. El total se suma solo.</p>
+            <div id="egresoBilletes" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:0;margin-bottom:22px;overflow:hidden;"></div>
 
             <button id="btnEnviarEgreso" onclick="enviarEgreso()" style="width:100%;padding:15px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
                 Enviar solicitud
@@ -2605,7 +2604,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v151</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">CarlosPN Interactive® · 2026 · v152</span>
         </button>
     </nav>
 
@@ -5483,43 +5482,100 @@
     // ── SOLICITUD DE EGRESO (anticipo de propina) ─────────────
     // ── Desglose del dinero recibido en el egreso ────────────────────
     // Mismas denominaciones que usa el arqueo en socios-comicion.
-    const EGR_DENOMS = [20000, 10000, 5000, 2000, 1000, 500, 100, 50, 10];
+    // Se muestran agrupadas (billetes / monedas) para que la lista se lea de corrido.
+    const EGR_GRUPOS = [
+        { titulo: 'Billetes', icono: '💵', denoms: [20000, 10000, 5000, 2000, 1000] },
+        { titulo: 'Monedas',  icono: '🪙', denoms: [500, 100, 50, 10] }
+    ];
+    const EGR_DENOMS = EGR_GRUPOS.reduce((acc, g) => acc.concat(g.denoms), []);
+    const _egrFmt = v => '$' + Number(v).toLocaleString('es-CL');
+
     function _egrRenderBilletes() {
         const cont = document.getElementById('egresoBilletes');
         if (!cont) return;
-        const fmtD = v => '$' + Number(v).toLocaleString('es-CL');
-        cont.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;">'
-            + EGR_DENOMS.map(d =>
-                '<div style="display:flex;align-items:center;gap:6px;">'
-                + '<span style="flex:1;font-size:0.78rem;font-weight:700;color:#475569;">' + fmtD(d) + '</span>'
-                + '<input type="tel" inputmode="numeric" id="egrBil-' + d + '" placeholder="0" '
-                +   'oninput="_egrTotalBilletes()" '
-                +   'style="width:52px;padding:6px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:0.85rem;'
-                +   'font-weight:700;text-align:center;color:#1e293b;background:#f8fafc;box-sizing:border-box;">'
-                + '</div>').join('')
+        // Tres columnas fijas: valor · cantidad · subtotal. Así cada número
+        // queda debajo de su título y se entiende de una mirada.
+        const COLS = 'display:grid;grid-template-columns:1fr 58px 90px;align-items:center;gap:10px;padding:7px 12px;';
+
+        const cabecera = '<div style="' + COLS + 'background:#f1f5f9;border-bottom:1.5px solid rgba(148,163,184,0.28);">'
+            + '<span style="font-size:0.6rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;">Valor</span>'
+            + '<span style="font-size:0.6rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;text-align:center;">Cant.</span>'
+            + '<span style="font-size:0.6rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;text-align:right;">Subtotal</span>'
             + '</div>';
+
+        const grupo = g => '<div style="padding:8px 12px 3px;font-size:0.64rem;font-weight:800;color:#64748b;'
+            + 'text-transform:uppercase;letter-spacing:0.07em;">' + g.icono + ' ' + g.titulo + '</div>'
+            + g.denoms.map(fila).join('');
+
+        function fila(d) {
+            return '<div style="' + COLS + '">'
+                + '<label for="egrBil-' + d + '" style="font-size:0.88rem;font-weight:700;color:#1e293b;">' + _egrFmt(d) + '</label>'
+                + '<input type="tel" inputmode="numeric" id="egrBil-' + d + '" placeholder="0" '
+                +   'oninput="_egrTotalBilletes()" onfocus="this.select()" '
+                +   'style="width:100%;padding:7px 2px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;'
+                +   'font-weight:700;text-align:center;color:#1e293b;background:#f8fafc;box-sizing:border-box;">'
+                + '<span id="egrSub-' + d + '" style="font-size:0.82rem;font-weight:700;text-align:right;color:#94a3b8;">—</span>'
+                + '</div>';
+        }
+
+        const pie = '<div style="' + COLS + 'background:#f1f5f9;border-top:1.5px solid rgba(148,163,184,0.28);margin-top:6px;'
+            + 'grid-template-columns:1fr auto;">'
+            + '<span style="font-size:0.78rem;font-weight:800;color:#1e293b;">Total desglose</span>'
+            + '<span id="egresoBilletesTotal" style="font-size:0.95rem;font-weight:800;color:#94a3b8;text-align:right;">$0</span>'
+            + '</div>'
+            + '<div id="egresoBilletesAviso" style="display:none;padding:6px 12px 9px;font-size:0.72rem;font-weight:700;line-height:1.35;"></div>';
+
+        cont.innerHTML = cabecera + EGR_GRUPOS.map(grupo).join('') + pie;
         _egrTotalBilletes();
     }
-    // Suma el desglose y avisa si no cuadra con el monto solicitado
+
+    // Suma el desglose, pinta el subtotal de cada fila y avisa si no cuadra con el monto
     window._egrTotalBilletes = function () {
         let total = 0;
         EGR_DENOMS.forEach(d => {
             const el = document.getElementById('egrBil-' + d);
             const n = Math.max(0, parseInt((el && el.value) || 0) || 0);
             total += n * d;
+            const sub = document.getElementById('egrSub-' + d);
+            if (sub) {
+                sub.textContent = n ? _egrFmt(n * d) : '—';
+                // Se reescribe el atributo style completo (no style.color) para que las reglas
+                // de tema oscuro, que buscan "color:#1e293b" en el atributo, sigan aplicando.
+                sub.setAttribute('style', n
+                    ? 'font-size:0.82rem;font-weight:800;text-align:right;color:#1e293b;'
+                    : 'font-size:0.82rem;font-weight:700;text-align:right;color:#94a3b8;opacity:0.7;');
+            }
         });
         const lbl = document.getElementById('egresoBilletesTotal');
+        const avi = document.getElementById('egresoBilletesAviso');
         if (!lbl) return total;
-        const monto = parseInt((document.getElementById('egresoMonto').value || '').replace(/\D/g, '')) || 0;
-        const fmtM = v => '$' + Number(v).toLocaleString('es-CL');
+        const inpMonto = document.getElementById('egresoMonto');
+        const monto = parseInt(((inpMonto && inpMonto.value) || '').replace(/\D/g, '')) || 0;
+
         if (!total) {
-            lbl.innerHTML = '<span style="color:#94a3b8;font-weight:600;">Total desglose: $0</span>';
+            lbl.setAttribute('style', 'font-size:0.95rem;font-weight:800;text-align:right;color:#94a3b8;');
+            lbl.textContent = '$0';
+            if (avi) { avi.style.display = 'none'; avi.textContent = ''; }
         } else if (monto && total !== monto) {
-            lbl.innerHTML = 'Total desglose: <b style="color:#b45309;">' + fmtM(total) + '</b>'
-                + ' <span style="font-weight:600;color:#b45309;">· no coincide con el monto (' + fmtM(monto) + ')</span>';
+            lbl.setAttribute('style', 'font-size:0.95rem;font-weight:800;text-align:right;color:#b45309;');
+            lbl.textContent = _egrFmt(total);
+            if (avi) {
+                const dif = Math.abs(monto - total);
+                avi.setAttribute('style', 'padding:6px 12px 9px;font-size:0.72rem;font-weight:700;line-height:1.35;color:#b45309;');
+                avi.textContent = '⚠ No coincide con el monto solicitado (' + _egrFmt(monto) + '). '
+                    + (total > monto ? 'Sobran ' : 'Faltan ') + _egrFmt(dif) + '.';
+                avi.style.display = 'block';
+            }
         } else {
-            lbl.innerHTML = 'Total desglose: <b style="color:#166534;">' + fmtM(total) + '</b>'
-                + (monto ? ' <span style="font-weight:600;color:#166534;">· coincide ✓</span>' : '');
+            lbl.setAttribute('style', 'font-size:0.95rem;font-weight:800;text-align:right;color:#166534;');
+            lbl.textContent = _egrFmt(total);
+            if (avi) {
+                if (monto) {
+                    avi.setAttribute('style', 'padding:6px 12px 9px;font-size:0.72rem;font-weight:700;line-height:1.35;color:#166534;');
+                    avi.textContent = '✓ Coincide con el monto solicitado.';
+                    avi.style.display = 'block';
+                } else { avi.style.display = 'none'; avi.textContent = ''; }
+            }
         }
         return total;
     };
