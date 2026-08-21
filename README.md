@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Fix: en "Encargado" aparecía uno solo en vez de los tres (SW v153)
+- **Causa:** `rpc_responsables_lista()` leía únicamente la tabla `responsable_creds`, que contiene solo a los responsables **con PIN personal configurado**. La lista real y completa la administra socios-comicion y vive en `config_sistema` bajo la clave `responsables` (JSON `[{ini, area}]`), con los tres: **N.M (S.J), P.M (S.J), C.P (S.J)**.
+- **Fix (cliente):** `_cargarEncargados()` ahora consulta **las dos fuentes en paralelo** y las fusiona eliminando duplicados por `ini|area`, ordenadas alfabéticamente. Si una de las dos falla, se usa la otra; nunca se pide el PIN.
+- **Fix (servidor, pendiente de aplicar):** se dejó `sql/rpc_responsables_lista.sql` en el repo de socios-comicion con la RPC corregida — hace la misma fusión dentro de la base y es `SECURITY DEFINER`, para que la app **no necesite leer `config_sistema`** cuando la Fase 1b cierre el SELECT anónimo sobre esa tabla.
+- Archivos: `app.js` (`_cargarEncargados`). SW v153 (visible v153).
+
 #### 2026-08-02 — Solicitar Egreso: el desglose del dinero queda ordenado y legible (SW v152)
 - El bloque **"Detalle del dinero recibido"** se rediseñó como **tabla de tres columnas**: **Valor · Cant. · Subtotal**, con encabezado fijo, para que cada número quede debajo de su título.
 - Se separó en dos grupos: **💵 Billetes** ($20.000 a $1.000) y **🪙 Monedas** ($500 a $10). Antes eran 9 casillas en dos columnas, con la etiqueta lejos de su casilla y una fila suelta al final.

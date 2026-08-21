@@ -3010,10 +3010,39 @@
         };
         if (_encargadosCache) { pintar(_encargadosCache); return; }
         pintar([]);
+        // Se leen DOS fuentes y se fusionan:
+        //  · rpc_responsables_lista  → responsables con PIN personal (responsable_creds).
+        //    Es solo un subconjunto: quien no tiene PIN propio no aparece ahí.
+        //  · config_sistema['responsables'] → la lista completa que administra
+        //    socios-comicion (JSON [{ini, area}]). Esta es la que manda.
+        // Sin la fusión aparecía un solo encargado en vez de los tres.
+        const [rpcRes, cfgRes] = await Promise.all([
+            dbSV.rpc('rpc_responsables_lista').then(r => r, () => ({ data: null })),
+            dbSV.from('config_sistema').select('valor').eq('clave', 'responsables')
+                .maybeSingle().then(r => r, () => ({ data: null }))
+        ]);
+
+        const lista = [];
+        const vistos = new Set();
+        const sumar = r => {
+            const ini = String((r && r.ini) || '').trim();
+            const area = String((r && r.area) || '').trim();
+            if (!ini) return;
+            const k = (ini + '|' + area).toLowerCase();
+            if (vistos.has(k)) return;
+            vistos.add(k);
+            lista.push({ ini, area });
+        };
+
         try {
-            const { data } = await dbSV.rpc('rpc_responsables_lista');
-            if (Array.isArray(data) && data.length) { _encargadosCache = data; pintar(data); }
-        } catch (e) { /* si falla, queda solo la opción "Otro" */ }
+            const cfg = cfgRes && cfgRes.data && cfgRes.data.valor;
+            const arr = cfg ? JSON.parse(cfg) : null;
+            if (Array.isArray(arr)) arr.forEach(sumar);
+        } catch (e) { /* JSON inválido: se ignora y queda lo de la RPC */ }
+        if (Array.isArray(rpcRes && rpcRes.data)) rpcRes.data.forEach(sumar);
+
+        lista.sort((a, b) => a.ini.localeCompare(b.ini, 'es'));
+        if (lista.length) { _encargadosCache = lista; pintar(lista); }
     }
     window.cerrarModalEgreso = () => {
         document.getElementById('modalEgreso').style.display = 'none';
