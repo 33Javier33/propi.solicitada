@@ -353,6 +353,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Las ausencias se descuentan igual que en socios-comicion (SW v155)
+Al revisar el borrado de ausencias en socios-comicion se compararon los dos cálculos y aparecieron **dos diferencias** que hacían que el mismo socio, con los mismos datos, viera un saldo distinto en cada app. Se unificó el criterio con el de socios-comicion (`js/anticipos.js`).
+- **Ausencias repetidas el mismo día:** propi descontaba el valor punto **una vez por registro**, así que dos ausencias cargadas para la misma fecha restaban doble y el saldo quedaba más bajo. socios-comicion usa un `Set` de fechas y descuenta una sola vez. Ahora propi también.
+- **Variantes del tipo:** propi exigía que el tipo fuera exactamente `AUSENCIA`; socios-comicion acepta cualquier tipo que **contenga** "ausencia" (sin distinguir mayúsculas). Un registro como `Ausencia Justificada` descontaba en la administración pero **no** en la app del socio, que mostraba un saldo más alto. Ahora las dos usan la misma regla.
+- Se agregó el helper `_ausenciasFechas(extras)` y lo usan tanto el cálculo del saldo como el historial y el calendario, para que no vuelvan a separarse.
+- Verificado con una simulación de los dos cálculos sobre 7 escenarios (sin ausencias, una, duplicada, tipo con variante, fecha con hora, día sin valor punto, y ausencia borrada): coinciden en todos.
+- Archivos: `app.js` (`_ausenciasFechas`, cálculo de `puntoGlobalTotal`, `ausenciasSet`). SW v155 (visible v155).
+
 #### 2026-08-02 — Solicitar Egreso: campos obligatorios y desglose cuadrado (SW v154)
 - **Monto solicitado** y **Encargado** pasan a ser **obligatorios** — ambos marcados en rojo con *(obligatorio)*. Antes el encargado decía *(opcional)*.
 - **Desglose del dinero: sigue siendo opcional.** Se puede enviar la solicitud sin anotar ni un billete.

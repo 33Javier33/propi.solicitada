@@ -1378,6 +1378,23 @@
         return _capIni(d.toLocaleDateString('es-CL', { weekday: 'long' }));
     };
 
+    // Fechas con ausencia del socio, como Set de 'YYYY-MM-DD'.
+    // Misma regla que usa socios-comicion (js/anticipos.js): se compara el tipo
+    // por CONTENIDO ("...ausencia...", sin distinguir mayúsculas) y no por
+    // igualdad exacta, para que variantes como "Ausencia Justificada" cuenten
+    // igual en las dos apps. Al ser un Set, dos registros del mismo día
+    // descuentan una sola vez, como en socios-comicion.
+    function _ausenciasFechas(extras) {
+        const set = new Set();
+        (extras || []).forEach(e => {
+            if (!e || !e.tipo) return;
+            if (!String(e.tipo).toLowerCase().includes('ausencia')) return;
+            const f = String(e.fecha || '').substring(0, 10);
+            if (f) set.add(f);
+        });
+        return set;
+    }
+
     // Calcula los días SIN ingreso (recaudación) entre la fecha más antigua con
     // ingreso y AYER. `fechasConIngreso` es un Set de claves 'YYYY-MM-DD'.
     function _calcularDiasFaltantes(fechasConIngreso) {
@@ -1602,8 +1619,11 @@
                 cargarDiasPTSolicitados();
             } else {
                 Object.values(mapVP).forEach(v=>puntoGlobalTotal+=v.totalVP);
-                userExtras.filter(e=>String(e.tipo).toUpperCase()==='AUSENCIA').forEach(a=>{
-                    const fKey=String(a.fecha).substring(0,10), vp=mapVP[fKey]?.totalVP||0;
+                // Se descuenta por FECHA, no por registro: si hubiera dos ausencias
+                // cargadas el mismo día se restaba el valor punto dos veces y el saldo
+                // quedaba más bajo que en socios-comicion, que usa un Set de fechas.
+                _ausenciasFechas(userExtras).forEach(fKey=>{
+                    const vp=mapVP[fKey]?.totalVP||0;
                     puntoGlobalTotal-=vp;
                     globalDiasCalendar.push({fecha:fKey,valorPunto:vp,montoAsociado:vp*pts});
                 });
@@ -1744,9 +1764,7 @@
             }
 
             // Historial — agrupado por fecha, con desglose de tipos dentro de cada día
-            const ausenciasSet = new Set(
-                userExtras.filter(e=>String(e.tipo).toUpperCase()==='AUSENCIA').map(a=>String(a.fecha).substring(0,10))
-            );
+            const ausenciasSet = _ausenciasFechas(userExtras);
             const diasTrabajadosSet = esPT
                 ? new Set((diasTrabajados[sID]||diasTrabajados[currentUser.ID]||[]).map(d=>String(d).substring(0,10)))
                 : null;
