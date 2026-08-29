@@ -1012,6 +1012,63 @@
     // ── MIS DOCUMENTOS (Supabase Storage) ─────────────────────
     function _escDoc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+    // ── Tipos de archivo (espejo de js/documentacion.js en socios-comicion) ──
+    // Se acepta cualquier archivo. Los navegadores dejan `file.type` VACÍO en
+    // varios formatos de Office —sobre todo los de macros (.xlsm, .docm,
+    // .pptm)—, así que el MIME se deduce de la extensión cuando falta.
+    const DOC_MIME_POR_EXT = {
+        pdf: 'application/pdf',
+        doc: 'application/msword',
+        docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        docm: 'application/vnd.ms-word.document.macroEnabled.12',
+        dot: 'application/msword',
+        dotx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+        dotm: 'application/vnd.ms-word.template.macroEnabled.12',
+        xls: 'application/vnd.ms-excel',
+        xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        xlsm: 'application/vnd.ms-excel.sheet.macroEnabled.12',
+        xlsb: 'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+        xltx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+        xltm: 'application/vnd.ms-excel.template.macroEnabled.12',
+        csv: 'text/csv',
+        ppt: 'application/vnd.ms-powerpoint',
+        pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        pptm: 'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
+        ppsx: 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+        odt: 'application/vnd.oasis.opendocument.text',
+        ods: 'application/vnd.oasis.opendocument.spreadsheet',
+        odp: 'application/vnd.oasis.opendocument.presentation',
+        rtf: 'application/rtf', txt: 'text/plain',
+        zip: 'application/zip', rar: 'application/vnd.rar', '7z': 'application/x-7z-compressed',
+        png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif',
+        webp: 'image/webp', heic: 'image/heic', svg: 'image/svg+xml',
+        mp4: 'video/mp4', mp3: 'audio/mpeg'
+    };
+    function _docExt(nombre) { const p = String(nombre || '').split('.'); return p.length > 1 ? p.pop().toLowerCase() : ''; }
+    function _docMime(file) { return file.type || DOC_MIME_POR_EXT[_docExt(file.name)] || 'application/octet-stream'; }
+    function _docTipo(nombre, mime) {
+        const e = _docExt(nombre), m = String(mime || '').toLowerCase();
+        if (e === 'pdf' || m.indexOf('pdf') >= 0) return { icono:'📄', etiqueta:'PDF', previsualiza:true };
+        if (['doc','docx','docm','dot','dotx','dotm','odt','rtf'].indexOf(e) >= 0 || m.indexOf('word') >= 0)
+            return { icono:'📝', etiqueta:'Word', previsualiza:false };
+        if (['xls','xlsx','xlsm','xlsb','xlt','xltx','xltm','csv','ods'].indexOf(e) >= 0 || m.indexOf('excel') >= 0 || m.indexOf('spreadsheet') >= 0)
+            return { icono:'📊', etiqueta:'Excel', previsualiza:false };
+        if (['ppt','pptx','pptm','pps','ppsx','odp'].indexOf(e) >= 0 || m.indexOf('powerpoint') >= 0 || m.indexOf('presentation') >= 0)
+            return { icono:'📽️', etiqueta:'PowerPoint', previsualiza:false };
+        if (['zip','rar','7z','tar','gz'].indexOf(e) >= 0) return { icono:'🗜️', etiqueta:'Comprimido', previsualiza:false };
+        if (m.indexOf('image/') === 0 || ['png','jpg','jpeg','gif','webp','heic','svg','bmp'].indexOf(e) >= 0)
+            return { icono:'🖼️', etiqueta:'Imagen', previsualiza:true };
+        if (m.indexOf('video/') === 0) return { icono:'🎬', etiqueta:'Video', previsualiza:true };
+        if (m.indexOf('audio/') === 0) return { icono:'🎵', etiqueta:'Audio', previsualiza:true };
+        if (['txt','md','log'].indexOf(e) >= 0) return { icono:'📃', etiqueta:'Texto', previsualiza:true };
+        return { icono:'📎', etiqueta: e ? e.toUpperCase() : 'Archivo', previsualiza:false };
+    }
+    function _docTamano(bytes) {
+        const b = Number(bytes) || 0;
+        if (b >= 1024 * 1024) return (b / (1024 * 1024)).toFixed(1).replace('.', ',') + ' MB';
+        return Math.max(1, Math.round(b / 1024)) + ' KB';
+    }
+
     async function cargarDocumentos() {
         const cont = document.getElementById('docsLista');
         if (!currentUser || !cont) return;
@@ -1027,22 +1084,23 @@
         if (!cont) return;
         if (!docs.length) { cont.innerHTML = '<p style="text-align:center;color:#94a3b8;font-size:12px;padding:8px;">Aún no has subido documentos.</p>'; return; }
         cont.innerHTML = docs.map(function(d) {
-            const kb = d.tamano ? Math.round(d.tamano/1024) : 0;
-            const icon = (d.mime||'').indexOf('pdf') >= 0 ? 'picture_as_pdf' : 'image';
+            const t = _docTipo(d.nombre_archivo, d.mime);
+            const tam = _docTamano(d.tamano);
+            const icon = t.icono;
             const esAdmin = (d.subido_por || 'socio') !== 'socio';
             const meta = esAdmin
-                ? '<p style="font-size:10px;color:#6366f1;font-weight:700;margin:1px 0 0;">📎 Enviado por administración · ' + kb + ' KB</p>'
-                : '<p style="font-size:10px;color:#94a3b8;margin:1px 0 0;">' + kb + ' KB</p>';
+                ? '<p style="font-size:10px;color:#6366f1;font-weight:700;margin:1px 0 0;">📎 Enviado por administración · ' + t.etiqueta + ' · ' + tam + '</p>'
+                : '<p style="font-size:10px;color:#94a3b8;margin:1px 0 0;">' + t.etiqueta + ' · ' + tam + '</p>';
             const borrarBtn = esAdmin
                 ? ''
                 : '<button onclick="borrarDocumento(\'' + d.id + '\',\'' + d.storage_path + '\')" style="background:#fee2e2;border:none;border-radius:8px;padding:6px 8px;color:#dc2626;cursor:pointer;">🗑</button>';
             return '<div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid ' + (esAdmin ? '#c7d2fe' : '#e2e8f0') + ';border-radius:12px;margin-bottom:8px;' + (esAdmin ? 'background:#f5f7ff;' : '') + '">'
-                + '<span class="material-symbols-outlined" style="font-size:22px;color:#6366f1;">' + icon + '</span>'
+                + '<span style="font-size:20px;line-height:1;">' + icon + '</span>'
                 + '<div style="flex:1;min-width:0;">'
                 + '<p style="font-size:12px;font-weight:700;color:#001723;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + _escDoc(d.nombre_archivo || 'documento') + '</p>'
                 + meta
                 + '</div>'
-                + '<button onclick="verDocumento(\'' + d.storage_path + '\')" style="background:#eef2ff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:#4338ca;cursor:pointer;">Ver</button>'
+                + '<button onclick="verDocumento(\'' + d.storage_path + '\')" style="background:#eef2ff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:#4338ca;cursor:pointer;white-space:nowrap;">' + (t.previsualiza ? 'Ver' : 'Abrir') + '</button>'
                 + borrarBtn
                 + '</div>';
         }).join('');
@@ -1059,13 +1117,14 @@
         const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
         const path = 'socio/' + currentUser.ID + '/' + Date.now() + '_' + safe;
         try {
-            const up = await dbSV.storage.from('documentos').upload(path, file, { contentType: file.type, upsert: false });
+            const mime = _docMime(file);
+            const up = await dbSV.storage.from('documentos').upload(path, file, { contentType: mime, upsert: false });
             if (up.error) throw up.error;
             await dbSV.from('documentos').insert({
                 id: crypto.randomUUID(), socio_id: String(currentUser.ID),
                 socio_nombre: ((currentUser.Nombre||'') + ' ' + (currentUser.Apellido||'')).trim(),
                 categoria: 'socio', nombre_archivo: file.name, storage_path: path,
-                mime: file.type, tamano: file.size, subido_por: 'socio'
+                mime: mime, tamano: file.size, subido_por: 'socio'
             });
             await cargarDocumentos();
         } catch(e) { alert('No se pudo subir el documento: ' + (e.message || e)); }

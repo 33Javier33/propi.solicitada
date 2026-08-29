@@ -353,6 +353,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Mis Documentos: cualquier tipo de archivo, con su icono (SW v156)
+Acompaña al cambio de socios-comicion (v69), que ahora permite enviar Word, Excel y cualquier archivo al socio. Sin esto, un Excel enviado por la administración aparecía en la app del socio con **icono de imagen** y sin indicar de qué se trataba.
+- **Icono y tipo por archivo:** 📄 PDF · 📝 Word · 📊 Excel · 📽️ PowerPoint · 🗜️ Comprimido · 🖼️ Imagen · 🎬 Video · 🎵 Audio · 📃 Texto · 📎 otros. La fila muestra **tipo · tamaño**, con el tamaño en MB cuando corresponde (antes siempre KB).
+- **Botón según el archivo:** *Ver* para lo que el navegador muestra y *Abrir* para Word/Excel/PowerPoint, que se descargan para abrirse con su programa.
+- **El socio también puede adjuntar cualquier archivo** (antes solo PDF o imagen), para que las dos puntas queden parejas.
+- **MIME deducido de la extensión** (`DOC_MIME_POR_EXT`, `_docMime`): los navegadores dejan `file.type` vacío en los formatos de Office con macros (`.xlsm`, `.docm`, `.pptm`) y el archivo se subía como binario genérico.
+- Límite por archivo: **15 MB** (sin cambios).
+- Archivos: `index.html` (selector y texto), `app.js` (`DOC_MIME_POR_EXT`, `_docMime`, `_docTipo`, `_docTamano`, `renderDocumentos`, `subirDocumento`). SW v156 (visible v156).
+
 #### 2026-08-02 — Las ausencias se descuentan igual que en socios-comicion (SW v155)
 Al revisar el borrado de ausencias en socios-comicion se compararon los dos cálculos y aparecieron **dos diferencias** que hacían que el mismo socio, con los mismos datos, viera un saldo distinto en cada app. Se unificó el criterio con el de socios-comicion (`js/anticipos.js`).
 - **Ausencias repetidas el mismo día:** propi descontaba el valor punto **una vez por registro**, así que dos ausencias cargadas para la misma fecha restaban doble y el saldo quedaba más bajo. socios-comicion usa un `Set` de fechas y descuenta una sola vez. Ahora propi también.
