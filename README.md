@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — El motivo de la donación se lee completo (SW v158)
+- La fila de movimientos usaba `truncate` / `text-overflow: ellipsis`, así que un motivo largo se cortaba con puntos suspensivos y el socio **no alcanzaba a leer a qué correspondía el descuento**. Ahora, **solo en las filas de donación**, el texto hace salto de línea y se muestra completo.
+- La fila se alinea arriba (`align-items: flex-start`) cuando el motivo ocupa varias líneas, para que el icono y el monto no queden flotando al medio.
+- Se aplicó en las **dos vistas**: la clásica y la premium (dashboard oscuro).
+- Las filas de anticipo mantienen el recorte de una línea como estaban — el cambio no las toca.
+- Archivos: `app.js` (render de movimientos). SW v158 (visible v158).
+
 #### 2026-08-02 — Donaciones: el aporte a una colecta se descuenta del balance (SW v157)
 Acompaña a la sección **💝 Donaciones** de socios-comicion (v70): cuando un socio necesita ayuda, la administración abre una colecta y registra cuánto aporta cada socio.
 - **El aporte se descuenta del balance a recibir**, con el mismo criterio que socios-comicion: `saldoBruto = (propina + saldo anterior) − (anticipos + descuentos + donaciones)`.

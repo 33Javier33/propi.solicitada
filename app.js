@@ -1820,12 +1820,12 @@
             })();
             if(merged.length>0){
                 listaContainer.innerHTML=merged.map(a=>`
-                <div class="movement-row">
+                <div class="movement-row"${a._donacion?' style="align-items:flex-start;"':''}>
                     <div class="movement-icon" style="background:${a._donacion?'rgba(219,39,119,0.12)':'rgba(239,68,68,0.10)'};">
                         <span class="material-symbols-outlined text-[18px]" style="color:${a._donacion?'#db2777':'#ef4444'};">${a._donacion?'volunteer_activism':'arrow_downward'}</span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-lm-primary truncate">${a.desc||a.tipo||'Anticipo'}</p>
+                        <p class="text-sm font-semibold text-lm-primary${a._donacion?'':' truncate'}"${a._donacion?' style="white-space:normal;overflow-wrap:anywhere;line-height:1.35;"':''}>${a.desc||a.tipo||'Anticipo'}</p>
                         <p class="text-[11px] text-lm-muted mt-0.5">${cleanDateStr(a.fecha)}</p>
                     </div>
                     <b class="text-lm-red text-sm font-bold shrink-0">-${formatMoney(a.cantidad||a.monto)}</b>
@@ -1839,10 +1839,10 @@
             const _pmMovs = document.getElementById('pmMovs');
             if (_pmMovs) {
                 _pmMovs.innerHTML = (merged.length > 0)
-                    ? merged.map(a => `<div style="display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid #43474b;">
+                    ? merged.map(a => `<div style="display:flex;align-items:${a._donacion?'flex-start':'center'};justify-content:space-between;padding:14px;border-bottom:1px solid #43474b;">
                         <div style="display:flex;align-items:center;gap:12px;min-width:0;">
                             <div style="width:40px;height:40px;border-radius:50%;background:${a._donacion?'rgba(244,114,182,0.16)':'rgba(255,180,171,0.12)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:${a._donacion?'#f472b6':'#ffb4ab'};font-size:18px;">${a._donacion?'volunteer_activism':'arrow_downward'}</span></div>
-                            <div style="min-width:0;"><p style="font-size:14px;font-weight:600;color:#e1e3e4;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.desc || a.tipo || 'Anticipo'}</p><p style="font-size:11px;color:#c3c7cb;margin:2px 0 0;">${cleanDateStr(a.fecha)}</p></div>
+                            <div style="min-width:0;"><p style="font-size:14px;font-weight:600;color:#e1e3e4;margin:0;${a._donacion?'white-space:normal;overflow-wrap:anywhere;line-height:1.35;':'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'}">${a.desc || a.tipo || 'Anticipo'}</p><p style="font-size:11px;color:#c3c7cb;margin:2px 0 0;">${cleanDateStr(a.fecha)}</p></div>
                         </div>
                         <b style="color:#ffb4ab;font-size:14px;flex-shrink:0;margin-left:10px;white-space:nowrap;">-${formatMoney(a.cantidad || a.monto)}</b>
                     </div>`).join('')
