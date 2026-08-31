@@ -1437,6 +1437,22 @@
         return _capIni(d.toLocaleDateString('es-CL', { weekday: 'long' }));
     };
 
+    // ── Donaciones ───────────────────────────────────────────────────
+    // Aportes a una colecta entre socios que registra la administración en
+    // socios-comicion. Viajan como extras con tipo 'DONACION' y descuentan
+    // del balance a recibir. Mismo criterio de detección que allá: por
+    // contenido y sin tildes, para que ninguna variante quede fuera.
+    function _esDonacion(e) {
+        return !!e && String(e.tipo || '').toLowerCase().replace(/ó/g, 'o').indexOf('donacion') >= 0;
+    }
+    // El motivo de la colecta viene en el detalle, como "Donación: <motivo>".
+    function _motivoDonacion(detalle) {
+        const d = String(detalle || '').trim();
+        const i = d.indexOf(':');
+        const m = i >= 0 ? d.slice(i + 1).trim() : d;
+        return m || 'Donación';
+    }
+
     // Fechas con ausencia del socio, como Set de 'YYYY-MM-DD'.
     // Misma regla que usa socios-comicion (js/anticipos.js): se compara el tipo
     // por CONTENIDO ("...ausencia...", sin distinguir mayúsculas) y no por
@@ -1694,10 +1710,14 @@
 
             const tAnt=userAnticipos.reduce((a,b)=>a+Number(b.cantidad||0),0);
             const tDesc=userExtras.filter(e=>e.tipo==='DESCUENTO_PERSONAL').reduce((a,b)=>a+Number(b.monto||0),0);
+            // Donaciones: aportes a una colecta que la administración registró.
+            // Descuentan del balance igual que un anticipo (mismo criterio que socios-comicion).
+            const userDonaciones=userExtras.filter(_esDonacion);
+            const tDon=userDonaciones.reduce((a,b)=>a+Number(b.monto||0),0);
             let sAnt=(saldosData[sID]||saldosData[currentUser.ID]||0)+(cierreData[sID]||cierreData[currentUser.ID]||0);
 
             const propinaBruta=puntoGlobalTotal*pts;
-            const saldoBruto=(propinaBruta+sAnt)-(tAnt+tDesc);
+            const saldoBruto=(propinaBruta+sAnt)-(tAnt+tDesc+tDon);
             let remanente=saldoBruto>0?saldoBruto%1000:saldoBruto;
             let liquido=saldoBruto>0?saldoBruto-remanente:0;
 
@@ -1779,11 +1799,18 @@
 
             // Últimos movimientos
             const listaContainer=document.getElementById('anticiposList');
-            const merged=[...userAnticipos,...userExtras.filter(e=>e.tipo==='DESCUENTO_PERSONAL')].sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+            const pedidos=[...userAnticipos,...userExtras.filter(e=>e.tipo==='DESCUENTO_PERSONAL')];
+            // Las donaciones se muestran junto a los movimientos, pero NO cuentan
+            // como pedidos: el socio no gastó un anticipo, aportó a una colecta.
+            const donacionesMov=userDonaciones.map(e=>({
+                fecha:e.fecha, monto:e.monto, cantidad:e.monto,
+                desc:'💝 ' + _motivoDonacion(e.detalle), _donacion:true
+            }));
+            const merged=[...pedidos,...donacionesMov].sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
             // Contador de pedidos: "Llevas N pedidos · te restan X · máximo 8" (clásico y premium)
             (function(){
                 const MOVS_MAX = 8;            // máximo de pedidos/anticipos por período
-                const cnt = merged.length;
+                const cnt = pedidos.length;
                 const restan = Math.max(0, MOVS_MAX - cnt);
                 const restanCol = restan === 0 ? '#ef4444' : (restan <= 2 ? '#f59e0b' : '#16a34a');
                 const html = `Llevas <b>${cnt}</b> pedido${cnt===1?'':'s'} · te restan <b style="color:${restanCol}">${restan}</b> · máximo ${MOVS_MAX}`;
@@ -1794,8 +1821,8 @@
             if(merged.length>0){
                 listaContainer.innerHTML=merged.map(a=>`
                 <div class="movement-row">
-                    <div class="movement-icon bg-lm-red/10">
-                        <span class="material-symbols-outlined text-lm-red text-[18px]">arrow_downward</span>
+                    <div class="movement-icon" style="background:${a._donacion?'rgba(219,39,119,0.12)':'rgba(239,68,68,0.10)'};">
+                        <span class="material-symbols-outlined text-[18px]" style="color:${a._donacion?'#db2777':'#ef4444'};">${a._donacion?'volunteer_activism':'arrow_downward'}</span>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-lm-primary truncate">${a.desc||a.tipo||'Anticipo'}</p>
@@ -1814,7 +1841,7 @@
                 _pmMovs.innerHTML = (merged.length > 0)
                     ? merged.map(a => `<div style="display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid #43474b;">
                         <div style="display:flex;align-items:center;gap:12px;min-width:0;">
-                            <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,180,171,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:#ffb4ab;font-size:18px;">arrow_downward</span></div>
+                            <div style="width:40px;height:40px;border-radius:50%;background:${a._donacion?'rgba(244,114,182,0.16)':'rgba(255,180,171,0.12)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:${a._donacion?'#f472b6':'#ffb4ab'};font-size:18px;">${a._donacion?'volunteer_activism':'arrow_downward'}</span></div>
                             <div style="min-width:0;"><p style="font-size:14px;font-weight:600;color:#e1e3e4;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.desc || a.tipo || 'Anticipo'}</p><p style="font-size:11px;color:#c3c7cb;margin:2px 0 0;">${cleanDateStr(a.fecha)}</p></div>
                         </div>
                         <b style="color:#ffb4ab;font-size:14px;flex-shrink:0;margin-left:10px;white-space:nowrap;">-${formatMoney(a.cantidad || a.monto)}</b>

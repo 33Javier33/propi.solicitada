@@ -353,6 +353,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-08-02 — Donaciones: el aporte a una colecta se descuenta del balance (SW v157)
+Acompaña a la sección **💝 Donaciones** de socios-comicion (v70): cuando un socio necesita ayuda, la administración abre una colecta y registra cuánto aporta cada socio.
+- **El aporte se descuenta del balance a recibir**, con el mismo criterio que socios-comicion: `saldoBruto = (propina + saldo anterior) − (anticipos + descuentos + donaciones)`.
+- **Aparece en "Últimos movimientos"** con icono propio (🤝 rosado en vez de la flecha roja) y el **motivo de la colecta** como descripción — ej. *"💝 Ayuda a Juan Pérez por licencia médica"* —, para que el socio sepa de inmediato a qué corresponde el descuento.
+- **No cuenta como pedido.** El contador *"Llevas N pedidos · te restan X · máximo 8"* sigue contando solo anticipos: aportar a una colecta no le consume un anticipo al socio.
+- Detección por contenido y sin tildes (`_esDonacion`), igual que en socios-comicion, para que ninguna variante del tipo (`DONACION`, `Donación`, `donacion`) quede fuera en una app y dentro en la otra.
+- Verificado con una simulación de los dos cálculos sobre 7 escenarios y 10 variantes del tipo: dan el mismo saldo en ambas apps.
+- Archivos: `app.js` (`_esDonacion`, `_motivoDonacion`, `saldoBruto`, lista de movimientos). SW v157 (visible v157).
+
 #### 2026-08-02 — Mis Documentos: cualquier tipo de archivo, con su icono (SW v156)
 Acompaña al cambio de socios-comicion (v69), que ahora permite enviar Word, Excel y cualquier archivo al socio. Sin esto, un Excel enviado por la administración aparecía en la app del socio con **icono de imagen** y sin indicar de qué se trataba.
 - **Icono y tipo por archivo:** 📄 PDF · 📝 Word · 📊 Excel · 📽️ PowerPoint · 🗜️ Comprimido · 🖼️ Imagen · 🎬 Video · 🎵 Audio · 📃 Texto · 📎 otros. La fila muestra **tipo · tamaño**, con el tamaño en MB cuando corresponde (antes siempre KB).
