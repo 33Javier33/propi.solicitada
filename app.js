@@ -1443,7 +1443,10 @@
     // del balance a recibir. Mismo criterio de detección que allá: por
     // contenido y sin tildes, para que ninguna variante quede fuera.
     function _esDonacion(e) {
-        return !!e && String(e.tipo || '').toLowerCase().replace(/ó/g, 'o').indexOf('donacion') >= 0;
+        const t = String((e && e.tipo) || '').toLowerCase().replace(/ó/g, 'o');
+        // Los aportes de personas ajenas al fondo (DONACION_EXTERNA) suman al
+        // total de la colecta pero NO descuentan a nadie: quedan fuera.
+        return t.indexOf('donacion') >= 0 && t.indexOf('extern') < 0;
     }
     // El motivo de la colecta viene en el detalle, como "Donación: <motivo>".
     function _motivoDonacion(detalle) {

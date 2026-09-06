@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-05 — Los aportes de personas ajenas al fondo no descuentan a nadie (SW v159)
+- Acompaña a socios-comicion v81, que ahora permite sumar a una colecta a **personas que no son socios** (con nombre, procedencia y monto). Esos aportes suman al total juntado pero **no tienen saldo del cual descontar**.
+- **Fix preventivo:** `_esDonacion()` detectaba cualquier tipo que contuviera *donacion*, así que habría tomado también el tipo nuevo `DONACION_EXTERNA` y descontado un aporte que no le corresponde a ningún socio. Ahora exige que el tipo contenga *donacion* **y no** *extern*, igual que en socios-comicion.
+- Los aportes externos se guardan con un `socio_id` ficticio, así que ningún socio los lee; el ajuste es una segunda barrera para que un error de tipeo en el tipo no llegue nunca al balance de nadie.
+- Archivos: `app.js` (`_esDonacion`). SW v159 (visible v159).
+
 #### 2026-08-02 — El motivo de la donación se lee completo (SW v158)
 - La fila de movimientos usaba `truncate` / `text-overflow: ellipsis`, así que un motivo largo se cortaba con puntos suspensivos y el socio **no alcanzaba a leer a qué correspondía el descuento**. Ahora, **solo en las filas de donación**, el texto hace salto de línea y se muestra completo.
 - La fila se alinea arriba (`align-items: flex-start`) cuando el motivo ocupa varias líneas, para que el icono y el monto no queden flotando al medio.
