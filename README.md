@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-08 — Se revierte el recorte al período en el aviso de recaudación (SW v162)
+- La v161 limitó el aviso al **período actual**, y eso rompía el caso real: estando en septiembre faltaba el **jueves 30-07**, un día de un período ya cerrado, y con ese recorte habría dejado de avisarse.
+- Un día sin recaudación **hay que saberlo aunque el período esté cerrado**, porque igual se puede ingresar. Vuelve la ventana de **45 días hacia atrás** desde ayer.
+- Se conservan las mejoras de la v161: el título dice **«Falta la recaudación de N días»**, no avisa mientras no haya datos cargados, y nunca revisa antes del primer día que trajo la consulta.
+- Verificado reproduciendo el caso de la captura (falta el 30/07 estando en septiembre → sí lo muestra) más cinco escenarios más.
+- Archivos: `app.js` (`_calcularDiasFaltantes`). SW v162 (visible v162).
+
 #### 2026-09-08 — El aviso de recaudación faltante dice qué falta (SW v161)
 - El título pasó de **«Ingreso faltante»** a **«Falta la recaudación de 1 día»** (o de N días), que dice de una lo que pasa. El texto explica que son días del período sin ningún monto ingresado.
 - **Ventana acotada al período actual** (del 15 en adelante) en vez de 45 días hacia atrás, que podía cruzar el corte de mes y mostrar días de un período ya cerrado.
