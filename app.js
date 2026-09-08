@@ -1474,6 +1474,22 @@
         return set;
     }
 
+    // Pinta el aviso de días sin recaudación en el home y devuelve los días.
+    // Va en su propia función y se llama TEMPRANO, apenas llegan los datos:
+    // antes se calculaba en medio de refresh(), después de pintar el balance y
+    // los movimientos, así que cualquier error en ese tramo dejaba el balance
+    // en pantalla y el aviso sin pintar — que es justo lo que se veía.
+    function _pintarFaltantesHome(recDataArr) {
+        let dias = [];
+        try {
+            const fechas = new Set((recDataArr || []).map(r => String(r.fecha).substring(0, 10)));
+            dias = _calcularDiasFaltantes(fechas);
+            const el = document.getElementById('faltantesAvisoHome');
+            if (el) el.innerHTML = _notaFaltantesHTML(dias, _temaEsOscuro());
+        } catch (e) { console.warn('[faltantes] no se pudo pintar:', e); }
+        return dias;
+    }
+
     // Calcula los días SIN ingreso (recaudación) entre la fecha más antigua con
     // ingreso y AYER. `fechasConIngreso` es un Set de claves 'YYYY-MM-DD'.
     function _calcularDiasFaltantes(fechasConIngreso) {
@@ -1648,6 +1664,10 @@
             if (!recJson._stale && !fullSheets._stale) {
                 _lastGood = { recData, sheetsData, diasTrabajados };
             }
+            // Aviso de días sin recaudación: se pinta ACÁ, antes del balance y
+            // de los movimientos, para que no dependa de que todo lo demás
+            // termine sin errores.
+            _pintarFaltantesHome(recData);
 
             // ── FASE 2: Notas en background (no bloquean el render) ─
             Promise.all([
@@ -1828,6 +1848,7 @@
                     const e=document.getElementById(id); if(e) e.innerHTML = html;
                 });
             })();
+            try {
             if(merged.length>0){
                 listaContainer.innerHTML=merged.map(a=>`
                 <div class="movement-row"${a._donacion?' style="align-items:flex-start;"':''}>
@@ -1844,6 +1865,7 @@
                 listaContainer.innerHTML=`<div class="text-center py-10 text-xs text-lm-muted">Sin movimientos en este periodo</div>`;
             }
             if (isFirstLoad) animateIn(listaContainer, '120ms');
+            } catch (e) { console.warn('[movimientos] error al pintar:', e); }
 
             // Versión premium: mismos movimientos, estilo oscuro
             const _pmMovs = document.getElementById('pmMovs');
@@ -1878,6 +1900,7 @@
 
             // Días sin ingreso (recaudación) → nota "Ingreso faltante"
             const _diasFaltantes = _calcularDiasFaltantes(new Set(Object.keys(porFecha)));
+            // (el aviso del home ya se pintó al principio de refresh)
             // El aviso sigue el tema: claro sobre fondo claro, oscuro sobre fondo
             // oscuro (el home premium se re-tinta según el tema vía .pm-layout).
             const _avisoOscuro = _temaEsOscuro();

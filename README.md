@@ -353,6 +353,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-08 — El aviso de recaudación se pinta antes que todo lo demás (SW v163)
+- **El síntoma:** el balance, los accesos rápidos y el resumen contable se veían bien, pero **el aviso de días sin recaudación no aparecía** — justo el hueco entre la tarjeta de balance y "Accesos Rápidos".
+- **Por qué:** el aviso se calculaba **en medio de `refresh()`**, después de pintar el balance y la lista de movimientos. Todo lo que va antes se ve; si algo falla en ese tramo, la función se corta ahí y **el aviso nunca se pinta**, sin ningún error visible en pantalla. Encaja exactamente con lo que se veía.
+- **Fix 1 — se pinta primero.** Se extrajo a `_pintarFaltantesHome()` y se llama **apenas llegan los datos**, antes del balance y de los movimientos. Va dentro de un `try/catch`, así que ni siquiera un error propio lo impide.
+- **Fix 2 — el render de movimientos ya no puede tumbar el resto.** Ese tramo quedó protegido: si una fila viene con datos raros, se registra en consola y `refresh()` sigue con el historial y el resto de la pantalla, en vez de cortarse a la mitad.
+- No se tocó el cálculo: sigue la ventana de 45 días hacia atrás, sin avisar cuando aún no hay datos.
+- Archivos: `app.js` (`_pintarFaltantesHome`, `refresh`). SW v163 (visible v163).
+
 #### 2026-09-08 — Se revierte el recorte al período en el aviso de recaudación (SW v162)
 - La v161 limitó el aviso al **período actual**, y eso rompía el caso real: estando en septiembre faltaba el **jueves 30-07**, un día de un período ya cerrado, y con ese recorte habría dejado de avisarse.
 - Un día sin recaudación **hay que saberlo aunque el período esté cerrado**, porque igual se puede ingresar. Vuelve la ventana de **45 días hacia atrás** desde ayer.
