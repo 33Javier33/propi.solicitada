@@ -1444,9 +1444,10 @@
     // contenido y sin tildes, para que ninguna variante quede fuera.
     function _esDonacion(e) {
         const t = String((e && e.tipo) || '').toLowerCase().replace(/ó/g, 'o');
-        // Los aportes de personas ajenas al fondo (DONACION_EXTERNA) suman al
-        // total de la colecta pero NO descuentan a nadie: quedan fuera.
-        return t.indexOf('donacion') >= 0 && t.indexOf('extern') < 0;
+        // Quedan fuera los aportes de personas ajenas al fondo (DONACION_EXTERNA),
+        // que suman al total pero no descuentan a nadie, y las ENTREGAS
+        // (DONACION_ENTREGA), que solo registran la salida de la caja.
+        return t.indexOf('donacion') >= 0 && t.indexOf('extern') < 0 && t.indexOf('entrega') < 0;
     }
     // El motivo de la colecta viene en el detalle, como "Donación: <motivo>".
     function _motivoDonacion(detalle) {

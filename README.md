@@ -353,6 +353,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-05 — El retiro de caja de una colecta no toca el balance del socio (SW v160)
+- Acompaña a socios-comicion v91, que agregó el **egreso de la colecta**: el registro de que el dinero juntado salió de la caja cuando se le entrega al beneficiado. Ese registro viaja como un extra de tipo `DONACION_ENTREGA`.
+- **Fix preventivo:** `_esDonacion()` aceptaba cualquier tipo que contuviera *donacion*, así que habría tomado también el nuevo `DONACION_ENTREGA` y **descontado del balance el monto completo del retiro**. Ahora exige que contenga *donacion* y **no** *extern* ni *entrega*, igual que en socios-comicion.
+- El registro se guarda con un `socio_id` ficticio, así que ningún socio lo lee; el ajuste es la segunda barrera para que nunca llegue al balance de nadie.
+- Archivos: `app.js` (`_esDonacion`). SW v160 (visible v160).
+
 #### 2026-09-05 — Los aportes de personas ajenas al fondo no descuentan a nadie (SW v159)
 - Acompaña a socios-comicion v81, que ahora permite sumar a una colecta a **personas que no son socios** (con nombre, procedencia y monto). Esos aportes suman al total juntado pero **no tienen saldo del cual descontar**.
 - **Fix preventivo:** `_esDonacion()` detectaba cualquier tipo que contuviera *donacion*, así que habría tomado también el tipo nuevo `DONACION_EXTERNA` y descontado un aporte que no le corresponde a ningún socio. Ahora exige que el tipo contenga *donacion* **y no** *extern*, igual que en socios-comicion.
