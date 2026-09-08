@@ -1534,12 +1534,22 @@
             </button>`;
         }).join('');
         const n = faltantes.length;
+        // Con un solo día se nombra el día en el título: es lo que se quiere
+        // saber de un vistazo ("hoy es 8 y falta agregar el 7").
+        const _dia1 = (() => {
+            const d = new Date(faltantes[0] + 'T12:00:00');
+            try { return _capIni(d.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' })); }
+            catch (e) { return faltantes[0]; }
+        })();
+        const titulo = n === 1
+            ? 'Falta agregar la recaudación del ' + _dia1
+            : 'Faltan agregar ' + n + ' días de recaudación';
         return `<div style="background:${bg};border:1.5px solid ${bd};border-radius:14px;padding:12px 14px;margin-bottom:12px;box-shadow:${sombra};">
             <div style="display:flex;align-items:center;gap:8px;">
                 <span class="material-symbols-outlined" style="font-size:18px;color:${tx};">event_busy</span>
-                <span style="font-size:13px;font-weight:800;color:${tx};">${n === 1 ? 'Falta la recaudación de 1 día' : 'Falta la recaudación de ' + n + ' días'}</span>
+                <span style="font-size:13px;font-weight:800;color:${tx};line-height:1.3;">${titulo}</span>
             </div>
-            <p style="font-size:11px;color:${tx};opacity:0.9;margin:6px 0 0;">Estos días del período no tienen ningún monto ingresado. Si conoces el dato, toca el día para ingresarlo:</p>
+            <p style="font-size:11px;color:${tx};opacity:0.9;margin:6px 0 0;">${n === 1 ? 'Ese día no tiene ninguna recaudación ingresada. Si conoces el dato, tócalo para ingresarlo:' : 'Esos días no tienen ninguna recaudación ingresada. Si conoces el dato, toca el día para ingresarlo:'}</p>
             <div style="margin-top:2px;">${chips}</div>
             <p style="font-size:11px;color:${tx};opacity:0.8;margin:10px 0 0;display:flex;align-items:flex-start;gap:6px;line-height:1.45;">
                 <span class="material-symbols-outlined" style="font-size:15px;flex-shrink:0;margin-top:1px;">schedule</span>

@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-08 — El aviso nombra el día que falta (SW v164)
+- Cuando falta **un solo día**, el título ahora lo dice con nombre y fecha: **«Falta agregar la recaudación del Lunes, 7 de septiembre»**. Antes decía solo *«Falta la recaudación de 1 día»* y había que mirar el chip para saber cuál era.
+- Con varios días sigue mostrando el conteo — *«Faltan agregar 3 días de recaudación»* — y el detalle en los chips.
+- El texto de apoyo se ajusta al singular: *«Ese día no tiene ninguna recaudación ingresada»*.
+- El aviso no habla de montos: solo dice qué día falta por ingresar.
+- Archivos: `app.js` (`_notaFaltantesHTML`). SW v164 (visible v164).
+
 #### 2026-09-08 — El aviso de recaudación se pinta antes que todo lo demás (SW v163)
 - **El síntoma:** el balance, los accesos rápidos y el resumen contable se veían bien, pero **el aviso de días sin recaudación no aparecía** — justo el hueco entre la tarjeta de balance y "Accesos Rápidos".
 - **Por qué:** el aviso se calculaba **en medio de `refresh()`**, después de pintar el balance y la lista de movimientos. Todo lo que va antes se ve; si algo falla en ese tramo, la función se corta ahí y **el aviso nunca se pinta**, sin ningún error visible en pantalla. Encaja exactamente con lo que se veía.
