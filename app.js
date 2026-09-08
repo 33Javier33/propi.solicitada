@@ -1478,13 +1478,19 @@
     // ingreso y AYER. `fechasConIngreso` es un Set de claves 'YYYY-MM-DD'.
     function _calcularDiasFaltantes(fechasConIngreso) {
         const keys = [...fechasConIngreso].sort();
+        // Sin datos cargados no se avisa: si no, al abrir la app saldría el
+        // período entero como faltante antes de que llegue la consulta.
         if (!keys.length) return [];
         const hoy = new Date(); hoy.setHours(0,0,0,0);
         const ayer = new Date(hoy); ayer.setDate(ayer.getDate() - 1);
-        let cur = new Date(keys[0] + 'T00:00:00');
-        // No escanear rangos gigantes: como mucho, los últimos 45 días.
-        const tope = new Date(ayer); tope.setDate(tope.getDate() - 45);
-        if (cur < tope) cur = tope;
+        // Se revisa el PERÍODO ACTUAL (del 15 en adelante), nunca antes, y
+        // tampoco antes del primer día cargado: esos días pueden tener
+        // recaudación sin estar en la consulta, y avisar ahí sería falso.
+        const y = hoy.getFullYear(), m = hoy.getMonth(), dd = hoy.getDate();
+        let cur = (dd >= 15) ? new Date(y, m, 15) : new Date(y, m - 1, 15);
+        const primero = new Date(keys[0] + 'T00:00:00');
+        if (primero > cur) cur = primero;
+        if (cur > ayer) return [];
         const faltan = [];
         for (let d = new Date(cur); d <= ayer; d.setDate(d.getDate() + 1)) {
             const k = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -1515,9 +1521,9 @@
         return `<div style="background:${bg};border:1.5px solid ${bd};border-radius:14px;padding:12px 14px;margin-bottom:12px;box-shadow:${sombra};">
             <div style="display:flex;align-items:center;gap:8px;">
                 <span class="material-symbols-outlined" style="font-size:18px;color:${tx};">event_busy</span>
-                <span style="font-size:13px;font-weight:800;color:${tx};">Ingreso faltante</span>
+                <span style="font-size:13px;font-weight:800;color:${tx};">${n === 1 ? 'Falta la recaudación de 1 día' : 'Falta la recaudación de ' + n + ' días'}</span>
             </div>
-            <p style="font-size:11px;color:${tx};opacity:0.9;margin:6px 0 0;">Hay ${n} día${n!==1?'s':''} sin ingreso registrado. Si conoces el dato, toca el día para ingresarlo:</p>
+            <p style="font-size:11px;color:${tx};opacity:0.9;margin:6px 0 0;">Estos días del período no tienen ningún monto ingresado. Si conoces el dato, toca el día para ingresarlo:</p>
             <div style="margin-top:2px;">${chips}</div>
             <p style="font-size:11px;color:${tx};opacity:0.8;margin:10px 0 0;display:flex;align-items:flex-start;gap:6px;line-height:1.45;">
                 <span class="material-symbols-outlined" style="font-size:15px;flex-shrink:0;margin-top:1px;">schedule</span>

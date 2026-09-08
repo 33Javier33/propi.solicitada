@@ -353,6 +353,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-08 — El aviso de recaudación faltante dice qué falta (SW v161)
+- El título pasó de **«Ingreso faltante»** a **«Falta la recaudación de 1 día»** (o de N días), que dice de una lo que pasa. El texto explica que son días del período sin ningún monto ingresado.
+- **Ventana acotada al período actual** (del 15 en adelante) en vez de 45 días hacia atrás, que podía cruzar el corte de mes y mostrar días de un período ya cerrado.
+- **Nunca revisa antes del primer día cargado**, para no marcar como faltantes días que sí tienen recaudación pero no vinieron en la consulta; y **no avisa si aún no hay datos**, para que al abrir la app no aparezca el período entero como faltante.
+- Los días siguen siendo tocables para ingresar el monto de ese día.
+- Verificado sobre siete escenarios (sin datos, falta ayer, falta un día del medio, dos días, todo al día, lista que arranca a mitad de período e historial largo).
+- Archivos: `app.js` (`_calcularDiasFaltantes`, `_notaFaltantesHTML`). SW v161 (visible v161).
+
 #### 2026-09-05 — El retiro de caja de una colecta no toca el balance del socio (SW v160)
 - Acompaña a socios-comicion v91, que agregó el **egreso de la colecta**: el registro de que el dinero juntado salió de la caja cuando se le entrega al beneficiado. Ese registro viaja como un extra de tipo `DONACION_ENTREGA`.
 - **Fix preventivo:** `_esDonacion()` aceptaba cualquier tipo que contuviera *donacion*, así que habría tomado también el nuevo `DONACION_ENTREGA` y **descontado del balance el monto completo del retiro**. Ahora exige que contenga *donacion* y **no** *extern* ni *entrega*, igual que en socios-comicion.
