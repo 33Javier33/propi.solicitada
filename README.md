@@ -353,6 +353,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+
+#### 2026-09-14 — Marca nueva: Carlos P. Nauto Interactive (SW v165)
+- Se reemplaza el logotipo (`img/carlospn-logo.png`) por el nuevo y **«CarlosPN Interactive» pasa a «Carlos P. Nauto Interactive»** en sus 5 menciones: el modal *Acerca de*, el pie del login, la línea de derechos reservados, el crédito de la barra inferior y el pie de los comprobantes que se imprimen (`app.js`).
+- El archivo mantiene el **mismo nombre**, así que las referencias siguen sirviendo; cache-bust a `?v=2026`.
+- **El logotipo nuevo es transparente** (el anterior tenía fondo blanco). La clase `.marca-logo` —`mix-blend-mode: multiply` en claro, `invert(1) hue-rotate(180deg)` + `screen` en oscuro— **funciona igual** con un PNG transparente: no hubo que tocar `app.css`.
+- Verificado en navegador en tema claro y oscuro.
+- `originalindex.html` regenerado con `build.sh`. SW `boveda-personal-v165`, versión visible **165**.
+- Archivos: `index.html`, `app.js`, `sw.js`, `img/carlospn-logo.png`, `originalindex.html`.
 #### 2026-09-08 — El aviso nombra el día que falta (SW v164)
 - Cuando falta **un solo día**, el título ahora lo dice con nombre y fecha: **«Falta agregar la recaudación del Lunes, 7 de septiembre»**. Antes decía solo *«Falta la recaudación de 1 día»* y había que mirar el chip para saber cuál era.
 - Con varios días sigue mostrando el conteo — *«Faltan agregar 3 días de recaudación»* — y el detalle en los chips.

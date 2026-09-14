@@ -4176,7 +4176,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
     <div class='firmas'>
         <div class='firma-box'><div class='firma-linea'></div><div class='firma-nombre'>${escHtml((u.Nombre+' '+u.Apellido).toUpperCase())}</div><div class='firma-label'>FIRMA SOCIO</div></div>
     </div>
-    <div class='footer'>Emitido: ${fechaEmision} | Sistema Fondo Solidario | CarlosPN Interactive®</div>
+    <div class='footer'>Emitido: ${fechaEmision} | Sistema Fondo Solidario | Carlos P. Nauto Interactive®</div>
 </div></body></html>`;
 
         // Abrir en nueva ventana e imprimir/guardar
