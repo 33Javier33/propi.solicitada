@@ -110,18 +110,23 @@
         :root[data-negro] [style*="background:#0f172a"],
         :root[data-negro] [style*="background:#0b141a"] { background: #000 !important; }
 
-        /* ── Logo de marca: se funde con el fondo como marca de agua ──
-           El PNG trae fondo BLANCO. Para que no se note la "caja":
-           · Temas claros: `multiply` hace transparente el blanco → el logo
-             (oscuro) se ve fundido sobre el fondo claro.
-           · Temas oscuros (oscuro/negro/esmeralda): invert+hue-rotate vuelve
-             NEGRO el fondo blanco y aclara el diseño, y `screen` hace
-             transparente ese negro → solo queda el diseño claro sobre el fondo. */
-        .marca-logo { filter: none; mix-blend-mode: multiply; }
-        :root[data-theme="oscuro"] .marca-logo {
-            filter: invert(1) hue-rotate(180deg);
-            mix-blend-mode: screen;
+        /* ── Logo de marca ──
+           El logotipo es neón sobre una placa de metal oscuro: los colores solo
+           tienen contraste sobre fondo oscuro, así que la placa viaja con él y
+           se muestra tal cual, como una chapa. NO se funde con el tema.
+           (Antes el PNG traía fondo blanco y se usaba `multiply` en claro e
+           `invert + screen` en oscuro; con este logotipo ese tratamiento lo
+           destruye: en los temas oscuros deja la placa blanca y lava el neón.) */
+        .marca-logo {
+            filter: none;
+            mix-blend-mode: normal;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.28);
         }
+        /* En los temas oscuros la placa ya se apoya sobre el fondo: sin sombra.
+           Todos los temas oscuros (oscuro, negro, esmeralda, grafito, vino,
+           indigo) usan `data-theme="oscuro"` como base, así que basta este. */
+        :root[data-theme="oscuro"] .marca-logo { box-shadow: none; }
 
         /* ── TEMA AQUA (turquesa, claro) ── */
         :root[data-theme="aqua"] {

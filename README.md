@@ -354,6 +354,15 @@ git push -u origin main
 ## Historial de Cambios
 
 
+#### 2026-09-15 — Logotipo nuevo: neón sobre placa oscura (SW v166)
+- Se reemplaza el logotipo por el nuevo de **Carlos P. Nauto Interactive**: escudo CPN en degradado neón sobre una **placa de metal oscuro**. Aparece en el modal *Acerca de* y en el pie del login.
+- **El logotipo viene con su placa y así se usa.** Los colores neón solo tienen contraste sobre fondo oscuro: si se recorta el fondo, en los temas claros el logotipo se vuelve ilegible. La placa, redondeada y con una sombra suave, se muestra como una chapa.
+- **Se eliminó el tratamiento por tema, que con este logotipo estaba al revés.** El anterior era azul oscuro sobre blanco y se fundía con `mix-blend-mode: multiply` en claro e `invert(1) hue-rotate(180deg)` + `screen` en oscuro. Probado con el nuevo, ese filtro **deja la placa blanca y lava el neón**. Ahora `.marca-logo` solo redondea y, en los temas oscuros, quita la sombra (todos ellos usan `data-theme="oscuro"` como base, así que basta ese selector).
+- **Archivo nuevo:** `img/marca/cpn-marca.jpg` (640×584, 68 KB). Es **JPG y no PNG** a propósito: la placa es opaca, no necesita transparencia, y en PNG el mismo recorte pesaba **502 KB** por la textura del metal. Se borra `img/carlospn-logo.png`.
+- Verificado en navegador que la imagen carga (640×584), que no queda filtro ni `mix-blend-mode`, y que la sombra aparece solo en los temas claros.
+- `originalindex.html` regenerado con `build.sh`. SW `boveda-personal-v166`, versión visible **166**.
+- Archivos: `index.html`, `app.css`, `sw.js`, `img/marca/cpn-marca.jpg`, `originalindex.html`.
+
 #### 2026-09-14 — Marca nueva: Carlos P. Nauto Interactive (SW v165)
 - Se reemplaza el logotipo (`img/carlospn-logo.png`) por el nuevo y **«CarlosPN Interactive» pasa a «Carlos P. Nauto Interactive»** en sus 5 menciones: el modal *Acerca de*, el pie del login, la línea de derechos reservados, el crédito de la barra inferior y el pie de los comprobantes que se imprimen (`app.js`).
 - El archivo mantiene el **mismo nombre**, así que las referencias siguen sirviendo; cache-bust a `?v=2026`.
