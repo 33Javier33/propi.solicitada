@@ -111,15 +111,15 @@
         :root[data-negro] [style*="background:#0b141a"] { background: #000 !important; }
 
         /* ── Logo de marca ──
-           El logotipo es un SVG de fondo transparente: el fondo que se ve es
-           el de la app, así que no necesita ni recorte ni fusión. Sus colores
-           (celeste → azul → violeta) están elegidos para tener contraste sobre
-           fondo claro, que es donde más se usa. */
+           PNG de fondo transparente: el fondo que se ve es el de la app, así
+           que no necesita ni recorte ni fusión. Es el logotipo original con
+           sus mismos tonos, pero más saturados y menos claros, porque el neón
+           original se lavaba sobre fondo blanco. */
         .marca-logo { filter: none; mix-blend-mode: normal; }
-        /* Sobre fondo oscuro esos mismos tonos quedan algo apagados: se avivan.
+        /* Sobre fondo oscuro esos tonos quedan algo apagados: se avivan.
            Todos los temas oscuros (oscuro, negro, esmeralda, grafito, vino,
            indigo) usan `data-theme="oscuro"` como base, así que basta este. */
-        :root[data-theme="oscuro"] .marca-logo { filter: brightness(1.35) saturate(1.05); }
+        :root[data-theme="oscuro"] .marca-logo { filter: brightness(1.45) saturate(1.05); }
 
         /* ── TEMA AQUA (turquesa, claro) ── */
         :root[data-theme="aqua"] {

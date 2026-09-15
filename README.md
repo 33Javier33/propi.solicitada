@@ -354,16 +354,13 @@ git push -u origin main
 ## Historial de Cambios
 
 
-#### 2026-09-15 — Logotipo redibujado en vectores, fondo transparente (SW v167)
-- El logotipo sobre placa negra que se publicó esta mañana **se retira**: el recuadro oscuro sobre las tarjetas claras no se veía profesional.
-- **El archivo que existía era una foto de una maqueta**, no un archivo de logotipo: el escudo estaba fotografiado sobre una pared de metal cepillado con degradado. No se puede recortar ese fondo (se probó, quedan restos de los brillos del metal) ni cambiarle los colores. Para tenerlo con fondo transparente **hubo que redibujarlo**.
-- **Ahora es un SVG dibujado en curvas**: mismo escudo hexagonal con el circuito, los símbolos `{ }` y `[ ]`, la flecha de crecimiento y el monograma CPN, más la marca denominativa debajo.
-- **Fondo transparente**, así que el fondo que se ve es el de la app y se adapta a los doce temas.
-- **Colores nuevos**, elegidos para tener contraste sobre fondo claro: degradado **celeste → azul → violeta**. En los temas oscuros se avivan con `filter: brightness(1.35) saturate(1.05)` (todos usan `data-theme="oscuro"` como base, así que basta un selector).
-- **La marca denominativa va convertida a curvas** (Montserrat pasada a trazados), así que el SVG **no depende de ninguna tipografía instalada**.
-- **Archivos:** `img/marca/cpn-marca.svg` (15 KB) e `img/marca/cpn-iso.svg` (4 KB). Se borra `cpn-marca.jpg`.
-- Verificado en navegador a 190 px, 120 px y 64 px sobre blanco, gris claro y azul oscuro.
-- `originalindex.html` regenerado con `build.sh`. SW `boveda-personal-v167`, versión visible **167**.
+#### 2026-09-15 — Logotipo original recortado y recoloreado (SW v168)
+- **Se revierte el redibujo.** El pedido era cambiar el color, no el dibujo. Vuelve **el arte original, con su forma exacta**, y lo único que cambia es el color.
+- **Cómo se recortó el fondo.** El archivo de origen es una foto de una maqueta (el escudo sobre metal cepillado con degradado). Lo que funcionó fue un **top-hat**: se estima el fondo como el mínimo local en una ventana más ancha que el trazo más grueso del logo y se conserva lo que sobresale. Tres ajustes hicieron falta: usar **croma absoluto** en vez de saturación relativa (si no, queda un halo gris), bajar el umbral de luminancia porque **el texto plateado no es tan claro como parece** (p90 = 116) y quedaba semitransparente, y descartar los reflejos pegados al borde exigiendo que todo píxel esté cerca de uno opaco.
+- **El color:** mismos tonos del original pero **más saturados y menos claros**, porque el neón se lava sobre fondo blanco. En los temas oscuros se avivan con `filter: brightness(1.45) saturate(1.05)`.
+- **Archivos:** `img/marca/cpn-marca.png` (520×480, 219 KB, fondo transparente). Se borran los SVG del intento anterior.
+- Verificado a 200 px y 118 px sobre blanco, gris claro y azul oscuro.
+- `originalindex.html` regenerado con `build.sh`. SW `boveda-personal-v168`, versión visible **168**.
 - Archivos: `index.html`, `app.css`, `sw.js`, `img/marca/`, `originalindex.html`.
 #### 2026-09-14 — Marca nueva: Carlos P. Nauto Interactive (SW v165)
 - Se reemplaza el logotipo (`img/carlospn-logo.png`) por el nuevo y **«CarlosPN Interactive» pasa a «Carlos P. Nauto Interactive»** en sus 5 menciones: el modal *Acerca de*, el pie del login, la línea de derechos reservados, el crédito de la barra inferior y el pie de los comprobantes que se imprimen (`app.js`).
