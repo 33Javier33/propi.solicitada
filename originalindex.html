@@ -166,15 +166,15 @@
         :root[data-negro] [style*="background:#0b141a"] { background: #000 !important; }
 
         /* ── Logo de marca ──
-           El logotipo es un SVG de fondo transparente: el fondo que se ve es
-           el de la app, así que no necesita ni recorte ni fusión. Sus colores
-           (celeste → azul → violeta) están elegidos para tener contraste sobre
-           fondo claro, que es donde más se usa. */
+           PNG de fondo transparente: el fondo que se ve es el de la app, así
+           que no necesita ni recorte ni fusión. Es el logotipo original con
+           sus mismos tonos, pero más saturados y menos claros, porque el neón
+           original se lavaba sobre fondo blanco. */
         .marca-logo { filter: none; mix-blend-mode: normal; }
-        /* Sobre fondo oscuro esos mismos tonos quedan algo apagados: se avivan.
+        /* Sobre fondo oscuro esos tonos quedan algo apagados: se avivan.
            Todos los temas oscuros (oscuro, negro, esmeralda, grafito, vino,
            indigo) usan `data-theme="oscuro"` como base, así que basta este. */
-        :root[data-theme="oscuro"] .marca-logo { filter: brightness(1.35) saturate(1.05); }
+        :root[data-theme="oscuro"] .marca-logo { filter: brightness(1.45) saturate(1.05); }
 
         /* ── TEMA AQUA (turquesa, claro) ── */
         :root[data-theme="aqua"] {
@@ -1295,7 +1295,7 @@
 
             <!-- Marca -->
             <div style="text-align:center;margin-bottom:28px;">
-                <img src="img/marca/cpn-marca.png?v=2026d" alt="Carlos P. Nauto Interactive" class="marca-logo" style="width:100%;max-width:250px;height:auto;display:block;margin:0 auto 10px;">
+                <img src="img/marca/cpn-marca.png?v=2026e" alt="Carlos P. Nauto Interactive" class="marca-logo" style="width:100%;max-width:250px;height:auto;display:block;margin:0 auto 10px;">
                 <div style="font-size:12px;color:#72787d;font-weight:500;margin-top:2px;letter-spacing:0.04em;">SISTEMA PROFESIONAL DE GESTIÓN · 2026</div>
             </div>
 
@@ -1465,7 +1465,7 @@
 
     <!-- MARCA (pie del login) -->
     <div style="position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom, 0px) + 12px);display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;">
-        <img src="img/marca/cpn-marca.png?v=2026d" alt="Carlos P. Nauto Interactive" class="marca-logo" style="width:120px;max-width:42vw;height:auto;opacity:0.92;">
+        <img src="img/marca/cpn-marca.png?v=2026e" alt="Carlos P. Nauto Interactive" class="marca-logo" style="width:120px;max-width:42vw;height:auto;opacity:0.92;">
         <span class="text-[9px] text-lm-muted" style="letter-spacing:0.06em;">© 2026 · Todos los derechos reservados</span>
     </div>
 </div>
@@ -2602,7 +2602,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">Carlos P. Nauto Interactive® · 2026 · v168</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">Carlos P. Nauto Interactive® · 2026 · v169</span>
         </button>
     </nav>
 

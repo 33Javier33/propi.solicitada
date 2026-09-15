@@ -354,13 +354,14 @@ git push -u origin main
 ## Historial de Cambios
 
 
-#### 2026-09-15 — Logotipo original recortado y recoloreado (SW v168)
+#### 2026-09-15 — Logotipo original recortado y recoloreado (SW v169)
 - **Se revierte el redibujo.** El pedido era cambiar el color, no el dibujo. Vuelve **el arte original, con su forma exacta**, y lo único que cambia es el color.
 - **Cómo se recortó el fondo.** El archivo de origen es una foto de una maqueta (el escudo sobre metal cepillado con degradado). Lo que funcionó fue un **top-hat**: se estima el fondo como el mínimo local en una ventana más ancha que el trazo más grueso del logo y se conserva lo que sobresale. Tres ajustes hicieron falta: usar **croma absoluto** en vez de saturación relativa (si no, queda un halo gris), bajar el umbral de luminancia porque **el texto plateado no es tan claro como parece** (p90 = 116) y quedaba semitransparente, y descartar los reflejos pegados al borde exigiendo que todo píxel esté cerca de uno opaco.
 - **El color:** mismos tonos del original pero **más saturados y menos claros**, porque el neón se lava sobre fondo blanco. En los temas oscuros se avivan con `filter: brightness(1.45) saturate(1.05)`.
 - **Archivos:** `img/marca/cpn-marca.png` (520×480, 219 KB, fondo transparente). Se borran los SVG del intento anterior.
-- Verificado a 200 px y 118 px sobre blanco, gris claro y azul oscuro.
-- `originalindex.html` regenerado con `build.sh`. SW `boveda-personal-v168`, versión visible **168**.
+- **Mediana 3×3 sobre el alfa:** el texto plateado sale del JPEG con motas sueltas en el borde y se veía sucio al lado de «Nauto», que es de color. Se probó además un cierre morfológico para rellenar la «C» y **se descartó**: engorda las letras y cierra el ojo de la «a».
+- Verificado a 240/190/120 px sobre blanco, gris claro y azul oscuro, y en las pantallas reales en tema claro y oscuro.
+- `originalindex.html` regenerado con `build.sh`. SW `boveda-personal-v169`, versión visible **169**.
 - Archivos: `index.html`, `app.css`, `sw.js`, `img/marca/`, `originalindex.html`.
 #### 2026-09-14 — Marca nueva: Carlos P. Nauto Interactive (SW v165)
 - Se reemplaza el logotipo (`img/carlospn-logo.png`) por el nuevo y **«CarlosPN Interactive» pasa a «Carlos P. Nauto Interactive»** en sus 5 menciones: el modal *Acerca de*, el pie del login, la línea de derechos reservados, el crédito de la barra inferior y el pie de los comprobantes que se imprimen (`app.js`).
