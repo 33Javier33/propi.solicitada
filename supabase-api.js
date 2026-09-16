@@ -874,7 +874,9 @@ async function _recHandler(url, options) {
             }
             const mapped = data.map(m => ({
                 uuid: m.id, fecha: m.created_at,
-                autor: m.autor, socId: null,
+                // socId venía fijo en null: por eso el chat de Administración
+                // no podía saber qué socio escribió ni mostrar su foto.
+                autor: m.autor, socId: m.socio_id || null,
                 mensaje: m.mensaje, nota: m.mensaje,
                 destinatario: 'ADMIN', editado: false,
                 pinned: m.pinned || false, reactions: m.reactions || {},
@@ -886,8 +888,13 @@ async function _recHandler(url, options) {
         }
 
         case 'addNote': {
+            // Se guarda el ID del socio, no solo su nombre: hay seis pares que
+            // comparten nombre de pila (Carlos Perez / Carlos Gomez, …) y con
+            // solo "Carlos" no había forma de saber quién escribió, ni de
+            // buscar su foto.
             await dbRV.from('notas_recaudacion').insert({
                 id: crypto.randomUUID(), autor: b.autor || 'Socio', mensaje: b.mensaje || '',
+                socio_id: b.socId || null,
                 foto_url: b.foto_url || null
             });
             return _mockRes({ success: true });

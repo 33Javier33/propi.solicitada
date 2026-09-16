@@ -353,6 +353,16 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-16 — Las notas guardan quién las escribió: ID y nombre completo (SW v172)
+
+- **Una nota escrita desde acá llegaba a la app de administración con solo el nombre de pila y sin foto.** Hay seis pares de socios que comparten nombre —Carlos Perez / Carlos Gomez, Sergio Bachmann / Sergio Duran, Yessica Araya / Yessica Vargas, Patricia Miralles / Patricia Cardenas, Camila Poffald / Camila Oyarzun— así que con «Carlos» no había forma de saber quién la escribió.
+- **Dos causas, las dos acá:**
+  - Se enviaba `autor: currentUser.Nombre` — el nombre de pila. Ahora va el **nombre completo**.
+  - Se enviaba el `socId`, pero **`addNote` no lo guardaba** en `notas_recaudacion`. Ahora sí (la columna se agregó en la base, nueva y opcional).
+- **El chat de Administración tampoco podía mostrar la foto**: `getNotes` devolvía `socId: null` fijo, así que el avatar nunca encontraba al socio. Corregido.
+- Con esto, en la app de administración cada nota muestra la **foto y el nombre y apellido** de quien la escribió, y acá los mensajes del canal de Administración muestran el avatar correcto.
+- Archivos: `app.js` (`_nombreCompleto`, envío de la nota), `supabase-api.js` (`addNote`, `getNotes`). `originalindex.html` regenerado. SW `boveda-personal-v172`, versión visible **172**.
+
 #### 2026-09-16 — Quién escribe: foto y nombre en los chats, y la foto en el menú (SW v171)
 
 - **En los chats ahora se ve quién escribe.** Antes solo el chat Equipo buscaba la foto del socio; en el de **Administración** los socios salían con una inicial anónima, aunque tuvieran foto. Ahora la foto se busca **en los tres chats**, por el `socId` del mensaje.

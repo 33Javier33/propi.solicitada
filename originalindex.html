@@ -2642,7 +2642,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">Carlos P. Nauto Interactive® · 2026 · v171</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">Carlos P. Nauto Interactive® · 2026 · v172</span>
         </button>
     </nav>
 
@@ -3572,6 +3572,14 @@
         return `<div style="${base}background:${color};display:flex;align-items:center;justify-content:center;`
              + `font-size:${Math.round(px * 0.42)}px;font-weight:700;color:#fff;" title="${escHtml(n)}">`
              + escHtml(n.charAt(0).toUpperCase()) + '</div>';
+    }
+
+    // Nombre completo de un socio (nombre + apellido), sin espacios de más.
+    function _nombreCompleto(s) {
+        if (!s) return '';
+        const n = (s.Nombre || s.nombre || '').trim();
+        const a = (s.Apellido || s.apellido || '').trim();
+        return (n + ' ' + a).trim() || n;
     }
 
     // Foto de un socio por su ID, desde la lista ya cargada.
@@ -5487,7 +5495,9 @@
                 method: 'POST',
                 body: JSON.stringify({
                     action,
-                    autor: currentUser.Nombre,
+                    // Nombre COMPLETO: con solo el nombre de pila no se
+                    // distingue entre los socios que lo comparten.
+                    autor: _nombreCompleto(currentUser),
                     mensaje: texto,
                     socId: currentUser.ID,
                     destinatario: dest,

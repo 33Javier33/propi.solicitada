@@ -921,6 +921,14 @@
              + escHtml(n.charAt(0).toUpperCase()) + '</div>';
     }
 
+    // Nombre completo de un socio (nombre + apellido), sin espacios de más.
+    function _nombreCompleto(s) {
+        if (!s) return '';
+        const n = (s.Nombre || s.nombre || '').trim();
+        const a = (s.Apellido || s.apellido || '').trim();
+        return (n + ' ' + a).trim() || n;
+    }
+
     // Foto de un socio por su ID, desde la lista ya cargada.
     function fotoDeSocio(socId) {
         if (!socId || typeof allSocios === 'undefined') return '';
@@ -2834,7 +2842,9 @@
                 method: 'POST',
                 body: JSON.stringify({
                     action,
-                    autor: currentUser.Nombre,
+                    // Nombre COMPLETO: con solo el nombre de pila no se
+                    // distingue entre los socios que lo comparten.
+                    autor: _nombreCompleto(currentUser),
                     mensaje: texto,
                     socId: currentUser.ID,
                     destinatario: dest,
