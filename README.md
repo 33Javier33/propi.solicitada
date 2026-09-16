@@ -353,6 +353,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-16 — Las notas de Administración se ven con su formato (SW v170)
+
+- Las notas que manda Administración ahora pueden traer **negrita**, *cursiva*, subrayado, alineación y listas. La app **escapaba todo el HTML**, así que una nota con formato se habría visto con las etiquetas a la vista; ahora la interpreta.
+- **Una nota centrada se ve centrada.** El contenedor de la burbuja no impone su propia alineación: la manda la nota. Con eso, un aviso con el título al centro y partes en negrita llega igual que como se escribió.
+- **Se sanea antes de mostrar.** El texto no se inyecta tal cual: pasa por un filtro que deja solo `b, strong, i, em, u, br, p, div, span, ul, ol, li, a` y los estilos `text-align, font-weight, font-style, text-decoration`. Los enlaces solo `http`/`https`, y con `rel="noopener noreferrer"`. Todo lo demás se convierte en texto. Probado con `<script>`, `onclick`, enlaces `javascript:`, `<iframe>`, `<img onerror>` y estilos no permitidos: ninguno sobrevive.
+- **Las notas antiguas no cambian.** Se detecta si la nota trae formato o es texto plano; las de siempre siguen pasando por `linkify` como hasta ahora.
+- Aplica a los tres lugares donde se leen notas: el panel de avisos, el chat de administración y los mensajes privados.
+- Archivos: `app.js` (`notaTraeFormato`, `sanearNota`, `notaHTML`), `app.css` (`.nota-cuerpo`). `originalindex.html` regenerado. SW `boveda-personal-v170`, versión visible **170**.
+
 
 #### 2026-09-15 — Logotipo original recortado y recoloreado (SW v169)
 - **Se revierte el redibujo.** El pedido era cambiar el color, no el dibujo. Vuelve **el arte original, con su forma exacta**, y lo único que cambia es el color.

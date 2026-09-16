@@ -990,3 +990,17 @@
             100% { opacity: 1; transform: scale(1); filter: blur(0); }
         }
         .pm-switch-fx { animation: pmSwitchFx 0.75s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   NOTAS CON FORMATO
+   La nota trae su propia alineación (centrada, a la derecha…) y sus
+   negritas. El contenedor no debe imponer la suya: si la burbuja forzara
+   `text-align`, una nota centrada se vería pegada a la izquierda.
+   ══════════════════════════════════════════════════════════════════════ */
+.nota-cuerpo p { margin: 0 0 6px; }
+.nota-cuerpo p:last-child { margin-bottom: 0; }
+.nota-cuerpo ul, .nota-cuerpo ol { margin: 4px 0 6px; padding-left: 20px; }
+.nota-cuerpo li { margin: 1px 0; }
+.nota-cuerpo b, .nota-cuerpo strong { font-weight: 700; }
+/* El div que envuelve cada línea del editor conserva su alineación propia */
+.nota-cuerpo div { min-height: 1em; }

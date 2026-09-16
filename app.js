@@ -2092,6 +2092,69 @@
     }
 
     // ── LINKIFY ───────────────────────────────────────────────
+    // ── Notas con formato ──────────────────────────────────────────────
+    // Las notas de Administración pueden venir con formato (negrita, cursiva,
+    // alineación, listas). Se muestran tal cual, pero SANEADAS: solo sobreviven
+    // estas etiquetas y estos estilos. Todo lo demás se convierte en texto, así
+    // que nada de lo que llegue puede ejecutar código acá.
+    // Las notas antiguas son texto plano y siguen por `linkify`.
+    const _NOTA_TAGS_OK = ['B','STRONG','I','EM','U','BR','P','DIV','SPAN','UL','OL','LI','A'];
+    const _NOTA_CSS_OK  = ['text-align','font-weight','font-style','text-decoration'];
+
+    function notaTraeFormato(txt) {
+        return /<(b|strong|i|em|u|br|p|div|span|ul|ol|li|a)\b[^>]*>/i.test(String(txt || ''));
+    }
+
+    function sanearNota(html) {
+        if (!html) return '';
+        let doc;
+        try { doc = new DOMParser().parseFromString('<div id="r">' + html + '</div>', 'text/html'); }
+        catch (e) { return escHtml(html); }
+        const raiz = doc.getElementById('r');
+        if (!raiz) return escHtml(html);
+        (function limpiar(nodo) {
+            [...nodo.childNodes].forEach(h => {
+                if (h.nodeType === 3) return;
+                if (h.nodeType !== 1) { h.remove(); return; }
+                if (!_NOTA_TAGS_OK.includes(h.tagName)) {
+                    limpiar(h);
+                    while (h.firstChild) nodo.insertBefore(h.firstChild, h);
+                    h.remove();
+                    return;
+                }
+                [...h.attributes].forEach(a => {
+                    const n = a.name.toLowerCase();
+                    if (n === 'style') return;
+                    if (n === 'href' && h.tagName === 'A') return;
+                    h.removeAttribute(a.name);
+                });
+                if (h.hasAttribute('style')) {
+                    const keep = _NOTA_CSS_OK
+                        .map(p => { const v = h.style.getPropertyValue(p); return v ? p + ':' + v : ''; })
+                        .filter(Boolean).join(';');
+                    if (keep) h.setAttribute('style', keep); else h.removeAttribute('style');
+                }
+                if (h.tagName === 'A') {
+                    const href = (h.getAttribute('href') || '').trim();
+                    if (!/^https?:\/\//i.test(href)) {
+                        while (h.firstChild) nodo.insertBefore(h.firstChild, h);
+                        h.remove();
+                        return;
+                    }
+                    h.setAttribute('target', '_blank');
+                    h.setAttribute('rel', 'noopener noreferrer');
+                }
+                limpiar(h);
+            });
+        })(raiz);
+        return raiz.innerHTML;
+    }
+
+    // Una nota, lista para pintar: con formato si lo trae, si no como siempre.
+    function notaHTML(txt) {
+        return notaTraeFormato(txt) ? sanearNota(txt) : linkify(txt || '');
+    }
+
     function linkify(text) {
         // Escapar HTML primero para neutralizar cualquier payload en el texto
         const safe = escHtml(text);
@@ -2269,7 +2332,7 @@
                 ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0"><div style="width:32px;height:32px;border-radius:50%;background:#264b5f;display:flex;align-items:center;justify-content:center;color:#fff"><span class="material-symbols-outlined" style="font-size:18px">shield_person</span></div></div>`:''}
                 <div class="msg-bubble ${bubbleClass}">
                     ${!isMine?`<div class="wa-author" style="color:#264b5f">${escHtml(n.autor||'Administración')}</div>`:''}
-                    ${n.mensaje?`<div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(n.mensaje||'')}</div>`:''}
+                    ${n.mensaje?`<div class="nota-cuerpo" style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${notaHTML(n.mensaje)}</div>`:''}
                     ${n.foto?`<img src="${(n.foto+'').replace(/"/g,'%22')}" onclick="verFotoGrande('${(n.foto+'').replace(/'/g,'%27')}')" style="max-width:200px;max-height:220px;border-radius:12px;margin-top:${n.mensaje?'6px':'0'};object-fit:cover;cursor:zoom-in;display:block;">`:''}
                     <div class="wa-time"><span>${_clTime(n.fecha)}</span></div>
                 </div>
@@ -2455,7 +2518,7 @@
                 ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?avatarInner:''}</div>`:''}
                 <div class="msg-bubble ${bubbleClass}"${esDestacado?' style="box-shadow:0 0 0 2px #f7d774, 0 2px 10px rgba(245,158,11,0.28);"':''}>
                     ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${escHtml(authorName)}</div>`:''}
-                    ${pinHtml}<div style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${linkify(msgContent)}</div>
+                    ${pinHtml}<div class="nota-cuerpo" style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${notaHTML(msgContent)}</div>
                     ${n.foto ? `<img src="${(n.foto+'').replace(/"/g,'%22')}" onclick="verFotoGrande('${(n.foto+'').replace(/'/g,'%27')}')" style="max-width:200px;max-height:220px;border-radius:12px;margin-top:6px;object-fit:cover;cursor:zoom-in;display:block;">` : ''}
                     ${rxHtml}
                     <div class="wa-time">
