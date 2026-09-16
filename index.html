@@ -1598,7 +1598,10 @@
                 <span class="text-[9px] font-semibold">Mensajes</span>
             </button>
             <button onclick="switchTab('tab-perfil')" class="nav-btn flex flex-col items-center gap-1 flex-1 min-w-0">
-                <span class="nav-icon material-symbols-outlined text-[22px]">badge</span>
+                <!-- Si el socio subió foto, el ícono se reemplaza por su foto
+                     (lo hace _aplicarFotoPerfil). Sin foto, queda el ícono. -->
+                <span id="navPerfilIcono" class="nav-icon material-symbols-outlined text-[22px]">badge</span>
+                <span id="navPerfilFoto" class="nav-foto" style="display:none;"></span>
                 <span class="text-[9px] font-semibold">Perfil</span>
             </button>
             <button onclick="switchTab('tab-config')" class="nav-btn flex flex-col items-center gap-1 flex-1 min-w-0">
@@ -1608,7 +1611,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">Carlos P. Nauto Interactive® · 2026 · v170</span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">Carlos P. Nauto Interactive® · 2026 · v171</span>
         </button>
     </nav>
 

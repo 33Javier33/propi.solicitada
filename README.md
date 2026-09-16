@@ -353,6 +353,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-16 — Quién escribe: foto y nombre en los chats, y la foto en el menú (SW v171)
+
+- **En los chats ahora se ve quién escribe.** Antes solo el chat Equipo buscaba la foto del socio; en el de **Administración** los socios salían con una inicial anónima, aunque tuvieran foto. Ahora la foto se busca **en los tres chats**, por el `socId` del mensaje.
+- **Los mensajes propios también se identifican.** El socio no aparecía en sus propios mensajes —ni nombre ni foto—, así que en una conversación no quedaba constancia de quién dijo qué. Ahora su mensaje lleva su **foto (o inicial) y su nombre**, igual que los de los demás.
+- **Un solo lugar decide el avatar** (`avatarSocioHTML`): foto si el socio la subió, inicial de color si no. Antes cada chat lo resolvía por su cuenta y se veían distintos. **Solo 3 de 67 socios tienen foto**, así que la inicial sigue siendo el caso normal y se mantiene tal cual.
+- **La foto también en la barra de menú.** El botón *Perfil* muestra la foto del socio en lugar del ícono. **Si no tiene foto, queda el ícono de siempre** — no se inventa nada.
+- **Verificado** en navegador con las tres situaciones: socio con foto, socio sin foto (inicial de color) y mensaje propio. Los tres se ven alineados y del mismo tamaño.
+- Archivos: `app.js` (`avatarSocioHTML`, `fotoDeSocio`, `_aplicarFotoPerfil`), `app.css` (`.wa-autor-yo`, `.nav-foto`), `index.html` (botón Perfil). `originalindex.html` regenerado. SW `boveda-personal-v171`, versión visible **171**.
+
 #### 2026-09-16 — Las notas de Administración se ven con su formato (SW v170)
 
 - Las notas que manda Administración ahora pueden traer **negrita**, *cursiva*, subrayado, alineación y listas. La app **escapaba todo el HTML**, así que una nota con formato se habría visto con las etiquetas a la vista; ahora la interpreta.

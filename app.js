@@ -899,6 +899,35 @@
     };
 
     // ── FOTO DE PERFIL (Supabase Storage, bucket público 'avatares') ──
+    // ── Avatar de un socio: su foto si la tiene, su inicial si no ──────
+    //
+    // Se usa en todos los chats para que se vea QUIÉN escribe. Hoy solo 3 de
+    // 67 socios tienen foto, así que la inicial de color sigue siendo el caso
+    // normal y tiene que verse bien.
+    const _avatarPaleta = ['#0ea5e9','#8b5cf6','#f59e0b','#10b981','#ef4444','#ec4899','#14b8a6','#6366f1'];
+    function avatarSocioHTML(nombre, fotoUrl, tam) {
+        const px = tam || 32;
+        const n = String(nombre || '?').trim() || '?';
+        const foto = String(fotoUrl || '').trim();
+        const base = `width:${px}px;height:${px}px;border-radius:50%;flex-shrink:0;`;
+        if (foto) {
+            return `<div style="${base}background-image:url('${foto.replace(/'/g, '%27')}');`
+                 + `background-size:cover;background-position:center;border:1px solid rgba(0,0,0,.08);"`
+                 + ` title="${escHtml(n)}"></div>`;
+        }
+        const color = _avatarPaleta[n.charCodeAt(0) % _avatarPaleta.length];
+        return `<div style="${base}background:${color};display:flex;align-items:center;justify-content:center;`
+             + `font-size:${Math.round(px * 0.42)}px;font-weight:700;color:#fff;" title="${escHtml(n)}">`
+             + escHtml(n.charAt(0).toUpperCase()) + '</div>';
+    }
+
+    // Foto de un socio por su ID, desde la lista ya cargada.
+    function fotoDeSocio(socId) {
+        if (!socId || typeof allSocios === 'undefined') return '';
+        const s = (allSocios || []).find(u => String(u.ID) === String(socId));
+        return s ? String(s.FotoUrl || '').trim() : '';
+    }
+
     function _aplicarFotoPerfil(url) {
         // Avatar del Perfil
         const av = document.getElementById('perfilAvatar');
@@ -912,6 +941,21 @@
         if (hd) {
             if (url) { hd.style.backgroundImage = 'url("' + url + '")'; hd.style.backgroundSize = 'cover'; hd.style.backgroundPosition = 'center'; hd.textContent = ''; }
             else { hd.style.backgroundImage = ''; }
+        }
+        // Barra de menú: la foto reemplaza al ícono de "Perfil". Si no hay
+        // foto se deja el ícono, que es el caso de casi todos los socios.
+        const navIco  = document.getElementById('navPerfilIcono');
+        const navFoto = document.getElementById('navPerfilFoto');
+        if (navIco && navFoto) {
+            if (url) {
+                navFoto.style.backgroundImage = 'url("' + url + '")';
+                navFoto.style.display = '';
+                navIco.style.display = 'none';
+            } else {
+                navFoto.style.backgroundImage = '';
+                navFoto.style.display = 'none';
+                navIco.style.display = '';
+            }
         }
         // Guardar la foto en el auth local para mostrarla en el login la próxima vez
         if (url) {
@@ -2331,7 +2375,9 @@
             html+=`<div class="${rowClass}" style="${n._sending?'opacity:0.7':''}">
                 ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0"><div style="width:32px;height:32px;border-radius:50%;background:#264b5f;display:flex;align-items:center;justify-content:center;color:#fff"><span class="material-symbols-outlined" style="font-size:18px">shield_person</span></div></div>`:''}
                 <div class="msg-bubble ${bubbleClass}">
-                    ${!isMine?`<div class="wa-author" style="color:#264b5f">${escHtml(n.autor||'Administración')}</div>`:''}
+                    ${!isMine
+                        ? `<div class="wa-author" style="color:#264b5f">${escHtml(n.autor||'Administración')}</div>`
+                        : `<div class="wa-autor-yo">${avatarSocioHTML(currentUser.Nombre, currentUser.FotoUrl, 20)}<span>${escHtml((currentUser.Nombre||'Yo'))}</span></div>`}
                     ${n.mensaje?`<div class="nota-cuerpo" style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${notaHTML(n.mensaje)}</div>`:''}
                     ${n.foto?`<img src="${(n.foto+'').replace(/"/g,'%22')}" onclick="verFotoGrande('${(n.foto+'').replace(/'/g,'%27')}')" style="max-width:200px;max-height:220px;border-radius:12px;margin-top:${n.mensaje?'6px':'0'};object-fit:cover;cursor:zoom-in;display:block;">`:''}
                     <div class="wa-time"><span>${_clTime(n.fecha)}</span></div>
@@ -2482,12 +2528,12 @@
             const showAvatar=!isMine&&isFirstInGroup;
             const colorIdx=authorName.charCodeAt(0)%avatarPalette.length;
             const avatarColor=avatarPalette[colorIdx];
-            // Foto del emisor (solo chat Equipo, donde socId identifica al socio)
-            let avatarFoto='';
-            if(currentChatMode==='SOCIAL' && n.socId){ const _s=allSocios.find(u=>String(u.ID)===String(n.socId)); if(_s) avatarFoto=(_s.FotoUrl||'').trim(); }
-            const avatarInner = avatarFoto
-                ? `<div style="width:32px;height:32px;border-radius:50%;background-image:url('${avatarFoto.replace(/'/g,'%27')}');background-size:cover;background-position:center;border:1px solid #e2e8f0;"></div>`
-                : `<div style="width:32px;height:32px;border-radius:50%;background:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${authorName.charAt(0).toUpperCase()}</div>`;
+            // Foto del que escribe. Antes solo se buscaba en el chat Equipo;
+            // ahora también en el de Administración, donde los socios escriben
+            // igual y hasta ahora aparecían con una inicial anónima.
+            const avatarFoto = fotoDeSocio(n.socId);
+            // Un solo lugar decide foto-o-inicial, para que todos los chats se vean igual
+            const avatarInner = avatarSocioHTML(authorName, avatarFoto, 32);
 
             let pinHtml = '', rxHtml = '';
             if(currentChatMode === 'ADMIN') {
@@ -2518,6 +2564,7 @@
                 ${!isMine?`<div style="width:32px;margin-right:6px;flex-shrink:0">${showAvatar?avatarInner:''}</div>`:''}
                 <div class="msg-bubble ${bubbleClass}"${esDestacado?' style="box-shadow:0 0 0 2px #f7d774, 0 2px 10px rgba(245,158,11,0.28);"':''}>
                     ${!isMine&&isFirstInGroup?`<div class="wa-author" style="color:${avatarColor}">${escHtml(authorName)}</div>`:''}
+                    ${isMine&&isFirstInGroup?`<div class="wa-autor-yo">${avatarSocioHTML(currentUser.Nombre, currentUser.FotoUrl, 20)}<span>${escHtml(currentUser.Nombre||'Yo')}</span></div>`:''}
                     ${pinHtml}<div class="nota-cuerpo" style="font-size:14px;line-height:1.45;color:inherit;word-break:break-word">${notaHTML(msgContent)}</div>
                     ${n.foto ? `<img src="${(n.foto+'').replace(/"/g,'%22')}" onclick="verFotoGrande('${(n.foto+'').replace(/'/g,'%27')}')" style="max-width:200px;max-height:220px;border-radius:12px;margin-top:6px;object-fit:cover;cursor:zoom-in;display:block;">` : ''}
                     ${rxHtml}

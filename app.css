@@ -1004,3 +1004,26 @@
 .nota-cuerpo b, .nota-cuerpo strong { font-weight: 700; }
 /* El div que envuelve cada línea del editor conserva su alineación propia */
 .nota-cuerpo div { min-height: 1em; }
+
+/* Identidad de quien escribe: foto (o inicial) + nombre, también en los
+   mensajes propios. Antes el socio no aparecía identificado en sus propios
+   mensajes, y en el chat de Administración salía con una inicial anónima. */
+.wa-autor-yo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: .75;
+    margin-bottom: 3px;
+}
+/* Foto del socio en la barra de menú, en lugar del ícono de Perfil */
+.nav-foto {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 1.5px solid currentColor;
+    display: block;
+}
