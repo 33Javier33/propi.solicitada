@@ -120,6 +120,11 @@
            Todos los temas oscuros (oscuro, negro, esmeralda, grafito, vino,
            indigo) usan `data-theme="oscuro"` como base, así que basta este. */
         :root[data-theme="oscuro"] .marca-logo { filter: brightness(1.45) saturate(1.05); }
+        /* Tamaños. El archivo es casi cuadrado (520x480), así que el ancho se
+           paga casi entero en alto: a 250px de ancho ocupaba 231px de alto y
+           se comía la ficha. Esta escala es la misma en las 3 apps. */
+        .marca-logo-panel { width: 118px; max-width: 45vw; height: auto; display: block; margin: 0 auto 10px; }
+        .marca-logo-foot  { width: 68px;  max-width: 40vw; height: auto; display: block; opacity: .85; }
 
         /* ── TEMA AQUA (turquesa, claro) ── */
         :root[data-theme="aqua"] {

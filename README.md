@@ -353,6 +353,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-17 — El logotipo de marca, a un tamaño discreto (SW v173)
+
+- **El logo ocupaba demasiado espacio y resultaba hostil a la vista.** La causa es que `cpn-marca.png` es **casi cuadrado (520×480)**: el ancho se paga casi entero en alto. En la ficha «Acerca de» medía 250 px de ancho por **231 px de alto** — el logo era casi toda la ficha.
+- **Escala nueva, idéntica en las 3 apps:** ficha «Acerca de» **250 → 118 px** (≈109 de alto), firma al pie del login **120 → 68 px** (≈63 de alto). El pie lleva `opacity: .85` para que se lea como firma y no compita con el formulario.
+- **Se dejan de usar medidas escritas a mano en el HTML.** Ahora son clases (`.marca-logo-panel`, `.marca-logo-foot`) en `app.css`, con los mismos valores que las otras dos apps, para que el tamaño no se vuelva a desincronizar.
+- **Archivos:** `app.css`, `index.html`. No cambia el archivo del logo ni sus colores — **solo el tamaño**.
+
 #### 2026-09-16 — Las notas guardan quién las escribió: ID y nombre completo (SW v172)
 
 - **Una nota escrita desde acá llegaba a la app de administración con solo el nombre de pila y sin foto.** Hay seis pares de socios que comparten nombre —Carlos Perez / Carlos Gomez, Sergio Bachmann / Sergio Duran, Yessica Araya / Yessica Vargas, Patricia Miralles / Patricia Cardenas, Camila Poffald / Camila Oyarzun— así que con «Carlos» no había forma de saber quién la escribió.
