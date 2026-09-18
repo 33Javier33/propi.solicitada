@@ -1,334 +1,6 @@
 // ==============================================================================
 // SCRIPT MAESTRO V25.1 - CON HISTORIAL DE AUDITORÍA + CREDENCIALES
-// + INTEGRACIÓN TELEGRAM (@GestionPtopinaBot)
 // ==============================================================================
-
-// ── CONFIGURACIÓN TELEGRAM ────────────────────────────────────────────────────
-const TELEGRAM_TOKEN = '8318855772:AAEDfwR7BdyF5gL7nMJjaYowvMF9gh6yfCw';
-const TELEGRAM_CHAT_ID = '5981473068';
-
-function telegramEnviar(mensaje) {
-  try {
-    const url = 'https://api.telegram.org/bot' + TELEGRAM_TOKEN + '/sendMessage';
-    UrlFetchApp.fetch(url, {
-      method: 'post',
-      contentType: 'application/json',
-      payload: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: 'HTML' }),
-      muteHttpExceptions: true
-    });
-  } catch(e) {
-    console.log('Telegram error: ' + e.toString());
-  }
-}
-
-function probarTelegram() {
-  telegramEnviar('🔔 Prueba de conexión exitosa!');
-}
-
-function telegramEnviarA(chatId, mensaje) {
-  try {
-    const url = 'https://api.telegram.org/bot' + TELEGRAM_TOKEN + '/sendMessage';
-    UrlFetchApp.fetch(url, {
-      method: 'post',
-      contentType: 'application/json',
-      payload: JSON.stringify({ chat_id: chatId, text: mensaje, parse_mode: 'HTML' }),
-      muteHttpExceptions: true
-    });
-  } catch(e) { console.log('Telegram error: ' + e.toString()); }
-}
-
-var URL_SOCIOCOMISION_TG = 'https://script.google.com/macros/s/AKfycbzCs74u0wnowFhgAbYM_EL11eEyOH4GivGzwg1v0ovMLW6QvwqOuL9HRhxmAwL9m8X6/exec';
-var MON_TIMEOUT_MS_TG = 180000;
-
-function doTelegramWebhook(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var msg = data.message;
-    if (!msg || !msg.text) return;
-    var texto = msg.text.trim().toLowerCase();
-    var textoO = msg.text.trim();
-    var chatId = msg.chat.id;
-
-    if (texto === '/start') {
-      telegramEnviarA(chatId,
-        '👋 <b>Hola! Soy el bot del Fondo Solidario</b>\n' +
-        'Casino de Puerto Varas\n\n' +
-        '<b>Comandos disponibles:</b>\n' +
-        '/resumen — Estado general del mes\n' +
-        '/socios — Conteo de socios\n' +
-        '/anticipos — Total de anticipos del periodo\n' +
-        '/recaudacion — Recaudacion del periodo\n' +
-        '/montos — Ultimos dias de montos diarios\n' +
-        '/sala — Quienes estan en sala ahora\n' +
-        '/online — Socios conectados en este momento\n' +
-        '/informe — Resumen completo de anticipos\n' +
-        '/socio [nombre] — Buscar un socio especifico\n' +
-        '/historial [nombre] — Anticipos de un socio\n' +
-        '/ayuda — Ver todos los comandos'
-      );
-    } else if (texto === '/resumen') {
-      telegramEnviarA(chatId, telegramObtenerResumen());
-    } else if (texto === '/socios') {
-      var lista = getSocios();
-      var planta = lista.filter(function(s){ return s.TipoContrato === 'Planta'; }).length;
-      var pt = lista.filter(function(s){ return s.TipoContrato === 'Part-Time'; }).length;
-      telegramEnviarA(chatId,
-        '👥 <b>Socios del Fondo</b>\n---------------------\n' +
-        'Total: ' + lista.length + '\nPlanta: ' + planta + '\nPart-Time: ' + pt
-      );
-    } else if (texto === '/anticipos') {
-      var ants = getAllAnticiposDesdeSheets();
-      var total = 0; var nSocios = Object.keys(ants).length;
-      Object.values(ants).forEach(function(lista){ lista.forEach(function(a){ total += Number(a.monto) || 0; }); });
-      telegramEnviarA(chatId,
-        '💰 <b>Anticipos del Periodo</b>\n---------------------\n' +
-        'Socios con anticipos: ' + nSocios + '\nTotal egresos: $' + total.toLocaleString('es-CL')
-      );
-    } else if (texto === '/recaudacion' || texto === '/rec') {
-      telegramEnviarA(chatId, 'Consultando recaudaciones...');
-      telegramEnviarA(chatId, telegramGetRecaudacion());
-    } else if (texto === '/montos') {
-      telegramEnviarA(chatId, 'Obteniendo montos diarios...');
-      telegramEnviarA(chatId, telegramGetMontosDiarios());
-    } else if (texto === '/sala') {
-      telegramEnviarA(chatId, 'Consultando sala...');
-      telegramEnviarA(chatId, telegramGetSala());
-    } else if (texto === '/online') {
-      telegramEnviarA(chatId, telegramGetOnline());
-    } else if (texto === '/informe') {
-      telegramEnviarA(chatId, 'Generando informe de anticipos...');
-      telegramEnviarA(chatId, telegramGetInformeAnticipos());
-    } else if (texto.startsWith('/socio ')) {
-      var busqSocio = textoO.substring(7).trim();
-      if (!busqSocio) { telegramEnviarA(chatId, 'Escribe el nombre: /socio Carlos'); }
-      else { telegramEnviarA(chatId, 'Buscando socio...'); telegramEnviarA(chatId, telegramBuscarSocio(busqSocio)); }
-    } else if (texto.startsWith('/historial ')) {
-      var busqHist = textoO.substring(11).trim();
-      if (!busqHist) { telegramEnviarA(chatId, 'Escribe el nombre: /historial Carlos'); }
-      else { telegramEnviarA(chatId, 'Buscando historial...'); telegramEnviarA(chatId, telegramGetHistorial(busqHist)); }
-    } else if (texto === '/ayuda') {
-      telegramEnviarA(chatId,
-        '<b>Comandos disponibles</b>\n\n' +
-        '<b>Fondo Solidario:</b>\n' +
-        '/resumen — Estado general del mes\n' +
-        '/socios — Conteo de socios\n' +
-        '/anticipos — Total de anticipos\n' +
-        '/informe — Resumen completo de anticipos\n' +
-        '/historial [nombre] — Anticipos de un socio\n' +
-        '/socio [nombre] — Info de un socio\n\n' +
-        '<b>Recaudacion:</b>\n' +
-        '/recaudacion — Recaudacion del periodo\n' +
-        '/montos — Ultimos dias con detalle\n\n' +
-        '<b>Sala:</b>\n' +
-        '/sala — Quienes estan en sala ahora\n' +
-        '/online — Socios online\n\n' +
-        '<b>Notificaciones automaticas:</b>\n' +
-        '- Anticipo registrado\n- Ausencia registrada\n' +
-        '- Nuevo socio agregado\n- Cierre de mes\n- Recaudacion registrada'
-      );
-    } else {
-      telegramEnviarA(chatId, 'Comando no reconocido. Escribe /ayuda para ver las opciones.');
-    }
-  } catch(err) {
-    console.log('Webhook error: ' + err.toString());
-  }
-}
-
-const URL_REC_TELEGRAM = 'https://script.google.com/macros/s/AKfycbz_kCb4aEe437zHGbRqnjCibw1NtAqfCbTNmsVPn9jaZOPBFaZ6-FwmiTLqVxq39X1P/exec';
-
-function telegramGetRecaudacion() {
-  try {
-    var respT = UrlFetchApp.fetch(URL_REC_TELEGRAM + '?action=getTotal', {muteHttpExceptions:true});
-    var dT = JSON.parse(respT.getContentText());
-    var total = (dT.totalAcumulado || 0) / 100;
-    var ultDia = (dT.totalLastDivisorDay || 0) / 100;
-    var divisor = dT.lastDivisor || 1;
-    var fechaDiv = dT.lastDivisorDate || 'N/A';
-    var punto = divisor > 1 ? Math.round(ultDia / divisor) : 0;
-    var desglose = dT.desgloseEsperado || [];
-
-    var respR = UrlFetchApp.fetch(URL_REC_TELEGRAM + '?action=get', {muteHttpExceptions:true});
-    var dR = JSON.parse(respR.getContentText());
-    var regs = dR.data || [];
-    var pFecha = {};
-    regs.forEach(function(r) {
-      if (!r.fecha) return;
-      if (!pFecha[r.fecha]) pFecha[r.fecha] = {tipos:{}, divisor:r.divisor};
-      pFecha[r.fecha].tipos[r.tipo] = (pFecha[r.fecha].tipos[r.tipo]||0) + (r.monto||0);
-    });
-    var fechas = Object.keys(pFecha).sort().reverse().slice(0,5);
-
-    var respN = UrlFetchApp.fetch(URL_REC_TELEGRAM + '?action=getNotes', {muteHttpExceptions:true});
-    var dN = JSON.parse(respN.getContentText());
-    var notas = (dN.data || []).slice(-3);
-
-    var m = '<b>Recaudacion del Periodo</b>\nCasino de Puerto Varas\n---------------------\n';
-    m += '<b>Total acumulado:</b> $' + total.toLocaleString('es-CL') + '\n';
-    if (desglose.length > 0) {
-      m += '\n<b>Por tipo:</b>\n';
-      desglose.forEach(function(d){ m += ' - ' + d.tipo + ': $' + ((d.monto||0)/100).toLocaleString('es-CL') + '\n'; });
-    }
-    m += '\n<b>Ultimo dia con divisor:</b> ' + fechaDiv + '\n';
-    m += ' Recaudado: $' + ultDia.toLocaleString('es-CL') + '\n';
-    m += ' Divisor: ' + divisor + '\n';
-    m += punto > 0 ? ' Punto noche: $' + punto.toLocaleString('es-CL') + '\n' : ' Sin divisor\n';
-    if (fechas.length > 0) {
-      m += '\n<b>Ultimos ' + fechas.length + ' dias:</b>\n';
-      fechas.forEach(function(f) {
-        var d = pFecha[f];
-        var tD = Object.values(d.tipos).reduce(function(a,b){return a+b;},0);
-        var fV = f.split('-').reverse().join('/');
-        m += ' <b>' + fV + '</b>: $' + tD.toLocaleString('es-CL') + (d.divisor?' div:'+d.divisor:' SIN DIV') + '\n';
-        Object.keys(d.tipos).forEach(function(t){ m += ' - '+t+': $'+d.tipos[t].toLocaleString('es-CL')+'\n'; });
-      });
-    }
-    if (notas.length > 0) {
-      m += '\n<b>Notas:</b>\n';
-      notas.forEach(function(n){ m += ' - '+(n.autor||'')+': '+(n.mensaje||'')+'\n'; });
-    }
-    m += '---------------------\n' + new Date().toLocaleString('es-CL');
-    return m;
-  } catch(e) { return 'Error recaudaciones: ' + e.toString(); }
-}
-
-function telegramGetMontosDiarios() {
-  try {
-    var respR = UrlFetchApp.fetch(URL_REC_TELEGRAM + '?action=get', {muteHttpExceptions:true});
-    var dR = JSON.parse(respR.getContentText());
-    var regs = dR.data || [];
-    var pFecha = {};
-    regs.forEach(function(r) {
-      if (!r.fecha) return;
-      if (!pFecha[r.fecha]) pFecha[r.fecha] = {tipos:{}, divisor:r.divisor};
-      pFecha[r.fecha].tipos[r.tipo] = (pFecha[r.fecha].tipos[r.tipo]||0) + (r.monto||0);
-    });
-    var fechas = Object.keys(pFecha).sort().reverse().slice(0, 10);
-    if (!fechas.length) return 'Sin registros de recaudacion.';
-    var m = '<b>Montos Diarios (ultimos ' + fechas.length + ' dias)</b>\nCasino de Puerto Varas\n---------------------\n';
-    fechas.forEach(function(f) {
-      var d = pFecha[f];
-      var tD = Object.values(d.tipos).reduce(function(a,b){return a+b;},0);
-      var fV = f.split('-').reverse().join('/');
-      var div = d.divisor ? ' div:' + d.divisor + ' pto:$' + Math.round(tD/d.divisor).toLocaleString('es-CL') : ' SIN DIV';
-      m += '\n<b>' + fV + '</b>: $' + tD.toLocaleString('es-CL') + div + '\n';
-      Object.keys(d.tipos).forEach(function(t){ m += ' - ' + t + ': $' + d.tipos[t].toLocaleString('es-CL') + '\n'; });
-    });
-    m += '---------------------\n' + new Date().toLocaleString('es-CL');
-    return m;
-  } catch(e) { return 'Error obteniendo montos: ' + e.toString(); }
-}
-
-function telegramGetSala() {
-  try {
-    var resp = UrlFetchApp.fetch(URL_SOCIOCOMISION_TG + '?action=read', {muteHttpExceptions:true});
-    var data = JSON.parse(resp.getContentText());
-    var users = Array.isArray(data) ? data : [];
-    var activos = users.filter(function(u){ return u.Estado === 'Activo'; });
-    if (!activos.length) return '🏢 <b>Sala vacia</b>\nNo hay socios en sala en este momento.';
-    var m = '🏢 <b>En Sala Ahora</b> (' + activos.length + ')\n---------------------\n';
-    activos.forEach(function(u){
-      var hora = u.Timestamp ? new Date(u.Timestamp).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : '--:--';
-      m += '- ' + (u.Nombre||'') + ' ' + (u.Apellido||'') + ' <i>' + (u.Seccion||u['Sección']||'') + '</i> ' + hora + '\n';
-    });
-    m += '---------------------\n' + new Date().toLocaleString('es-CL');
-    return m;
-  } catch(e) { return 'Error consultando sala: ' + e.toString(); }
-}
-
-function telegramGetOnline() {
-  try {
-    var resp = UrlFetchApp.fetch(URL_SOCIOCOMISION_TG + '?action=read', {muteHttpExceptions:true});
-    var data = JSON.parse(resp.getContentText());
-    var users = Array.isArray(data) ? data : [];
-    var now = new Date();
-    var online = users.filter(function(u){ return u.UltimaConexion && (now - new Date(u.UltimaConexion) < MON_TIMEOUT_MS_TG); });
-    var activos = users.filter(function(u){ return u.Estado === 'Activo'; });
-    return '📡 <b>Estado de Conexion</b>\n---------------------\n' +
-      'En sala ahora: ' + activos.length + '\n' +
-      'Online reciente (3h): ' + online.length + '\n' +
-      'Total socios: ' + users.length + '\n---------------------\n' + now.toLocaleString('es-CL');
-  } catch(e) { return 'Error consultando online: ' + e.toString(); }
-}
-
-function telegramGetInformeAnticipos() {
-  try {
-    var socios = getSocios();
-    var ants = getAllAnticiposDesdeSheets();
-    var totalGeneral = 0;
-    var lineas = [];
-    socios.forEach(function(s) {
-      var lista = ants[s.ID] || [];
-      if (!lista.length) return;
-      var totalSocio = lista.reduce(function(a,b){ return a + (Number(b.monto)||0); }, 0);
-      totalGeneral += totalSocio;
-      var detalle = lista.map(function(a){ return ' ' + (a.fecha||'?') + ': $' + (Number(a.monto)||0).toLocaleString('es-CL'); }).join('\n');
-      lineas.push('<b>' + (s.Nombre||'') + ' ' + (s.Apellido||'') + '</b>\n' + detalle + '\nTotal: $' + totalSocio.toLocaleString('es-CL'));
-    });
-    if (!lineas.length) return 'Sin anticipos registrados en el periodo actual.';
-    var header = '<b>Informe de Anticipos</b>\nCasino de Puerto Varas\n---------------------\n';
-    var footer = '\n---------------------\nTOTAL GENERAL: $' + totalGeneral.toLocaleString('es-CL');
-    return header + lineas.join('\n\n') + footer;
-  } catch(e) { return 'Error generando informe: ' + e.toString(); }
-}
-
-function telegramBuscarSocio(nombre) {
-  try {
-    var socios = getSocios();
-    var q = nombre.toLowerCase();
-    var encontrados = socios.filter(function(s){ return ((s.Nombre||'') + ' ' + (s.Apellido||'')).toLowerCase().includes(q); });
-    if (!encontrados.length) return 'No se encontro ningun socio con "' + nombre + '".';
-    var ants = getAllAnticiposDesdeSheets();
-    var m = '';
-    encontrados.slice(0, 3).forEach(function(s) {
-      var lista = ants[s.ID] || [];
-      var totalAnt = lista.reduce(function(a,b){ return a + (Number(b.monto)||0); }, 0);
-      m += '👤 <b>' + (s.Nombre||'') + ' ' + (s.Apellido||'') + '</b>\nID: ' + s.ID + '\n';
-      m += 'Area: ' + (s.Area||'') + ' | Contrato: ' + (s.TipoContrato||'') + '\n';
-      m += 'Anticipos este periodo: ' + lista.length + ' ($' + totalAnt.toLocaleString('es-CL') + ')\n\n';
-    });
-    if (encontrados.length > 3) m += '...y ' + (encontrados.length - 3) + ' mas. Se mas especifico.';
-    return m.trim();
-  } catch(e) { return 'Error buscando socio: ' + e.toString(); }
-}
-
-function telegramGetHistorial(nombre) {
-  try {
-    var socios = getSocios();
-    var q = nombre.toLowerCase();
-    var encontrado = socios.find(function(s){ return ((s.Nombre||'') + ' ' + (s.Apellido||'')).toLowerCase().includes(q); });
-    if (!encontrado) return 'No se encontro socio con "' + nombre + '".';
-    var ants = getAllAnticiposDesdeSheets();
-    var lista = ants[encontrado.ID] || [];
-    if (!lista.length) return '👤 <b>' + encontrado.Nombre + ' ' + encontrado.Apellido + '</b>\nSin anticipos en el periodo actual.';
-    var total = lista.reduce(function(a,b){ return a + (Number(b.monto)||0); }, 0);
-    var m = '👤 <b>' + encontrado.Nombre + ' ' + encontrado.Apellido + '</b>\n';
-    m += (encontrado.Area||'') + ' | ' + (encontrado.TipoContrato||'') + '\n---------------------\n';
-    lista.forEach(function(a){
-      var resp = a.responsable ? ' (' + a.responsable + ')' : '';
-      m += (a.fecha||'?') + ': $' + (Number(a.monto)||0).toLocaleString('es-CL') + resp + '\n';
-    });
-    m += '---------------------\nTOTAL: $' + total.toLocaleString('es-CL');
-    return m;
-  } catch(e) { return 'Error obteniendo historial: ' + e.toString(); }
-}
-
-function telegramObtenerResumen() {
-  try {
-    const socios = getSocios();
-    const ants = getAllAnticiposDesdeSheets();
-    const totalAnt = Object.values(ants).reduce((acc, lista) =>
-      acc + lista.reduce((s, a) => s + (Number(a.monto) || 0), 0), 0);
-    const nConAnt = Object.keys(ants).length;
-    return (
-      '📊 <b>Resumen Fondo Solidario</b>\n' +
-      'Casino de Puerto Varas\n─────────────────────\n' +
-      '👥 Socios totales: ' + socios.length + '\n' +
-      '💰 Anticipos registrados: ' + nConAnt + ' socios\n' +
-      '💸 Total anticipos: $' + totalAnt.toLocaleString('es-CL') + '\n' +
-      '─────────────────────\n🕐 ' + new Date().toLocaleString('es-CL')
-    );
-  } catch(e) { return '⚠️ Error obteniendo resumen: ' + e.toString(); }
-}
 
 // ==============================================================================
 // NOMBRES DE LAS HOJAS
@@ -378,12 +50,6 @@ function registrarAuditoria(usuario, accion, detalle, idAfectado, geoLat, geoLng
 function doGet(e) { return handleRequest(e, 'GET'); }
 
 function doPost(e) {
-  try {
-    if (e.postData && e.postData.contents) {
-      var body = JSON.parse(e.postData.contents);
-      if (body.update_id !== undefined) return doTelegramWebhook(e);
-    }
-  } catch(err) {}
   return handleRequest(e, 'POST');
 }
 
@@ -732,13 +398,6 @@ function procesarCierreMensual(payload) {
     reportName
   );
 
-  telegramEnviar(
-    '🔒 <b>Cierre de Mes ejecutado</b>\n' +
-    '📊 Socios procesados: ' + nSocios + '\n' +
-    '💵 Total pagado: $' + totalPagado.toLocaleString('es-CL') + '\n' +
-    '📁 Hoja generada: ' + reportName + '\n' +
-    '🕐 ' + new Date().toLocaleString('es-CL')
-  );
   return reportName;
 }
 
@@ -755,12 +414,6 @@ function addSocio(d, usuario) {
     'Agregar Socio',
     'Nombre: ' + (d.Nombre||'') + ' ' + (d.Apellido||'') + ' | Contrato: ' + (d.TipoContrato||'') + ' | Área: ' + (d.Area||''),
     id
-  );
-  telegramEnviar(
-    '🆕 <b>Nuevo socio registrado</b>\n' +
-    '👤 ' + (d.Nombre || '') + ' ' + (d.Apellido || '') + '\n' +
-    '📋 ' + (d.TipoContrato || '') + ' · ' + (d.Area || '') + '\n' +
-    '📅 Inicio: ' + (d.FechaInicioPuntos || d.FechaIngreso || 'N/A')
   );
   return { ...d, ID: id };
 }
@@ -821,12 +474,6 @@ function registrarBatchAnticipos(lista, usuario) {
       uuid
     );
     const resp = item.responsable ? ' · Resp: ' + item.responsable + (item.areaResponsable ? ' (' + item.areaResponsable + ')' : '') : '';
-    telegramEnviar(
-      '💰 <b>Anticipo registrado</b>\n' +
-      '👤 ' + item.nombre + '\n' +
-      '💵 $' + Number(item.monto).toLocaleString('es-CL') + '\n' +
-      '📅 ' + item.fecha + resp
-    );
   });
 }
 
@@ -845,35 +492,6 @@ function registrarBatchExtras(lista, usuario) {
   });
   sheet.getRange(sheet.getLastRow() + 1, 1, newRows.length, 8).setValues(newRows);
 
-  const ausencias = lista.filter(item => item.tipo && item.tipo.toLowerCase().includes('ausencia'));
-  if (ausencias.length > 0) {
-    const grupos = {};
-    ausencias.forEach(item => {
-      const key = item.nombre + '|' + (item.detalle || item.tipo);
-      if (!grupos[key]) grupos[key] = { nombre: item.nombre, detalle: item.detalle || item.tipo, fechas: [] };
-      grupos[key].fechas.push(item.fecha);
-    });
-    Object.values(grupos).forEach(g => {
-      const fechasOrdenadas = g.fechas.sort();
-      if (fechasOrdenadas.length === 1) {
-        telegramEnviar(
-          '📅 <b>Ausencia registrada</b>\n' +
-          '👤 ' + g.nombre + '\n' +
-          '📋 ' + g.detalle + '\n' +
-          '📅 ' + fechasOrdenadas[0]
-        );
-      } else {
-        telegramEnviar(
-          '🔴 <b>Ausencia múltiple registrada</b>\n' +
-          '👤 ' + g.nombre + '\n' +
-          '📋 ' + g.detalle + '\n' +
-          '📅 Desde: ' + fechasOrdenadas[0] + '\n' +
-          '📅 Hasta: ' + fechasOrdenadas[fechasOrdenadas.length - 1] + '\n' +
-          '📆 Total: ' + fechasOrdenadas.length + ' días'
-        );
-      }
-    });
-  }
 }
 
 function actualizarAnticipo(uuid, fecha, monto, responsable, areaResponsable) {
@@ -1104,13 +722,6 @@ function pingConexion(socioId) {
       if (!prevPing || (now - prevPing) > 300000) {
         const hConex = ss.getSheetByName(HOJA_HISTORIAL_CONEXIONES);
         if (hConex) hConex.appendRow([d[i][0], d[i][1], d[i][4], now, 'LOGIN', '']);
-        telegramEnviar(
-          '🟢 <b>Conexion en sistema</b>\n' +
-          '👤 ' + d[i][1] + ' ' + (d[i][2] || '') + '\n' +
-          '📋 ' + (d[i][4] || '') + '\n' +
-          '🪪 ID: ' + d[i][0] + '\n' +
-          '🕐 ' + Utilities.formatDate(now, tz, 'HH:mm')
-        );
       }
       return;
     }
@@ -1121,7 +732,7 @@ function logoutConexion(socioId) {
   if (!socioId) return;
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  // Limpiar UltimaConexion para que el próximo login siempre notifique por Telegram
+  // Limpiar UltimaConexion: deja la fila del socio sin sesión activa
   const soc = ss.getSheetByName(HOJA_SOCIOS);
   if (soc) {
     const socData = soc.getDataRange().getValues();
@@ -1154,13 +765,6 @@ function logoutConexion(socioId) {
       const entrada = d[i][3] ? new Date(d[i][3]) : null;
       const minutos = entrada ? Math.round((now - entrada) / 60000) : 0;
       const tiempoStr = minutos > 0 ? ' (' + minutos + ' min)' : '';
-      telegramEnviar(
-        '🔴 <b>Desconexion del sistema</b>\n' +
-        '👤 ' + nomLog + '\n' +
-        (areaLog ? '📋 ' + areaLog + '\n' : '') +
-        '🪪 ID: ' + socioId + '\n' +
-        '🕐 ' + Utilities.formatDate(now, ss2.getSpreadsheetTimeZone(), 'HH:mm') + tiempoStr
-      );
       return;
     }
   }

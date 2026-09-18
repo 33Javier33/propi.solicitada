@@ -16,7 +16,6 @@ PWA (Progressive Web App) para socios del Fondo Solidario de Propina del Casino 
 5. [Backend — Google Apps Script](#backend--google-apps-script)
    - [Endpoints GAS](#endpoints-gas)
    - [Hojas de Cálculo (Google Sheets)](#hojas-de-cálculo-google-sheets)
-   - [Integración Telegram](#integración-telegram)
 6. [Service Worker y Caché PWA](#service-worker-y-caché-pwa)
 7. [Despliegue](#despliegue)
 8. [Flujo de Desarrollo](#flujo-de-desarrollo)
@@ -207,8 +206,8 @@ El GAS completo de referencia está en `gas/code.gs`. Los cambios exclusivos de 
 | `getSaldosCierre` | GET | Saldos de cierre / remanentes |
 | `getDiasPartTime` | GET | Días trabajados (socios Part-Time) |
 | `getNotes` | GET | Notas del período (mensajes admin) |
-| `pingConexion` | POST | Heartbeat cada 2 min — actualiza UltimaConexion, Telegram si lleva >5 min inactivo |
-| `logoutConexion` | POST | Registra logout y **borra UltimaConexion** (fuerza Telegram en próximo login) |
+| `pingConexion` | POST | Heartbeat cada 2 min — deja constancia de la conexión en Supabase |
+| `logoutConexion` | POST | Registra el cierre de sesión y **borra UltimaConexion** |
 | `getHistorialConexiones` | GET | Historial de conexiones del socio |
 | `addNote` / `deleteNote` | POST | CRUD de notas admin |
 | `registrarBatchAnticipos` | POST | Registra múltiples anticipos |
@@ -257,15 +256,6 @@ El GAS completo de referencia está en `gas/code.gs`. Los cambios exclusivos de 
 | `HOJA_RETIROS_ANTICIPOS` | `RetirosAnticipos` | Retiros de anticipos registrados |
 | `HOJA_MATERIALES` | `RecaudacionMateriales` | Materiales de recaudación |
 | — | `Anticipos_*` | Hojas dinámicas por período (ej: `Anticipos_2025-Enero`) para historial completo |
-
-### Integración Telegram
-
-El bot de Telegram se gestiona enteramente en `gas/code.gs`:
-
-- **Login**: al hacer `pingConexion`, si `(now - UltimaConexion) > 300000ms (5 min)`, envía notificación al bot
-- **Logout**: `logoutConexion` borra `UltimaConexion` → garantiza que el próximo login siempre notifique
-- **Comandos admin vía Telegram**: `/recaudacion`, `/montosDiarios`, `/sala`, `/online`, `/anticipos`, `/buscar [nombre]`, `/historial [nombre]`, `/resumen`
-- **doTelegramWebhook**: recibe eventos del webhook de Telegram y enruta a las funciones correspondientes
 
 ---
 
@@ -352,6 +342,17 @@ git push -u origin main
 ---
 
 ## Historial de Cambios
+
+#### 2026-09-18 — Telegram eliminado por completo (SW v174)
+
+- **Se retira la integración con Telegram de las 3 apps.** No queda código que envíe ni reciba datos por esa vía.
+- **Lo más importante estaba acá, en el front.** `pingConexion` y `logoutConexion` ya escribían en Supabase, pero **además reenviaban la llamada al GAS** (`_origFetch` / `_origBeacon`) *solo* para que el script mandara el aviso al chat. Eso significaba que cada conexión, cada latido cada 2 minutos y cada cierre de sesión de cada socio **salían del navegador hacia un servidor externo**. Ese reenvío se eliminó.
+- **Medido antes y después** con el mismo arnés de pruebas: antes, `pingConexion` + `logoutConexion` + el `sendBeacon` de cierre producían **3 salidas a la red**; ahora producen **0**, y el registro en Supabase se mantiene igual.
+- **En `gas/code.gs`** se quitó el token, el chat_id, las funciones de envío, el **webhook de entrada** (`doTelegramWebhook` y su despacho en `doPost`), los 8 comandos de consulta y los 9 avisos automáticos.
+- **No se pierde nada visible.** Lo que ve el administrador en su centro de actividad lo escribe `logActividad()` en la tabla `conexiones_log` de Supabase, que nunca pasó por Telegram — incluida la desconexión.
+- **Archivos:** `supabase-api.js`, `app.js`, `gas/code.gs`, `README.md`.
+
+> ⚠️ **Pendiente fuera del repositorio:** el token del bot estaba escrito en `gas/code.gs` y quedó en el historial de git. **Hay que revocarlo en @BotFather** — borrar el archivo no lo invalida. Ver el detalle en el README de `diario.propi`.
 
 #### 2026-09-17 — El logotipo de marca, a un tamaño discreto (SW v173)
 

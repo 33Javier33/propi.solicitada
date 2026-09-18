@@ -12,7 +12,7 @@ const SUPABASE_KEY_REC_V    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJz
 const dbSV = supabase.createClient(SUPABASE_URL_SOCIOS_V, SUPABASE_KEY_SOCIOS_V);
 const dbRV = supabase.createClient(SUPABASE_URL_REC_V, SUPABASE_KEY_REC_V);
 
-// ── REGISTRO DE ACTIVIDAD (lo ve socios-comicion, estilo Telegram) ──
+// ── REGISTRO DE ACTIVIDAD (lo ve socios-comicion) ──
 // Deja constancia con fecha y hora de: (1) cuando el socio se conecta a la app
 // y (2) cuando entra a "Recaudación del Día". Evita repetir el mismo evento
 // dentro de una ventana corta para no llenar el registro.
@@ -646,22 +646,19 @@ async function _sociosHandler(url, options) {
             return _mockRes({ success: true });
         }
 
-        // Conexión activa del socio — escribe en Supabase Y notifica GAS (Telegram)
+        // Conexión activa del socio — queda en Supabase y no sale a ningún lado más.
         case 'pingConexion': {
             dbSV.from('historial_conexiones').insert({
                 id: crypto.randomUUID(),
                 usuario: String(b.socioId || ''),
                 area: 'app', ip: null, device_id: null
             }).then(() => {}).catch(() => {});
-            // Pasar al GAS para que envíe la notificación Telegram
-            _origFetch(url, options).catch(() => {});
             return _mockRes({ success: true });
         }
 
-        // Logout (también manejado por sendBeacon)
+        // Logout (también manejado por sendBeacon). Lo que ve el administrador
+        // en el centro de actividad lo escribe logActividad('desconectado').
         case 'logoutConexion':
-            // Pasar al GAS para notificación Telegram de desconexión
-            _origFetch(url, options).catch(() => {});
             return _mockRes({ success: true });
 
         // Guardar el RUT del socio (para certificados/informes). Se refleja en socios-comicion.
@@ -1047,8 +1044,7 @@ navigator.sendBeacon = function(url, data) {
                 }).then(() => {}).catch(() => {});
             }
         } catch(e) {}
-        // También dejar pasar al GAS para la notificación Telegram
-        _origBeacon(url, data);
+        // El beacon NO se reenvía: todo queda en Supabase.
         return true;
     }
     return _origBeacon(url, data);

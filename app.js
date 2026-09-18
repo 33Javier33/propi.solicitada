@@ -541,7 +541,7 @@
             logoutConexion();
         } else {
             // Al volver a la app: revisar PRIMERO la inactividad. Si ya expiró (≥15 min),
-            // cerrar la sesión SIN marcar "conectado" en Telegram (se desconectó, no se reconectó).
+            // cerrar la sesión SIN marcar "conectado" (se desconectó, no se reconectó).
             const last = Number(localStorage.getItem(_INACT_KEY) || 0);
             if (last && (Date.now() - last) >= INACTIVITY_LIMIT) {
                 _checkInactivity(); // cierra la sesión (envía la desconexión)
@@ -3868,7 +3868,7 @@
             if (typeof logActividadReset === 'function') setTimeout(logActividadReset, 300);
         } catch (e) {}
         try { if (typeof recPresSalir === 'function') recPresSalir(); } catch (e) {}
-        // Avisar la desconexión (Telegram) ANTES de limpiar el usuario
+        // Registrar la desconexión ANTES de limpiar el usuario
         try { logoutConexion(); } catch(e) {}
         try { localStorage.removeItem(_INACT_KEY); } catch(e) {}
         // Al cerrar sesión (inactividad o manual) se exige el PIN de nuevo: borrar el PIN de sesión
