@@ -343,6 +343,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-25 — La versión, sobre el logotipo — y mostrando la correcta (SW v176)
+
+- **El número va ahora SOBRE el logotipo**, en una chapita justo bajo el dibujo. Primero quedó encima de la esquina y tapaba la «e» de «Interactive»; se bajó para que se lea como parte del logo sin pisarlo.
+- **Corregido un error de la versión anterior de este dato.** Leía las cachés desde la página y se quedaba con **la más alta**. En socios-comicion y propi.solicitada la versión nueva se instala pero queda **en espera** hasta que se aprieta «Actualizar», así que conviven dos cachés: el número mostraba la que **todavía no estaba corriendo**. Justo la sensación de «no se actualizó» al revés.
+- **Ahora se le pregunta al Service Worker que controla la página** —cada uno responde con su propia caché—, que es el único dato que no se puede confundir.
+- **Tres respaldos, en orden:** si el Service Worker es anterior a este cambio y no sabe responder, se usa la caché **más vieja** presente, que es la que manda en ese caso; si no hay ninguna, el número del código. Nunca se muestra un número más alto que el que está corriendo.
+- **Verificación:** 11 comprobaciones — las cuatro apps muestran su versión, el número queda sobre el logo, el caso de la versión en espera (muestra la que controla, no la que espera), la primera visita sin Service Worker, y el Service Worker viejo que no responde (muestra la vieja, no miente).
+- **Archivos:** `version.js`, `index.html`, `app.css`, `sw.js`.
+
 #### 2026-09-25 — La versión, junto a la marca (SW v175)
 
 - **El número no está escrito a mano: se lee de la caché que el Service Worker tiene activa en este celular.** Esa es la diferencia que importa — lo que ves es la versión que *de verdad* estás usando, no la que dice el código. Si el celular todavía te sirve la anterior, el número te lo dice.

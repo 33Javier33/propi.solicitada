@@ -1088,6 +1088,24 @@
     display: block;
 }
 
+/* ── La versión, encima del logotipo de la marca ──
+   El número va pegado al logo y no suelto por ahí: es el lugar donde se
+   busca "¿qué versión tengo?". El contenedor se ajusta al ancho del logo
+   (width:fit-content) para que la chapita quede sobre la imagen y no en el
+   borde del bloque que la contiene. */
+.marca-wrap { position: relative; display: block; width: fit-content; margin-left: auto; margin-right: auto; padding-bottom: 9px; }
+.marca-wrap .app-version {
+    /* Justo BAJO el logotipo, no encima: puesta sobre la esquina tapaba la
+       "e" final de "Interactive". Así sigue leyéndose como parte del logo. */
+    position: absolute; right: 0; bottom: -1px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #93c5fd;
+    font-size: 9px; font-weight: 800; letter-spacing: 0.04em;
+    line-height: 1; padding: 3px 6px; border-radius: 7px;
+    border: 1px solid rgba(147, 197, 253, 0.35);
+    pointer-events: none;
+}
+
     </style>
     <!-- Aplicar tema guardado antes del render para evitar parpadeo -->
     <script>
@@ -1337,8 +1355,8 @@
 
             <!-- Marca -->
             <div style="text-align:center;margin-bottom:28px;">
-                <img src="img/marca/cpn-marca.png?v=2026e" alt="Carlos P. Nauto Interactive" class="marca-logo marca-logo-panel">
-                <div style="font-size:12px;color:#72787d;font-weight:500;margin-top:2px;letter-spacing:0.04em;">SISTEMA PROFESIONAL DE GESTIÓN · 2026 · <span class="app-version">—</span></div>
+                <div class="marca-wrap"><img src="img/marca/cpn-marca.png?v=2026e" alt="Carlos P. Nauto Interactive" class="marca-logo marca-logo-panel"><span class="app-version">—</span></div>
+                <div style="font-size:12px;color:#72787d;font-weight:500;margin-top:2px;letter-spacing:0.04em;">SISTEMA PROFESIONAL DE GESTIÓN · 2026</div>
             </div>
 
             <!-- Divisor -->
@@ -1507,8 +1525,8 @@
 
     <!-- MARCA (pie del login) -->
     <div style="position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom, 0px) + 12px);display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:none;">
-        <img src="img/marca/cpn-marca.png?v=2026e" alt="Carlos P. Nauto Interactive" class="marca-logo marca-logo-foot">
-        <span class="text-[9px] text-lm-muted" style="letter-spacing:0.06em;">© 2026 · <span class="app-version">—</span> · Todos los derechos reservados</span>
+        <div class="marca-wrap"><img src="img/marca/cpn-marca.png?v=2026e" alt="Carlos P. Nauto Interactive" class="marca-logo marca-logo-foot"><span class="app-version">—</span></div>
+        <span class="text-[9px] text-lm-muted" style="letter-spacing:0.06em;">© 2026 · Todos los derechos reservados</span>
     </div>
 </div>
 
@@ -2647,7 +2665,7 @@
         </div>
         <!-- Crédito -->
         <button onclick="toggleAbout(true)" style="width:100%;padding:2px 0 6px;background:none;border:none;cursor:pointer;">
-            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">Carlos P. Nauto Interactive® · 2026 · <span class="app-version">—</span></span>
+            <span style="font-size:9px;color:#c2c7cc;font-weight:600;letter-spacing:0.06em;">Carlos P. Nauto Interactive® · 2026</span>
         </button>
     </nav>
 

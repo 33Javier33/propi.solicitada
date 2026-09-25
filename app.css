@@ -1032,3 +1032,21 @@
     border: 1.5px solid currentColor;
     display: block;
 }
+
+/* ── La versión, encima del logotipo de la marca ──
+   El número va pegado al logo y no suelto por ahí: es el lugar donde se
+   busca "¿qué versión tengo?". El contenedor se ajusta al ancho del logo
+   (width:fit-content) para que la chapita quede sobre la imagen y no en el
+   borde del bloque que la contiene. */
+.marca-wrap { position: relative; display: block; width: fit-content; margin-left: auto; margin-right: auto; padding-bottom: 9px; }
+.marca-wrap .app-version {
+    /* Justo BAJO el logotipo, no encima: puesta sobre la esquina tapaba la
+       "e" final de "Interactive". Así sigue leyéndose como parte del logo. */
+    position: absolute; right: 0; bottom: -1px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #93c5fd;
+    font-size: 9px; font-weight: 800; letter-spacing: 0.04em;
+    line-height: 1; padding: 3px 6px; border-radius: 7px;
+    border: 1px solid rgba(147, 197, 253, 0.35);
+    pointer-events: none;
+}
