@@ -343,6 +343,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-25 — La versión, junto a la marca (SW v175)
+
+- **El número no está escrito a mano: se lee de la caché que el Service Worker tiene activa en este celular.** Esa es la diferencia que importa — lo que ves es la versión que *de verdad* estás usando, no la que dice el código. Si el celular todavía te sirve la anterior, el número te lo dice.
+- Va **junto a la marca**: en la ficha «Acerca de» bajo el logotipo, en la línea de «Carlos P. Nauto Interactive® · 2026» y al pie del login. El módulo pinta todo elemento con la clase `app-version`, así que sumar el dato en otro lugar es poner un `<span class="app-version">`.
+- **Un solo origen para el número.** Antes estaba escrito a mano en el HTML y además en el nombre de la caché del Service Worker: dos lugares que podían discrepar. Ahora manda el Service Worker.
+- **Casos cubiertos:** sin Service Worker (primera visita, incógnito) cae al número del código en vez de dejar un hueco; con la caché vieja y la nueva conviviendo muestra **la más alta**, que es la que va a quedar; y filtra por el prefijo de su propia app. Se repinta solo al activarse el Service Worker, sin recargar.
+- Es el mismo módulo que en socios-comicion, Horarios y diario.propi: las cuatro apps muestran su versión igual.
+- **Archivos:** `version.js` (nuevo), `index.html`, `sw.js`.
+
 #### 2026-09-18 — Telegram eliminado por completo (SW v174)
 
 - **Se retira la integración con Telegram de las 3 apps.** No queda código que envíe ni reciba datos por esa vía.
