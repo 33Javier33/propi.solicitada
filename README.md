@@ -343,6 +343,11 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-25 — Comprobación previa al despliegue
+
+- Esta app **no estaba afectada**: fue la única que siguió desplegando, porque no tenía la clave inválida que rompió a las otras dos.
+- Se agregó igual `revisar-despliegue.py`, que comprueba que `vercel.json` solo use claves que Vercel acepta y que todo archivo local que carga el HTML tenga no-caché o `?v=`.
+
 #### 2026-09-25 — Por qué el número no cambiaba: el archivo nunca llegaba (SW v177)
 
 - **El arreglo de ayer nunca llegó a los teléfonos.** `version.js` **no estaba en la lista de no-caché** de `vercel.json` y además se publicó dos veces con la misma dirección (`?v=1`): el navegador se quedó con la copia del primer día —la que tenía el error de mostrar la versión en espera— y nunca volvió a pedir el archivo. Por eso el número no cambiaba.
