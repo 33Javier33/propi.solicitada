@@ -343,6 +343,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-25 — Por qué el número no cambiaba: el archivo nunca llegaba (SW v177)
+
+- **El arreglo de ayer nunca llegó a los teléfonos.** `version.js` **no estaba en la lista de no-caché** de `vercel.json` y además se publicó dos veces con la misma dirección (`?v=1`): el navegador se quedó con la copia del primer día —la que tenía el error de mostrar la versión en espera— y nunca volvió a pedir el archivo. Por eso el número no cambiaba.
+- **Dos correcciones, porque hacía falta cada una:** se agregó `version.js` a las reglas de no-caché (la cabecera sola no alcanza, porque no se aplica a una copia que el navegador ya considera fresca) y se cambió la dirección a `?v=3`, que es lo que la obliga a pedirla de nuevo.
+- **Auditoría de TODO lo que carga cada app** contra sus reglas de caché. Aparecieron más archivos sin protección, que se agregaron: `manifest2.json`, `index2.html` y `sw2.js` en socios-comicion; `manifest.json`, `version.js`, `/icons/` e `/img/` en propi.solicitada. **Resultado ahora: 53 recursos revisados en las cuatro apps, 0 sin protección.**
+- Se comprobó además que los cuatro Service Workers piden a la red **antes** que a su propia caché, así que ninguno puede quedarse sirviendo un archivo viejo estando en línea.
+
 #### 2026-09-25 — La versión, sobre el logotipo — y mostrando la correcta (SW v176)
 
 - **El número va ahora SOBRE el logotipo**, en una chapita justo bajo el dibujo. Primero quedó encima de la esquina y tapaba la «e» de «Interactive»; se bajó para que se lea como parte del logo sin pisarlo.
