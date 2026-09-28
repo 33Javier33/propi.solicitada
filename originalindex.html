@@ -1431,8 +1431,8 @@
             <div class="w-20 h-20 rounded-3xl bg-lm-primary/8 border border-lm-primary/15 mx-auto mb-5 flex items-center justify-center">
                 <span class="material-symbols-outlined text-4xl text-lm-primary">account_balance</span>
             </div>
-            <h1 class="font-headline text-2xl font-bold text-lm-primary mb-1">Vincular Cuenta</h1>
-            <p class="text-sm text-lm-muted">Ingrese sus datos para activar el dispositivo</p>
+            <h1 id="setupTitulo" class="font-headline text-2xl font-bold text-lm-primary mb-1">Vincular Cuenta</h1>
+            <p id="setupSubtitulo" class="text-sm text-lm-muted">Ingrese sus datos para activar el dispositivo</p>
         </div>
         <div class="space-y-3">
             <div>
@@ -1443,6 +1443,12 @@
                 <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">RUT</label>
                 <input type="text" id="setupRUT" placeholder="Ej: 12.345.678-9" class="w-full rounded-2xl py-4 px-5 font-medium text-base text-center tracking-wider">
             </div>
+            <!-- Solo se muestra cuando el socio entra por QR y su ficha no tiene correo -->
+            <div id="setupCorreoBloque" style="display:none;">
+                <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">Correo</label>
+                <input type="email" id="setupCorreo" inputmode="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" class="w-full rounded-2xl py-4 px-5 font-medium text-base">
+            </div>
+            <div id="qr-aviso" style="display:none;font-size:12px;font-weight:600;line-height:1.35;background:#f0f9ff;border:1px solid #bae6fd;border-radius:14px;padding:10px 12px;"></div>
             <div>
                 <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">Crear PIN</label>
                 <div style="position:relative;">
@@ -2673,6 +2679,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
+<script src="qr-entrada.js"></script>
 <script>
     const SCRIPT_URL_SOCIOS = 'https://script.google.com/macros/s/AKfycbyr447pMQtsKoBfp8qTcB1uyE3rORhgPPmZM6Fgia3BgmIvtlZ_h04uGZrmx_HwubHQ/exec';
     const SCRIPT_URL_RECAUDACIONES = 'https://script.google.com/macros/s/AKfycbz_kCb4aEe437zHGbRqnjCibw1NtAqfCbTNmsVPn9jaZOPBFaZ6-FwmiTLqVxq39X1P/exec';
@@ -2756,7 +2763,16 @@
             });
         }
 
-        checkSecurity();
+        // Entrada por QR: si la URL trae un código válido, esta función toma el
+        // control de la pantalla de ingreso (pregunta a qué app entrar, canjea
+        // el código y rellena lo que ya está en la ficha). Si no hay código, o
+        // el código no sirve, sigue el ingreso normal.
+        let _qrTomoElControl = false;
+        try {
+            if (typeof qrIntentarEntrada === 'function') _qrTomoElControl = await qrIntentarEntrada();
+        } catch (e) { console.warn('[QR] ', e && e.message); }
+
+        if (!_qrTomoElControl) checkSecurity();
 
         // ── 1. Intentar desde caché primero (instantáneo) ────────
         const cached = getSociosFromCache();
@@ -2921,7 +2937,46 @@
         }
         const rutNormalizado = formatRUT(rutRaw);
         const u = allSocios.find(s => String(s.ID).toUpperCase() === id);
+
+        // El RUT tiene que ser el del socio, no solo uno bien formado.
+        // Antes solo se validaba el FORMATO y nunca se comparaba con el
+        // guardado: con un ID válido —y los IDs son adivinables— cualquiera
+        // podía vincularse como ese socio y crearle el PIN.
+        //
+        // Si el socio todavía no tiene RUT en su ficha no hay contra qué
+        // comparar, así que se acepta y queda registrado: es el caso de la
+        // mayoría, y el QR es el camino para ir completándolos.
+        if (u) {
+            const rutFicha = String(u.Rut || u.rut || '').trim();
+            if (rutFicha && cleanRUT(rutFicha) !== cleanRUT(rutNormalizado)) {
+                alert('El RUT no corresponde a ese ID de socio.\n\n'
+                    + 'Revísalo, o pide tu QR de acceso en la administración.');
+                document.getElementById('setupRUT').focus();
+                return;
+            }
+        }
+
+        // Si entró por QR y su ficha no tenía correo, se pide acá y se valida
+        // antes de vincular: después de location.reload() ya no hay dónde pedirlo.
+        let correoNuevo = '';
+        if (typeof qrEnCurso === 'function' && qrEnCurso()) {
+            const bloque = document.getElementById('setupCorreoBloque');
+            if (bloque && bloque.style.display !== 'none') {
+                correoNuevo = typeof qrCorreoEscrito === 'function' ? qrCorreoEscrito() : '';
+                if (!correoNuevo || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correoNuevo)) {
+                    alert('Escribe un correo válido.\nEjemplo: tucorreo@ejemplo.com');
+                    document.getElementById('setupCorreo').focus();
+                    return;
+                }
+            }
+        }
+
         if (u && pin.length === 4) {
+            // Lo que completó el socio se guarda ANTES de recargar. La función de
+            // Supabase solo rellena campos vacíos, así que no puede pisar la ficha.
+            if (typeof qrGuardarDatosCompletados === 'function' && typeof qrEnCurso === 'function' && qrEnCurso()) {
+                await qrGuardarDatosCompletados(rutNormalizado, correoNuevo);
+            }
             const pinHash = await hashPin(pin, u.ID);
             // PIN nunca en localStorage — solo hash para verificación en nueva sesión
             localStorage.setItem('visor_secure_auth', JSON.stringify({id:u.ID, rut:rutNormalizado, name:u.Nombre, pinHash}));

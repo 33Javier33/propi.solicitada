@@ -343,6 +343,23 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-28 — Entrar con el QR que emite la administración (SW v179)
+
+El QR que se genera en socios-comicion abre esta app con los datos del socio ya puestos. Al escanearlo pregunta a qué app quiere entrar —esta o diario.propi— y sigue desde ahí.
+
+- **El QR no trae los datos**, trae un código opaco (`?qr=<32 hex>`) que se canjea contra Supabase. Así caduca, se puede anular, y ni el nombre ni el RUT viajan en la URL.
+- **Lo que ya está en la ficha llega puesto y de solo lectura** (el ID siempre; el RUT cuando lo tiene). **Lo que falta se pide**, y se guarda de vuelta en la ficha. De 67 socios, 46 no tienen RUT y 50 no tienen correo, así que pedirlos es el caso normal: el QR va completando la base sola.
+- La función de Supabase que guarda **solo rellena campos vacíos**: si el socio se equivoca al tipear, no puede pisar un dato que la administración ya cargó.
+- Si el código está vencido, ya usado o no existe, **lo dice y deja el ingreso normal disponible**; no queda la pantalla a medio rellenar.
+
+**Un problema que apareció al probarlo, y que habría roto justo el caso que importa:** en la **primera visita** el Service Worker se instala, toma el control y la página **se recarga sola** (`index.html`, `controllerchange`). El código ya había salido de la URL, así que esa recarga se lo llevaba — y la primera visita es exactamente la del socio que estrena la app con su QR. Ahora el código se guarda en `sessionStorage` en cuanto se lee y de ahí se recupera tras la recarga; se olvida en cuanto se canjea, para no reintentar un código ya usado. `sessionStorage` es el lugar correcto: sobrevive la recarga y muere al cerrar la pestaña.
+
+**Además, la vinculación ahora compara el RUT.** Antes `handleSetup` buscaba al socio **solo por ID** y del RUT validaba únicamente el *formato*, nunca lo comparaba con el guardado (`app.js` 241 y 247). Como los IDs son adivinables (`SOC-…`), con un ID válido cualquiera podía vincularse como ese socio y crearle el PIN. Ahora, **si el socio tiene RUT en su ficha, tiene que coincidir**. Si no lo tiene no hay contra qué comparar, así que se acepta y queda registrado — es el caso de la mayoría, y el QR es el camino para ir completándolos.
+
+**Verificación:** 19 comprobaciones del escaneo (elección de app, que el código salga de la URL antes de canjear nada, socio sin datos vs. socio completo, correo inválido rechazado, que lo completado se mande con el código, código vencido) y 6 del RUT: con un RUT ajeno no vincula y lo dice; con el suyo sí; y si su ficha no tiene RUT, se acepta el que escriba.
+
+**Archivos:** `qr-entrada.js` (nuevo), `app.js`, `index.html`, `sw.js`, `version.js`, `vercel.json`, `originalindex.html` (regenerado).
+
 #### 2026-09-28 — El navegador pedía actualizar la contraseña en cada acción (SW v178)
 
 - **Síntoma:** el navegador preguntaba «¿Actualizar la contraseña?» en **cada acción** —agregar un billete en el arqueo, abrir un modal, cualquier cosa—, no solo al entrar.

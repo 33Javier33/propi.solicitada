@@ -377,8 +377,8 @@
             <div class="w-20 h-20 rounded-3xl bg-lm-primary/8 border border-lm-primary/15 mx-auto mb-5 flex items-center justify-center">
                 <span class="material-symbols-outlined text-4xl text-lm-primary">account_balance</span>
             </div>
-            <h1 class="font-headline text-2xl font-bold text-lm-primary mb-1">Vincular Cuenta</h1>
-            <p class="text-sm text-lm-muted">Ingrese sus datos para activar el dispositivo</p>
+            <h1 id="setupTitulo" class="font-headline text-2xl font-bold text-lm-primary mb-1">Vincular Cuenta</h1>
+            <p id="setupSubtitulo" class="text-sm text-lm-muted">Ingrese sus datos para activar el dispositivo</p>
         </div>
         <div class="space-y-3">
             <div>
@@ -389,6 +389,12 @@
                 <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">RUT</label>
                 <input type="text" id="setupRUT" placeholder="Ej: 12.345.678-9" class="w-full rounded-2xl py-4 px-5 font-medium text-base text-center tracking-wider">
             </div>
+            <!-- Solo se muestra cuando el socio entra por QR y su ficha no tiene correo -->
+            <div id="setupCorreoBloque" style="display:none;">
+                <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">Correo</label>
+                <input type="email" id="setupCorreo" inputmode="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" class="w-full rounded-2xl py-4 px-5 font-medium text-base">
+            </div>
+            <div id="qr-aviso" style="display:none;font-size:12px;font-weight:600;line-height:1.35;background:#f0f9ff;border:1px solid #bae6fd;border-radius:14px;padding:10px 12px;"></div>
             <div>
                 <label class="text-[11px] text-lm-muted font-semibold uppercase tracking-wider ml-1 mb-1.5 block">Crear PIN</label>
                 <div style="position:relative;">
@@ -1619,6 +1625,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
+<script src="qr-entrada.js"></script>
 <script src="app.js"></script>
 <script src="version.js?v=3"></script>
 

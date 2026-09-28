@@ -80,7 +80,16 @@
             });
         }
 
-        checkSecurity();
+        // Entrada por QR: si la URL trae un código válido, esta función toma el
+        // control de la pantalla de ingreso (pregunta a qué app entrar, canjea
+        // el código y rellena lo que ya está en la ficha). Si no hay código, o
+        // el código no sirve, sigue el ingreso normal.
+        let _qrTomoElControl = false;
+        try {
+            if (typeof qrIntentarEntrada === 'function') _qrTomoElControl = await qrIntentarEntrada();
+        } catch (e) { console.warn('[QR] ', e && e.message); }
+
+        if (!_qrTomoElControl) checkSecurity();
 
         // ── 1. Intentar desde caché primero (instantáneo) ────────
         const cached = getSociosFromCache();
@@ -245,7 +254,46 @@
         }
         const rutNormalizado = formatRUT(rutRaw);
         const u = allSocios.find(s => String(s.ID).toUpperCase() === id);
+
+        // El RUT tiene que ser el del socio, no solo uno bien formado.
+        // Antes solo se validaba el FORMATO y nunca se comparaba con el
+        // guardado: con un ID válido —y los IDs son adivinables— cualquiera
+        // podía vincularse como ese socio y crearle el PIN.
+        //
+        // Si el socio todavía no tiene RUT en su ficha no hay contra qué
+        // comparar, así que se acepta y queda registrado: es el caso de la
+        // mayoría, y el QR es el camino para ir completándolos.
+        if (u) {
+            const rutFicha = String(u.Rut || u.rut || '').trim();
+            if (rutFicha && cleanRUT(rutFicha) !== cleanRUT(rutNormalizado)) {
+                alert('El RUT no corresponde a ese ID de socio.\n\n'
+                    + 'Revísalo, o pide tu QR de acceso en la administración.');
+                document.getElementById('setupRUT').focus();
+                return;
+            }
+        }
+
+        // Si entró por QR y su ficha no tenía correo, se pide acá y se valida
+        // antes de vincular: después de location.reload() ya no hay dónde pedirlo.
+        let correoNuevo = '';
+        if (typeof qrEnCurso === 'function' && qrEnCurso()) {
+            const bloque = document.getElementById('setupCorreoBloque');
+            if (bloque && bloque.style.display !== 'none') {
+                correoNuevo = typeof qrCorreoEscrito === 'function' ? qrCorreoEscrito() : '';
+                if (!correoNuevo || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correoNuevo)) {
+                    alert('Escribe un correo válido.\nEjemplo: tucorreo@ejemplo.com');
+                    document.getElementById('setupCorreo').focus();
+                    return;
+                }
+            }
+        }
+
         if (u && pin.length === 4) {
+            // Lo que completó el socio se guarda ANTES de recargar. La función de
+            // Supabase solo rellena campos vacíos, así que no puede pisar la ficha.
+            if (typeof qrGuardarDatosCompletados === 'function' && typeof qrEnCurso === 'function' && qrEnCurso()) {
+                await qrGuardarDatosCompletados(rutNormalizado, correoNuevo);
+            }
             const pinHash = await hashPin(pin, u.ID);
             // PIN nunca en localStorage — solo hash para verificación en nueva sesión
             localStorage.setItem('visor_secure_auth', JSON.stringify({id:u.ID, rut:rutNormalizado, name:u.Nombre, pinHash}));
