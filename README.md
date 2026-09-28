@@ -343,6 +343,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-28 — El navegador pedía actualizar la contraseña en cada acción (SW v178)
+
+- **Síntoma:** el navegador preguntaba «¿Actualizar la contraseña?» en **cada acción** —agregar un billete en el arqueo, abrir un modal, cualquier cosa—, no solo al entrar.
+- **Causa:** al entrar bien, el campo del PIN **nunca se vaciaba**. Quedaba en el HTML con el PIN adentro, escondido dentro del overlay del login. El gestor de contraseñas del navegador re-evalúa los campos `type="password"` ante cualquier cambio de la página y, como ya tenía una credencial guardada para el sitio, salía a ofrecer actualizarla una y otra vez. El `autocomplete="off"` que ya tenía no sirve para esto: los gestores lo ignoran para el aviso de guardar.
+- **Arreglo:** al entrar, el campo se vacía y deja de ser `type="password"`; al cerrar sesión vuelve a serlo, que es cuando de verdad se usa. **Mientras usas la app no queda ningún campo de contraseña en la página**, así que el navegador no tiene nada que ofrecer.
+- **Los otros 7 PIN de la app** —configuración, cambio de clave, firma de certificados, borrar un desglose, clave de recuperación— pasaron a ser texto enmascarado con CSS (`.campo-secreto`). Se ven igual de ocultos, pero el navegador no los confunde con la clave del sitio. El único `type="password"` que queda es el del login, que es el que corresponde.
+- **Se revisó la misma falla en las otras apps:** diario.propi y propi.solicitada la tenían igual y quedaron arregladas. Horarios no la tiene, porque usa teclado numérico en vez de un campo.
+- **Verificación:** 9 comprobaciones — antes de entrar hay un campo de contraseña, ya dentro hay **cero**, el PIN queda vacío, los 7 campos internos son texto y se ven ocultos, y al cerrar sesión el login vuelve a ser contraseña.
+
 #### 2026-09-25 — Comprobación previa al despliegue
 
 - Esta app **no estaba afectada**: fue la única que siguió desplegando, porque no tenía la clave inválida que rompió a las otras dos.

@@ -2933,6 +2933,15 @@
 
     // Completa el ingreso una vez validada la identidad (PIN o huella).
     async function _completarIngreso(auth) {
+        // Los campos de PIN se vacían y dejan de ser `type="password"` mientras
+        // se usa la app. Si quedan con valor, el gestor de contraseñas del
+        // navegador los re-evalúa ante cualquier cambio de la página y sale a
+        // preguntar "¿Actualizar la contraseña?" en cada acción. Vuelven a ser
+        // contraseña al cerrar sesión, que recarga la página.
+        ['fastPIN', 'setupPIN'].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) { el.value = ''; el.type = 'text'; }
+        });
         // ── Si ya tenemos socios en memoria o caché → entrar ya ──
         if (allSocios.length === 0) {
             const cached = getSociosFromCache();
