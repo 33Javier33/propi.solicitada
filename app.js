@@ -5222,10 +5222,26 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
               </div>`
         },
         {
+            icon: 'qr_code_2',
+            color: '#0ea5e9',
+            title: 'Entrar con el QR de la administración',
+            body: 'Si la administración te entregó un <b>QR</b>, es el camino más corto para dejar tu cuenta lista.<br><br>📷 <b>Escanéalo</b> con la cámara de tu teléfono, como cualquier código.<br><br>📱 Te pregunta <b>a qué app quieres entrar</b>: esta o el Diario de Recaudación. El mismo código sirve una vez en cada una.<br><br>✅ Tus datos llegan <b>ya puestos</b>: tu ID, y tu RUT si la administración lo tenía. Lo que falte te lo pide una sola vez y queda guardado en tu ficha. Solo tienes que <b>crear tu PIN</b>.<br><br>🔒 Ese código es <b>tuyo</b>: quien lo tenga puede entrar como tú. No lo reenvíes ni lo dejes a la vista. Vence a los 3 días.',
+            preview: `
+              <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:18px;text-align:center;">
+                <div style="width:44px;height:44px;border-radius:13px;background:rgba(14,165,233,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><span class="material-symbols-outlined" style="font-size:22px;color:#0ea5e9">qr_code_2</span></div>
+                <div style="font-size:13px;font-weight:800;color:#001723;margin-bottom:3px;">Hola, Isaac</div>
+                <div style="font-size:10px;color:#94a3b8;margin-bottom:12px;">Completa lo que falta y crea tu PIN</div>
+                <div style="background:#f1f5f9;border:1px solid #c2c7cc;border-radius:10px;padding:8px;font-size:11px;color:#64748b;text-align:left;margin-bottom:6px;">ID &nbsp;·&nbsp; SOC-014 <span style="float:right;font-size:13px;">🔒</span></div>
+                <div style="background:#f1f5f9;border:1px solid #c2c7cc;border-radius:10px;padding:8px;font-size:11px;color:#64748b;text-align:left;margin-bottom:6px;">RUT &nbsp;·&nbsp; 12.345.678-9 <span style="float:right;font-size:13px;">🔒</span></div>
+                <div style="background:#fff;border:2px solid #0ea5e9;border-radius:10px;padding:8px;font-size:11px;color:#94a3b8;text-align:left;margin-bottom:10px;">Crear PIN &nbsp;·&nbsp; ••••</div>
+                <div style="background:#001723;border-radius:12px;padding:10px;font-size:12px;font-weight:700;color:#fff;">Activar Dispositivo</div>
+              </div>`
+        },
+        {
             icon: 'badge',
             color: '#264b5f',
             title: '¿Por qué me pidieron el RUT?',
-            body: 'La primera vez que abres la app te pedimos tu <b>RUT chileno</b>. Es un paso rápido y sirve para dos cosas importantes:<br><br>🔑 <b>Recuperar tu PIN:</b> si algún día lo olvidas, con tu RUT podrás recuperar el acceso.<br><br>📜 <b>Tus certificados:</b> el RUT se usa para generar tus certificados oficiales del Fondo con tus datos correctos.<br><br>Se guarda de forma segura. Una vez ingresado, <b>no vuelve a aparecer</b>. Si tienes algún problema, la administración también puede registrarlo por ti en Gestión de Socios.',
+            body: 'La primera vez que abres la app te pedimos tu <b>RUT chileno</b>. Es un paso rápido y sirve para dos cosas importantes:<br><br>🔑 <b>Recuperar tu PIN:</b> si algún día lo olvidas, con tu RUT podrás recuperar el acceso.<br><br>📜 <b>Tus certificados:</b> el RUT se usa para generar tus certificados oficiales del Fondo con tus datos correctos.<br><br>Se guarda de forma segura. Una vez ingresado, <b>no vuelve a aparecer</b>.<br><br>⚠️ <b>Tiene que ser el tuyo.</b> Si la administración ya registró tu RUT, el que escribas debe coincidir: es lo que impide que otra persona vincule tu cuenta sabiendo solo tu ID. Si no coincide, pide tu <b>QR de acceso</b> en la administración.',
             preview: `
               <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:18px;">
                 <div style="width:44px;height:44px;border-radius:13px;background:rgba(38,75,95,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><span class="material-symbols-outlined" style="font-size:22px;color:#264b5f">badge</span></div>

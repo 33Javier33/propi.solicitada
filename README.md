@@ -343,6 +343,18 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-09-29 — La guía ahora explica el QR y el RUT (SW v180)
+
+La guía de bienvenida pasa de **23 a 24 diapositivas**.
+
+**Nueva: «Entrar con el QR de la administración».** Explica escanear con la cámara, que pregunta a qué app entrar —esta o el Diario—, que el mismo código sirve una vez en cada una, y que los datos llegan puestos y solo hay que crear el PIN. Con la advertencia clara: **quien tenga ese código puede entrar como tú**, no lo reenvíes, y vence a los 3 días.
+
+**Actualizada: «¿Por qué me pidieron el RUT?».** Desde v179 el RUT **se compara** con el que la administración tenga registrada. La diapositiva decía solo para qué sirve; ahora avisa que **tiene que ser el tuyo**, explica que eso es lo que impide que otra persona vincule tu cuenta sabiendo solo tu ID, y dice qué hacer si no coincide: pedir el QR de acceso.
+
+**Verificación:** 12 comprobaciones — que la guía abra y el contador diga 24, que la diapositiva del QR se pueda abrir y su texto se pinte, y que los avisos de seguridad estén en el texto.
+
+**Archivos:** `app.js`, `sw.js`, `version.js`, `originalindex.html` (regenerado).
+
 #### 2026-09-28 — Entrar con el QR que emite la administración (SW v179)
 
 El QR que se genera en socios-comicion abre esta app con los datos del socio ya puestos. Al escanearlo pregunta a qué app quiere entrar —esta o diario.propi— y sigue desde ahí.
