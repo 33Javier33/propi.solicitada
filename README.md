@@ -343,6 +343,22 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-04 — El socio de Bóveda veía mal sus puntos (SW v182)
+
+La regla: **todos parten en 4 puntos** y suman **+2 por año cumplido** hasta el tope de su área. **Bóveda es la única excepción: parte en 2, tope 10.**
+
+La fórmula estaba escrita **tres veces** en `app.js` y **dos de ellas no tenían la regla de Bóveda**: al socio de bóveda su propio perfil le calculaba el base 4. Con 2 años de antigüedad le mostraba **8 puntos** donde le corresponden **6**.
+
+Además, el área se comparaba con tildes en uno de esos lugares (`'bóveda' !== 'boveda'`), lo que también dejaba fuera a **Máquinas** y **Técnicos** de su tope de 12.
+
+Ahora las tres salen de **un solo sitio**, `_reglaPuntosArea`, que compara el área **sin tildes ni espacios** y dice lo mismo que `reglaPuntosArea` de socios-comicion.
+
+**Esto solo afecta lo que se MUESTRA cuando la base no trae un valor guardado.** Si el socio tiene puntos cargados en Supabase, ese número sigue mandando, igual que antes — y si ese número está mal, se corrige desde la app de la comisión, que ahora avisa de los casos así.
+
+**Verificación:** 32 comprobaciones compartidas con socios-comicion — base y tope de cada área escrita con tilde, sin tilde, en mayúsculas y con espacios; la serie año por año; que Bóveda sea la única que parte en 2; y que el perfil del socio de bóveda con 2 años muestre **6** y no 8.
+
+**Archivos:** `app.js`, `index.html`, `sw.js`, `version.js`, `originalindex.html` (regenerado).
+
 #### 2026-10-04 — Las ausencias seguidas se ven como un tramo (SW v181)
 
 Si el socio faltó **varios días seguidos** —una licencia, por ejemplo—, en **Ver Calendario → Ausencias del período** aparecían como una tarjeta suelta por día. Con una licencia de 19 días había que sumar de cabeza para saber cuánto se dejó de percibir.

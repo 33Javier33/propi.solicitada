@@ -625,8 +625,8 @@
         let anos = hoy.getFullYear() - dIng.getFullYear();
         if (hoy.getMonth() < dIng.getMonth() || (hoy.getMonth() === dIng.getMonth() && hoy.getDate() < dIng.getDate())) anos--;
         anos = Math.max(0, anos);
-        const areaN = String(currentUser.Area || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-        const ptsFormula = Math.min(4 + (anos * 2), (areaN.includes('mesa') ? 20 : areaN.includes('cambist') ? 8 : areaN.includes('boveda') ? 10 : 12));
+        const _r = _reglaPuntosArea(currentUser.Area);
+        const ptsFormula = Math.min(_r.base + (anos * 2), _r.tope);
         const ptsSB = Number(currentUser.Puntos);
         const pts = (Number.isFinite(ptsSB) && ptsSB > 0) ? ptsSB : ptsFormula;
 
@@ -1537,6 +1537,27 @@
         if(p[0].length===4) d=new Date(p[0],p[1]-1,p[2]); else d=new Date(p[2],p[1]-1,p[0]);
         return d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}).replace('.','');
     };
+    // ── Puntos por área: base, tope y la única excepción ─────
+    // Todos arrancan en 4 puntos y suman +2 por año cumplido, hasta el tope de
+    // su área. BÓVEDA es la única excepción: arranca en 2, con tope 10.
+    //
+    // El área se compara SIN TILDES y sin espacios. La fórmula estaba repetida
+    // en tres lugares de este archivo y dos de ellos NO tenían la regla de
+    // Bóveda: al socio de bóveda le mostraban el base 4. Ahora sale de acá.
+    // Tiene que decir lo mismo que `reglaPuntosArea` de socios-comicion.
+    function _reglaPuntosArea(area) {
+        const a = String(area || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .toLowerCase().replace(/\s+/g, '').trim();
+        if (a.includes('gastos')) return { base: 1, tope: 1, gastos: true };
+        if (a.includes('boveda')) return { base: 2, tope: 10 };   // la única excepción
+        let tope = 10;
+        if (a.includes('mesa')) tope = 20;
+        else if (a.includes('maquina')) tope = 12;
+        else if (a.includes('tecnico')) tope = 12;
+        else if (a.includes('cambista')) tope = 8;
+        return { base: 4, tope };
+    }
+
     // "3 de octubre", sin el día de la semana: para los extremos de un tramo.
     const _fechaCorta = f => {
         const p = String(f).substring(0,10).split('-');
@@ -1847,9 +1868,8 @@
             const dIng=_parseLocalDate(currentUser.FechaIngreso), hoy=new Date();
             let anos=hoy.getFullYear()-dIng.getFullYear();
             if(hoy.getMonth()<dIng.getMonth()||(hoy.getMonth()===dIng.getMonth()&&hoy.getDate()<dIng.getDate())) anos--;
-            const areaN=String(currentUser.Area||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-            const _baseF=areaN.includes('boveda')?2:4; // Bóveda comienza en 2; el resto en 4
-            const ptsF=Math.min(_baseF+(Math.max(0,anos)*2),(areaN.includes('mesa')?20:areaN.includes('cambist')?8:areaN.includes('boveda')?10:12));
+            const _rF=_reglaPuntosArea(currentUser.Area);
+            const ptsF=Math.min(_rF.base+(Math.max(0,anos)*2),_rF.tope);
             const ptsSBb=Number(currentUser.Puntos);
             const pts=(Number.isFinite(ptsSBb)&&ptsSBb>0)?ptsSBb:ptsF;
 
@@ -3128,18 +3148,12 @@
             let anios = hoy.getFullYear() - anio15;
             if (hoy.getMonth() < mes15 || (hoy.getMonth() === mes15 && hoy.getDate() < 15)) anios--;
             if (anios < 0) anios = 0;
-            const areaNorm = String(s.Area || '').toLowerCase().trim();
+            const _r = _reglaPuntosArea(s.Area);
             let pts;
-            if (areaNorm === 'gastoscomision' || areaNorm.includes('gastos')) {
+            if (_r.gastos) {
                 pts = 1;
             } else {
-                let cap = 10;
-                if (areaNorm === 'mesas') cap = 20;
-                else if (areaNorm === 'maquinas') cap = 12;
-                else if (areaNorm === 'tecnicos') cap = 12;
-                else if (areaNorm === 'boveda') cap = 10;
-                else if (areaNorm.includes('cambista')) cap = 8;
-                const maxPos = Math.min(4 + anios * 2, cap);
+                const maxPos = Math.min(_r.base + anios * 2, _r.tope);
                 const ptsSB = Number(s.Puntos);
                 pts = (Number.isFinite(ptsSB) && ptsSB > 0) ? ptsSB : maxPos;
             }
