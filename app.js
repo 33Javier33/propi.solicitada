@@ -1537,6 +1537,40 @@
         if(p[0].length===4) d=new Date(p[0],p[1]-1,p[2]); else d=new Date(p[2],p[1]-1,p[0]);
         return d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}).replace('.','');
     };
+    // "3 de octubre", sin el día de la semana: para los extremos de un tramo.
+    const _fechaCorta = f => {
+        const p = String(f).substring(0,10).split('-');
+        const d = new Date(p[0], p[1]-1, p[2]);
+        return d.toLocaleDateString('es-ES', { day:'numeric', month:'long' });
+    };
+
+    // ── Tramos de ausencia ───────────────────────────────────
+    // Los días seguidos con el MISMO motivo son un solo tramo: la tarjeta
+    // muestra desde cuándo hasta cuándo y lo que deja de percibir, y se abre
+    // para ver el día por día. Un día suelto sigue siendo una tarjeta normal.
+    function _ausTramos(dias) {
+        const orden = [...dias].sort((a,b) => String(a.fecha).localeCompare(String(b.fecha)));
+        const tramos = [];
+        orden.forEach(d => {
+            const ult = tramos[tramos.length - 1];
+            const mismoMotivo = ult && String(ult.motivo||'') === String(d.motivo||'');
+            const seguido = ult && Math.round(
+                (new Date(String(d.fecha).substring(0,10) + 'T12:00:00')
+                 - new Date(String(ult.dias[ult.dias.length-1].fecha).substring(0,10) + 'T12:00:00')) / 86400000) === 1;
+            if (mismoMotivo && seguido) { ult.dias.push(d); ult.total += Number(d.montoAsociado)||0; return; }
+            tramos.push({ motivo: d.motivo || '', dias: [d], total: Number(d.montoAsociado)||0 });
+        });
+        return tramos;
+    }
+    function ausTramoToggle(id) {
+        const c = document.getElementById(id);
+        const fl = document.getElementById(id + '-fl');
+        if (!c) return;
+        const abierto = c.style.display === 'none';
+        c.style.display = abierto ? 'block' : 'none';
+        if (fl) fl.textContent = abierto ? 'expand_less' : 'expand_more';
+    }
+    window.ausTramoToggle = ausTramoToggle;
 
     // Nombre del día de la semana (capitalizado) a partir de YYYY-MM-DD
     const _capIni = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
@@ -1846,10 +1880,18 @@
                 // Se descuenta por FECHA, no por registro: si hubiera dos ausencias
                 // cargadas el mismo día se restaba el valor punto dos veces y el saldo
                 // quedaba más bajo que en socios-comicion, que usa un Set de fechas.
+                // El motivo viaja con el día para poder agrupar el tramo después:
+                // una licencia de 19 días es UNA ausencia, no 19 sueltas.
+                const _motivoAus = {};
+                (userExtras||[]).forEach(e=>{
+                    if(!e || !e.tipo || !String(e.tipo).toLowerCase().includes('ausencia')) return;
+                    const f=String(e.fecha||'').substring(0,10);
+                    if(f && !_motivoAus[f]) _motivoAus[f]=String(e.detalle||'').replace(/^Ausencia:\s*/i,'').trim();
+                });
                 _ausenciasFechas(userExtras).forEach(fKey=>{
                     const vp=mapVP[fKey]?.totalVP||0;
                     puntoGlobalTotal-=vp;
-                    globalDiasCalendar.push({fecha:fKey,valorPunto:vp,montoAsociado:vp*pts});
+                    globalDiasCalendar.push({fecha:fKey,valorPunto:vp,montoAsociado:vp*pts,motivo:_motivoAus[fKey]||''});
                 });
             }
 
@@ -4186,7 +4228,7 @@
 
         if (sortedTodos.length === 0) {
             detalleHTML += '<p style="text-align:center;font-size:12px;color:#94a3b8;padding:16px 0;">Sin registros en el período actual</p>';
-        } else {
+        } else if (userTypeGlobal === 'PT') {
             detalleHTML += sortedTodos.map(function(d) {
                 const esMesActual = String(d.fecha).split('T')[0].substring(0,10).startsWith(prefix);
                 const bgExtra = esMesActual ? '' : 'opacity:0.6;';
@@ -4195,9 +4237,51 @@
                     + '<p class="text-xs font-semibold text-lm-primary mb-0.5">' + formatDateText(d.fecha) + '</p>'
                     + '<p class="text-[11px] text-lm-accent">VP: ' + formatMoney(d.valorPunto) + '</p>'
                     + '</div>'
-                    + '<span class="' + (userTypeGlobal==='PT'?'text-lm-green':'text-lm-red') + ' font-bold text-base">'
-                    + (userTypeGlobal==='PT'?'+':'-') + formatMoney(d.montoAsociado)
+                    + '<span class="text-lm-green font-bold text-base">+' + formatMoney(d.montoAsociado)
                     + '</span></div>';
+            }).join('');
+        } else {
+            // Planta: los días seguidos del mismo motivo se muestran como UN
+            // tramo —desde cuándo hasta cuándo y cuánto deja de percibir— y la
+            // tarjeta se abre para ver día por día.
+            detalleHTML += _ausTramos(sortedTodos).map(function(t, i) {
+                const prim = String(t.dias[0].fecha).substring(0,10);
+                const ult  = String(t.dias[t.dias.length-1].fecha).substring(0,10);
+                const esMesActual = prim.startsWith(prefix) || ult.startsWith(prefix);
+                const bgExtra = esMesActual ? '' : 'opacity:0.6;';
+
+                if (t.dias.length === 1) {
+                    return '<div class="flex justify-between items-center bg-lm-subtle rounded-2xl p-4 border border-lm-border" style="' + bgExtra + 'margin-bottom:8px;">'
+                        + '<div><p class="text-xs font-semibold text-lm-primary mb-0.5">' + formatDateText(prim) + '</p>'
+                        + '<p class="text-[11px] text-lm-accent">' + (t.motivo ? _escDoc(t.motivo) + ' · ' : '') + 'VP: ' + formatMoney(t.dias[0].valorPunto) + '</p></div>'
+                        + '<span class="text-lm-red font-bold text-base">-' + formatMoney(t.dias[0].montoAsociado) + '</span></div>';
+                }
+
+                const id = 'austr-' + i + '-' + prim.replace(/-/g,'');
+                const detalle = t.dias.map(function(d) {
+                    return '<div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed rgba(148,163,184,0.25);">'
+                        + '<span class="text-lm-accent" style="font-size:11px;">' + formatDateText(d.fecha) + '</span>'
+                        + '<span style="font-size:11px;font-weight:700;white-space:nowrap;" class="text-lm-red">-' + formatMoney(d.montoAsociado) + '</span>'
+                        + '</div>';
+                }).join('');
+
+                return '<div class="bg-lm-subtle rounded-2xl border border-lm-border" style="' + bgExtra + 'margin-bottom:8px;overflow:hidden;">'
+                    + '<div onclick="ausTramoToggle(\'' + id + '\')" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px;cursor:pointer;">'
+                    + '<div style="min-width:0;">'
+                    + '<p class="text-xs font-semibold text-lm-primary mb-0.5">Del ' + _fechaCorta(prim) + ' al ' + _fechaCorta(ult) + '</p>'
+                    + '<p class="text-[11px] text-lm-accent">' + (t.motivo ? _escDoc(t.motivo) + ' · ' : '') + t.dias.length + ' días</p>'
+                    + '</div>'
+                    + '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
+                    + '<span class="text-lm-red font-bold text-base">-' + formatMoney(t.total) + '</span>'
+                    + '<span class="material-symbols-outlined text-lm-accent" id="' + id + '-fl" style="font-size:18px;">expand_more</span>'
+                    + '</div></div>'
+                    + '<div id="' + id + '" style="display:none;padding:0 16px 14px;">'
+                    + '<p class="text-lm-accent" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Los ' + t.dias.length + ' días</p>'
+                    + detalle
+                    + '<div style="display:flex;justify-content:space-between;gap:10px;padding-top:8px;font-size:12px;font-weight:800;">'
+                    + '<span class="text-lm-accent">Dejas de percibir</span>'
+                    + '<span class="text-lm-red">-' + formatMoney(t.total) + '</span></div>'
+                    + '</div></div>';
             }).join('');
         }
 
@@ -5091,7 +5175,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'event_note',
             color: '#705d00',
             title: 'Calendario de Ausencias y Turnos',
-            body: 'El botón <b>"Ver Calendario"</b> aparece en tu Balance si eres <b>Part-Time</b> o si tienes <b>ausencias</b> registradas.<br><br>🟢 <b>Verde (Part-Time):</b> Los días que trabajaste — esos suman puntos a tu propina.<br>🔴 <b>Rojo (Planta):</b> Los días que faltaste — esos restan puntos de tu propina.<br><br>Si ves un día marcado incorrectamente, avísale a la administración por Mensajes.',
+            body: 'El botón <b>"Ver Calendario"</b> aparece en tu Balance si eres <b>Part-Time</b> o si tienes <b>ausencias</b> registradas.<br><br>🟢 <b>Verde (Part-Time):</b> Los días que trabajaste — esos suman puntos a tu propina.<br>🔴 <b>Rojo (Planta):</b> Los días que faltaste — esos restan puntos de tu propina.<br><br>📆 <b>Si faltaste varios días seguidos</b> (una licencia, por ejemplo), abajo aparecen como <b>un solo tramo</b>: <b>desde cuándo hasta cuándo</b>, cuántos días son y <b>cuánto dejas de percibir</b> en total. Tócalo para abrirlo y ver día por día cuánto fue cada uno.<br><br>Si ves un día marcado incorrectamente, avísale a la administración por Mensajes.',
             preview: `
               <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:14px;">
                 <div style="font-size:14px;font-weight:800;color:#191c1d;font-family:Manrope,sans-serif;margin-bottom:2px;">Calendario Marzo 2026</div>

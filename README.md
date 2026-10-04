@@ -343,6 +343,26 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-04 — Las ausencias seguidas se ven como un tramo (SW v181)
+
+Si el socio faltó **varios días seguidos** —una licencia, por ejemplo—, en **Ver Calendario → Ausencias del período** aparecían como una tarjeta suelta por día. Con una licencia de 19 días había que sumar de cabeza para saber cuánto se dejó de percibir.
+
+**Ahora los días seguidos del mismo motivo son UNA tarjeta:** *Del 16 de septiembre al 20 de septiembre · Licencia Médica · 5 días · −$100.000*. Tocándola se abre y muestra **día por día** cuánto fue cada uno, con el total al final.
+
+**Mismo criterio que en la app de la comisión:** seguidos **y** del mismo motivo. Una licencia pegada a un permiso son dos tramos, no uno; y una ausencia de un día solo se sigue viendo como una tarjeta normal, sin flecha.
+
+**El motivo ahora viaja con el día**, así la tarjeta puede decir de qué fue la ausencia — antes solo se veía la fecha y el monto.
+
+**Los totales de arriba no cambiaron:** siguen contando los días reales del período (8 días, no 3 tarjetas) y el monto completo.
+
+**El Part-Time queda exactamente igual:** sus días trabajados siguen uno por tarjeta, en verde y sumando.
+
+**Verificación:** 19 comprobaciones — que 8 días queden en 3 tarjetas; que el permiso pegado vaya aparte; que el día suelto no se pliegue; abrir, cerrar y la flecha; que el detalle liste sus 5 días con el total al final; que los contadores de arriba sigan con los días reales; el Part-Time intacto; y la lista vacía sin romperse.
+
+**Nota honesta sobre el contraste:** en este entorno no se puede medir, porque las clases de color de la app (`text-lm-*`, `bg-lm-*`) vienen del CDN de Tailwind, que está bloqueado. Lo que sí se verificó es que el bloque nuevo **no trae ningún color escrito a mano**: usa las mismas clases que las tarjetas que ya estaban en esa lista.
+
+**Archivos:** `app.js`, `index.html`, `sw.js`, `version.js`, `originalindex.html` (regenerado).
+
 #### 2026-09-29 — La guía ahora explica el QR y el RUT (SW v180)
 
 La guía de bienvenida pasa de **23 a 24 diapositivas**.
