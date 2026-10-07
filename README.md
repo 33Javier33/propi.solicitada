@@ -343,6 +343,18 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-07 — Los años de antigüedad, con la misma regla que la comisión (SW v183)
+
+Acá los años se contaban por el **día exacto de ingreso**: quien entró un 23 de octubre sumaba un año el 23 de octubre. En la app de la comisión el aumento cae el **15 del mes de ingreso**. Durante esas dos semanas el socio veía un número distinto al que tenía la comisión.
+
+Ahora el cálculo es el mismo en las dos apps, siguiendo la política: los primeros puntos llegan el **primer día 15 al cumplir un mes** de contrato, y suben **cada 15 del mes de ingreso**.
+
+Afecta lo que se **muestra** cuando la base no trae un valor guardado de puntos; si el socio ya tiene puntos cargados, ese número sigue mandando, igual que antes.
+
+**Verificación:** las mismas 32 comprobaciones compartidas con socios-comicion, más el perfil del socio mostrando los puntos que corresponden.
+
+**Archivos:** `app.js`, `index.html`, `sw.js`, `version.js`, `originalindex.html` (regenerado).
+
 #### 2026-10-04 — El socio de Bóveda veía mal sus puntos (SW v182)
 
 La regla: **todos parten en 4 puntos** y suman **+2 por año cumplido** hasta el tope de su área. **Bóveda es la única excepción: parte en 2, tope 10.**

@@ -1,7 +1,7 @@
 // Nombre base de la caché de ESTA app y número de respaldo (el del código).
 // Solo se usan si el Service Worker no puede decir su propia versión.
 const CACHE_BASE = 'boveda-personal-';
-const VERSION_FALLBACK = 182;
+const VERSION_FALLBACK = 183;
 
 // ══════════════════════════════════════════════════════════════════════
 // VERSIÓN QUE SE ESTÁ VIENDO

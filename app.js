@@ -620,11 +620,8 @@
     function renderPerfil() {
         if (!currentUser) return;
         const nombre = getDisplayName();
-        const dIng = _parseLocalDate(currentUser.FechaIngreso);
-        const hoy = new Date();
-        let anos = hoy.getFullYear() - dIng.getFullYear();
-        if (hoy.getMonth() < dIng.getMonth() || (hoy.getMonth() === dIng.getMonth() && hoy.getDate() < dIng.getDate())) anos--;
-        anos = Math.max(0, anos);
+        const anos = _aniosPuntos(currentUser.FechaIngreso);
+        const dIng = _parseLocalDate(currentUser.FechaIngreso);   // se muestra más abajo
         const _r = _reglaPuntosArea(currentUser.Area);
         const ptsFormula = Math.min(_r.base + (anos * 2), _r.tope);
         const ptsSB = Number(currentUser.Puntos);
@@ -1537,6 +1534,30 @@
         if(p[0].length===4) d=new Date(p[0],p[1]-1,p[2]); else d=new Date(p[2],p[1]-1,p[0]);
         return d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}).replace('.','');
     };
+    // ── Cuándo suben los puntos ──────────────────────────────
+    // Misma política que socios-comicion: los primeros puntos llegan el
+    // primer día 15 al cumplir un mes de contrato, y suben cada 15 del mes
+    // de INGRESO. Acá antes se contaban años por el día exacto de ingreso,
+    // así que en el mes del aniversario el socio podía ver un número
+    // distinto al de la comisión durante dos semanas.
+    function _aniosPuntos(fechaIngreso) {
+        const q = String(fechaIngreso || '').substring(0, 10).split('-').map(Number);
+        if (q.length !== 3 || !q[0] || !q[1] || !q[2]) return 0;
+        const [anio, mes, dia] = q, mes0 = mes - 1;
+        const ultimo = new Date(anio, mes0 + 2, 0).getDate();
+        const cumple = new Date(anio, mes0 + 1, Math.min(dia, ultimo));
+        const primera = cumple.getDate() <= 15
+            ? new Date(cumple.getFullYear(), cumple.getMonth(), 15)
+            : new Date(cumple.getFullYear(), cumple.getMonth() + 1, 15);
+        let aniv = new Date(anio, mes0, 15);
+        while (aniv <= primera) aniv = new Date(aniv.getFullYear() + 1, mes0, 15);
+        const hoy = new Date();
+        if (hoy < aniv) return 0;
+        let n = hoy.getFullYear() - aniv.getFullYear() + 1;
+        if (hoy.getMonth() < mes0 || (hoy.getMonth() === mes0 && hoy.getDate() < 15)) n--;
+        return Math.max(0, n);
+    }
+
     // ── Puntos por área: base, tope y la única excepción ─────
     // Todos arrancan en 4 puntos y suman +2 por año cumplido, hasta el tope de
     // su área. BÓVEDA es la única excepción: arranca en 2, con tope 10.
@@ -1865,11 +1886,9 @@
                 if(d>0) mapVP[f].totalVP+=(m/d); mapVP[f].montoReal+=m;
             });
 
-            const dIng=_parseLocalDate(currentUser.FechaIngreso), hoy=new Date();
-            let anos=hoy.getFullYear()-dIng.getFullYear();
-            if(hoy.getMonth()<dIng.getMonth()||(hoy.getMonth()===dIng.getMonth()&&hoy.getDate()<dIng.getDate())) anos--;
+            const anos=_aniosPuntos(currentUser.FechaIngreso);
             const _rF=_reglaPuntosArea(currentUser.Area);
-            const ptsF=Math.min(_rF.base+(Math.max(0,anos)*2),_rF.tope);
+            const ptsF=Math.min(_rF.base+(anos*2),_rF.tope);
             const ptsSBb=Number(currentUser.Puntos);
             const pts=(Number.isFinite(ptsSBb)&&ptsSBb>0)?ptsSBb:ptsF;
 
