@@ -58,15 +58,15 @@
         (function () {
             try {
                 // Mantener sincronizado con app.js (_TEMAS / _TEMA_TINTE / _TEMA_COLOR).
-                var TINTES = { esmeralda: 'esmeralda', grafito: 'grafito', vino: 'vino', indigo: 'indigo' };
-                var VALID = ['claro', 'oscuro', 'negro', 'esmeralda', 'grafito', 'vino', 'indigo', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'];
+                var TINTES = { esmeralda: 'esmeralda', grafito: 'grafito', vino: 'vino', indigo: 'indigo', oceano: 'oceano', campo: 'campo' };
+                var VALID = ['claro', 'oscuro', 'negro', 'esmeralda', 'grafito', 'vino', 'indigo', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno', 'cielo', 'pasto', 'oceano', 'campo'];
                 var t = localStorage.getItem('propi_tema') || 'claro';
                 if (VALID.indexOf(t) === -1) t = 'claro';
                 var esDerivadoOscuro = (t === 'negro' || !!TINTES[t]);
                 document.documentElement.setAttribute('data-theme', esDerivadoOscuro ? 'oscuro' : t);
                 if (t === 'negro') document.documentElement.setAttribute('data-negro', '1');
                 if (TINTES[t]) document.documentElement.setAttribute('data-tinte', TINTES[t]);
-                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', grafito: '#111113', vino: '#1a080e', indigo: '#0f0e1e', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
+                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', grafito: '#111113', vino: '#1a080e', indigo: '#0f0e1e', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12', cielo: '#1e3a8a', pasto: '#365314', oceano: '#06182e', campo: '#0d1a06' };
                 var m = document.querySelector('meta[name="theme-color"]');
                 if (m) m.setAttribute('content', tc[t] || '#001723');
             } catch (e) {}
@@ -1369,6 +1369,30 @@
                                 </span>
                                 <span style="font-size:11px;font-weight:700;color:#334155">Índigo</span>
                             </button>
+                            <button type="button" data-tema="cielo" onclick="aplicarTema('cielo')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#3b82f6);border:1px solid #93c5fd;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#1e3a8a">cloud</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Cielo</span>
+                            </button>
+                            <button type="button" data-tema="oceano" onclick="aplicarTema('oceano')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#06182e);border:1px solid #163c63;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#7dd3fc">waves</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Océano</span>
+                            </button>
+                            <button type="button" data-tema="pasto" onclick="aplicarTema('pasto')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ecfccb,#65a30d);border:1px solid #bef264;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#365314">grass</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Pasto</span>
+                            </button>
+                            <button type="button" data-tema="campo" onclick="aplicarTema('campo')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#84cc16,#0d1a06);border:1px solid #2d4a14;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#bef264">park</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Campo</span>
+                            </button>
                         </div>
                     </div>
 
@@ -1626,8 +1650,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=183"></script>
-<script src="version.js?v=4"></script>
+<script src="app.js?v=184"></script>
+<script src="version.js?v=5"></script>
 
 
     <!-- Banner de nueva versión (reescrito para que NUNCA se quede pegado):

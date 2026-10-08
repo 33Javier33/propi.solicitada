@@ -662,10 +662,10 @@
     }
 
     // ── TEMAS DE LA APP (claro / oscuro / rosa) ──
-    const _TEMAS = ['claro', 'oscuro', 'negro', 'esmeralda', 'grafito', 'vino', 'indigo', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'];
-    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', grafito: '#111113', vino: '#1a080e', indigo: '#0f0e1e', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
+    const _TEMAS = ['claro', 'oscuro', 'negro', 'esmeralda', 'grafito', 'vino', 'indigo', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno', 'cielo', 'pasto', 'oceano', 'campo'];
+    const _TEMA_COLOR = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', grafito: '#111113', vino: '#1a080e', indigo: '#0f0e1e', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12', cielo: '#1e3a8a', pasto: '#365314', oceano: '#06182e', campo: '#0d1a06' };
     // Temas oscuros que reutilizan la base "oscuro" con un tinte de color (data-tinte)
-    const _TEMA_TINTE = { negro: null, esmeralda: 'esmeralda', grafito: 'grafito', vino: 'vino', indigo: 'indigo' };
+    const _TEMA_TINTE = { negro: null, esmeralda: 'esmeralda', grafito: 'grafito', vino: 'vino', indigo: 'indigo', oceano: 'oceano', campo: 'campo' };
     function _temaActual() {
         let t = 'claro';
         try { t = localStorage.getItem('propi_tema') || 'claro'; } catch (e) {}

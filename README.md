@@ -343,6 +343,25 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-08 — Cuatro fondos nuevos: dos azules y dos verde pasto (SW v184)
+
+En **Configuración → Tema de la app** había doce fondos. Ahora hay **dieciséis**:
+
+| Fondo | Cómo es |
+|---|---|
+| **Cielo** ☁️ | Azul de día: fondo celeste muy suave, textos en azul marino. |
+| **Océano** 🌊 | Azul de noche, más azul que el Oscuro de fábrica (que tira a gris). |
+| **Pasto** 🌱 | Verde pasto de verdad: tira a amarillo, no a azul como Menta. |
+| **Campo** 🌳 | El Pasto de noche: el mismo verde lima, pero sobre fondo oscuro. |
+
+Funcionan como los que ya estaban: se eligen con un toque, se guardan **en ese teléfono**, tiñen la barra de arriba del celular y vuelven puestos al abrir la app, sin el parpadeo a blanco.
+
+Cielo y Pasto son temas claros completos; Océano y Campo se montan sobre la base oscura con un tinte (`data-tinte`), igual que Esmeralda, Grafito, Vino e Índigo.
+
+**Un detalle de color:** en Pasto el acento es verde oliva `#4d7c0f` y no el lima `#65a30d` — sobre el lima, el texto blanco de las pastillas daba 3,1:1 y no se leía; con el oliva da 5,1:1. En Cielo pasa lo mismo: el acento es `#2563eb` y no `#3b82f6`.
+
+**Archivos:** `app.css`, `app.js`, `index.html`, `sw.js`.
+
 #### 2026-10-07 — Los años de antigüedad, con la misma regla que la comisión (SW v183)
 
 Acá los años se contaban por el **día exacto de ingreso**: quien entró un 23 de octubre sumaba un año el 23 de octubre. En la app de la comisión el aumento cae el **15 del mes de ingreso**. Durante esas dos semanas el socio veía un número distinto al que tenía la comisión.

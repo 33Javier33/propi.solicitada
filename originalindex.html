@@ -1043,6 +1043,191 @@
         }
         :root[data-theme="menta"] .tema-btn.active { border-color: #059669 !important; box-shadow: 0 0 0 3px rgba(5,150,105,0.18); }
 
+        /* ══════════════════════════════════════════════════════════════
+           TEMA CIELO (azul claro, claro, alto contraste)
+           Azul de día: fondo celeste muy suave, textos en azul marino.
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-theme="cielo"] {
+            --lm-bg:          239 246 255;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      191 219 254;
+            --lm-primary:     30 58 138;
+            --lm-primary-mid: 29 78 216;
+            --lm-accent:      59 130 246;
+            --lm-secondary:   37 99 235;
+            --lm-tertiary:    30 64 175;
+            --lm-green:       13 148 136;
+            --lm-red:         220 38 38;
+            --lm-yellow:      161 98 7;
+            /* 5.3:1 sobre el fondo: el gris azulado más claro se quedaba corto. */
+            --lm-muted:       83 102 133;
+            --lm-subtle:      239 246 255;
+            --lm-high:        219 234 254;
+            --wa-bg:          219 234 254;
+            --wa-mine:        191 219 254;
+            --wa-other:       255 255 255;
+            --color-card:    #ffffff;
+            --color-subtle:  #eff6ff;
+            --app-bg:        #eff6ff;
+            --pm-bg:         #e8f1fe;
+            --pm-card:       #ffffff;
+            --pm-card2:      #f3f8ff;
+            --pm-card-hi:    #dbeafe;
+            --pm-border:     #bfdbfe;
+            --pm-text:       #1e3a8a;
+            --pm-muted:      #536685;
+            /* El acento se usa de fondo con texto blanco encima: va el azul
+               fuerte (5.2:1) y no el #3b82f6, que ahí queda ilegible. */
+            --pm-accent:     #2563eb;
+            --pm-green:      #0a8f78;
+            --pm-red:        #dc2626;
+            --nav-bg:        rgba(239,246,255,0.94);
+            --nav-border:    rgba(30,58,138,0.10);
+            --glass-bg:      rgba(239,246,255,0.92);
+            --chat-bg:       #d8e8fb;
+        }
+        :root[data-theme="cielo"] .tema-btn.active { border-color: #2563eb !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.18); }
+
+        /* ══════════════════════════════════════════════════════════════
+           TEMA PASTO (verde pasto, claro, alto contraste)
+           El verde del pasto de verdad: tira a amarillo, no a azul como
+           Menta. Fondo lima muy suave, textos en verde oliva oscuro.
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-theme="pasto"] {
+            --lm-bg:          247 254 231;
+            --lm-surface:     255 255 255;
+            --lm-card:        255 255 255;
+            --lm-border:      217 249 157;
+            --lm-primary:     54 83 20;
+            --lm-primary-mid: 77 124 15;
+            --lm-accent:      101 163 13;
+            --lm-secondary:   63 98 18;
+            --lm-tertiary:    54 83 20;
+            --lm-green:       5 150 105;
+            --lm-red:         220 38 38;
+            --lm-yellow:      161 98 7;
+            --lm-muted:       93 110 70;
+            --lm-subtle:      247 254 231;
+            --lm-high:        236 252 203;
+            --wa-bg:          236 252 203;
+            --wa-mine:        217 249 157;
+            --wa-other:       255 255 255;
+            --color-card:    #ffffff;
+            --color-subtle:  #f7fee7;
+            --app-bg:        #f7fee7;
+            --pm-bg:         #f1fbdf;
+            --pm-card:       #ffffff;
+            --pm-card2:      #f7fee7;
+            --pm-card-hi:    #ecfccb;
+            --pm-border:     #d9f99d;
+            --pm-text:       #365314;
+            --pm-muted:      #5d6e46;
+            /* Verde oliva y no el lima #65a30d: con texto blanco encima el
+               lima da 3.1:1 y este 5.1:1. */
+            --pm-accent:     #4d7c0f;
+            --pm-green:      #0a8f78;
+            --pm-red:        #dc2626;
+            --nav-bg:        rgba(247,254,231,0.94);
+            --nav-border:    rgba(54,83,20,0.10);
+            --glass-bg:      rgba(247,254,231,0.92);
+            --chat-bg:       #e4f5c8;
+        }
+        :root[data-theme="pasto"] .tema-btn.active { border-color: #4d7c0f !important; box-shadow: 0 0 0 3px rgba(77,124,15,0.20); }
+
+        /* ══════════════════════════════════════════════════════════════
+           TEMA OCÉANO (azul profundo, oscuro)
+           = base oscuro + data-tinte="oceano". El azul de noche, más azul
+           que el Oscuro de fábrica (que tira a gris).
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-tinte="oceano"] {
+            --lm-bg:          6 24 46;
+            --lm-surface:     10 32 57;
+            --lm-card:        13 39 68;
+            --lm-border:      22 60 99;
+            --lm-primary:     125 211 252;
+            --lm-primary-mid: 56 189 248;
+            --lm-accent:      14 165 233;
+            --lm-secondary:   56 189 248;
+            --lm-tertiary:    251 191 36;
+            --lm-green:       52 211 153;
+            --lm-subtle:      11 33 57;
+            --lm-high:        18 48 80;
+            --wa-bg:          6 24 46;
+            --wa-mine:        12 74 110;
+            --wa-other:       13 39 68;
+            --color-card:    #0d2744;
+            --color-subtle:  #123050;
+            --app-bg:        #06182e;
+            --pm-bg:         #06182e;
+            --pm-card:       #0d2744;
+            --pm-card2:      #0a2039;
+            --pm-card-hi:    #123050;
+            --pm-border:     #163c63;
+            --pm-accent:     #38bdf8;
+            --nav-bg:        rgba(6,24,46,0.94);
+            --glass-bg:      rgba(6,24,46,0.92);
+            --chat-bg:       #0a2039;
+        }
+        :root[data-tinte="oceano"] [style*="background:#fff;"],
+        :root[data-tinte="oceano"] [style*="background:#ffffff"],
+        :root[data-tinte="oceano"] [style*="background:#f8fafc"],
+        :root[data-tinte="oceano"] [style*="background:#f8f9fa"],
+        :root[data-tinte="oceano"] [style*="background:#f0f2f5"],
+        :root[data-tinte="oceano"] [style*="background:#f9fafb"] { background: #0d2744 !important; border-color: #163c63 !important; }
+        :root[data-tinte="oceano"] [style*="background:#f3f4f5"],
+        :root[data-tinte="oceano"] [style*="background:#f1f5f9"] { background: #123050 !important; }
+        :root[data-tinte="oceano"] input { background: #0a2039 !important; border-color: #1e5a8a !important; color: #dbeafe !important; }
+        :root[data-tinte="oceano"] .tema-btn { background: #0d2744 !important; border-color: #163c63 !important; }
+        :root[data-tinte="oceano"] .tema-btn.active { border-color: #38bdf8 !important; box-shadow: 0 0 0 3px rgba(56,189,248,0.22); }
+
+        /* ══════════════════════════════════════════════════════════════
+           TEMA CAMPO (verde pasto oscuro)
+           = base oscuro + data-tinte="campo". El Pasto de noche: mismo
+           verde lima, pero sobre fondo oscuro. No es Esmeralda, que tira
+           a azul verdoso.
+           ══════════════════════════════════════════════════════════════ */
+        :root[data-tinte="campo"] {
+            --lm-bg:          13 26 6;
+            --lm-surface:     20 38 10;
+            --lm-card:        26 45 12;
+            --lm-border:      45 74 20;
+            --lm-primary:     190 242 100;
+            --lm-primary-mid: 163 230 53;
+            --lm-accent:      132 204 22;
+            --lm-secondary:   163 230 53;
+            --lm-tertiary:    251 191 36;
+            --lm-green:       163 230 53;
+            --lm-subtle:      21 37 10;
+            --lm-high:        36 59 16;
+            --wa-bg:          13 26 6;
+            --wa-mine:        54 83 20;
+            --wa-other:       26 45 12;
+            --color-card:    #1a2d0c;
+            --color-subtle:  #243b10;
+            --app-bg:        #0d1a06;
+            --pm-bg:         #0d1a06;
+            --pm-card:       #1a2d0c;
+            --pm-card2:      #15250a;
+            --pm-card-hi:    #243b10;
+            --pm-border:     #2d4a14;
+            --pm-accent:     #a3e635;
+            --nav-bg:        rgba(13,26,6,0.94);
+            --glass-bg:      rgba(13,26,6,0.92);
+            --chat-bg:       #15250a;
+        }
+        :root[data-tinte="campo"] [style*="background:#fff;"],
+        :root[data-tinte="campo"] [style*="background:#ffffff"],
+        :root[data-tinte="campo"] [style*="background:#f8fafc"],
+        :root[data-tinte="campo"] [style*="background:#f8f9fa"],
+        :root[data-tinte="campo"] [style*="background:#f0f2f5"],
+        :root[data-tinte="campo"] [style*="background:#f9fafb"] { background: #1a2d0c !important; border-color: #2d4a14 !important; }
+        :root[data-tinte="campo"] [style*="background:#f3f4f5"],
+        :root[data-tinte="campo"] [style*="background:#f1f5f9"] { background: #243b10 !important; }
+        :root[data-tinte="campo"] input { background: #142309 !important; border-color: #3f6212 !important; color: #ecfccb !important; }
+        :root[data-tinte="campo"] .tema-btn { background: #1a2d0c !important; border-color: #2d4a14 !important; }
+        :root[data-tinte="campo"] .tema-btn.active { border-color: #a3e635 !important; box-shadow: 0 0 0 3px rgba(163,230,53,0.22); }
+
         /* Efecto al estrenar la nueva versión (migración clásica → premium) */
         @keyframes pmSwitchFx {
             0%   { opacity: 0.15; transform: scale(0.985); filter: blur(5px); }
@@ -1112,15 +1297,15 @@
         (function () {
             try {
                 // Mantener sincronizado con app.js (_TEMAS / _TEMA_TINTE / _TEMA_COLOR).
-                var TINTES = { esmeralda: 'esmeralda', grafito: 'grafito', vino: 'vino', indigo: 'indigo' };
-                var VALID = ['claro', 'oscuro', 'negro', 'esmeralda', 'grafito', 'vino', 'indigo', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno'];
+                var TINTES = { esmeralda: 'esmeralda', grafito: 'grafito', vino: 'vino', indigo: 'indigo', oceano: 'oceano', campo: 'campo' };
+                var VALID = ['claro', 'oscuro', 'negro', 'esmeralda', 'grafito', 'vino', 'indigo', 'rosa', 'aqua', 'lavanda', 'menta', 'durazno', 'cielo', 'pasto', 'oceano', 'campo'];
                 var t = localStorage.getItem('propi_tema') || 'claro';
                 if (VALID.indexOf(t) === -1) t = 'claro';
                 var esDerivadoOscuro = (t === 'negro' || !!TINTES[t]);
                 document.documentElement.setAttribute('data-theme', esDerivadoOscuro ? 'oscuro' : t);
                 if (t === 'negro') document.documentElement.setAttribute('data-negro', '1');
                 if (TINTES[t]) document.documentElement.setAttribute('data-tinte', TINTES[t]);
-                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', grafito: '#111113', vino: '#1a080e', indigo: '#0f0e1e', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12' };
+                var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', grafito: '#111113', vino: '#1a080e', indigo: '#0f0e1e', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12', cielo: '#1e3a8a', pasto: '#365314', oceano: '#06182e', campo: '#0d1a06' };
                 var m = document.querySelector('meta[name="theme-color"]');
                 if (m) m.setAttribute('content', tc[t] || '#001723');
             } catch (e) {}
@@ -2423,6 +2608,30 @@
                                 </span>
                                 <span style="font-size:11px;font-weight:700;color:#334155">Índigo</span>
                             </button>
+                            <button type="button" data-tema="cielo" onclick="aplicarTema('cielo')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#3b82f6);border:1px solid #93c5fd;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#1e3a8a">cloud</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Cielo</span>
+                            </button>
+                            <button type="button" data-tema="oceano" onclick="aplicarTema('oceano')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#06182e);border:1px solid #163c63;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#7dd3fc">waves</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Océano</span>
+                            </button>
+                            <button type="button" data-tema="pasto" onclick="aplicarTema('pasto')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ecfccb,#65a30d);border:1px solid #bef264;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#365314">grass</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Pasto</span>
+                            </button>
+                            <button type="button" data-tema="campo" onclick="aplicarTema('campo')" class="tema-btn" style="border:2px solid #e2e8f0;border-radius:14px;padding:12px 6px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#84cc16,#0d1a06);border:1px solid #2d4a14;display:flex;align-items:center;justify-content:center;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:#bef264">park</span>
+                                </span>
+                                <span style="font-size:11px;font-weight:700;color:#334155">Campo</span>
+                            </button>
                         </div>
                     </div>
 
@@ -2680,8 +2889,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=183"></script>
-<script src="version.js?v=4"></script>
+<script src="app.js?v=184"></script>
+<script src="version.js?v=5"></script>
 
 
     <!-- Banner de nueva versión (reescrito para que NUNCA se quede pegado):
