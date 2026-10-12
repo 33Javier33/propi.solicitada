@@ -343,6 +343,20 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-10 — Solución de superposición en la sección Mensajes (SW v186)
+
+- **Corrección de z-index:** En la sección Mensajes (`tab-chat`), la capa fija del chat tenía un `z-index: 40` mientras que el `<header>` superior de la aplicación tenía un `z-index: 20`. Esto provocaba que la sección de mensajes cubriera los botones del encabezado (incluido el botón para cerrar sesión `logout()`), impidiendo cerrar la app o interactuar con el header estando en la pestaña Mensajes. Se elevó la clase del header a `z-50`, de modo que queda correctamente posicionado sobre el chat (`z-40`) y debajo de la barra de navegación inferior (`z-60`).
+- **Service Worker:** Se incrementó la versión a `boveda-personal-v186` en `sw.js`, `version.js` e `index.html`.
+
+**Archivos:** `index.html`, `sw.js`, `version.js`, `README.md`, `originalindex.html` (regenerado).
+
+#### 2026-10-10 — Corrección de atributo src en fotoGrandeImg e incremento a SW v185
+
+- **Corrección de HTML:** Se reemplazó el atributo `src=""` vacío en la etiqueta `<img id="fotoGrandeImg">` de `index.html` por un data URI SVG transparente placeholder (`data:image/svg+xml,...`). Esto evita peticiones HTTP redundantes a la raíz al cargar el documento y resuelve la advertencia/error detectado por las herramientas de validación HTML.
+- **Service Worker:** Se incrementó la versión a `boveda-personal-v185` en `sw.js`, `version.js` e `index.html` para asegurar que los navegadores y PWA actualicen sus recursos cacheados.
+
+**Archivos:** `index.html`, `sw.js`, `version.js`, `README.md`, `originalindex.html` (regenerado).
+
 #### 2026-10-08 — Cuatro fondos nuevos: dos azules y dos verde pasto (SW v184)
 
 En **Configuración → Tema de la app** había doce fondos. Ahora hay **dieciséis**:
