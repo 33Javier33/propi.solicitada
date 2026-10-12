@@ -343,6 +343,33 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-12 — Ocho versiones para la tarjeta del balance (SW v187)
+
+La tarjeta no seguía ningún tema: daba igual que la app estuviera en claro, oscuro o rosa, siempre era el mismo azul petróleo. Los colores estaban escritos a mano en el HTML, y había incluso una regla en `app.css` que la forzaba a blanco para que el tema no la tocara.
+
+Ahora se elige entre **ocho diseños**, todos conservando **«Fondo Solidario · Casino Puerto Varas»**:
+
+| Diseño | Cómo es |
+|---|---|
+| **Medianoche** | La de siempre: azul petróleo con chip dorado. Sigue siendo la que viene puesta |
+| **Ónix** | Negro con chip dorado |
+| **Océano** | Azul profundo con chip celeste |
+| **Esmeralda** | Verde oscuro con chip menta |
+| **Vino** | Burdeos con chip rosado |
+| **Pasto** | Verde oliva con chip lima |
+| **Lavanda** | Violeta con chip lila |
+| **Platino** | **Clara**, plateada, con texto azul noche y chip dorado viejo |
+
+Se elige en **Configuración → Versión de la tarjeta**, con una miniatura de cada una. Va **aparte del tema de la app**, a propósito: el tema viste la app y la tarjeta es la tarjeta, así que se puede tener la app en oscuro y la tarjeta en Platino. Se guarda en ese dispositivo, como el tema.
+
+**Cómo está hecho.** Todo el color sale de `--tj-base`, que es el color del **texto** en RGB suelto; los grises de la tarjeta son ese mismo color con transparencia. Así, una tarjeta clara solo cambia esa variable y toda la jerarquía se da vuelta sola — es lo que hace posible Platino sin duplicar ni una regla.
+
+**Las transparencias no son a ojo.** Se midieron contra el tope **más claro** del degradado de cada diseño, que es el caso peor. Con las que tenía la tarjeta original, «Casino Puerto Varas» daba **4,34:1** en Medianoche y habría dado **3,83:1** en Pasto, bajo el mínimo de 4,5. Subidas, el peor de los ocho diseños queda en **5,37:1**.
+
+> Dos cosas que se arreglaron de paso: la tarjeta original ya venía con ese contraste flojo, y los nombres del selector usaban al principio variables de **socios-comicion** (`--rf-suave`, `--rf-bd`) que en esta app no existen, así que caían a un gris ilegible sobre fondo oscuro. Ahora llevan su variante explícita para `data-theme="oscuro"`, que cubre de una vez a Oscuro, Negro y todos los temas con tinte.
+
+**Archivos:** `app.css`, `app.js`, `index.html`, `originalindex.html`, `sw.js`, `version.js`.
+
 #### 2026-10-10 — Solución de superposición en la sección Mensajes (SW v186)
 
 - **Corrección de z-index:** En la sección Mensajes (`tab-chat`), la capa fija del chat tenía un `z-index: 40` mientras que el `<header>` superior de la aplicación tenía un `z-index: 20`. Esto provocaba que la sección de mensajes cubriera los botones del encabezado (incluido el botón para cerrar sesión `logout()`), impidiendo cerrar la app o interactuar con el header estando en la pestaña Mensajes. Se elevó la clase del header a `z-50`, de modo que queda correctamente posicionado sobre el chat (`z-40`) y debajo de la barra de navegación inferior (`z-60`).

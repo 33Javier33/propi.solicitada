@@ -706,6 +706,68 @@
     // rápido del <head> fuera de una versión previa/incompleta.
     try { window.aplicarTema(_temaActual()); } catch (e) {}
 
+    // ══════════════════════════════════════════════════════════════════
+    // VERSIONES DE LA TARJETA
+    //
+    // Va APARTE del tema de la app, a propósito: el tema viste la app y la
+    // tarjeta es la tarjeta. Alguien puede querer la app en claro y la
+    // tarjeta en ónix, y antes eso no se podía porque los colores estaban
+    // escritos a mano en el HTML y la tarjeta era siempre la misma.
+    //
+    // Todas conservan «Fondo Solidario · Casino Puerto Varas». Lo que
+    // cambia es el fondo, el chip y el color de los puntos. Los colores
+    // viven en app.css; acá solo está la lista y qué se guarda.
+    //
+    // Se guarda en ESTE dispositivo: cada socio elige la suya.
+    // ══════════════════════════════════════════════════════════════════
+    const TARJETAS = [
+        { id: 'medianoche', nombre: 'Medianoche', prev: 'linear-gradient(135deg,#0f2027,#2c5364)', chip: '#f7d774' },
+        { id: 'onix',       nombre: 'Ónix',       prev: 'linear-gradient(135deg,#000000,#2a2a2a)', chip: '#f7d774' },
+        { id: 'oceano',     nombre: 'Océano',     prev: 'linear-gradient(135deg,#041c3a,#0e5a8a)', chip: '#bae6fd' },
+        { id: 'esmeralda',  nombre: 'Esmeralda',  prev: 'linear-gradient(135deg,#04120d,#11614a)', chip: '#a7f3d0' },
+        { id: 'vino',       nombre: 'Vino',       prev: 'linear-gradient(135deg,#1a080e,#6d1a30)', chip: '#fbcfe8' },
+        { id: 'pasto',      nombre: 'Pasto',      prev: 'linear-gradient(135deg,#0d1a06,#3a6317)', chip: '#d9f99d' },
+        { id: 'lavanda',    nombre: 'Lavanda',    prev: 'linear-gradient(135deg,#140d2b,#4a2d8f)', chip: '#ddd6fe' },
+        { id: 'platino',    nombre: 'Platino',    prev: 'linear-gradient(135deg,#dfe7ef,#cfd9e4)', chip: '#a67c12' }
+    ];
+    const TARJETA_IDS = TARJETAS.map(t => t.id);
+
+    function _tarjetaActual() {
+        let t = 'medianoche';
+        try { t = localStorage.getItem('propi_tarjeta') || 'medianoche'; } catch (e) {}
+        return TARJETA_IDS.indexOf(t) >= 0 ? t : 'medianoche';
+    }
+    function _sincronizarTarjetaBtns() {
+        const actual = _tarjetaActual();
+        document.querySelectorAll('.tarjeta-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-tarjeta') === actual);
+        });
+    }
+    window.aplicarTarjeta = function (id) {
+        if (TARJETA_IDS.indexOf(id) < 0) id = 'medianoche';
+        // Medianoche es la de siempre y vive en :root, así que no lleva
+        // atributo: si lo llevara habría que repetir sus valores.
+        if (id === 'medianoche') document.documentElement.removeAttribute('data-tarjeta');
+        else document.documentElement.setAttribute('data-tarjeta', id);
+        try { localStorage.setItem('propi_tarjeta', id); } catch (e) {}
+        _sincronizarTarjetaBtns();
+    };
+    // Pinta los botones del selector en Configuración.
+    window._tarjetaPintarSelector = function () {
+        const cont = document.getElementById('tarjetaSelector');
+        if (!cont || cont.dataset.listo === '1') { _sincronizarTarjetaBtns(); return; }
+        cont.innerHTML = TARJETAS.map(t =>
+            '<button type="button" class="tarjeta-btn" data-tarjeta="' + t.id + '"'
+            + ' onclick="aplicarTarjeta(\'' + t.id + '\')"'
+            + ' style="--tj-prev:' + t.prev + ';--tj-prev-chip:' + t.chip + ';">'
+            + '<span class="tj-mini"></span><span>' + t.nombre + '</span></button>').join('');
+        cont.dataset.listo = '1';
+        _sincronizarTarjetaBtns();
+    };
+    try { window.aplicarTarjeta(_tarjetaActual()); } catch (e) {}
+    // app.js va al final del <body>, así que el contenedor ya existe.
+    try { window._tarjetaPintarSelector(); } catch (e) {}
+
     // ── ESTILO DEL BALANCE (clásico / tarjeta bancaria) ──────────────
     function _balanceEstiloGuardado() {
         try { return localStorage.getItem('propi_balance_estilo') === 'tarjeta' ? 'tarjeta' : 'clasico'; }

@@ -613,8 +613,10 @@
         .pm-layout [style*="color:#ffb4ab"] { color: var(--pm-red) !important; }
         /* Toggle activo (Movimientos/Anticipos) → pill de acento del tema */
         .pm-layout [style*="background:#ffffff"] { background: var(--pm-accent) !important; color: #fff !important; }
-        /* Tarjeta bancaria: SIEMPRE oscura (no sigue el tema) */
-        .pm-layout #pmBalanceTarjeta [style*="color:#fff"] { color: #fff !important; }
+        /* La tarjeta ya no lleva colores escritos en el HTML: los pone el
+           bloque «VERSIONES DE LA TARJETA», más abajo. Acá había una regla
+           que la forzaba a blanco para que el tema de la app no la tocara;
+           sobra, y además impedía que pudiera existir una tarjeta clara. */
         :root[data-theme="rosa"] .tema-btn.active {
             border-color: #db2777 !important;
             box-shadow: 0 0 0 3px rgba(219,39,119,0.18);
@@ -1228,6 +1230,126 @@
         :root[data-tinte="campo"] .tema-btn { background: #1a2d0c !important; border-color: #2d4a14 !important; }
         :root[data-tinte="campo"] .tema-btn.active { border-color: #a3e635 !important; box-shadow: 0 0 0 3px rgba(163,230,53,0.22); }
 
+        /* ══════════════════════════════════════════════════════════════
+           VERSIONES DE LA TARJETA
+
+           La tarjeta del balance era una sola y con los colores escritos a
+           mano en el HTML, así que no seguía ningún tema: daba igual que la
+           app estuviera en claro, oscuro o rosa, la tarjeta siempre era el
+           mismo azul petróleo.
+
+           Ahora el diseño se elige aparte del tema de la app —son dos cosas
+           distintas: el tema viste la app, la tarjeta es la tarjeta— y vive
+           en `<html data-tarjeta="...">`.
+
+           Todo el color sale de `--tj-base`, que es el color del TEXTO en
+           RGB suelto. Los grises de la tarjeta son ese mismo color con
+           transparencia, así que una tarjeta clara solo tiene que cambiar
+           esa variable y toda la jerarquía se da vuelta sola: en Platino el
+           texto es azul noche y los secundarios son azul noche al 82 %, no
+           blancos ilegibles.
+
+           Las transparencias no son a ojo: se midieron contra el tope MÁS
+           CLARO del degradado de cada diseño, que es el caso peor. Con las
+           de antes, «Casino Puerto Varas» daba 3,83:1 en Pasto y 4,34:1 en
+           Medianoche —la tarjeta que ya existía—, bajo el mínimo de 4,5.
+           ══════════════════════════════════════════════════════════════ */
+        :root {
+            --tj-base:   255, 255, 255;      /* color del texto, en RGB suelto */
+            --tj-bg:     linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            --tj-sombra: 0 14px 34px rgba(0, 0, 0, 0.35);
+            --tj-chip:   linear-gradient(135deg, #f7d774, #c9a227);
+            --tj-acento: #f7d774;            /* los puntos */
+        }
+        :root[data-tarjeta="onix"] {
+            --tj-bg:     linear-gradient(135deg, #000000, #161616, #2a2a2a);
+            --tj-sombra: 0 14px 34px rgba(0, 0, 0, 0.55);
+        }
+        :root[data-tarjeta="oceano"] {
+            --tj-bg:     linear-gradient(135deg, #041c3a, #0a3d6b, #0e5a8a);
+            --tj-chip:   linear-gradient(135deg, #bae6fd, #38bdf8);
+            --tj-acento: #bae6fd;
+        }
+        :root[data-tarjeta="esmeralda"] {
+            --tj-bg:     linear-gradient(135deg, #04120d, #0b3b2a, #11614a);
+            --tj-chip:   linear-gradient(135deg, #a7f3d0, #34d399);
+            --tj-acento: #a7f3d0;
+        }
+        :root[data-tarjeta="vino"] {
+            --tj-bg:     linear-gradient(135deg, #1a080e, #4a1020, #6d1a30);
+            --tj-chip:   linear-gradient(135deg, #fbcfe8, #f472b6);
+            --tj-acento: #fbcfe8;
+        }
+        :root[data-tarjeta="pasto"] {
+            --tj-bg:     linear-gradient(135deg, #0d1a06, #24400f, #3a6317);
+            --tj-chip:   linear-gradient(135deg, #d9f99d, #a3e635);
+            --tj-acento: #d9f99d;
+        }
+        :root[data-tarjeta="lavanda"] {
+            --tj-bg:     linear-gradient(135deg, #140d2b, #2e1a5e, #4a2d8f);
+            --tj-chip:   linear-gradient(135deg, #ddd6fe, #a78bfa);
+            --tj-acento: #ddd6fe;
+        }
+        /* La clara. Es la razón de que el color del texto sea una variable:
+           acá se da vuelta entera y el resto de las reglas no se tocan. */
+        :root[data-tarjeta="platino"] {
+            --tj-base:   16, 38, 59;
+            --tj-bg:     linear-gradient(135deg, #dfe7ef, #f7f9fb, #cfd9e4);
+            --tj-sombra: 0 14px 30px rgba(31, 55, 80, 0.28);
+            --tj-chip:   linear-gradient(135deg, #e3b23c, #a67c12);
+            --tj-acento: #6b4500;
+        }
+
+        .tj-cara {
+            position: relative; border-radius: 22px; padding: 20px; min-height: 210px;
+            overflow: hidden; background: var(--tj-bg); box-shadow: var(--tj-sombra);
+            color: rgb(var(--tj-base));
+        }
+        .tj-velo  { position: absolute; border-radius: 50%; pointer-events: none;
+                    background: rgba(var(--tj-base), 0.06); }
+        .tj-velo2 { background: rgba(var(--tj-base), 0.045); }
+        .tj-marca { font-size: 9px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+                    margin: 0; color: rgba(var(--tj-base), 0.9); }
+        .tj-sub   { font-size: 10px; margin: 2px 0 0; color: rgba(var(--tj-base), 0.82); }
+        .tj-btn   { width: 34px; height: 34px; border-radius: 10px; cursor: pointer;
+                    display: flex; align-items: center; justify-content: center;
+                    background: rgba(var(--tj-base), 0.16); border: 1px solid rgba(var(--tj-base), 0.28); }
+        .tj-btn .material-symbols-outlined { font-size: 18px; color: rgba(var(--tj-base), 0.95); }
+        .tj-chip  { width: 46px; height: 34px; border-radius: 7px; background: var(--tj-chip);
+                    margin: 16px 0 10px; position: relative; z-index: 2;
+                    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); }
+        .tj-etq   { font-size: 9px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+                    margin: 0; position: relative; z-index: 2; color: rgba(var(--tj-base), 0.85); }
+        .tj-monto { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin: 2px 0 14px;
+                    position: relative; z-index: 2; color: rgb(var(--tj-base)); }
+        .tj-num   { font-family: monospace; font-size: 16px; letter-spacing: 3px; margin: 0 0 14px;
+                    position: relative; z-index: 2; color: rgba(var(--tj-base), 0.95); }
+        .tj-pie   { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;
+                    position: relative; z-index: 2; }
+        .tj-pie-etq { font-size: 8px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;
+                      color: rgba(var(--tj-base), 0.84); }
+        .tj-pie-val { font-size: 13px; font-weight: 700; margin: 2px 0 0; color: rgb(var(--tj-base)); }
+        .tj-pie-pts { color: var(--tj-acento); }
+
+        /* Botones del selector de tarjeta, en Configuración.
+           Los colores van explícitos y con su variante oscura, igual que
+           los botones de tema. `data-theme="oscuro"` cubre de una vez a
+           Oscuro y a todos los temas con tinte (Negro, Esmeralda, Grafito,
+           Vino, Índigo, Océano, Campo), porque todos usan esa base. */
+        .tarjeta-btn { border: 2px solid #e2e8f0; border-radius: 14px; padding: 8px 6px 10px;
+                       background: #fff; cursor: pointer; display: flex;
+                       flex-direction: column; align-items: center; gap: 7px; font-family: inherit; }
+        .tarjeta-btn .tj-mini { width: 100%; height: 40px; border-radius: 7px; background: var(--tj-prev);
+                                box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14); position: relative; }
+        .tarjeta-btn .tj-mini::after { content: ''; position: absolute; left: 7px; bottom: 7px;
+                                       width: 13px; height: 9px; border-radius: 2px; background: var(--tj-prev-chip); }
+        .tarjeta-btn span { font-size: 11px; font-weight: 700; color: #334155; }
+        .tarjeta-btn.active { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        :root[data-theme="oscuro"] .tarjeta-btn { background: #334155; border-color: #475569; }
+        :root[data-theme="oscuro"] .tarjeta-btn span { color: #e2e8f0; }
+        :root[data-theme="oscuro"] .tarjeta-btn.active { border-color: #60a5fa;
+                              box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25); }
+
         /* Efecto al estrenar la nueva versión (migración clásica → premium) */
         @keyframes pmSwitchFx {
             0%   { opacity: 0.15; transform: scale(0.985); filter: blur(5px); }
@@ -1308,6 +1430,13 @@
                 var tc = { claro: '#001723', oscuro: '#0f172a', negro: '#000000', esmeralda: '#04120d', grafito: '#111113', vino: '#1a080e', indigo: '#0f0e1e', rosa: '#9d174d', aqua: '#0e7490', lavanda: '#5b21b6', menta: '#064e3b', durazno: '#7c2d12', cielo: '#1e3a8a', pasto: '#365314', oceano: '#06182e', campo: '#0d1a06' };
                 var m = document.querySelector('meta[name="theme-color"]');
                 if (m) m.setAttribute('content', tc[t] || '#001723');
+
+                // Versión de la tarjeta. Va aparte del tema y también se
+                // aplica acá para que no se vea un parpadeo de la tarjeta
+                // vieja antes de que cargue app.js.
+                var TARJETAS_OK = ['onix','oceano','esmeralda','vino','pasto','lavanda','platino'];
+                var tj = localStorage.getItem('propi_tarjeta') || 'medianoche';
+                if (TARJETAS_OK.indexOf(tj) >= 0) document.documentElement.setAttribute('data-tarjeta', tj);
             } catch (e) {}
         })();
     </script>
@@ -1799,39 +1928,39 @@
 
             <!-- HERO BALANCE CARD (estilo tarjeta bancaria) -->
             <div id="balanceTarjeta" class="mx-4 mt-4 mb-5" style="display:none;">
-                <div style="position:relative;border-radius:22px;padding:20px;min-height:210px;overflow:hidden;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);box-shadow:0 14px 34px rgba(0,0,0,0.35);color:#fff;">
-                    <div style="position:absolute;right:-30px;top:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
-                    <div style="position:absolute;left:-20px;bottom:-45px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;"></div>
+                <div class="tj-cara">
+                    <div class="tj-velo" style="right:-30px;top:-30px;width:170px;height:170px;"></div>
+                    <div class="tj-velo tj-velo2" style="left:-20px;bottom:-45px;width:150px;height:150px;"></div>
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2;">
                         <div>
-                            <p style="font-size:9px;font-weight:800;letter-spacing:0.14em;color:rgba(255,255,255,0.65);text-transform:uppercase;margin:0;">Fondo Solidario</p>
-                            <p style="font-size:10px;color:rgba(255,255,255,0.45);margin:2px 0 0;">Casino Puerto Varas</p>
+                            <p class="tj-marca">Fondo Solidario</p>
+                            <p class="tj-sub">Casino Puerto Varas</p>
                         </div>
                         <div style="display:flex;gap:8px;align-items:center;">
-                            <button onclick="descargarComprobante()" title="Descargar Comprobante" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;">
-                                <span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.85)">receipt</span>
+                            <button onclick="descargarComprobante()" title="Descargar Comprobante" class="tj-btn">
+                                <span class="material-symbols-outlined">receipt</span>
                             </button>
-                            <button onclick="toggleBalanceEstilo()" title="Volver a vista clásica" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;">
-                                <span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.85)">sync_alt</span>
+                            <button onclick="toggleBalanceEstilo()" title="Volver a vista clásica" class="tj-btn">
+                                <span class="material-symbols-outlined">sync_alt</span>
                             </button>
                         </div>
                     </div>
-                    <div style="width:46px;height:34px;border-radius:7px;background:linear-gradient(135deg,#f7d774,#c9a227);margin:16px 0 10px;position:relative;z-index:2;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.12);"></div>
-                    <p style="font-size:9px;font-weight:800;letter-spacing:0.14em;color:rgba(255,255,255,0.55);text-transform:uppercase;margin:0;position:relative;z-index:2;">Balance a recibir</p>
-                    <h2 id="montoRecibirTarjeta" class="font-headline" style="font-size:34px;font-weight:800;color:#fff;letter-spacing:-0.01em;margin:2px 0 14px;position:relative;z-index:2;">$0</h2>
-                    <p id="tarjetaNumero" style="font-family:monospace;font-size:16px;letter-spacing:3px;color:rgba(255,255,255,0.88);margin:0 0 14px;position:relative;z-index:2;">•••• •••• •••• ••••</p>
-                    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative;z-index:2;">
+                    <div class="tj-chip"></div>
+                    <p class="tj-etq">Balance a recibir</p>
+                    <h2 id="montoRecibirTarjeta" class="font-headline tj-monto">$0</h2>
+                    <p id="tarjetaNumero" class="tj-num">•••• •••• •••• ••••</p>
+                    <div class="tj-pie">
                         <div style="min-width:0;">
-                            <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Titular</p>
-                            <p id="tarjetaTitular" style="font-size:13px;font-weight:700;color:#fff;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</p>
+                            <p class="tj-pie-etq">Titular</p>
+                            <p id="tarjetaTitular" class="tj-pie-val" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</p>
                         </div>
                         <div style="text-align:center;flex-shrink:0;">
-                            <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Mis Puntos</p>
-                            <p id="tarjetaPuntos" style="font-size:13px;font-weight:700;color:#f7d774;margin:2px 0 0;">—</p>
+                            <p class="tj-pie-etq">Mis Puntos</p>
+                            <p id="tarjetaPuntos" class="tj-pie-val tj-pie-pts">—</p>
                         </div>
                         <div style="text-align:right;flex-shrink:0;">
-                            <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Miembro desde</p>
-                            <p id="tarjetaDesde" style="font-size:13px;font-weight:700;color:#fff;margin:2px 0 0;">—</p>
+                            <p class="tj-pie-etq">Miembro desde</p>
+                            <p id="tarjetaDesde" class="tj-pie-val">—</p>
                         </div>
                     </div>
                 </div>
@@ -1962,31 +2091,33 @@
 
                 <!-- Tarjeta bancaria (premium) -->
                 <div id="pmBalanceTarjeta" style="display:none;margin-bottom:26px;">
-                    <div style="position:relative;border-radius:20px;padding:20px;min-height:210px;overflow:hidden;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);box-shadow:0 14px 34px rgba(0,0,0,0.4);color:#fff;">
-                        <div style="position:absolute;right:-30px;top:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none;"></div>
+                    <div class="tj-cara" style="border-radius:20px;">
+                        <div class="tj-velo" style="right:-30px;top:-30px;width:170px;height:170px;"></div>
                         <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2;">
                             <div>
-                                <p style="font-size:9px;font-weight:800;letter-spacing:0.14em;color:rgba(255,255,255,0.65);text-transform:uppercase;margin:0;">Fondo Solidario</p>
-                                <p style="font-size:10px;color:rgba(255,255,255,0.45);margin:2px 0 0;">Casino Puerto Varas</p>
+                                <p class="tj-marca">Fondo Solidario</p>
+                                <p class="tj-sub">Casino Puerto Varas</p>
                             </div>
-                            <button onclick="toggleBalanceEstilo()" title="Volver a la tarjeta" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.85)">sync_alt</span></button>
+                            <button onclick="toggleBalanceEstilo()" title="Volver a la tarjeta" class="tj-btn">
+                                <span class="material-symbols-outlined">sync_alt</span>
+                            </button>
                         </div>
-                        <div style="width:46px;height:34px;border-radius:7px;background:linear-gradient(135deg,#f7d774,#c9a227);margin:16px 0 10px;position:relative;z-index:2;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.12);"></div>
-                        <p style="font-size:9px;font-weight:800;letter-spacing:0.14em;color:rgba(255,255,255,0.55);text-transform:uppercase;margin:0;position:relative;z-index:2;">Balance a recibir</p>
-                        <h2 id="montoRecibirTarjetaPm" style="font-family:Manrope,sans-serif;font-size:34px;font-weight:800;color:#fff;margin:2px 0 14px;position:relative;z-index:2;">$0</h2>
-                        <p id="tarjetaNumeroPm" style="font-family:monospace;font-size:16px;letter-spacing:3px;color:rgba(255,255,255,0.88);margin:0 0 14px;position:relative;z-index:2;">•••• •••• •••• ••••</p>
-                        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative;z-index:2;">
+                        <div class="tj-chip"></div>
+                        <p class="tj-etq">Balance a recibir</p>
+                        <h2 id="montoRecibirTarjetaPm" class="tj-monto" style="font-family:Manrope,sans-serif;">$0</h2>
+                        <p id="tarjetaNumeroPm" class="tj-num">•••• •••• •••• ••••</p>
+                        <div class="tj-pie">
                             <div style="min-width:0;">
-                                <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Titular</p>
-                                <p id="tarjetaTitularPm" style="font-size:13px;font-weight:700;color:#fff;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</p>
+                                <p class="tj-pie-etq">Titular</p>
+                                <p id="tarjetaTitularPm" class="tj-pie-val" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</p>
                             </div>
                             <div style="text-align:center;flex-shrink:0;">
-                                <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Mis Puntos</p>
-                                <p id="tarjetaPuntosPm" style="font-size:13px;font-weight:700;color:#f7d774;margin:2px 0 0;">—</p>
+                                <p class="tj-pie-etq">Mis Puntos</p>
+                                <p id="tarjetaPuntosPm" class="tj-pie-val tj-pie-pts">—</p>
                             </div>
                             <div style="text-align:right;flex-shrink:0;">
-                                <p style="font-size:8px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin:0;">Miembro desde</p>
-                                <p id="tarjetaDesdePm" style="font-size:13px;font-weight:700;color:#fff;margin:2px 0 0;">—</p>
+                                <p class="tj-pie-etq">Miembro desde</p>
+                                <p id="tarjetaDesdePm" class="tj-pie-val">—</p>
                             </div>
                         </div>
                     </div>
@@ -2635,6 +2766,21 @@
                         </div>
                     </div>
 
+                    <!-- VERSIÓN DE LA TARJETA -->
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                            <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1">credit_card</span>
+                            </div>
+                            <div style="min-width:0;">
+                                <p style="font-size:14px;font-weight:800;color:#001723;margin:0;">Versión de la tarjeta</p>
+                                <p style="font-size:11px;color:#94a3b8;margin:2px 0 0;line-height:1.4;">El diseño de tu tarjeta del balance. Va aparte del tema de la app. Se guarda en este dispositivo.</p>
+                            </div>
+                        </div>
+                        <!-- Los botones los pinta _tarjetaPintarSelector() desde la lista TARJETAS de app.js -->
+                        <div id="tarjetaSelector" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;"></div>
+                    </div>
+
                     <!-- ACCESO POR HUELLA / ROSTRO -->
                     <div id="filaHuella" style="display:none;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);align-items:center;gap:12px;">
                         <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -2889,7 +3035,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=186"></script>
+<script src="app.js?v=187"></script>
 <script src="version.js?v=5"></script>
 
 

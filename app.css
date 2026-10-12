@@ -558,8 +558,10 @@
         .pm-layout [style*="color:#ffb4ab"] { color: var(--pm-red) !important; }
         /* Toggle activo (Movimientos/Anticipos) → pill de acento del tema */
         .pm-layout [style*="background:#ffffff"] { background: var(--pm-accent) !important; color: #fff !important; }
-        /* Tarjeta bancaria: SIEMPRE oscura (no sigue el tema) */
-        .pm-layout #pmBalanceTarjeta [style*="color:#fff"] { color: #fff !important; }
+        /* La tarjeta ya no lleva colores escritos en el HTML: los pone el
+           bloque «VERSIONES DE LA TARJETA», más abajo. Acá había una regla
+           que la forzaba a blanco para que el tema de la app no la tocara;
+           sobra, y además impedía que pudiera existir una tarjeta clara. */
         :root[data-theme="rosa"] .tema-btn.active {
             border-color: #db2777 !important;
             box-shadow: 0 0 0 3px rgba(219,39,119,0.18);
@@ -1172,6 +1174,126 @@
         :root[data-tinte="campo"] input { background: #142309 !important; border-color: #3f6212 !important; color: #ecfccb !important; }
         :root[data-tinte="campo"] .tema-btn { background: #1a2d0c !important; border-color: #2d4a14 !important; }
         :root[data-tinte="campo"] .tema-btn.active { border-color: #a3e635 !important; box-shadow: 0 0 0 3px rgba(163,230,53,0.22); }
+
+        /* ══════════════════════════════════════════════════════════════
+           VERSIONES DE LA TARJETA
+
+           La tarjeta del balance era una sola y con los colores escritos a
+           mano en el HTML, así que no seguía ningún tema: daba igual que la
+           app estuviera en claro, oscuro o rosa, la tarjeta siempre era el
+           mismo azul petróleo.
+
+           Ahora el diseño se elige aparte del tema de la app —son dos cosas
+           distintas: el tema viste la app, la tarjeta es la tarjeta— y vive
+           en `<html data-tarjeta="...">`.
+
+           Todo el color sale de `--tj-base`, que es el color del TEXTO en
+           RGB suelto. Los grises de la tarjeta son ese mismo color con
+           transparencia, así que una tarjeta clara solo tiene que cambiar
+           esa variable y toda la jerarquía se da vuelta sola: en Platino el
+           texto es azul noche y los secundarios son azul noche al 82 %, no
+           blancos ilegibles.
+
+           Las transparencias no son a ojo: se midieron contra el tope MÁS
+           CLARO del degradado de cada diseño, que es el caso peor. Con las
+           de antes, «Casino Puerto Varas» daba 3,83:1 en Pasto y 4,34:1 en
+           Medianoche —la tarjeta que ya existía—, bajo el mínimo de 4,5.
+           ══════════════════════════════════════════════════════════════ */
+        :root {
+            --tj-base:   255, 255, 255;      /* color del texto, en RGB suelto */
+            --tj-bg:     linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            --tj-sombra: 0 14px 34px rgba(0, 0, 0, 0.35);
+            --tj-chip:   linear-gradient(135deg, #f7d774, #c9a227);
+            --tj-acento: #f7d774;            /* los puntos */
+        }
+        :root[data-tarjeta="onix"] {
+            --tj-bg:     linear-gradient(135deg, #000000, #161616, #2a2a2a);
+            --tj-sombra: 0 14px 34px rgba(0, 0, 0, 0.55);
+        }
+        :root[data-tarjeta="oceano"] {
+            --tj-bg:     linear-gradient(135deg, #041c3a, #0a3d6b, #0e5a8a);
+            --tj-chip:   linear-gradient(135deg, #bae6fd, #38bdf8);
+            --tj-acento: #bae6fd;
+        }
+        :root[data-tarjeta="esmeralda"] {
+            --tj-bg:     linear-gradient(135deg, #04120d, #0b3b2a, #11614a);
+            --tj-chip:   linear-gradient(135deg, #a7f3d0, #34d399);
+            --tj-acento: #a7f3d0;
+        }
+        :root[data-tarjeta="vino"] {
+            --tj-bg:     linear-gradient(135deg, #1a080e, #4a1020, #6d1a30);
+            --tj-chip:   linear-gradient(135deg, #fbcfe8, #f472b6);
+            --tj-acento: #fbcfe8;
+        }
+        :root[data-tarjeta="pasto"] {
+            --tj-bg:     linear-gradient(135deg, #0d1a06, #24400f, #3a6317);
+            --tj-chip:   linear-gradient(135deg, #d9f99d, #a3e635);
+            --tj-acento: #d9f99d;
+        }
+        :root[data-tarjeta="lavanda"] {
+            --tj-bg:     linear-gradient(135deg, #140d2b, #2e1a5e, #4a2d8f);
+            --tj-chip:   linear-gradient(135deg, #ddd6fe, #a78bfa);
+            --tj-acento: #ddd6fe;
+        }
+        /* La clara. Es la razón de que el color del texto sea una variable:
+           acá se da vuelta entera y el resto de las reglas no se tocan. */
+        :root[data-tarjeta="platino"] {
+            --tj-base:   16, 38, 59;
+            --tj-bg:     linear-gradient(135deg, #dfe7ef, #f7f9fb, #cfd9e4);
+            --tj-sombra: 0 14px 30px rgba(31, 55, 80, 0.28);
+            --tj-chip:   linear-gradient(135deg, #e3b23c, #a67c12);
+            --tj-acento: #6b4500;
+        }
+
+        .tj-cara {
+            position: relative; border-radius: 22px; padding: 20px; min-height: 210px;
+            overflow: hidden; background: var(--tj-bg); box-shadow: var(--tj-sombra);
+            color: rgb(var(--tj-base));
+        }
+        .tj-velo  { position: absolute; border-radius: 50%; pointer-events: none;
+                    background: rgba(var(--tj-base), 0.06); }
+        .tj-velo2 { background: rgba(var(--tj-base), 0.045); }
+        .tj-marca { font-size: 9px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+                    margin: 0; color: rgba(var(--tj-base), 0.9); }
+        .tj-sub   { font-size: 10px; margin: 2px 0 0; color: rgba(var(--tj-base), 0.82); }
+        .tj-btn   { width: 34px; height: 34px; border-radius: 10px; cursor: pointer;
+                    display: flex; align-items: center; justify-content: center;
+                    background: rgba(var(--tj-base), 0.16); border: 1px solid rgba(var(--tj-base), 0.28); }
+        .tj-btn .material-symbols-outlined { font-size: 18px; color: rgba(var(--tj-base), 0.95); }
+        .tj-chip  { width: 46px; height: 34px; border-radius: 7px; background: var(--tj-chip);
+                    margin: 16px 0 10px; position: relative; z-index: 2;
+                    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); }
+        .tj-etq   { font-size: 9px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+                    margin: 0; position: relative; z-index: 2; color: rgba(var(--tj-base), 0.85); }
+        .tj-monto { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; margin: 2px 0 14px;
+                    position: relative; z-index: 2; color: rgb(var(--tj-base)); }
+        .tj-num   { font-family: monospace; font-size: 16px; letter-spacing: 3px; margin: 0 0 14px;
+                    position: relative; z-index: 2; color: rgba(var(--tj-base), 0.95); }
+        .tj-pie   { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;
+                    position: relative; z-index: 2; }
+        .tj-pie-etq { font-size: 8px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;
+                      color: rgba(var(--tj-base), 0.84); }
+        .tj-pie-val { font-size: 13px; font-weight: 700; margin: 2px 0 0; color: rgb(var(--tj-base)); }
+        .tj-pie-pts { color: var(--tj-acento); }
+
+        /* Botones del selector de tarjeta, en Configuración.
+           Los colores van explícitos y con su variante oscura, igual que
+           los botones de tema. `data-theme="oscuro"` cubre de una vez a
+           Oscuro y a todos los temas con tinte (Negro, Esmeralda, Grafito,
+           Vino, Índigo, Océano, Campo), porque todos usan esa base. */
+        .tarjeta-btn { border: 2px solid #e2e8f0; border-radius: 14px; padding: 8px 6px 10px;
+                       background: #fff; cursor: pointer; display: flex;
+                       flex-direction: column; align-items: center; gap: 7px; font-family: inherit; }
+        .tarjeta-btn .tj-mini { width: 100%; height: 40px; border-radius: 7px; background: var(--tj-prev);
+                                box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14); position: relative; }
+        .tarjeta-btn .tj-mini::after { content: ''; position: absolute; left: 7px; bottom: 7px;
+                                       width: 13px; height: 9px; border-radius: 2px; background: var(--tj-prev-chip); }
+        .tarjeta-btn span { font-size: 11px; font-weight: 700; color: #334155; }
+        .tarjeta-btn.active { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        :root[data-theme="oscuro"] .tarjeta-btn { background: #334155; border-color: #475569; }
+        :root[data-theme="oscuro"] .tarjeta-btn span { color: #e2e8f0; }
+        :root[data-theme="oscuro"] .tarjeta-btn.active { border-color: #60a5fa;
+                              box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25); }
 
         /* Efecto al estrenar la nueva versión (migración clásica → premium) */
         @keyframes pmSwitchFx {
