@@ -1602,15 +1602,29 @@
     // de INGRESO. Acá antes se contaban años por el día exacto de ingreso,
     // así que en el mes del aniversario el socio podía ver un número
     // distinto al de la comisión durante dos semanas.
+    // Cuándo le empiezan a correr los puntos a quien ingresó esa fecha: el
+    // primer día 15 que cae EN O DESPUÉS de cumplir el primer mes completo.
+    // Estaba metido dentro de _aniosPuntos y por eso el cálculo del total de
+    // la recaudación lo rehizo por su cuenta... y lo rehizo mal. Ahora hay
+    // una sola. Tiene que decir lo mismo que `reglaPuntosFechas` de
+    // socios-comicion.
+    function _primeraEntregaPuntos(fechaIngreso) {
+        const q = String(fechaIngreso || '').substring(0, 10).split('-').map(Number);
+        if (q.length !== 3 || !q[0] || !q[1] || !q[2]) return null;
+        const anio = q[0], mes0 = q[1] - 1, dia = q[2];
+        const ultimo = new Date(anio, mes0 + 2, 0).getDate();
+        const cumple = new Date(anio, mes0 + 1, Math.min(dia, ultimo));
+        return cumple.getDate() <= 15
+            ? new Date(cumple.getFullYear(), cumple.getMonth(), 15)
+            : new Date(cumple.getFullYear(), cumple.getMonth() + 1, 15);
+    }
+
     function _aniosPuntos(fechaIngreso) {
         const q = String(fechaIngreso || '').substring(0, 10).split('-').map(Number);
         if (q.length !== 3 || !q[0] || !q[1] || !q[2]) return 0;
-        const [anio, mes, dia] = q, mes0 = mes - 1;
-        const ultimo = new Date(anio, mes0 + 2, 0).getDate();
-        const cumple = new Date(anio, mes0 + 1, Math.min(dia, ultimo));
-        const primera = cumple.getDate() <= 15
-            ? new Date(cumple.getFullYear(), cumple.getMonth(), 15)
-            : new Date(cumple.getFullYear(), cumple.getMonth() + 1, 15);
+        const anio = q[0], mes0 = q[1] - 1;
+        const primera = _primeraEntregaPuntos(fechaIngreso);
+        if (!primera) return 0;
         let aniv = new Date(anio, mes0, 15);
         while (aniv <= primera) aniv = new Date(aniv.getFullYear() + 1, mes0, 15);
         const hoy = new Date();
@@ -3213,22 +3227,45 @@
     // Calcula el total de puntos del reparto (mismo criterio que socios-comicion →
     // "Gestión de Socios" → Total Puntos / Pts Planta). Solo socios visibles/activos
     // (fecha_inicio_puntos, regla del día 15). Usa el valor de BD si es > 0, si no la fórmula.
+    // Los dos números que se muestran al abrir «Recaudación del Día».
+    // Tienen que dar lo MISMO que el panel de Gestión de Socios en
+    // socios-comicion y que la franja de diario.propi.
+    //
+    // Acá había una tercera copia de la regla, y traía la versión vieja:
+    // daba los puntos el día 15 del MES DE INGRESO en vez del primer 15
+    // tras cumplir un mes. A quien entraba el 4 de septiembre le contaba
+    // puntos desde el 15 de septiembre y las otras dos apps desde el 15 de
+    // octubre, así que este botón mostraba de más.
     function _recCalcTotalPuntos() {
         const hoy = new Date();
         let total = 0, planta = 0;
         (allSocios || []).forEach(s => {
             const fechaStr = s.FechaIngreso;
             if (!fechaStr) return;
-            const fechaPuntosRaw = (s.FechaInicioPuntos && String(s.FechaInicioPuntos).trim()) ? String(s.FechaInicioPuntos).trim() : fechaStr;
-            const pr = String(fechaPuntosRaw).split('-');
-            const anio15 = parseInt(pr[0]), mes15 = parseInt(pr[1]) - 1;
-            if (!Number.isFinite(anio15) || !Number.isFinite(mes15)) return;
-            const fechaParaPuntos = new Date(anio15, mes15, 15);
-            const visible = hoy >= fechaParaPuntos;
-            if (!visible) return; // solo socios activos/visibles
-            let anios = hoy.getFullYear() - anio15;
-            if (hoy.getMonth() < mes15 || (hoy.getMonth() === mes15 && hoy.getDate() < 15)) anios--;
-            if (anios < 0) anios = 0;
+
+            // La fecha de inicio manual manda SOLO cuando difiere del
+            // ingreso: si viene igual no es una excepción, es un eco.
+            const ov = (s.FechaInicioPuntos && String(s.FechaInicioPuntos).trim()
+                        && String(s.FechaInicioPuntos).trim() !== String(fechaStr).trim())
+                       ? String(s.FechaInicioPuntos).trim() : null;
+
+            let fechaParaPuntos, anios;
+            if (ov) {
+                const q = ov.substring(0, 10).split('-').map(Number);
+                const anio15 = q[0], mes15 = q[1] - 1;
+                if (!Number.isFinite(anio15) || !Number.isFinite(mes15)) return;
+                fechaParaPuntos = new Date(anio15, mes15, 15);
+                anios = hoy.getFullYear() - anio15;
+                if (hoy.getMonth() < mes15 ||
+                    (hoy.getMonth() === mes15 && hoy.getDate() < 15)) anios--;
+                if (anios < 0) anios = 0;
+            } else {
+                fechaParaPuntos = _primeraEntregaPuntos(fechaStr);
+                if (!fechaParaPuntos) return;
+                anios = _aniosPuntos(fechaStr);
+            }
+            if (hoy < fechaParaPuntos) return;   // todavía no le corren puntos
+
             const _r = _reglaPuntosArea(s.Area);
             let pts;
             if (_r.gastos) {
@@ -3243,6 +3280,7 @@
         });
         return { total, planta };
     }
+
 
     window.abrirModalRec = (fecha) => {
         if (!currentUser) return;

@@ -343,6 +343,29 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-12 — «Total Puntos» y «Pts Planta» de Recaudación del Día no cuadraban (SW v188)
+
+Los dos números que salen al abrir **Recaudación del Día** no coincidían con el panel de Gestión de Socios de socios-comicion ni con la franja de diario.propi.
+
+**La causa: una tercera copia de la regla, con la versión vieja.** `_recCalcTotalPuntos` rehacía por su cuenta el cálculo de cuándo empiezan los puntos, y lo hacía mal:
+
+| | Cuándo empieza a contar un socio |
+|---|---|
+| socios-comicion y diario.propi | El primer día **15 en o después de cumplir el primer mes** |
+| Recaudación del Día (lo que hacía) | El día **15 del mes de ingreso** |
+
+Con el Ejemplo A de la política —ingresa el 4 de septiembre— este botón le contaba puntos desde el 15 de septiembre y las otras dos apps desde el 15 de octubre. Sobre la nómina de prueba daba **123 / 83** donde las otras dos daban **119 / 79**.
+
+Lo llamativo es que esta app **ya tenía la regla correcta** en `_aniosPuntos`; el agregado simplemente no la usaba. La causa de fondo era que el cálculo de la primera entrega estaba **enterrado dentro** de `_aniosPuntos`, así que quien necesitaba ese dato lo rehacía. Ahora está suelto en `_primeraEntregaPuntos()` y las dos funciones lo comparten.
+
+De paso se corrigió que `fecha_inicio_puntos` manda **solo cuando difiere** de la fecha de ingreso: si viene igual no es una excepción manual, es un eco del ingreso.
+
+**Después del cambio:** las **tres apps** dan lo mismo en **293.460 combinaciones** de fecha de ingreso, área y puntaje guardado.
+
+> Se barrieron los tres repos buscando una cuarta copia de la regla. No hay: los únicos `new Date(año, mes, 15)` que quedan en el cálculo de puntos están en la rama del override manual, donde sí corresponde. El resto de los «día 15» del código son el cálculo del período 15→14, que es otra cosa.
+
+**Archivos:** `app.js`, `index.html`, `originalindex.html`, `sw.js`, `version.js`.
+
 #### 2026-10-12 — Ocho versiones para la tarjeta del balance (SW v187)
 
 La tarjeta no seguía ningún tema: daba igual que la app estuviera en claro, oscuro o rosa, siempre era el mismo azul petróleo. Los colores estaban escritos a mano en el HTML, y había incluso una regla en `app.css` que la forzaba a blanco para que el tema no la tocara.
