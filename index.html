@@ -512,10 +512,14 @@
                 </button>
                 <div id="notifMenu" style="display:none;position:fixed;top:calc(env(safe-area-inset-top, 0px) + 60px);right:10px;width:300px;max-width:calc(100vw - 20px);max-height:62vh;overflow-y:auto;background:var(--color-card,#ffffff);border:1px solid var(--color-subtle,#e2e8f0);border-radius:16px;box-shadow:0 14px 44px rgba(0,0,0,0.20);z-index:250;padding:6px;"></div>
             </div>
-            <div class="flex items-center gap-1.5 bg-lm-subtle border border-lm-border rounded-xl px-3 py-1.5">
-                <div class="w-1.5 h-1.5 rounded-full bg-lm-green pulse-dot"></div>
-                <span id="userAreaLabel" class="text-[11px] text-lm-primary font-medium">...</span>
-            </div>
+            <!-- Acá iba la píldora con el área del socio. Se quitó porque el
+                 área ya sale justo debajo, en «mesas · Casino Puerto Varas»
+                 (#pmRolTxt): era el mismo dato dos veces. En su lugar queda
+                 el comprobante, que antes vivía escondido dentro de la
+                 tarjeta del balance. -->
+            <button onclick="descargarComprobante()" title="Descargar comprobante" aria-label="Descargar comprobante" class="w-9 h-9 flex items-center justify-center rounded-xl bg-lm-subtle text-lm-muted hover:text-lm-primary transition-colors border border-lm-border">
+                <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+            </button>
             <button onclick="openHelp()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-lm-subtle text-lm-muted hover:text-lm-primary transition-colors border border-lm-border">
                 <span class="material-symbols-outlined text-[18px]">help</span>
             </button>
@@ -548,11 +552,6 @@
                         <h2 id="montoRecibirLabel" class="font-headline text-4xl font-bold text-white tracking-tight">$0</h2>
                     </div>
                     <div style="display:flex;gap:8px;align-items:center;">
-                        <button onclick="toggleBalanceEstilo()" title="Cambiar a vista tarjeta"
-                            style="width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                            <span class="material-symbols-outlined" style="font-size:20px;color:rgba(255,255,255,0.85)">credit_card</span>
-                        </button>
                         <button onclick="descargarComprobante()" title="Descargar Comprobante"
                             style="width:40px;height:40px;border-radius:14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0;"
                             onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
@@ -578,9 +577,6 @@
                         <div style="display:flex;gap:8px;align-items:center;">
                             <button onclick="descargarComprobante()" title="Descargar Comprobante" class="tj-btn">
                                 <span class="material-symbols-outlined">receipt</span>
-                            </button>
-                            <button onclick="toggleBalanceEstilo()" title="Volver a vista clásica" class="tj-btn">
-                                <span class="material-symbols-outlined">sync_alt</span>
                             </button>
                         </div>
                     </div>
@@ -704,29 +700,10 @@
                     </p>
                 </div>
                 <!-- Tarjeta balance premium -->
-                <div id="pmBalanceCard" style="position:relative;overflow:hidden;background:linear-gradient(135deg,#171c22,#282e36);border:1px solid #43474b;border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.35);margin-bottom:26px;">
-                    <div style="position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.03);pointer-events:none;"></div>
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;position:relative;z-index:2;">
-                        <div>
-                            <p style="font-size:11px;font-weight:600;letter-spacing:0.09em;color:#cee6f7;text-transform:uppercase;margin:0 0 6px;">Balance a Recibir</p>
-                            <h2 id="pmBalance" style="font-family:Manrope,sans-serif;font-size:38px;font-weight:700;letter-spacing:-0.02em;color:#e1e3e4;margin:0;">$0</h2>
-                        </div>
-                        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
-                            <button onclick="toggleBalanceEstilo()" title="Cambiar a vista tarjeta" style="width:36px;height:36px;border-radius:10px;background:#282e36;border:1px solid #43474b;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:18px;color:#cee6f7;">credit_card</span></button>
-                            <button onclick="descargarComprobante()" title="Comprobante" style="width:36px;height:36px;border-radius:10px;background:#282e36;border:1px solid #43474b;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:18px;color:#cee6f7;">receipt</span></button>
-                        </div>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px;padding-top:18px;border-top:1px solid #43474b;position:relative;z-index:2;">
-                        <div>
-                            <p style="font-size:12px;color:#c3c7cb;margin:0 0 3px;">Miembro desde</p>
-                            <p id="pmDesde" style="font-size:15px;font-weight:600;color:#e1e3e4;margin:0;">—</p>
-                        </div>
-                        <div style="text-align:right;">
-                            <p style="font-size:12px;color:#c3c7cb;margin:0 0 3px;">ID Socio</p>
-                            <p id="pmId" style="font-size:15px;font-weight:600;color:#e1e3e4;margin:0;">—</p>
-                        </div>
-                    </div>
-                </div>
+                <!-- El balance «clásico» (#pmBalanceCard) se retiró: la app usa
+                     siempre la tarjeta, que ahora tiene ocho versiones para
+                     elegir en Configuración. Antes convivían las dos y había un
+                     botón para saltar de una a otra. -->
 
                 <!-- Tarjeta bancaria (premium) -->
                 <div id="pmBalanceTarjeta" style="display:none;margin-bottom:26px;">
@@ -737,9 +714,6 @@
                                 <p class="tj-marca">Fondo Solidario</p>
                                 <p class="tj-sub">Casino Puerto Varas</p>
                             </div>
-                            <button onclick="toggleBalanceEstilo()" title="Volver a la tarjeta" class="tj-btn">
-                                <span class="material-symbols-outlined">sync_alt</span>
-                            </button>
                         </div>
                         <div class="tj-chip"></div>
                         <p class="tj-etq">Balance a recibir</p>
@@ -1674,7 +1648,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=188"></script>
+<script src="app.js?v=189"></script>
 <script src="version.js?v=5"></script>
 
 

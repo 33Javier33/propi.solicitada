@@ -343,6 +343,20 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-13 — Se retira el balance clásico y el comprobante sube al header (SW v189)
+
+Dos cambios que van juntos:
+
+**1. El balance se muestra siempre como tarjeta.** Hasta ahora convivían dos vistas —la clásica (`#pmBalanceCard`) y la tarjeta— con un botón para saltar de una a otra. Desde que la tarjeta tiene **ocho versiones** para elegir en Configuración, la clásica sobraba. Se retiró el bloque, se quitaron los botones de cambio de vista y la tarjeta queda limpia, sin nada encima.
+
+**2. El comprobante sube al header.** El botón de descargar comprobante vivía escondido dentro de la tarjeta. Ahora está arriba, junto a la campana, la ayuda y el botón de salir, con las mismas clases que ellos para que se vea igual.
+
+**En su lugar se quitó la píldora con el área** (`● mesas`), porque era **el mismo dato dos veces**: el área ya sale justo debajo del saludo, en «mesas · Casino Puerto Varas» (`#pmRolTxt`), que es la que se queda.
+
+> **Un error que la prueba destapó.** Al dejar la tarjeta siempre visible, `_aplicarBalanceEstilo` pasó a llamar **siempre** a `_refrescarTarjeta`, y esa lee `currentUser.ID`. Antes solo corría al elegir la vista «tarjeta», así que nunca se topaba con `currentUser` en nulo; ahora corre también **al cargar la app antes de entrar**, y reventaba en el arranque. Lleva su guarda, y la prueba cubre ese caso.
+
+**Archivos:** `index.html`, `app.js`, `originalindex.html`, `sw.js`, `version.js`.
+
 #### 2026-10-12 — «Total Puntos» y «Pts Planta» de Recaudación del Día no cuadraban (SW v188)
 
 Los dos números que salen al abrir **Recaudación del Día** no coincidían con el panel de Gestión de Socios de socios-comicion ni con la franja de diario.propi.

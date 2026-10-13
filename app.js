@@ -655,7 +655,7 @@
             : 'Con ' + anos + ' año' + (anos === 1 ? '' : 's') + ' en el casino, tienes ' + pts + ' puntos asignados en el reparto.';
         cargarDocumentos();
         _sincronizarTemaBtns();
-        _aplicarBalanceEstilo(_balanceEstiloGuardado());
+        _aplicarBalanceEstilo();
         _maybeMigrarPremium();
         _aplicarLoginShape(_loginShapeGuardada());
         _pushRefrescarEstado();
@@ -769,11 +769,18 @@
     try { window._tarjetaPintarSelector(); } catch (e) {}
 
     // ── ESTILO DEL BALANCE (clásico / tarjeta bancaria) ──────────────
+    // Se conserva solo para no romper llamadas viejas: el estilo ya no es
+    // una opción, siempre es la tarjeta.
     function _balanceEstiloGuardado() {
-        try { return localStorage.getItem('propi_balance_estilo') === 'tarjeta' ? 'tarjeta' : 'clasico'; }
-        catch (e) { return 'clasico'; }
+        try { return 'tarjeta'; }
+        catch (e) { return 'tarjeta'; }
     }
     function _refrescarTarjeta() {
+        // Sin socio en sesión no hay nada que pintar, y getDisplayName()
+        // revienta al leer currentUser.ID. Antes no se notaba porque esto
+        // solo corría al elegir la vista «tarjeta»; ahora corre siempre,
+        // también al cargar la app antes de entrar.
+        if (!currentUser) return;
         const _set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
         const src = document.getElementById('montoRecibirLabel');
         let monto = '$0';
@@ -799,20 +806,19 @@
             }
         }
     }
-    function _aplicarBalanceEstilo(estilo) {
-        const esTarjeta = estilo === 'tarjeta';
-        [['balanceClasico', 'balanceTarjeta'], ['pmBalanceCard', 'pmBalanceTarjeta']].forEach(([nId, tId]) => {
-            const n = document.getElementById(nId), t = document.getElementById(tId);
-            if (n) n.style.display = esTarjeta ? 'none' : '';
-            if (t) t.style.display = esTarjeta ? 'block' : 'none';
-        });
-        if (esTarjeta) _refrescarTarjeta();
+    // El balance se muestra SIEMPRE como tarjeta. Antes había dos vistas
+    // —la clásica y la tarjeta— con un botón para saltar entre ellas; la
+    // clásica se retiró cuando la tarjeta pasó a tener ocho versiones para
+    // elegir en Configuración, así que ya no hay entre qué elegir.
+    function _aplicarBalanceEstilo() {
+        [['balanceClasico', 'balanceTarjeta'], ['pmBalanceCard', 'pmBalanceTarjeta']]
+            .forEach(([nId, tId]) => {
+                const n = document.getElementById(nId), t = document.getElementById(tId);
+                if (n) n.style.display = 'none';
+                if (t) t.style.display = 'block';
+            });
+        _refrescarTarjeta();
     }
-    window.toggleBalanceEstilo = function () {
-        const nuevo = _balanceEstiloGuardado() === 'tarjeta' ? 'clasico' : 'tarjeta';
-        try { localStorage.setItem('propi_balance_estilo', nuevo); } catch (e) {}
-        _aplicarBalanceEstilo(nuevo);
-    };
 
     // ── VERSIÓN DE INICIO ────────────────────────────────────────────
     // La versión CLÁSICA fue retirada: la app usa siempre la versión nueva (premium).
@@ -888,7 +894,7 @@
             localStorage.setItem('propi_balance_estilo', 'tarjeta');
         } catch (e) {}
         const m = document.getElementById('nuevaVersionModal'); if (m) m.style.display = 'none';
-        _aplicarBalanceEstilo('tarjeta');
+        _aplicarBalanceEstilo();
         _aplicarHomeVersion('premium');
         // Efecto de transición al estrenar la nueva versión
         const app = document.getElementById('appContainer');
@@ -1382,7 +1388,10 @@
         document.getElementById('appContainer').classList.remove('hidden');
         document.getElementById('appContainer').classList.add('flex');
         applyDisplayName();
-        document.getElementById('userAreaLabel').textContent = currentUser.Area;
+        // El área salía también en el header; se quitó de ahí por repetida
+        // (queda la de abajo, en #pmRolTxt). Se pinta solo si existe.
+        const _elArea = document.getElementById('userAreaLabel');
+        if (_elArea) _elArea.textContent = currentUser.Area;
         renderPerfil();
         _renderSonidoSelector();
         try { _bioRefrescarUI(); } catch (e) {}
