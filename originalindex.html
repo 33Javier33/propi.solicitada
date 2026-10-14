@@ -432,6 +432,76 @@
             color: #9ba3ab;
             pointer-events: none;
         }
+        /* El formato que el socio escribe se ve en el propio cuadro de
+           escritura, no solo al enviarlo. */
+        #chatInput b, #chatInput strong { font-weight: 800; }
+        #chatInput p  { margin: 0 0 4px; }
+        #chatInput ul, #chatInput ol { margin: 2px 0 4px; padding-left: 20px; }
+
+        /* ── Barra de formato del mensaje ──
+           Los mismos botones que las notas de socios-comicion. En un
+           teléfono no caben todos a lo ancho, así que la barra se desliza
+           en horizontal en vez de apilarse y empujar el teclado. */
+        .chat-formato {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 5px 8px;
+            margin-bottom: 6px;
+            background: var(--color-card, #fff);
+            border: 1px solid rgb(var(--lm-border) / 1);
+            border-radius: 14px;
+        }
+        .chat-formato::-webkit-scrollbar { display: none; }
+        .chat-formato[hidden] { display: none; }
+        .chat-formato button {
+            min-width: 34px;
+            height: 32px;
+            padding: 0 8px;
+            flex-shrink: 0;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            background: transparent;
+            color: rgb(var(--lm-primary) / 1);
+            font-size: 0.9rem;
+            line-height: 1;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .chat-formato button:active { background: rgb(var(--lm-high) / 1); }
+        /* Marca el formato que hay donde está el cursor, como en Word. */
+        .chat-formato button.activo {
+            background: rgb(var(--lm-secondary) / 0.14);
+            border-color: rgb(var(--lm-secondary) / 0.45);
+            color: rgb(var(--lm-secondary) / 1);
+        }
+        .chat-formato-sep {
+            width: 1px; height: 18px; flex-shrink: 0;
+            background: rgb(var(--lm-border) / 1);
+            margin: 0 4px;
+        }
+        /* El botón «Aa» que abre la barra, dentro de la burbuja de escritura. */
+        #chatFormatoBtn {
+            flex-shrink: 0;
+            width: 30px; height: 30px;
+            border: none;
+            border-radius: 9px;
+            background: rgb(var(--lm-subtle) / 1);
+            color: rgb(var(--lm-muted) / 1);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+        }
+        #chatFormatoBtn.abierto {
+            background: rgb(var(--lm-secondary) / 0.16);
+            color: rgb(var(--lm-secondary) / 1);
+        }
         #tab-chat.active { display: flex !important; flex-direction: column; }
         .wa-send-btn {
             width: 46px; height: 46px;
@@ -2440,6 +2510,23 @@
                 <div id="chatFotoPreview" style="display:none; align-items:center; gap:8px; background:#fff; border:1px solid #e1e3e4; border-radius:12px; padding:6px 10px; margin-bottom:6px;"></div>
                 <input type="file" id="chatFotoCam" accept="image/*" capture="environment" style="display:none" onchange="chatAdjuntarFoto(this)">
                 <input type="file" id="chatFotoGal" accept="image/*" style="display:none" onchange="chatAdjuntarFoto(this)">
+                <!-- Formato del mensaje: los mismos botones que las notas de
+                     socios-comicion, para que lo que se redacta acá se vea
+                     igual allá. Se abre con el botón «Aa». -->
+                <div class="chat-formato" id="chatFormato" role="toolbar" aria-label="Formato del mensaje" hidden>
+                    <button type="button" data-cmd="bold"          title="Negrita"><b>B</b></button>
+                    <button type="button" data-cmd="italic"        title="Cursiva"><i>I</i></button>
+                    <button type="button" data-cmd="underline"     title="Subrayado"><u>U</u></button>
+                    <span class="chat-formato-sep"></span>
+                    <button type="button" data-cmd="justifyLeft"   title="Alinear a la izquierda">⯇</button>
+                    <button type="button" data-cmd="justifyCenter" title="Centrar">≡</button>
+                    <button type="button" data-cmd="justifyRight"  title="Alinear a la derecha">⯈</button>
+                    <span class="chat-formato-sep"></span>
+                    <button type="button" data-cmd="insertUnorderedList" title="Lista con viñetas">•—</button>
+                    <button type="button" data-cmd="insertOrderedList"   title="Lista numerada">1.</button>
+                    <span class="chat-formato-sep"></span>
+                    <button type="button" data-cmd="removeFormat"  title="Quitar formato">✕</button>
+                </div>
                 <div style="display:flex; align-items:flex-end; gap:6px;">
                     <button onclick="document.getElementById('chatFotoCam').click()" title="Tomar foto" style="width:44px;height:44px;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;">
                         <span class="material-symbols-outlined" style="color:#6366f1;font-size:22px">photo_camera</span>
@@ -2447,7 +2534,12 @@
                     <button onclick="document.getElementById('chatFotoGal').click()" title="Elegir de galería" style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;">
                         <span class="material-symbols-outlined" style="color:#64748b;font-size:22px">image</span>
                     </button>
-                    <div style="flex:1; background:#ffffff; border-radius:22px; padding:10px 16px; display:flex; align-items:center; border:1px solid #e1e3e4; min-height:44px;">
+                    <div style="flex:1; background:#ffffff; border-radius:22px; padding:10px 14px 10px 8px; display:flex; align-items:center; gap:6px; border:1px solid #e1e3e4; min-height:44px;">
+                        <!-- Va DENTRO de la burbuja: un cuarto botón redondo
+                             afuera dejaba el campo de escritura muy angosto
+                             en un teléfono. -->
+                        <button type="button" id="chatFormatoBtn" onclick="chatFormatoToggle()"
+                                title="Formato del texto" aria-label="Formato del texto" aria-expanded="false">Aa</button>
                         <div id="chatInput"
                             contenteditable="true"
                             data-placeholder="Escribe un mensaje..."
@@ -3009,7 +3101,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=189"></script>
+<script src="app.js?v=190"></script>
 <script src="version.js?v=5"></script>
 
 

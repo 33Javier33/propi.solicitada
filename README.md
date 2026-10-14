@@ -343,6 +343,34 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-14 — Formato en los mensajes: negrita, subrayado y listas (SW v190)
+
+La app **ya sabía mostrar** mensajes con formato: `notaHTML()` los pinta saneados con la misma lista blanca que usa socios-comicion en sus Notas. Lo que faltaba era poder **escribirlos** — el cuadro mandaba `innerText` y el formato se perdía al enviar.
+
+**Nueva barra de formato**, con los mismos nueve botones que socios-comicion:
+
+| | |
+|---|---|
+| **B** · *I* · <u>U</u> | negrita, cursiva, subrayado |
+| ⯇ ≡ ⯈ | alinear a la izquierda, centrar, a la derecha |
+| •— · 1. | lista con viñetas, lista numerada |
+| ✕ | quitar formato |
+
+Se abre con el botón **Aa**, que va **dentro de la burbuja de escritura**: un cuarto botón redondo afuera dejaba el campo muy angosto en un teléfono. Queda cerrada por omisión — sobre el teclado hay poco espacio y la mayoría de los mensajes no llevan formato. La barra se **desliza en horizontal** en vez de apilarse, para no empujar el teclado.
+
+Detalles que importan:
+
+- **Lo que se manda es exactamente lo que se va a mostrar.** `getChatText()` devuelve el HTML pasado por `sanearNota()`, la misma función con la que se pinta. Nada que no sobreviva al saneado llega a viajar.
+- **Sin formato de por medio, el mensaje sigue siendo texto plano.** Un «Hola, ¿cómo están?» no se convierte en HTML, así que los mensajes de siempre no cambian en nada.
+- **Editar no aplana el formato.** Si el mensaje traía negritas, vuelve al editor con ellas; antes se metía como texto plano y corregir una palabra borraba el formato del resto.
+- **Pegar entra siempre como texto plano**, para que no se cuele el formato de Word o de una página.
+- **Los botones se marcan** según dónde esté el cursor, como en Word.
+- Solo etiquetas y espacios cuenta como vacío, para que la validación de «escribe algo o adjunta una foto» siga sirviendo.
+
+Los tres modos del chat (Administración, Social y Privado) ya pintaban con `notaHTML()`, así que el formato se ve en los tres. Y como la lista blanca es idéntica a la de socios-comicion (`B,STRONG,I,EM,U,BR,P,DIV,SPAN,UL,OL,LI,A`), lo que se redacta acá se ve igual allá y al revés.
+
+`test_chat_formato.js`: 43 comprobaciones, incluidas las de saneado (script, img con onerror, enlaces `javascript:`, estilos no permitidos).
+
 #### 2026-10-13 — Se retira el balance clásico y el comprobante sube al header (SW v189)
 
 Dos cambios que van juntos:

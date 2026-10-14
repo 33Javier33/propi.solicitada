@@ -1079,6 +1079,23 @@
                 <div id="chatFotoPreview" style="display:none; align-items:center; gap:8px; background:#fff; border:1px solid #e1e3e4; border-radius:12px; padding:6px 10px; margin-bottom:6px;"></div>
                 <input type="file" id="chatFotoCam" accept="image/*" capture="environment" style="display:none" onchange="chatAdjuntarFoto(this)">
                 <input type="file" id="chatFotoGal" accept="image/*" style="display:none" onchange="chatAdjuntarFoto(this)">
+                <!-- Formato del mensaje: los mismos botones que las notas de
+                     socios-comicion, para que lo que se redacta acá se vea
+                     igual allá. Se abre con el botón «Aa». -->
+                <div class="chat-formato" id="chatFormato" role="toolbar" aria-label="Formato del mensaje" hidden>
+                    <button type="button" data-cmd="bold"          title="Negrita"><b>B</b></button>
+                    <button type="button" data-cmd="italic"        title="Cursiva"><i>I</i></button>
+                    <button type="button" data-cmd="underline"     title="Subrayado"><u>U</u></button>
+                    <span class="chat-formato-sep"></span>
+                    <button type="button" data-cmd="justifyLeft"   title="Alinear a la izquierda">⯇</button>
+                    <button type="button" data-cmd="justifyCenter" title="Centrar">≡</button>
+                    <button type="button" data-cmd="justifyRight"  title="Alinear a la derecha">⯈</button>
+                    <span class="chat-formato-sep"></span>
+                    <button type="button" data-cmd="insertUnorderedList" title="Lista con viñetas">•—</button>
+                    <button type="button" data-cmd="insertOrderedList"   title="Lista numerada">1.</button>
+                    <span class="chat-formato-sep"></span>
+                    <button type="button" data-cmd="removeFormat"  title="Quitar formato">✕</button>
+                </div>
                 <div style="display:flex; align-items:flex-end; gap:6px;">
                     <button onclick="document.getElementById('chatFotoCam').click()" title="Tomar foto" style="width:44px;height:44px;border-radius:50%;background:#eef2ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;">
                         <span class="material-symbols-outlined" style="color:#6366f1;font-size:22px">photo_camera</span>
@@ -1086,7 +1103,12 @@
                     <button onclick="document.getElementById('chatFotoGal').click()" title="Elegir de galería" style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;">
                         <span class="material-symbols-outlined" style="color:#64748b;font-size:22px">image</span>
                     </button>
-                    <div style="flex:1; background:#ffffff; border-radius:22px; padding:10px 16px; display:flex; align-items:center; border:1px solid #e1e3e4; min-height:44px;">
+                    <div style="flex:1; background:#ffffff; border-radius:22px; padding:10px 14px 10px 8px; display:flex; align-items:center; gap:6px; border:1px solid #e1e3e4; min-height:44px;">
+                        <!-- Va DENTRO de la burbuja: un cuarto botón redondo
+                             afuera dejaba el campo de escritura muy angosto
+                             en un teléfono. -->
+                        <button type="button" id="chatFormatoBtn" onclick="chatFormatoToggle()"
+                                title="Formato del texto" aria-label="Formato del texto" aria-expanded="false">Aa</button>
                         <div id="chatInput"
                             contenteditable="true"
                             data-placeholder="Escribe un mensaje..."
@@ -1648,7 +1670,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=189"></script>
+<script src="app.js?v=190"></script>
 <script src="version.js?v=5"></script>
 
 

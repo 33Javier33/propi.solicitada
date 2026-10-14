@@ -377,6 +377,76 @@
             color: #9ba3ab;
             pointer-events: none;
         }
+        /* El formato que el socio escribe se ve en el propio cuadro de
+           escritura, no solo al enviarlo. */
+        #chatInput b, #chatInput strong { font-weight: 800; }
+        #chatInput p  { margin: 0 0 4px; }
+        #chatInput ul, #chatInput ol { margin: 2px 0 4px; padding-left: 20px; }
+
+        /* ── Barra de formato del mensaje ──
+           Los mismos botones que las notas de socios-comicion. En un
+           teléfono no caben todos a lo ancho, así que la barra se desliza
+           en horizontal en vez de apilarse y empujar el teclado. */
+        .chat-formato {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 5px 8px;
+            margin-bottom: 6px;
+            background: var(--color-card, #fff);
+            border: 1px solid rgb(var(--lm-border) / 1);
+            border-radius: 14px;
+        }
+        .chat-formato::-webkit-scrollbar { display: none; }
+        .chat-formato[hidden] { display: none; }
+        .chat-formato button {
+            min-width: 34px;
+            height: 32px;
+            padding: 0 8px;
+            flex-shrink: 0;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            background: transparent;
+            color: rgb(var(--lm-primary) / 1);
+            font-size: 0.9rem;
+            line-height: 1;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .chat-formato button:active { background: rgb(var(--lm-high) / 1); }
+        /* Marca el formato que hay donde está el cursor, como en Word. */
+        .chat-formato button.activo {
+            background: rgb(var(--lm-secondary) / 0.14);
+            border-color: rgb(var(--lm-secondary) / 0.45);
+            color: rgb(var(--lm-secondary) / 1);
+        }
+        .chat-formato-sep {
+            width: 1px; height: 18px; flex-shrink: 0;
+            background: rgb(var(--lm-border) / 1);
+            margin: 0 4px;
+        }
+        /* El botón «Aa» que abre la barra, dentro de la burbuja de escritura. */
+        #chatFormatoBtn {
+            flex-shrink: 0;
+            width: 30px; height: 30px;
+            border: none;
+            border-radius: 9px;
+            background: rgb(var(--lm-subtle) / 1);
+            color: rgb(var(--lm-muted) / 1);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+        }
+        #chatFormatoBtn.abierto {
+            background: rgb(var(--lm-secondary) / 0.16);
+            color: rgb(var(--lm-secondary) / 1);
+        }
         #tab-chat.active { display: flex !important; flex-direction: column; }
         .wa-send-btn {
             width: 46px; height: 46px;

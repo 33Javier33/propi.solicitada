@@ -2948,13 +2948,91 @@
     };
 
     // ── CHAT INPUT BEHAVIOR ────────────────────────────────────
+    //
+    // El mensaje viaja como HTML, con las mismas etiquetas que ya se saben
+    // mostrar (`notaHTML`) y que usa socios-comicion en sus notas: negrita,
+    // cursiva, subrayado, alineación y listas. Así lo que el socio redacta
+    // acá se ve igual allá, y al revés.
+    //
+    // Sale SANEADO por `sanearNota`, con la misma lista blanca con la que
+    // se pinta. Lo que se manda es exactamente lo que se va a mostrar.
     function getChatText() {
         const el = document.getElementById('chatInput');
-        return el ? el.innerText.trim() : '';
+        if (!el) return '';
+        const limpio = sanearNota(el.innerHTML).trim();
+        // Sin formato de por medio no se manda HTML: un mensaje suelto
+        // sigue viajando como texto plano, igual que siempre.
+        if (!notaTraeFormato(limpio)) return (el.innerText || '').trim();
+        // Solo etiquetas y espacios = vacío, para que la validación de
+        // «escribe algo o adjunta una foto» siga sirviendo.
+        const soloTexto = limpio.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+        return soloTexto ? limpio : '';
     }
     function clearChatInput() {
         const el = document.getElementById('chatInput');
-        if (el) el.innerText = '';
+        if (el) el.innerHTML = '';
+        chatFormatoMarcar();
+    }
+
+    // ── Barra de formato ───────────────────────────────────────
+    // Se abre con el botón «Aa» y queda cerrada por omisión: en un teléfono
+    // el espacio sobre el teclado es poco, y la mayoría de los mensajes no
+    // llevan formato.
+    function chatFormatoToggle() {
+        const barra = document.getElementById('chatFormato');
+        const btn   = document.getElementById('chatFormatoBtn');
+        if (!barra) return;
+        const abrir = barra.hasAttribute('hidden');
+        if (abrir) barra.removeAttribute('hidden'); else barra.setAttribute('hidden', '');
+        if (btn) {
+            btn.classList.toggle('abierto', abrir);
+            btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+        }
+        if (abrir) {
+            const ed = document.getElementById('chatInput');
+            if (ed) ed.focus();
+            chatFormatoMarcar();
+        }
+    }
+
+    function chatFormatoInit() {
+        const barra = document.getElementById('chatFormato');
+        const ed    = document.getElementById('chatInput');
+        if (!barra || !ed || barra._listo) return;
+        barra._listo = true;
+
+        barra.querySelectorAll('button[data-cmd]').forEach(btn => {
+            // `mousedown`/`touchstart` y no `click`: con `click` el editor ya
+            // perdió la selección y el formato se aplicaría sobre nada.
+            ['mousedown', 'touchstart'].forEach(ev => {
+                btn.addEventListener(ev, e => {
+                    e.preventDefault();
+                    ed.focus();
+                    try { document.execCommand(btn.dataset.cmd, false, null); } catch (err) {}
+                    chatFormatoMarcar();
+                }, { passive: false });
+            });
+        });
+
+        // Pegar siempre como texto plano: así no entra el formato ajeno de
+        // Word o de una página, que es de donde vienen los desórdenes.
+        ed.addEventListener('paste', e => {
+            e.preventDefault();
+            const t = ((e.clipboardData || window.clipboardData).getData('text/plain') || '');
+            try { document.execCommand('insertText', false, t); } catch (err) {}
+        });
+
+        ['keyup', 'mouseup', 'focus'].forEach(ev => ed.addEventListener(ev, chatFormatoMarcar));
+    }
+
+    function chatFormatoMarcar() {
+        const barra = document.getElementById('chatFormato');
+        if (!barra || barra.hasAttribute('hidden')) return;
+        barra.querySelectorAll('button[data-cmd]').forEach(b => {
+            let on = false;
+            try { on = document.queryCommandState(b.dataset.cmd); } catch (e) {}
+            b.classList.toggle('activo', !!on);
+        });
     }
 
     function initChatInput() {
@@ -2965,6 +3043,8 @@
         // Siempre restaurar el spacer y el nav (puede quedar en estado roto tras logout)
         if (spc) spc.style.height = (nav ? nav.offsetHeight || 72 : 72) + 'px';
         if (nav) nav.style.display = '';
+
+        chatFormatoInit();
 
         if (!tx || tx._init) return;
         tx._init = true;
@@ -3006,7 +3086,12 @@
         editingMessageId=id;
         const text = (window._chatMsgMap && window._chatMsgMap[id]) || '';
         const input=document.getElementById('chatInput');
-        input.innerText=text; input.focus();
+        // Si el mensaje traía formato, vuelve al editor CON su formato: si se
+        // metiera como texto plano, editar una palabra borraría las negritas
+        // del resto sin que nadie lo pidiera.
+        if (notaTraeFormato(text)) input.innerHTML = sanearNota(text);
+        else input.innerText = text;
+        input.focus();
         const range=document.createRange(), sel=window.getSelection();
         range.selectNodeContents(input); range.collapse(false);
         sel.removeAllRanges(); sel.addRange(range);
