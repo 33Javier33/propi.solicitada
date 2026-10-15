@@ -542,6 +542,11 @@
                 <span id="lastUpdateLabel" style="font-size:10px;color:#94a3b8;font-weight:500">Actualizando...</span>
             </div>
 
+            <!-- Aviso de que la administración ya cerró el mes de este socio.
+                 Si además ya cobró, el balance de abajo parte en $0 y esto
+                 explica por qué. -->
+            <div id="avisoCierreMes" style="display:none;"></div>
+
             <!-- HERO BALANCE CARD (estilo clásico) -->
             <div id="balanceClasico" class="mx-4 mt-4 mb-5 card-shine rounded-[28px] p-6 shadow-2xl relative overflow-hidden" style="min-height:180px">
                 <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5 blur-2xl pointer-events-none"></div>
@@ -1670,7 +1675,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=190"></script>
+<script src="app.js?v=191"></script>
 <script src="version.js?v=5"></script>
 
 

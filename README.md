@@ -343,6 +343,31 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-15 — El socio que ya cobró queda en $0, igual que en la administración (SW v191)
+
+**El problema.** Cuando la administración le cerraba el mes a un socio y éste retiraba su plata, la app le seguía mostrando **el monto completo**, como si aún tuviera que recibirlo. La recaudación del período sigue cargada —no se archiva— así que el balance se volvía a calcular entero.
+
+**La regla**, la misma que ahora aplica socios-comicion:
+
+| Estado del cierre | Qué ve el socio |
+|---|---|
+| **Cobrado** | Balance en **$0** — parte el mes nuevo solo con su **saldo anterior** (el remanente del cierre) |
+| **En sobre** | El monto **se mantiene**: la plata es suya y lo está esperando. Solo se le avisa que el mes ya se cerró y que pase a retirarlo |
+
+Esa distinción importa: poner en $0 al socio que todavía no retira le escondería plata que es suya.
+
+**Cómo lo sabe.** Nueva acción `getCierresMes` en `supabase-api.js`, que lee la tabla `cierres_mes` del proyecto de socios — la misma que escribe la administración al cerrar. **Mientras la fila exista, ese mes está liquidado.** Se vacía al archivar el período, que es cuando empieza el mes siguiente, así que el socio vuelve a acumular solo. No hizo falta ninguna tabla nueva.
+
+**El aviso.** Sobre la tarjeta de balance, para que ver $0 no parezca que la app perdió sus datos:
+
+> ✅ **Tu mes ya fue pagado** — Se cerró el **14 de octubre** y ya retiraste **$95.000**. Por eso tu balance parte en $0: lo que ves abajo es tu **saldo para el mes nuevo**.
+
+**El comprobante sigue sirviendo.** Antes se bloqueaba con «los datos aún no han cargado» justo cuando el balance quedaba en 0 — o sea, exactamente después de cobrar. Ahora, si hay cierre, imprime **lo que se liquidó** (mismo criterio que el recibo del admin), no los ceros del mes nuevo.
+
+**Si no se puede leer el cierre, el monto no reaparece.** Una lectura caída conserva el último cierre conocido. Sin esto, un corte de red le devolvería al socio un monto que ya cobró — que es justo el error que se está corrigiendo.
+
+`test_propi_cierre.js`: 25 comprobaciones sobre los tres estados (sin cierre, en sobre, cobrado), el comprobante, que la recaudación quede intacta, y el caso de la lectura caída.
+
 #### 2026-10-14 — Formato en los mensajes: negrita, subrayado y listas (SW v190)
 
 La app **ya sabía mostrar** mensajes con formato: `notaHTML()` los pinta saneados con la misma lista blanca que usa socios-comicion en sus Notas. Lo que faltaba era poder **escribirlos** — el cuadro mandaba `innerText` y el formato se perdía al enviar.

@@ -1898,6 +1898,42 @@
         setTimeout(() => d.remove(), 15000);
     }
 
+    // Le dice al socio que su mes ya se cerró, y en qué quedó. Sin esto,
+    // ver $0 después de cobrar parecería que la app perdió sus datos.
+    function _pintarAvisoCierre(c) {
+        const el = document.getElementById('avisoCierreMes');
+        if (!el) return;
+        if (!c) { el.style.display = 'none'; el.innerHTML = ''; return; }
+        const cobrado = c.estadoCobro === 'cobrado';
+        // «14 de octubre», no «14-octubre»: el es-CL con month:'long'
+        // devuelve la forma con guion, que en una frase se lee mal.
+        let cuando = '';
+        try {
+            if (c.fechaCierre) {
+                const _M = ['enero','febrero','marzo','abril','mayo','junio','julio',
+                            'agosto','septiembre','octubre','noviembre','diciembre'];
+                const _p = new Intl.DateTimeFormat('es-CL', { timeZone: 'America/Santiago',
+                    day: 'numeric', month: 'numeric' })
+                    .formatToParts(new Date(c.fechaCierre))
+                    .reduce((a, x) => (a[x.type] = x.value, a), {});
+                if (_p.day && _M[Number(_p.month) - 1]) cuando = _p.day + ' de ' + _M[Number(_p.month) - 1];
+            }
+        } catch (e) {}
+        el.style.display = 'block';
+        el.className = 'aviso-cierre' + (cobrado ? ' cobrado' : '');
+        el.innerHTML =
+              '<div class="ac-t">' + (cobrado ? '✅ Tu mes ya fue pagado' : '📩 Tu mes está cerrado') + '</div>'
+            + '<div class="ac-d">'
+            + (cobrado
+                ? 'Se cerró' + (cuando ? ' el <b>' + escHtml(cuando) + '</b>' : '') + ' y ya retiraste '
+                  + '<b>' + formatMoney(c.aPagar) + '</b>. Por eso tu balance parte en $0: '
+                  + 'lo que ves abajo es tu <b>saldo para el mes nuevo</b>.'
+                : 'Se cerró' + (cuando ? ' el <b>' + escHtml(cuando) + '</b>' : '') + ' con '
+                  + '<b>' + formatMoney(c.aPagar) + '</b> a tu favor, <b>en sobre</b>. '
+                  + 'Pasa a retirarlo; el monto ya no cambia.')
+            + '</div>';
+    }
+
     // ── REFRESH DATA — FASE 1: balance (crítico) + FASE 2: notas (background) ──
     let _balanceCache = null;
     let _balanceCacheTs = 0;
@@ -1912,12 +1948,13 @@
             // ── FASE 1: Las 5 llamadas de balance en paralelo ────
             // Las notas NO bloquean — se cargan en background
             // 5 llamadas en paralelo — cambiar a getAllSocioData una vez agregado al GAS
-            const [recRes, dataRes, saldosRes, cierreRes, diasRes] = await Promise.all([
+            const [recRes, dataRes, saldosRes, cierreRes, diasRes, cmRes] = await Promise.all([
                 fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get`),
                 fetch(SCRIPT_URL_SOCIOS, {method:'POST', body:JSON.stringify({action:'getAllDataDesdeSheets'})}),
                 fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosAnteriores`),
                 fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosCierre`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`)
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`),
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getCierresMes`)
             ]);
 
             const recJson    = await recRes.json();
@@ -1925,12 +1962,14 @@
             const saldosJson = await saldosRes.json();
             const cierreJson = await cierreRes.json();
             const diasJson   = await diasRes.json();
+            const cmJson     = await cmRes.json();
 
             let recData        = recJson.data   || [];
             let sheetsData     = fullSheets.data || fullSheets;
             let saldosData     = saldosJson.data || {};
             let cierreData     = cierreJson.data || {};
             let diasTrabajados = diasJson.data || {};
+            let cierresMes     = cmJson.data || {};
 
             // Anti-parpadeo: si una fuente respondió "stale" (timeout por conexión
             // dormida al volver a la app), conservar los últimos datos buenos en
@@ -1939,10 +1978,14 @@
                 if (recJson._stale   && _lastGood.recData)        recData        = _lastGood.recData;
                 if (fullSheets._stale&& _lastGood.sheetsData)     sheetsData     = _lastGood.sheetsData;
                 if (diasJson._stale  && _lastGood.diasTrabajados) diasTrabajados = _lastGood.diasTrabajados;
+                // Si no se pudo leer el cierre, se conserva el último conocido.
+                // Perderlo haría reaparecer el monto de un mes ya cobrado.
+                if (cmJson._stale    && _lastGood.cierresMes)     cierresMes     = _lastGood.cierresMes;
             }
             // Guardar snapshot bueno solo cuando los datos clave llegaron frescos.
             if (!recJson._stale && !fullSheets._stale) {
-                _lastGood = { recData, sheetsData, diasTrabajados };
+                _lastGood = { recData, sheetsData, diasTrabajados,
+                              cierresMes: cmJson._stale ? (_lastGood && _lastGood.cierresMes) : cierresMes };
             }
             // Aviso de días sin recaudación: se pinta ACÁ, antes del balance y
             // de los movimientos, para que no dependa de que todo lo demás
@@ -2031,10 +2074,31 @@
             const tDon=userDonaciones.reduce((a,b)=>a+Number(b.monto||0),0);
             let sAnt=(saldosData[sID]||saldosData[currentUser.ID]||0)+(cierreData[sID]||cierreData[currentUser.ID]||0);
 
-            const propinaBruta=puntoGlobalTotal*pts;
-            const saldoBruto=(propinaBruta+sAnt)-(tAnt+tDesc+tDon);
+            // ── ¿Ya me cerraron y me pagaron el mes? ─────────────────
+            //
+            // Mismo criterio que socios-comicion: mientras exista el cierre,
+            // la recaudación y los anticipos de este período YA se
+            // liquidaron. Acá se mira además si quedó COBRADO:
+            //
+            //   · cobrado  → el socio ya retiró la plata. Queda en 0 y parte
+            //     el mes nuevo solo con su saldo anterior (el remanente que
+            //     dejó el cierre). Antes seguía mostrando el monto completo,
+            //     como si todavía tuviera que recibirlo.
+            //   · en sobre → la plata es suya y está esperándolo, así que el
+            //     monto se mantiene; solo se le avisa que el mes ya se cerró.
+            //
+            // La recaudación no se toca: sigue entera, igual que en la
+            // administración. Lo que cambia es que este socio no la vuelve a
+            // sumar hasta que se archive el período.
+            const _miCierre = cierresMes[sID] || cierresMes[String(currentUser.ID)] || null;
+            const _yaCobre = !!(_miCierre && _miCierre.estadoCobro === 'cobrado');
+
+            const propinaBruta = _yaCobre ? 0 : puntoGlobalTotal*pts;
+            const _descuentos  = _yaCobre ? 0 : (tAnt+tDesc+tDon);
+            const saldoBruto=(propinaBruta+sAnt)-_descuentos;
             let remanente=saldoBruto>0?saldoBruto%1000:saldoBruto;
             let liquido=saldoBruto>0?saldoBruto-remanente:0;
+            _pintarAvisoCierre(_miCierre);
 
             const montoEl = document.getElementById('montoRecibirLabel');
             // Solo animar si el valor cambió o es primer load
@@ -2336,6 +2400,10 @@
             const vpVals = Object.values(mapVP);
             _lastBalance = {
                 liquido, remanente, propinaBruta, sAnt, tAnt,
+                // El cierre, si lo hay: el comprobante tiene que poder
+                // imprimir lo que se liquidó aunque el balance esté en 0
+                // porque el socio ya cobró.
+                cierre: _miCierre,
                 pts, anos, puntoGlobalTotal,
                 userAnticipos: [...userAnticipos],
                 vpPromedio: vpVals.length ? vpVals.reduce((a,v)=>a+v.totalVP,0)/vpVals.length : 0
@@ -4564,13 +4632,25 @@
     }
 
     function descargarComprobante() {
-        if (!currentUser || _lastBalance.liquido === 0 && _lastBalance.propinaBruta === 0) {
+        // Con el mes ya cerrado el balance está en 0 a propósito, así que
+        // ese 0 no significa «todavía no cargan los datos».
+        const _hayCierre = !!(_lastBalance && _lastBalance.cierre);
+        if (!currentUser || (!_hayCierre && _lastBalance.liquido === 0 && _lastBalance.propinaBruta === 0)) {
             alert('Los datos aún no han cargado. Espera un momento e intenta nuevamente.');
             return;
         }
 
         const u = currentUser;
-        const b = _lastBalance;
+        // Si el mes se cerró, el comprobante dice lo que se LIQUIDÓ, no los
+        // ceros del mes nuevo — mismo criterio que el recibo del admin.
+        const b = _hayCierre
+            ? Object.assign({}, _lastBalance, {
+                liquido: _lastBalance.cierre.aPagar,
+                remanente: _lastBalance.cierre.remanente,
+                propinaBruta: _lastBalance.cierre.alcance != null
+                    ? _lastBalance.cierre.alcance : _lastBalance.propinaBruta
+              })
+            : _lastBalance;
         const hoy = new Date();
         const fechaEmision = hoy.toLocaleDateString('es-CL', {day:'2-digit',month:'2-digit',year:'numeric'});
 

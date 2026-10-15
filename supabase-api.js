@@ -549,6 +549,31 @@ async function _sociosHandler(url, options) {
             return _mockRes(d);
         }
 
+        // ── Cierre de mes del socio ──────────────────────────────────
+        // Lo escribe socios-comicion al cerrarle el mes. Mientras la fila
+        // exista, el mes de ese socio YA está liquidado: su recaudación y
+        // sus anticipos de este período se pagaron. La administración
+        // vacía la tabla al archivar el período, que es cuando empieza el
+        // mes siguiente — por eso basta con mirar si la fila está.
+        case 'getCierresMes': {
+            const _cmRes = await _conTimeout(
+                dbSV.from('cierres_mes').select('socio_id, a_pagar, remanente, estado_cobro, fecha_cierre, alcance'),
+                8000, { data: null, _to: true }
+            );
+            if (_cmRes._to || !_cmRes.data) return _mockRes({ status: 'success', data: {}, _stale: true });
+            const mapa = {};
+            for (const c of _cmRes.data) {
+                mapa[String(c.socio_id)] = {
+                    aPagar: Number(c.a_pagar) || 0,
+                    remanente: Number(c.remanente) || 0,
+                    estadoCobro: c.estado_cobro || 'en_sobre',
+                    fechaCierre: c.fecha_cierre || null,
+                    alcance: c.alcance != null ? Number(c.alcance) : null
+                };
+            }
+            return _mockRes({ status: 'success', data: mapa });
+        }
+
         // Saldo de cierre — caché 24h + no-await para no bloquear el Promise.all del balance
         case 'getSaldosCierre': {
             const CK = 'propi_cache_saldos_cierre', TTL = 24 * 60 * 60 * 1000;
