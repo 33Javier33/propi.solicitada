@@ -1,6 +1,18 @@
     const SCRIPT_URL_SOCIOS = 'https://script.google.com/macros/s/AKfycbyr447pMQtsKoBfp8qTcB1uyE3rORhgPPmZM6Fgia3BgmIvtlZ_h04uGZrmx_HwubHQ/exec';
     const SCRIPT_URL_RECAUDACIONES = 'https://script.google.com/macros/s/AKfycbz_kCb4aEe437zHGbRqnjCibw1NtAqfCbTNmsVPn9jaZOPBFaZ6-FwmiTLqVxq39X1P/exec';
 
+    // Candado del saldo. Declarado acá arriba a propósito: se aplica al
+    // evaluar el script, antes de donde vive el resto de su código, y un
+    // `let` más abajo caería en la zona muerta temporal.
+    const SALDO_OCULTO_KEY = 'propi_saldo_oculto';
+    const SALDO_MASCARA = '$ ••••••';
+    const SALDO_IDS = ['montoRecibirLabel', 'montoRecibirTarjeta', 'montoRecibirTarjetaPm',
+                       'remateTag', 'pmBalance', 'pmRemanente'];
+
+    let _saldoOculto = (() => {
+        try { return localStorage.getItem(SALDO_OCULTO_KEY) === '1'; } catch (e) { return false; }
+    })();
+
     let allSocios=[], currentUser=null, messages={admin:[],social:[]},
         currentChatMode='ADMIN', currentSocialTarget={id:'TODOS',name:'Chat General'},
         lastMsgCount=parseInt(localStorage.getItem('lastMsgCountV19')||0),
@@ -767,6 +779,9 @@
     try { window.aplicarTarjeta(_tarjetaActual()); } catch (e) {}
     // app.js va al final del <body>, así que el contenedor ya existe.
     try { window._tarjetaPintarSelector(); } catch (e) {}
+    // El candado del saldo, tal como quedó la última vez: así el ojito
+    // sale con el icono correcto desde el primer pintado.
+    try { _aplicarSaldoOculto(); } catch (e) {}
 
     // ── ESTILO DEL BALANCE (clásico / tarjeta bancaria) ──────────────
     // Se conserva solo para no romper llamadas viejas: el estilo ya no es
@@ -784,9 +799,12 @@
         const _set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
         const src = document.getElementById('montoRecibirLabel');
         let monto = '$0';
-        if (src) { const v = src.getAttribute('data-value'); monto = (v !== null && v !== '') ? formatMoney(Number(v)) : src.textContent; }
-        _set('montoRecibirTarjeta', monto);
-        _set('montoRecibirTarjetaPm', monto);
+        if (src) {
+            const v = src.getAttribute('data-value');
+            monto = (v !== null && v !== '') ? formatMoney(Number(v)) : _montoReal(src, '$0');
+        }
+        _ponerMonto('montoRecibirTarjeta', monto);
+        _ponerMonto('montoRecibirTarjetaPm', monto);
         const titular = (getDisplayName() || '—').toUpperCase();
         _set('tarjetaTitular', titular);
         _set('tarjetaTitularPm', titular);
@@ -845,10 +863,13 @@
         }
         // Cifras en vivo (espejo del clásico, por si se cambia antes de un refresco)
         const bal = document.getElementById('montoRecibirLabel');
-        if (bal) { const v = bal.getAttribute('data-value'); _pmSet('pmBalance', (v !== null && v !== '') ? formatMoney(Number(v)) : bal.textContent); }
+        if (bal) {
+            const v = bal.getAttribute('data-value');
+            _ponerMonto('pmBalance', (v !== null && v !== '') ? formatMoney(Number(v)) : _montoReal(bal, '$0'));
+        }
         const pp = document.getElementById('perfilPuntos'); if (pp) _pmSet('pmPuntos', pp.textContent);
         const gp = document.getElementById('globalPtsTag'); if (gp) _pmSet('pmValorPunto', '$' + gp.textContent);
-        const rt = document.getElementById('remateTag'); if (rt) _pmSet('pmRemanente', rt.textContent);
+        const rt = document.getElementById('remateTag'); if (rt) _ponerMonto('pmRemanente', _montoReal(rt, '$0'));
     }
     function _aplicarHomeVersion(v) {
         const esPremium = v === 'premium';
@@ -1547,6 +1568,58 @@
         btn.disabled = false; btn.textContent = 'Guardar correo';
     };
 
+    // ══════════════════════════════════════════════════════════════
+    // CANDADO DEL SALDO
+    //
+    // Como en las apps del banco: el socio puede tapar su balance para
+    // que no quede a la vista de cualquiera que mire la pantalla, y lo
+    // vuelve a mostrar con el ojito. La elección se guarda, así que al
+    // cerrar y volver a abrir la app sigue tapado.
+    //
+    // Se tapa al ESCRIBIR, no después: si se pintara el monto real y se
+    // ocultara en un segundo paso, el número alcanzaría a verse en cada
+    // refresco. Por eso `_ponerMonto()` guarda el valor real en
+    // `data-real` y pinta la máscara o el monto según el candado.
+    // ══════════════════════════════════════════════════════════════
+    // Escribe un monto respetando el candado.
+    function _ponerMonto(id, texto) {
+        const el = (typeof id === 'string') ? document.getElementById(id) : id;
+        if (!el) return;
+        el.dataset.real = texto;
+        el.textContent = _saldoOculto ? SALDO_MASCARA : texto;
+    }
+
+    // El monto REAL de un elemento, aunque esté tapado. Lo usan los
+    // espejos (la tarjeta, el panel premium) para no copiarse la máscara.
+    function _montoReal(id, siFalta) {
+        const el = (typeof id === 'string') ? document.getElementById(id) : id;
+        if (!el) return siFalta || '';
+        if (el.dataset && el.dataset.real !== undefined) return el.dataset.real;
+        return el.textContent || siFalta || '';
+    }
+
+    function _aplicarSaldoOculto() {
+        SALDO_IDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el || !el.dataset || el.dataset.real === undefined) return;
+            el.textContent = _saldoOculto ? SALDO_MASCARA : el.dataset.real;
+        });
+        document.querySelectorAll('.ojo-saldo').forEach(b => {
+            const ic = b.querySelector('.material-symbols-outlined');
+            if (ic) ic.textContent = _saldoOculto ? 'visibility_off' : 'visibility';
+            b.setAttribute('aria-pressed', _saldoOculto ? 'true' : 'false');
+            b.setAttribute('aria-label', _saldoOculto ? 'Mostrar el balance' : 'Ocultar el balance');
+            b.setAttribute('title', _saldoOculto ? 'Mostrar el balance' : 'Ocultar el balance');
+        });
+    }
+
+    window.toggleSaldoOculto = function (ev) {
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+        _saldoOculto = !_saldoOculto;
+        try { localStorage.setItem(SALDO_OCULTO_KEY, _saldoOculto ? '1' : '0'); } catch (e) {}
+        _aplicarSaldoOculto();
+    };
+
     // ── SKELETON LOADERS ──────────────────────────────────────
     function showSkeletons() {
         const _mrl = document.getElementById('montoRecibirLabel');
@@ -2145,21 +2218,19 @@
             const prevMonto = montoEl.getAttribute('data-value');
             const newMonto = String(liquido);
             if (prevMonto !== newMonto) {
-                montoEl.textContent = formatMoney(liquido);
+                _ponerMonto(montoEl, formatMoney(liquido));
                 montoEl.setAttribute('data-value', newMonto);
                 if (isFirstLoad) animateIn(montoEl, '0ms');
             }
-            const _mt = document.getElementById('montoRecibirTarjeta');
-            if (_mt) _mt.textContent = formatMoney(liquido);
-            const _mtp = document.getElementById('montoRecibirTarjetaPm');
-            if (_mtp) _mtp.textContent = formatMoney(liquido);
-            document.getElementById('remateTag').textContent = formatMoney(remanente);
+            _ponerMonto('montoRecibirTarjeta', formatMoney(liquido));
+            _ponerMonto('montoRecibirTarjetaPm', formatMoney(liquido));
+            _ponerMonto('remateTag', formatMoney(remanente));
             document.getElementById('globalPtsTag').textContent = Math.round(puntoGlobalTotal).toLocaleString('es-CL');
             // Versión premium (dashboard): cifras en vivo
             (function () {
                 const _s = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
-                _s('pmBalance', formatMoney(liquido));
-                _s('pmRemanente', formatMoney(remanente));
+                _ponerMonto('pmBalance', formatMoney(liquido));
+                _ponerMonto('pmRemanente', formatMoney(remanente));
                 _s('pmValorPunto', formatMoney(Math.round(puntoGlobalTotal)));
                 _s('pmPuntos', String(pts));
             })();

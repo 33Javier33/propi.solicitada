@@ -343,6 +343,21 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-16 — Candado del saldo: tapar el balance con un ojito (SW v193)
+
+Como en las apps del banco: un **ojito** en la tarjeta tapa el balance para que no quede a la vista de cualquiera que mire la pantalla, y lo vuelve a mostrar. **La elección se guarda**, así que al cerrar y volver a abrir la app sigue como la dejaste.
+
+Con el candado puesto se tapan **todos los montos personales** —el balance de la tarjeta, el de arriba, el remanente y los del panel premium— con `$ ••••••`. No se tapan los puntos ni el valor punto por noche: no son plata de nadie en particular.
+
+**Se tapa al escribir, no después.** Si el monto real se pintara y se ocultara en un segundo paso, alcanzaría a verse en cada refresco. `_ponerMonto()` guarda el valor real en `data-real` y pinta la máscara o el monto según el candado, así que el número nunca pasa por la pantalla. La prueba lo vigila con un `MutationObserver` sobre el nodo durante un refresco completo: el monto real **no aparece ni una vez**.
+
+Dos detalles que podrían haber salido mal:
+
+- La tarjeta y el panel premium se **copian el monto entre sí**. Si copiaran el texto visible, se copiarían la máscara y al destapar quedarían con `••••` pegado. Ahora leen el valor real, no lo que está en pantalla.
+- El **comprobante que el socio descarga NO se tapa**. Tapar la pantalla es para que no la miren de reojo; el documento tiene que traer sus cifras igual.
+
+`test_saldo_oculto.js`: 31 comprobaciones — tapar, destapar, que persista tras recargar la app entera, que el refresco no filtre el monto, y que el comprobante siga completo.
+
 #### 2026-10-16 — «Total Puntos» y «Pts Planta» no seguían a socios-comicion (SW v192)
 
 **La causa, en una línea:** el shim mapeaba `fecha_inicio_puntos` al nombre **`FechaInicioLiquidacion`**, que no lo leía nadie, mientras el cálculo buscaba **`FechaInicioPuntos`**, que nadie escribía. El campo llegaba a la app y se perdía en silencio.
