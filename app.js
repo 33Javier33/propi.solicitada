@@ -210,9 +210,24 @@
             else { if (_fbox) _fbox.style.backgroundImage = ''; if (_fico) _fico.style.display = ''; }
             _aplicarLoginShape(_loginShapeGuardada());
             document.getElementById('fastName').textContent = (auth.name || '').split(' ')[0];
-            document.getElementById('fastIDLabel').textContent = `ID: ${auth.id}`;
+            document.getElementById('fastIDLabel').textContent = 'ID: ' + _idEnmascarado(auth.id);
             setTimeout(() => document.getElementById('fastPIN').focus(), 100);
         } else { switchToSetup(); }
+    }
+
+    // El ID tapado para la pantalla de ingreso.
+    //
+    // Ahí el ID se ve ANTES de autenticarse: cualquiera que tome el
+    // teléfono lo lee, y junto con el PIN es la credencial de entrada.
+    // Se conserva el prefijo (SOC-) para que el socio reconozca que es el
+    // suyo, y el resto va en asteriscos. La cantidad es fija a propósito:
+    // calcarla al largo real delataría cuántos dígitos tiene.
+    function _idEnmascarado(idRaw) {
+        const id = String(idRaw == null ? '' : idRaw).trim();
+        if (!id) return '—';
+        const i = id.indexOf('-');
+        const prefijo = i >= 0 ? id.slice(0, i + 1) : '';
+        return prefijo + '************';
     }
 
     function switchToSetup() {

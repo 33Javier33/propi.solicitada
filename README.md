@@ -343,6 +343,16 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-16 — El ID ya no se lee en la pantalla de ingreso (SW v195)
+
+La pantalla de ingreso mostraba el ID completo: `ID: SOC-1764786246858`. Ese dato se ve **antes de autenticarse** —cualquiera que tome el teléfono lo lee— y junto con el PIN es la credencial de entrada. Ahora va tapado: `ID: SOC-************`.
+
+Se conserva el **prefijo** (`SOC-`) para que el socio reconozca que es el suyo, y el resto en asteriscos. La cantidad es **fija a propósito**: calcarla al largo real delataría cuántos dígitos tiene.
+
+Dentro de la app, ya autenticado, el ID se sigue viendo en el perfil — el socio necesita poder leerlo para dárselo a la administración.
+
+8 comprobaciones más en `test_saldo_oculto.js` (50 en total): que no quede ningún dígito, que dos IDs de largo distinto se tapen igual, que un ID sin prefijo también se tape, y que sin ID no se invente nada.
+
 #### 2026-10-16 — El número de la tarjeta es el ID del login, y el candado también lo tapa (SW v194)
 
 Dos cosas que quedaron pendientes del candado:
