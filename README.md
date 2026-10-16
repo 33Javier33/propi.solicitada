@@ -343,6 +343,16 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-16 — El número de la tarjeta es el ID del login, y el candado también lo tapa (SW v194)
+
+Dos cosas que quedaron pendientes del candado:
+
+**1. El número mostraba un recorte del ID, no el ID.** Se le quitaban las letras y se tomaban los últimos cuatro dígitos: un ID como `SOC-001` quedaba en `001`, que no se reconoce como el de nadie. Ahora va **el ID completo con el que el socio entra**, en el último grupo: `•••• •••• •••• SOC-001`. Para un ID numérico corto el resultado se ve igual que antes, pero ahora es el dato real y no una coincidencia.
+
+**2. Con el candado puesto el número seguía legible.** Quedaba el balance tapado y el ID del socio a la vista en la misma tarjeta — justo lo que el candado busca evitar. Ahora se tapa también, con **su propia máscara** (`•••• •••• •••• ••••`) y no con la del monto: `_ponerMonto()` acepta una máscara por elemento, así que cada cosa se tapa con lo que le corresponde.
+
+`test_saldo_oculto.js` sube a 42 comprobaciones: que el número sea el ID, que un ID con letras se muestre entero, que el candado lo tape sin dejar ver los dígitos, que use su máscara y no la del monto, y que al destapar vuelva.
+
 #### 2026-10-16 — Candado del saldo: tapar el balance con un ojito (SW v193)
 
 Como en las apps del banco: un **ojito** en la tarjeta tapa el balance para que no quede a la vista de cualquiera que mire la pantalla, y lo vuelve a mostrar. **La elección se guarda**, así que al cerrar y volver a abrir la app sigue como la dejaste.

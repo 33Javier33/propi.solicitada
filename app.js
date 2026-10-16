@@ -6,8 +6,10 @@
     // `let` más abajo caería en la zona muerta temporal.
     const SALDO_OCULTO_KEY = 'propi_saldo_oculto';
     const SALDO_MASCARA = '$ ••••••';
+    const NUM_TARJETA_MASCARA = '•••• •••• •••• ••••';
     const SALDO_IDS = ['montoRecibirLabel', 'montoRecibirTarjeta', 'montoRecibirTarjetaPm',
-                       'remateTag', 'pmBalance', 'pmRemanente'];
+                       'remateTag', 'pmBalance', 'pmRemanente',
+                       'tarjetaNumero', 'tarjetaNumeroPm'];
 
     let _saldoOculto = (() => {
         try { return localStorage.getItem(SALDO_OCULTO_KEY) === '1'; } catch (e) { return false; }
@@ -813,10 +815,9 @@
         _set('tarjetaPuntos', puntos);
         _set('tarjetaPuntosPm', puntos);
         if (typeof currentUser !== 'undefined' && currentUser) {
-            const id = String(currentUser.ID || '').replace(/\D/g, '');
-            const num = '•••• •••• •••• ' + (id.slice(-4) || '0000');
-            _set('tarjetaNumero', num);
-            _set('tarjetaNumeroPm', num);
+            const num = _numeroTarjeta(currentUser.ID);
+            _ponerMonto('tarjetaNumero', num, NUM_TARJETA_MASCARA);
+            _ponerMonto('tarjetaNumeroPm', num, NUM_TARJETA_MASCARA);
             if (currentUser.FechaIngreso) {
                 const anio = String(currentUser.FechaIngreso).split('-')[0] || '—';
                 _set('tarjetaDesde', anio);
@@ -1581,12 +1582,24 @@
     // refresco. Por eso `_ponerMonto()` guarda el valor real en
     // `data-real` y pinta la máscara o el monto según el candado.
     // ══════════════════════════════════════════════════════════════
-    // Escribe un monto respetando el candado.
-    function _ponerMonto(id, texto) {
+    // Escribe un dato tapable respetando el candado. `mascara` permite que
+    // cada cosa se tape con lo suyo: los montos con «$ ••••••» y el número
+    // de la tarjeta con los cuatro grupos de puntos.
+    function _ponerMonto(id, texto, mascara) {
         const el = (typeof id === 'string') ? document.getElementById(id) : id;
         if (!el) return;
         el.dataset.real = texto;
-        el.textContent = _saldoOculto ? SALDO_MASCARA : texto;
+        if (mascara) el.dataset.mask = mascara;
+        el.textContent = _saldoOculto ? (el.dataset.mask || SALDO_MASCARA) : texto;
+    }
+
+    // El número de la tarjeta, armado con el ID con el que el socio entra.
+    // Antes se le quitaban las letras y se tomaban los últimos 4 dígitos,
+    // así que un ID como «SOC-001» quedaba en «001» y no se reconocía.
+    // Ahora va completo, en el último grupo, como el número de una tarjeta.
+    function _numeroTarjeta(idRaw) {
+        const id = String(idRaw == null ? '' : idRaw).trim().toUpperCase();
+        return id ? ('•••• •••• •••• ' + id) : NUM_TARJETA_MASCARA;
     }
 
     // El monto REAL de un elemento, aunque esté tapado. Lo usan los
@@ -1602,7 +1615,7 @@
         SALDO_IDS.forEach(id => {
             const el = document.getElementById(id);
             if (!el || !el.dataset || el.dataset.real === undefined) return;
-            el.textContent = _saldoOculto ? SALDO_MASCARA : el.dataset.real;
+            el.textContent = _saldoOculto ? (el.dataset.mask || SALDO_MASCARA) : el.dataset.real;
         });
         document.querySelectorAll('.ojo-saldo').forEach(b => {
             const ic = b.querySelector('.material-symbols-outlined');
