@@ -481,6 +481,14 @@ async function _sociosHandler(url, options) {
                 ID: s.id, Nombre: s.nombre, Apellido: s.apellido,
                 Area: s.area, TipoContrato: s.contrato,
                 FechaIngreso: s.fecha_ingreso,
+                // El nombre que usa el resto del ecosistema (socios-comicion
+                // y diario.propi) es `FechaInicioPuntos`. Acá se mapeaba a
+                // `FechaInicioLiquidacion`, que NADIE leía: el override de
+                // la fecha de inicio de puntos llegaba a la app y se perdía,
+                // así que «Total Puntos» y «Pts Planta» no coincidían con
+                // los de la administración. Se deja el nombre viejo como
+                // alias por si alguna versión cacheada lo espera.
+                FechaInicioPuntos: s.fecha_inicio_puntos,
                 FechaInicioLiquidacion: s.fecha_inicio_puntos,
                 Puntos: s.puntos, PuntosActivos: s.puntos_activos, Activo: s.activo,
                 Rut: s.rut || '', FotoUrl: s.foto_url || '', Correo: s.correo || ''

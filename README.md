@@ -343,6 +343,22 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-16 — «Total Puntos» y «Pts Planta» no seguían a socios-comicion (SW v192)
+
+**La causa, en una línea:** el shim mapeaba `fecha_inicio_puntos` al nombre **`FechaInicioLiquidacion`**, que no lo leía nadie, mientras el cálculo buscaba **`FechaInicioPuntos`**, que nadie escribía. El campo llegaba a la app y se perdía en silencio.
+
+Un campo escrito y nunca leído, y otro leído y nunca escrito. Sin error en consola, sin dato vacío a la vista: simplemente el **override de la fecha de inicio de puntos no se aplicaba**, así que a los socios con fecha movida a mano se les contaban puntos desde la fecha equivocada —o se les contaban cuando todavía no correspondía— y los dos números no cuadraban con los de la administración.
+
+Se nota ahora porque hace dos versiones se arregló que esa fecha **se pudiera guardar** en socios-comicion (antes el volcado de la planilla la pisaba). Recién cuando empezó a haber overrides reales quedó a la vista que esta app los ignoraba.
+
+**El arreglo.** `getSocios` entrega `FechaInicioPuntos`, el nombre que usan socios-comicion y diario.propi. Se conserva `FechaInicioLiquidacion` como alias, y el lado que lee acepta los dos: los socios guardados en la **caché local** por versiones anteriores solo traen el nombre viejo, y sin el alias los puntos seguirían saliendo mal hasta que la caché se renovara.
+
+De paso, los **años de antigüedad del propio socio** salían del ingreso aunque tuviera override. Nuevo `_aniosDeSocio()` los resuelve en un solo lugar, igual que `procesarSocioDesdeGoogle` en la administración.
+
+**Verificación.** `test_puntos_propi.js` levanta **las dos apps** y corre sus implementaciones reales —`procesarSocioDesdeGoogle` y `_recCalcTotalPuntos`— sobre los mismos socios, exigiendo que coincidan. Los casos que separan a las dos: override hacia atrás, override a futuro (aún no le corren puntos), override igual al ingreso (es un eco, no una excepción), recién ingresado sin cumplir el mes, y Gastos Comisión. 21 comprobaciones, incluida la de la caché vieja.
+
+Una diferencia que **se deja a propósito**: en Gastos Comisión la administración registra `0 años` porque la antigüedad no les mueve los puntos (siempre 1), pero la app del socio le muestra su **antigüedad real**. Son dos cosas distintas y las dos están bien; la prueba lo fija explícitamente para que nadie lo «corrija» después.
+
 #### 2026-10-15 — El socio que ya cobró queda en $0, igual que en la administración (SW v191)
 
 **El problema.** Cuando la administración le cerraba el mes a un socio y éste retiraba su plata, la app le seguía mostrando **el monto completo**, como si aún tuviera que recibirlo. La recaudación del período sigue cargada —no se archiva— así que el balance se volvía a calcular entero.

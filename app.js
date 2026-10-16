@@ -620,7 +620,7 @@
     function renderPerfil() {
         if (!currentUser) return;
         const nombre = getDisplayName();
-        const anos = _aniosPuntos(currentUser.FechaIngreso);
+        const anos = _aniosDeSocio(currentUser);
         const dIng = _parseLocalDate(currentUser.FechaIngreso);   // se muestra más abajo
         const _r = _reglaPuntosArea(currentUser.Area);
         const ptsFormula = Math.min(_r.base + (anos * 2), _r.tope);
@@ -1628,6 +1628,46 @@
             : new Date(cumple.getFullYear(), cumple.getMonth() + 1, 15);
     }
 
+    // La fecha de inicio de puntos puesta a mano por la administración, o
+    // null si el socio sigue la regla automática.
+    //
+    // Lee los DOS nombres a propósito: el actual (`FechaInicioPuntos`, el
+    // que usan socios-comicion y diario.propi) y el viejo
+    // (`FechaInicioLiquidacion`), que es con el que quedaron guardados los
+    // socios en la caché local de las versiones anteriores. Sin el alias,
+    // los puntos seguirían saliendo mal hasta que la caché se renueve.
+    //
+    // Solo manda cuando DIFIERE del ingreso: si viene igual no es una
+    // excepción, es un eco del mismo dato.
+    function _fipOverride(s) {
+        if (!s) return null;
+        const ing = String(s.FechaIngreso || '').trim();
+        const fip = String(s.FechaInicioPuntos || s.FechaInicioLiquidacion || '').trim();
+        return (fip && fip !== ing) ? fip : null;
+    }
+
+    // Años cumplidos de puntos contando desde el override: el aniversario
+    // corre desde la fecha que puso la administración, no desde el ingreso.
+    // Es lo que hace `procesarSocioDesdeGoogle` en socios-comicion.
+    function _aniosDesdeOverride(ov, hoy) {
+        const q = String(ov).substring(0, 10).split('-').map(Number);
+        const anio15 = q[0], mes15 = q[1] - 1;
+        if (!Number.isFinite(anio15) || !Number.isFinite(mes15)) return null;
+        let n = hoy.getFullYear() - anio15;
+        if (hoy.getMonth() < mes15 || (hoy.getMonth() === mes15 && hoy.getDate() < 15)) n--;
+        return { anios: Math.max(0, n), desde: new Date(anio15, mes15, 15) };
+    }
+
+    // Los años de puntos de UN socio, con su override si lo tiene. Es lo
+    // que hay que usar en vez de `_aniosPuntos(FechaIngreso)` a secas:
+    // si la administración le movió la fecha de inicio, el aniversario
+    // corre desde ahí y la app tiene que decir lo mismo que el admin.
+    function _aniosDeSocio(s) {
+        const ov = _fipOverride(s);
+        if (ov) { const o = _aniosDesdeOverride(ov, new Date()); if (o) return o.anios; }
+        return _aniosPuntos(s && s.FechaIngreso);
+    }
+
     function _aniosPuntos(fechaIngreso) {
         const q = String(fechaIngreso || '').substring(0, 10).split('-').map(Number);
         if (q.length !== 3 || !q[0] || !q[1] || !q[2]) return 0;
@@ -2014,7 +2054,7 @@
                 if(d>0) mapVP[f].totalVP+=(m/d); mapVP[f].montoReal+=m;
             });
 
-            const anos=_aniosPuntos(currentUser.FechaIngreso);
+            const anos=_aniosDeSocio(currentUser);
             const _rF=_reglaPuntosArea(currentUser.Area);
             const ptsF=Math.min(_rF.base+(anos*2),_rF.tope);
             const ptsSBb=Number(currentUser.Puntos);
@@ -3407,20 +3447,14 @@
 
             // La fecha de inicio manual manda SOLO cuando difiere del
             // ingreso: si viene igual no es una excepción, es un eco.
-            const ov = (s.FechaInicioPuntos && String(s.FechaInicioPuntos).trim()
-                        && String(s.FechaInicioPuntos).trim() !== String(fechaStr).trim())
-                       ? String(s.FechaInicioPuntos).trim() : null;
+            const ov = _fipOverride(s);
 
             let fechaParaPuntos, anios;
             if (ov) {
-                const q = ov.substring(0, 10).split('-').map(Number);
-                const anio15 = q[0], mes15 = q[1] - 1;
-                if (!Number.isFinite(anio15) || !Number.isFinite(mes15)) return;
-                fechaParaPuntos = new Date(anio15, mes15, 15);
-                anios = hoy.getFullYear() - anio15;
-                if (hoy.getMonth() < mes15 ||
-                    (hoy.getMonth() === mes15 && hoy.getDate() < 15)) anios--;
-                if (anios < 0) anios = 0;
+                const _o = _aniosDesdeOverride(ov, hoy);
+                if (!_o) return;
+                fechaParaPuntos = _o.desde;
+                anios = _o.anios;
             } else {
                 fechaParaPuntos = _primeraEntregaPuntos(fechaStr);
                 if (!fechaParaPuntos) return;
