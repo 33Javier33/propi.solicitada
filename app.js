@@ -1763,6 +1763,18 @@
     // que hay que usar en vez de `_aniosPuntos(FechaIngreso)` a secas:
     // si la administración le movió la fecha de inicio, el aniversario
     // corre desde ahí y la app tiene que decir lo mismo que el admin.
+    // «SUBE PUNTOS»: el aumento anual cae el día 15 del mes de ingreso,
+    // o del mes del override si la administración lo puso. Misma regla
+    // que `reglaPuntosFechas` en socios-comicion.
+    const _MESES_SUBE = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+    function _subePuntosLabel(s) {
+        const ov = _fipOverride(s);
+        const base = String(ov || (s && s.FechaIngreso) || '').substring(0, 10);
+        const p = base.split('-').map(Number);
+        if (p.length !== 3 || !(p[1] >= 1 && p[1] <= 12)) return '—';
+        return '15 ' + _MESES_SUBE[p[1] - 1];
+    }
+
     function _aniosDeSocio(s) {
         const ov = _fipOverride(s);
         if (ov) { const o = _aniosDesdeOverride(ov, new Date()); if (o) return o.anios; }
@@ -4795,11 +4807,12 @@
         const fmtFecha = d => d.toLocaleDateString('es-CL', {day:'2-digit',month:'2-digit',year:'numeric'});
         const periodoStr = fmtFecha(inicio) + ' AL ' + fmtFecha(fin);
 
-        // Próximo aumento de puntos
-        const dIng = _parseLocalDate(u.FechaIngreso);
-        const proxAnio = new Date(dIng);
-        proxAnio.setFullYear(hoy.getFullYear() + (hoy >= new Date(hoy.getFullYear(), dIng.getMonth(), dIng.getDate()) ? 1 : 0));
-        const proxAumentoStr = proxAnio.toLocaleDateString('es-CL', {day:'2-digit', month:'short'}).toUpperCase();
+        // Próximo aumento de puntos: el día 15 del mes de ingreso, o del
+        // mes de la fecha de inicio de puntos si la administración se la
+        // puso a mano. Antes salía el DÍA del ingreso —«10 JUN» para
+        // quien entró un día 10— y se ignoraba el override, así que no
+        // coincidía con lo que dice la administración.
+        const proxAumentoStr = _subePuntosLabel(u);
 
         // Valor punto promedio
         const vpStr = b.vpPromedio > 0 ? formatMoney(b.vpPromedio) : '—';

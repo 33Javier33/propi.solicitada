@@ -343,6 +343,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-18 — «SUBE PUNTOS» del comprobante: día 15 y respetando el override (SW v196)
+
+Comparando el comprobante de esta app con el recibo de socios-comicion apareció que **los dos** decían mal esa línea, de formas distintas. El grueso del error estaba en la administración (usaba el mes de la primera entrega en vez del del aniversario), pero acá había dos detalles:
+
+- El día salía del **ingreso**: «10 JUN» para quien entró un día 10. El aumento anual cae siempre el **día 15**.
+- **No respetaba el override**: a un socio con la fecha de inicio de puntos puesta a mano por la administración le mostraba igual el mes de ingreso.
+
+Nuevo `_subePuntosLabel()`, que aplica la misma regla que `reglaPuntosFechas` en socios-comicion: día 15 del mes de ingreso, o del mes del override si lo hay. Las tres apps dicen ahora lo mismo, verificado corriendo sus implementaciones reales sobre los mismos socios.
+
 #### 2026-10-16 — El ID ya no se lee en la pantalla de ingreso (SW v195)
 
 La pantalla de ingreso mostraba el ID completo: `ID: SOC-1764786246858`. Ese dato se ve **antes de autenticarse** —cualquiera que tome el teléfono lo lee— y junto con el PIN es la credencial de entrada. Ahora va tapado: `ID: SOC-************`.
