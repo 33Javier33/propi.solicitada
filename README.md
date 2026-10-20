@@ -343,6 +343,16 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-20 — Acerca de: el cargo de Encargado queda con fecha de término (SW v197)
+
+El texto decía que desde el **15 de noviembre de 2025** «cumple el rol de Encargado del Fondo Solidario de Propina», sin término. El cargo va hasta el **15 de noviembre de 2026**; después continúa como **socio del fondo** y a cargo de esta plataforma.
+
+Redactado para que sea cierto **hoy y después**, sin tener que volver a tocarlo cuando llegue la fecha:
+
+> Colaborador del Casino de Puerto Varas desde **2013**, actualmente ejerce como **Croupier**. Encargado del **Fondo Solidario de Propina** desde el **15 de noviembre de 2025 hasta el 15 de noviembre de 2026**, velando por los derechos económicos de todos los socios. Seguirá como **socio del fondo** y a cargo del desarrollo y la mantención de esta plataforma.
+
+También: el nombre pasa de «Carlos» a **«Carlos P. Nauto»**, y se retira la línea *«Encargado Fondo Solidario · Desde 15/11/2025»* que iba bajo él — decía lo mismo sin el término y quedaba contradiciendo al párrafo.
+
 #### 2026-10-18 — «SUBE PUNTOS» del comprobante: día 15 y respetando el override (SW v196)
 
 Comparando el comprobante de esta app con el recibo de socios-comicion apareció que **los dos** decían mal esa línea, de formas distintas. El grueso del error estaba en la administración (usaba el mes de la primera entrega en vez del del aniversario), pero acá había dos detalles:
