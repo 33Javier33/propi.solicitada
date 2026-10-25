@@ -5,6 +5,20 @@
     // evaluar el script, antes de donde vive el resto de su código, y un
     // `let` más abajo caería en la zona muerta temporal.
     const SALDO_OCULTO_KEY = 'propi_saldo_oculto';
+
+    // La fecha de "Reportar recaudación" se queda donde la dejen mientras la
+    // app esté abierta. sessionStorage y no localStorage: mañana lo correcto
+    // vuelve a ser hoy, no el día que se estuvo corrigiendo ayer.
+    const REC_FECHA_SS = 'propi_rec_fecha';
+    function _hoyISOLocal() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+             + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function _recFechaRecordada() {
+        try { return sessionStorage.getItem(REC_FECHA_SS) || ''; } catch (e) { return ''; }
+    }
+
     const SALDO_MASCARA = '$ ••••••';
     const NUM_TARJETA_MASCARA = '•••• •••• •••• ••••';
     const SALDO_IDS = ['montoRecibirLabel', 'montoRecibirTarjeta', 'montoRecibirTarjetaPm',
@@ -3591,10 +3605,24 @@
 
     window.abrirModalRec = (fecha) => {
         if (!currentUser) return;
-        // Fecha opcional (p. ej. al tocar un día faltante); por defecto, hoy.
+        // Fecha opcional (p. ej. al tocar un día faltante). Si no viene, se
+        // usa la última que se eligió en esta sesión, y si tampoco hay, hoy.
+        //
+        // Antes era siempre `new Date().toISOString()`, que da la fecha en
+        // UTC: en Chile, a partir de las 20:00 o 21:00, el campo aparecía con
+        // el día siguiente. Trabajando de noche eso es casi todos los turnos.
         const _f = (typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fecha))
-            ? fecha : new Date().toISOString().split('T')[0];
-        document.getElementById('recFecha').value = _f;
+            ? fecha : (_recFechaRecordada() || _hoyISOLocal());
+        const _elF = document.getElementById('recFecha');
+        _elF.value = _f;
+        // Se engancha una sola vez: lo que el socio elija se recuerda mientras
+        // la app siga abierta, para no volver al calendario en cada registro.
+        if (_elF.dataset.pegajosa !== '1') {
+            _elF.dataset.pegajosa = '1';
+            _elF.addEventListener('change', () => {
+                try { sessionStorage.setItem(REC_FECHA_SS, _elF.value || ''); } catch (e) {}
+            });
+        }
         document.getElementById('recMonto').value = '';
         document.getElementById('recDivisor').value = '';
         // Mostrar el total de puntos como dato de referencia

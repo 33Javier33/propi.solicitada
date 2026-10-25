@@ -343,6 +343,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-10-25 — La fecha de «Reportar recaudación» ya no se adelanta de noche (SW v198)
+
+El "hoy" del campo de fecha se calculaba con `toISOString()`, que da la fecha en **UTC** — tres o cuatro horas adelante de Chile. A partir de las 20:00 o 21:00 el modal se abría con **el día siguiente**, y en un casino que trabaja de noche eso es casi todos los turnos.
+
+Medido con el reloj puesto a las 22:30 del 3 de septiembre en horario de Chile: la forma vieja decía `2026-09-04`; la nueva dice `2026-09-03`.
+
+Además, la fecha se queda donde la dejen mientras la app esté abierta: si se corrige una vez, el siguiente reporte se abre en esa misma fecha en vez de volver a hoy. Abrir el modal tocando un día faltante sigue mandando sobre todo lo demás — esa fecha es explícita y gana.
+
 #### 2026-10-20 — Acerca de: el cargo de Encargado queda con fecha de término (SW v197)
 
 El texto decía que desde el **15 de noviembre de 2025** «cumple el rol de Encargado del Fondo Solidario de Propina», sin término. El cargo va hasta el **15 de noviembre de 2026**; después continúa como **socio del fondo** y a cargo de esta plataforma.
