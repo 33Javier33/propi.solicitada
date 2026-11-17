@@ -1,0 +1,34 @@
+# Cabeceras para Cloudflare Pages (equivalente a vercel.json).
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Service-Worker-Allowed: /
+
+/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/app.js
+  Cache-Control: no-cache, must-revalidate
+
+/app.css
+  Cache-Control: no-cache, must-revalidate
+
+/supabase-api.js
+  Cache-Control: no-cache, must-revalidate
+
+/qr-entrada.js
+  Cache-Control: no-cache, must-revalidate
+
+/
+  Cache-Control: no-cache, must-revalidate
+
+/version.js
+  Cache-Control: no-cache, must-revalidate
+
+/manifest.json
+  Cache-Control: no-cache, must-revalidate
+
+/icons/*
+  Cache-Control: no-cache, must-revalidate
+
+/img/*
+  Cache-Control: no-cache, must-revalidate
