@@ -343,6 +343,20 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-11-19 — «Solicitar Egreso» pasa a ser «Registro de Anticipo» y descuenta al instante (SW v199)
+
+- El botón, el formulario y la ayuda se llaman ahora **Registro de Anticipo**. El socio registra el anticipo que le entregó el encargado: monto, encargado y, si quiere, el desglose de billetes.
+- **El balance se descuenta de inmediato.** Ya no espera a que socios-comicion registre el anticipo. Los registros PENDIENTES se suman a los descuentos del balance, y el balance se recalcula apenas se envía.
+- **No se descuenta dos veces.** Cuando la administración registra el anticipo, el registro pasa a PROCESADO y desde ahí cuenta solo el anticipo real.
+- Si el socio lo **cancela**, o la administración lo **rechaza**, el monto vuelve al balance.
+- El desglose del balance muestra la línea «Anticipo registrado · por confirmar», y la tarjeta de estado muestra el total de todos los registros pendientes.
+- El comprobante que descarga el socio incluye esos registros, para que cuadre con la pantalla.
+- Se descuentan aunque el mes ya esté cobrado: un anticipo registrado después del cobro es del mes nuevo.
+- Nueva acción `misSolicitudesEgreso` en `supabase-api.js`: todos los registros PENDIENTES del socio.
+
+Probado de punta a punta en el navegador con la app real y una base simulada: se descuenta al instante, no se descuenta dos veces al confirmarse, y vuelve al rechazarse o cancelarse. Contra la versión anterior, la prueba falla en el descuento inmediato.
+
+
 #### 2026-10-25 — La fecha de «Reportar recaudación» ya no se adelanta de noche (SW v198)
 
 El "hoy" del campo de fecha se calculaba con `toISOString()`, que da la fecha en **UTC** — tres o cuatro horas adelante de Chile. A partir de las 20:00 o 21:00 el modal se abría con **el día siguiente**, y en un casino que trabaja de noche eso es casi todos los turnos.

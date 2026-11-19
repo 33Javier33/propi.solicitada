@@ -672,7 +672,7 @@
                 </button>
                 <button onclick="abrirModalEgreso()" class="flex-1 py-3.5 rounded-[18px] flex items-center justify-center gap-2 font-semibold text-[13px] border transition-all active:scale-[0.98]" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
                     <span class="material-symbols-outlined text-[18px]">request_quote</span>
-                    Solicitar Egreso
+                    Registro de Anticipo
                 </button>
             </div>
             <!-- Estado de la solicitud de egreso pendiente (se llena por JS) -->
@@ -762,7 +762,7 @@
                     <button onclick="abrirModalEgreso()" style="display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:18px;background:#171c22;border:1px solid #43474b;border-radius:16px;cursor:pointer;">
                         <div style="width:44px;height:44px;border-radius:10px;background:#333942;display:flex;align-items:center;justify-content:center;margin-bottom:12px;"><span class="material-symbols-outlined" style="color:#cee6f7;">request_quote</span></div>
                         <span style="font-size:12px;color:#c3c7cb;margin-bottom:2px;">Solicitar</span>
-                        <span style="font-size:15px;font-weight:700;color:#e1e3e4;line-height:1.25;">Solicitar Egreso</span>
+                        <span style="font-size:15px;font-weight:700;color:#e1e3e4;line-height:1.25;">Registro de Anticipo</span>
                     </button>
                     <button id="pmCalBtn" onclick="openCalendar()" style="grid-column:span 2;display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#171c22;border:1px solid #43474b;border-radius:16px;cursor:pointer;">
                         <div style="display:flex;align-items:center;gap:12px;">
@@ -1608,18 +1608,18 @@
     <div id="modalEgreso" onclick="if(event.target===this)cerrarModalEgreso()" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-end">
         <div style="background:#f8fafc;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;box-shadow:0 -8px 32px rgba(0,0,0,0.18);max-height:90vh;overflow-y:auto">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <h3 style="font-size:1.05rem;font-weight:800;color:#1e293b">Solicitar Egreso</h3>
+                <h3 style="font-size:1.05rem;font-weight:800;color:#1e293b">Registro de Anticipo</h3>
                 <button onclick="cerrarModalEgreso()" style="background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center">✕</button>
             </div>
-            <p style="font-size:0.8rem;color:#64748b;line-height:1.45;margin-bottom:18px">Solicita un <b>anticipo de propina</b>. La administración recibirá tu solicitud como <b>pendiente</b> para procesarla.</p>
+            <p style="font-size:0.8rem;color:#64748b;line-height:1.45;margin-bottom:18px">Registra el <b>anticipo de propina</b> que te entregaron. <b>Se descuenta de tu balance de inmediato</b> y la administración lo confirma.</p>
 
-            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Monto solicitado <span style="font-size:0.85em;color:#dc2626;font-weight:800;text-transform:none;">(obligatorio)</span></p>
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Monto del anticipo <span style="font-size:0.85em;color:#dc2626;font-weight:800;text-transform:none;">(obligatorio)</span></p>
             <input type="tel" id="egresoMonto" placeholder="$0" oninput="fmtEgresoMonto(this)" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:1.1rem;font-weight:700;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
 
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
             <textarea id="egresoNota" rows="2" placeholder="Ej: gasto imprevisto" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px;resize:none;font-family:inherit"></textarea>
 
-            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Encargado que te entregó el egreso <span style="font-size:0.85em;color:#dc2626;font-weight:800;text-transform:none;">(obligatorio)</span></p>
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Encargado que te entregó el anticipo <span style="font-size:0.85em;color:#dc2626;font-weight:800;text-transform:none;">(obligatorio)</span></p>
             <select id="egresoEncargado" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:6px;font-family:inherit;">
                 <option value="">— Selecciona el encargado —</option>
             </select>
@@ -1627,11 +1627,11 @@
             <p style="font-size:0.72em;color:#94a3b8;margin-bottom:16px;line-height:1.4;">Indica quién te entregó el dinero, para que la administración pueda verificarlo.</p>
 
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle del dinero recibido <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
-            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px;line-height:1.4;">Anota <b>cuántos</b> billetes o monedas de cada valor te entregaron. Puedes dejarlo en blanco, pero <b>si lo completas, el total debe ser igual al monto solicitado.</b></p>
+            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px;line-height:1.4;">Anota <b>cuántos</b> billetes o monedas de cada valor te entregaron. Puedes dejarlo en blanco, pero <b>si lo completas, el total debe ser igual al monto del anticipo.</b></p>
             <div id="egresoBilletes" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:0;margin-bottom:22px;overflow:hidden;"></div>
 
             <button id="btnEnviarEgreso" onclick="enviarEgreso()" style="width:100%;padding:15px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
-                Enviar solicitud
+                Registrar anticipo
             </button>
         </div>
     </div>
@@ -1684,7 +1684,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=197"></script>
+<script src="app.js?v=198"></script>
 <script src="version.js?v=5"></script>
 
 

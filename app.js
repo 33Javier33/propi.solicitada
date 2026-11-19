@@ -2107,6 +2107,8 @@
     const BALANCE_CACHE_TTL = 15000; // 15 segundos
 
     async function refresh(isFirstLoad=false) {
+        // Sin sesión no hay balance que calcular (y la carga pide el ID del socio).
+        if (!currentUser) return;
         // Guard anti-solapamiento: si ya hay un refresh en curso, marcar pendiente
         // y salir. Al terminar, se corre UNO solo de seguimiento (coalescing).
         if (_refreshing) { _refreshPending = true; return; }
@@ -2115,13 +2117,17 @@
             // ── FASE 1: Las 5 llamadas de balance en paralelo ────
             // Las notas NO bloquean — se cargan en background
             // 5 llamadas en paralelo — cambiar a getAllSocioData una vez agregado al GAS
-            const [recRes, dataRes, saldosRes, cierreRes, diasRes, cmRes] = await Promise.all([
+            const [recRes, dataRes, saldosRes, cierreRes, diasRes, cmRes, pendRes] = await Promise.all([
                 fetch(`${SCRIPT_URL_RECAUDACIONES}?action=get`),
                 fetch(SCRIPT_URL_SOCIOS, {method:'POST', body:JSON.stringify({action:'getAllDataDesdeSheets'})}),
                 fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosAnteriores`),
                 fetch(`${SCRIPT_URL_SOCIOS}?action=getSaldosCierre`),
                 fetch(`${SCRIPT_URL_SOCIOS}?action=getDiasPartTime`),
-                fetch(`${SCRIPT_URL_SOCIOS}?action=getCierresMes`)
+                fetch(`${SCRIPT_URL_SOCIOS}?action=getCierresMes`),
+                // Registros de anticipo que el socio envió y la administración
+                // aún no registra. Se descuentan del balance de inmediato.
+                fetch(SCRIPT_URL_SOCIOS, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+                    body:JSON.stringify({action:'misSolicitudesEgreso', socioId:String(currentUser.ID)})}).catch(()=>null)
             ]);
 
             const recJson    = await recRes.json();
@@ -2130,6 +2136,8 @@
             const cierreJson = await cierreRes.json();
             const diasJson   = await diasRes.json();
             const cmJson     = await cmRes.json();
+            let pendJson = { _stale: true, data: null };
+            try { if (pendRes) pendJson = await pendRes.json(); } catch (e) {}
 
             let recData        = recJson.data   || [];
             let sheetsData     = fullSheets.data || fullSheets;
@@ -2137,6 +2145,7 @@
             let cierreData     = cierreJson.data || {};
             let diasTrabajados = diasJson.data || {};
             let cierresMes     = cmJson.data || {};
+            let pendientesAnt  = Array.isArray(pendJson.data) ? pendJson.data : null;
 
             // Anti-parpadeo: si una fuente respondió "stale" (timeout por conexión
             // dormida al volver a la app), conservar los últimos datos buenos en
@@ -2149,10 +2158,15 @@
                 // Perderlo haría reaparecer el monto de un mes ya cobrado.
                 if (cmJson._stale    && _lastGood.cierresMes)     cierresMes     = _lastGood.cierresMes;
             }
+            // Si no se pudieron leer los registros pendientes, se conservan los
+            // últimos conocidos: perderlos haría subir el balance de golpe con un
+            // anticipo que el socio ya se llevó.
+            if (pendientesAnt === null) pendientesAnt = (_lastGood && _lastGood.pendientesAnt) || [];
             // Guardar snapshot bueno solo cuando los datos clave llegaron frescos.
             if (!recJson._stale && !fullSheets._stale) {
                 _lastGood = { recData, sheetsData, diasTrabajados,
-                              cierresMes: cmJson._stale ? (_lastGood && _lastGood.cierresMes) : cierresMes };
+                              cierresMes: cmJson._stale ? (_lastGood && _lastGood.cierresMes) : cierresMes,
+                              pendientesAnt };
             }
             // Aviso de días sin recaudación: se pinta ACÁ, antes del balance y
             // de los movimientos, para que no dependa de que todo lo demás
@@ -2260,8 +2274,16 @@
             const _miCierre = cierresMes[sID] || cierresMes[String(currentUser.ID)] || null;
             const _yaCobre = !!(_miCierre && _miCierre.estadoCobro === 'cobrado');
 
+            // Anticipos que el socio registró desde la app y la administración
+            // todavía no confirma. Se descuentan YA, sin esperar a socios-comicion.
+            // Cuando la administración lo registra, la solicitud pasa a PROCESADO
+            // y el monto pasa a contarse como anticipo real (tAnt): nunca los dos.
+            // Se descuentan aunque el mes esté cobrado: si llegan después del
+            // cobro, son del mes nuevo.
+            const tPend = pendientesAnt.reduce((a,b)=>a+(Number(b.monto)||0),0);
+
             const propinaBruta = _yaCobre ? 0 : puntoGlobalTotal*pts;
-            const _descuentos  = _yaCobre ? 0 : (tAnt+tDesc+tDon);
+            const _descuentos  = (_yaCobre ? 0 : (tAnt+tDesc+tDon)) + tPend;
             const saldoBruto=(propinaBruta+sAnt)-_descuentos;
             let remanente=saldoBruto>0?saldoBruto%1000:saldoBruto;
             let liquido=saldoBruto>0?saldoBruto-remanente:0;
@@ -2317,7 +2339,16 @@
                         <span class="text-sm text-lm-primary">Descuentos / Anticipos</span>
                     </div>
                     <b class="text-sm font-bold text-lm-red">-${formatMoney(tAnt+tDesc)}</b>
-                </div>`;
+                </div>` + (tPend > 0 ? `
+                <div class="flex justify-between items-center px-5 py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="movement-icon bg-lm-red/10" style="width:36px;height:36px;border-radius:10px">
+                            <span class="material-symbols-outlined text-lm-red text-[16px]">hourglass_top</span>
+                        </div>
+                        <span class="text-sm text-lm-primary">Anticipo registrado · por confirmar</span>
+                    </div>
+                    <b class="text-sm font-bold text-lm-red">-${formatMoney(tPend)}</b>
+                </div>` : '');
 
             if (isFirstLoad) animateIn(document.getElementById('detallesContables'), '60ms');
 
@@ -2337,7 +2368,8 @@
                 _pmDet.innerHTML =
                     _row('percent', '#cee6f7', `Total Bruto (${pts} pts)`, formatMoney(propinaBruta)) +
                     _row('account_balance', '#25D366', 'Saldo Anterior', formatMoney(sAnt)) +
-                    _row('remove_circle', '#ffb4ab', 'Descuentos / Anticipos', '-' + formatMoney(tAnt + tDesc), '#ffb4ab');
+                    _row('remove_circle', '#ffb4ab', 'Descuentos / Anticipos', '-' + formatMoney(tAnt + tDesc), '#ffb4ab') +
+                    (tPend > 0 ? _row('hourglass_top', '#ffb4ab', 'Anticipo registrado · por confirmar', '-' + formatMoney(tPend), '#ffb4ab') : '');
                 _pmDet.lastElementChild && (_pmDet.lastElementChild.style.borderBottom = 'none');
             }
 
@@ -2564,7 +2596,10 @@
             // Guardar datos para el comprobante PDF
             const vpVals = Object.values(mapVP);
             _lastBalance = {
-                liquido, remanente, propinaBruta, sAnt, tAnt,
+                liquido, remanente, propinaBruta, sAnt,
+                // Incluye los anticipos registrados por confirmar: el saldo que
+                // imprime el comprobante tiene que ser el mismo de la pantalla.
+                tAnt: tAnt + tPend, tPend,
                 // El cierre, si lo hay: el comprobante tiene que poder
                 // imprimir lo que se liquidó aunque el balance esté en 0
                 // porque el socio ya cobró.
@@ -3781,7 +3816,7 @@
             if (avi) {
                 const dif = Math.abs(monto - total);
                 avi.setAttribute('style', 'padding:6px 12px 9px;font-size:0.72rem;font-weight:700;line-height:1.35;color:#b45309;');
-                avi.textContent = '⚠ No coincide con el monto solicitado (' + _egrFmt(monto) + '). '
+                avi.textContent = '⚠ No coincide con el monto del anticipo (' + _egrFmt(monto) + '). '
                     + (total > monto ? 'Sobran ' : 'Faltan ') + _egrFmt(dif) + '. '
                     + 'Corrígelo o deja el desglose en blanco para poder enviar.';
                 avi.style.display = 'block';
@@ -3792,7 +3827,7 @@
             if (avi) {
                 if (monto) {
                     avi.setAttribute('style', 'padding:6px 12px 9px;font-size:0.72rem;font-weight:700;line-height:1.35;color:#166534;');
-                    avi.textContent = '✓ Coincide con el monto solicitado.';
+                    avi.textContent = '✓ Coincide con el monto del anticipo.';
                     avi.style.display = 'block';
                 } else { avi.style.display = 'none'; avi.textContent = ''; }
             }
@@ -3903,13 +3938,13 @@
         // pero si el socio anota algo tiene que sumar exactamente el monto pedido.
         const faltante = (txt, el) => {
             btn.textContent = txt;
-            setTimeout(() => { btn.textContent = 'Enviar solicitud'; }, 2400);
+            setTimeout(() => { btn.textContent = 'Registrar anticipo'; }, 2400);
             if (el) {
                 try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
                 setTimeout(() => { try { el.focus(); } catch (e) {} }, 120);
             }
         };
-        if (!monto) return faltante('Falta el monto solicitado', document.getElementById('egresoMonto'));
+        if (!monto) return faltante('Falta el monto del anticipo', document.getElementById('egresoMonto'));
         if (!encargado) {
             const esOtro = _selEnc && _selEnc.value === '__otro__';
             return faltante('Falta indicar el encargado', esOtro ? _otroEnc : _selEnc);
@@ -3934,15 +3969,19 @@
             });
             const json = await res.json();
             if (json.success) {
-                btn.textContent = '✓ Solicitud enviada';
-                setTimeout(() => { cerrarModalEgreso(); btn.textContent = 'Enviar solicitud'; renderEgresoEstado(); }, 1100);
+                btn.textContent = '✓ Anticipo registrado';
+                // El balance se ajusta YA: no espera a que la administración
+                // lo registre en socios-comicion.
+                refresh();
+                renderEgresoEstado();
+                setTimeout(() => { cerrarModalEgreso(); btn.textContent = 'Registrar anticipo'; }, 1100);
             } else {
                 btn.textContent = 'Error, reintenta';
-                setTimeout(() => btn.textContent = 'Enviar solicitud', 1800);
+                setTimeout(() => btn.textContent = 'Registrar anticipo', 1800);
             }
         } catch (e) {
             btn.textContent = 'Error de conexión';
-            setTimeout(() => btn.textContent = 'Enviar solicitud', 1800);
+            setTimeout(() => btn.textContent = 'Registrar anticipo', 1800);
         } finally { btn.disabled = false; }
     };
 
@@ -3959,11 +3998,14 @@
             const res = await fetch(SCRIPT_URL_SOCIOS, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'miSolicitudEgreso', socioId: String(currentUser.ID) })
+                body: JSON.stringify({ action: 'misSolicitudesEgreso', socioId: String(currentUser.ID) })
             });
-            const s = (await res.json()).data;
-            if (!s) { _ocultar(); return; }
-            const montoTxt = '$' + (Number(s.monto) || 0).toLocaleString('es-CL');
+            const lista = (await res.json()).data;
+            if (!Array.isArray(lista)) return;          // sin datos: no tocar lo que se ve
+            if (!lista.length) { _ocultar(); return; }
+            const total = lista.reduce((a, s) => a + (Number(s.monto) || 0), 0);
+            const montoTxt = '$' + total.toLocaleString('es-CL')
+                + (lista.length > 1 ? ' (' + lista.length + ' registros)' : '');
             // Clásico (claro, con clases de tema)
             if (box) {
                 box.innerHTML = `
@@ -3973,12 +4015,12 @@
                         <span class="material-symbols-outlined" style="font-size:20px;color:#0284c7">hourglass_top</span>
                       </div>
                       <div style="flex:1;min-width:0">
-                        <div style="font-size:12px;font-weight:800;color:#075985">Egreso solicitado · pendiente</div>
-                        <div style="font-size:11px;color:#0369a1;margin-top:1px">${montoTxt} — a la espera de que la administración lo procese</div>
+                        <div style="font-size:12px;font-weight:800;color:#075985">Anticipo registrado · por confirmar</div>
+                        <div style="font-size:11px;color:#0369a1;margin-top:1px">${montoTxt} — ya descontado de tu balance; la administración lo confirmará</div>
                       </div>
                     </div>
                     <button onclick="cancelarEgreso()" style="width:100%;margin-top:10px;padding:9px;background:#fff;border:1px solid #fca5a5;border-radius:11px;color:#dc2626;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-                      <span class="material-symbols-outlined" style="font-size:16px;">cancel</span> Cancelar solicitud
+                      <span class="material-symbols-outlined" style="font-size:16px;">cancel</span> Cancelar registro
                     </button>
                   </div>`;
                 box.classList.remove('hidden');
@@ -3992,12 +4034,12 @@
                         <span class="material-symbols-outlined" style="font-size:20px;color:#67e8f9">hourglass_top</span>
                       </div>
                       <div style="flex:1;min-width:0">
-                        <div style="font-size:13px;font-weight:800;color:#a5f3fc">Egreso solicitado · pendiente</div>
-                        <div style="font-size:11px;color:#7dd3fc;margin-top:2px">${montoTxt} — a la espera de que la administración lo procese</div>
+                        <div style="font-size:13px;font-weight:800;color:#a5f3fc">Anticipo registrado · por confirmar</div>
+                        <div style="font-size:11px;color:#7dd3fc;margin-top:2px">${montoTxt} — ya descontado de tu balance; la administración lo confirmará</div>
                       </div>
                     </div>
                     <button onclick="cancelarEgreso()" style="width:100%;margin-top:12px;padding:10px;background:#2a1618;border:1px solid #7f1d1d;border-radius:12px;color:#ffb4ab;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
-                      <span class="material-symbols-outlined" style="font-size:16px;">cancel</span> Cancelar solicitud
+                      <span class="material-symbols-outlined" style="font-size:16px;">cancel</span> Cancelar registro
                     </button>
                   </div>`;
                 boxPm.style.display = 'block';
@@ -4009,7 +4051,7 @@
     // El socio cancela su solicitud de egreso pendiente (por error / arrepentimiento).
     window.cancelarEgreso = async function () {
         if (!currentUser) return;
-        if (!confirm('¿Cancelar tu solicitud de egreso pendiente?\n\nSe eliminará y la administración ya no la verá.')) return;
+        if (!confirm('¿Cancelar tu registro de anticipo por confirmar?\n\nSe eliminará, la administración ya no lo verá y el monto vuelve a tu balance.')) return;
         try {
             const res = await fetch(SCRIPT_URL_SOCIOS, {
                 method: 'POST',
@@ -4018,8 +4060,9 @@
             });
             const r = await res.json();
             if (r && r.success) {
-                if (typeof showToast === 'function') showToast('Egreso', 'Solicitud cancelada ✓');
+                if (typeof showToast === 'function') showToast('Anticipo', 'Registro cancelado ✓');
                 renderEgresoEstado();
+                refresh();          // el monto vuelve al balance de inmediato
             } else {
                 alert('No se pudo cancelar. Intenta de nuevo.');
             }
@@ -5522,7 +5565,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
               <div>
                 <div style="display:flex;gap:8px;margin-bottom:12px;">
                   <div style="flex:1;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:14px;padding:11px;text-align:center;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 4px 12px rgba(99,102,241,0.3);"><span class="material-symbols-outlined" style="font-size:15px">add_circle</span>Recaudación del Día</div>
-                  <div style="flex:1;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:14px;padding:11px;text-align:center;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 4px 12px rgba(14,165,233,0.3);"><span class="material-symbols-outlined" style="font-size:15px">request_quote</span>Solicitar Egreso</div>
+                  <div style="flex:1;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:14px;padding:11px;text-align:center;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 4px 12px rgba(14,165,233,0.3);"><span class="material-symbols-outlined" style="font-size:15px">request_quote</span>Registro de Anticipo</div>
                 </div>
                 <div style="background:#fff;border:1px solid #e1e3e4;border-radius:16px;padding:12px;">
                   <div style="font-size:9px;color:#94a3b8;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;">Categoría</div>
@@ -5538,19 +5581,19 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
         {
             icon: 'request_quote',
             color: '#0284c7',
-            title: 'Solicitar un Egreso (anticipo)',
-            body: 'Junto al botón anterior está <b>"Solicitar Egreso"</b> (celeste). Con él puedes pedir un <b>anticipo de propina</b> sin tener que ir presencialmente.<br><br>Solo ingresas el <b>monto</b> que necesitas y, si quieres, un <b>motivo</b>. Tu solicitud le llega a la administración como <b>pendiente</b>.<br><br>⏳ Mientras no la procesen, verás en tu Balance una tarjeta <b>"Egreso solicitado · pendiente"</b>.<br><br>✅ Cuando la administración la registre, se convertirá en un anticipo normal y aparecerá descontado en tu Balance, en <b>Últimos Movimientos</b>.',
+            title: 'Registro de Anticipo',
+            body: 'Junto al botón anterior está <b>"Registro de Anticipo"</b> (celeste). Con él registras el <b>anticipo de propina</b> que te entregó el encargado.<br><br>Ingresas el <b>monto</b>, el <b>encargado</b> que te lo entregó y, si quieres, un detalle.<br><br>💸 <b>El monto se descuenta de tu balance de inmediato</b>: no tienes que esperar a la administración. En tu Balance verás la tarjeta <b>"Anticipo registrado · por confirmar"</b>.<br><br>✅ Cuando la administración lo confirme, pasa a ser un anticipo normal en <b>Últimos Movimientos</b> (no se descuenta dos veces).<br><br>↩️ Si lo cancelas, o la administración lo rechaza, el monto vuelve a tu balance.',
             preview: `
               <div>
                 <div style="background:#f8fafc;border-radius:16px;padding:14px;border:1px solid #e1e3e4;margin-bottom:10px;">
-                  <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:8px;">Solicitar Egreso</div>
-                  <div style="font-size:9px;color:#94a3b8;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Monto solicitado</div>
+                  <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:8px;">Registro de Anticipo</div>
+                  <div style="font-size:9px;color:#94a3b8;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Monto del anticipo</div>
                   <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:9px 11px;font-size:15px;font-weight:800;color:#1e293b;margin-bottom:10px;">$50.000</div>
-                  <div style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:12px;padding:10px;text-align:center;color:#fff;font-size:12px;font-weight:700;">Enviar solicitud</div>
+                  <div style="background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:12px;padding:10px;text-align:center;color:#fff;font-size:12px;font-weight:700;">Registrar anticipo</div>
                 </div>
                 <div style="background:#e0f2fe;border:1px solid #7dd3fc;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:10px;">
                   <span class="material-symbols-outlined" style="font-size:20px;color:#0284c7">hourglass_top</span>
-                  <div><div style="font-size:11px;font-weight:800;color:#075985">Egreso solicitado · pendiente</div><div style="font-size:10px;color:#0369a1;margin-top:1px">$50.000 — esperando a la administración</div></div>
+                  <div><div style="font-size:11px;font-weight:800;color:#075985">Anticipo registrado · por confirmar</div><div style="font-size:10px;color:#0369a1;margin-top:1px">$50.000 — ya descontado de tu balance</div></div>
                 </div>
               </div>`
         },

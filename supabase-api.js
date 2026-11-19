@@ -361,6 +361,22 @@ async function _sociosHandler(url, options) {
             return _mockRes({ success: !error, error: error && error.message });
         }
 
+        // TODOS los registros de anticipo PENDIENTES del socio. Se descuentan
+        // del balance apenas se envían, sin esperar a que la administración
+        // los registre: cuando los registra pasan a PROCESADO y desde ahí los
+        // cuenta el anticipo real, así que no se descuentan dos veces.
+        case 'misSolicitudesEgreso': {
+            const { data, error } = await dbSV.from('solicitudes_egreso')
+                // `*` y no una lista: la columna `encargado` puede no existir
+                // todavía en la base, y nombrarla haría fallar la consulta.
+                .select('*')
+                .eq('socio_id', String(b.socioId || ''))
+                .eq('estado', 'PENDIENTE')
+                .order('created_at', { ascending: true });
+            if (error) return _mockRes({ _stale: true, data: null });
+            return _mockRes({ data: data || [] });
+        }
+
         // Última solicitud de egreso PENDIENTE del socio (para mostrar el estado en la app)
         case 'miSolicitudEgreso': {
             const { data } = await dbSV.from('solicitudes_egreso')
