@@ -303,6 +303,34 @@ async function _migrarASupabase(gasJson) {
 // Cache de sesión para días PT desde GAS (evita re-fetch en cada refresh)
 let _diasPtGasCache = null;
 
+// ── Planilla Part-Time (tabla dias_pt: una fila por socio con el arreglo de días) ──
+// Se lee y se vuelve a escribir la fila completa, uniendo con lo que ya hay, igual
+// que lo hace socios-comicion al confirmar: así no se pisan días cargados por la
+// administración.
+async function _ptAgregarAPlanilla(sid, fecha, periodo) {
+    try {
+        const { data: ex, error: e1 } = await dbSV.from('dias_pt').select('dias').eq('socio_id', sid).maybeSingle();
+        if (e1) return false;
+        const actuales = (ex && Array.isArray(ex.dias)) ? ex.dias.map(d => String(d).substring(0, 10)) : [];
+        if (actuales.includes(fecha)) return true;
+        const fila = { socio_id: sid, dias: [...new Set([...actuales, fecha])].sort() };
+        if (periodo) fila.periodo = periodo;
+        const { error } = await dbSV.from('dias_pt').upsert(fila, { onConflict: 'socio_id' });
+        return !error;
+    } catch (e) { return false; }
+}
+
+async function _ptQuitarDePlanilla(sid, fecha) {
+    try {
+        const { data: ex } = await dbSV.from('dias_pt').select('dias').eq('socio_id', sid).maybeSingle();
+        if (!ex || !Array.isArray(ex.dias)) return true;
+        const quedan = ex.dias.map(d => String(d).substring(0, 10)).filter(d => d !== fecha);
+        if (quedan.length === ex.dias.length) return true;
+        const { error } = await dbSV.from('dias_pt').update({ dias: quedan }).eq('socio_id', sid);
+        return !error;
+    } catch (e) { return false; }
+}
+
 // ── HANDLER: SOCIOS ────────────────────────────────────────────────────────────
 async function _sociosHandler(url, options) {
     const b = await _body(options);
@@ -387,9 +415,11 @@ async function _sociosHandler(url, options) {
         }
 
         // ── DÍAS PART-TIME AUTOGESTIÓN ────────────────────────────────────────
-        // El socio Part-Time marca un día trabajado desde su calendario. Crea una
-        // solicitud PENDIENTE que la administración confirma en socios-comicion.
-        // Al confirmarse, el día pasa a la planilla real (tabla dias_pt).
+        // El socio Part-Time marca un día trabajado desde su calendario y el día
+        // entra DIRECTO a la planilla real (tabla dias_pt): suma en su balance y
+        // en el pago de socios-comicion sin esperar confirmación. Además queda
+        // el registro en `dias_pt_solicitados` como PENDIENTE (= en revisión),
+        // para que la comisión lo revise y lo quite si fue un error.
         case 'marcarDiaPT': {
             const sid = String(b.socioId || '');
             const fecha = String(b.fecha || '').substring(0, 10);
@@ -409,19 +439,33 @@ async function _sociosHandler(url, options) {
                 confirmado_por: null,
                 confirmado_at: null
             }, { onConflict: 'socio_id,fecha' });
-            if (!error) dbSV.channel('sv-dias-pt').send({ type: 'broadcast', event: 'nuevo', payload: {} }).catch(() => {});
-            return _mockRes({ success: !error, error: error && error.message });
+            if (error) return _mockRes({ success: false, error: error.message });
+            // Directo a la planilla. Si esto falla, el registro igual quedó y
+            // la comisión puede sumarlo al revisarlo; la app lo avisa.
+            const sumado = await _ptAgregarAPlanilla(sid, fecha, b.periodo || '');
+            dbSV.channel('sv-dias-pt').send({ type: 'broadcast', event: 'nuevo', payload: {} }).catch(() => {});
+            return _mockRes({ success: true, sumado });
         }
 
-        // El socio quita un día que había marcado (solo si aún está PENDIENTE).
+        // El socio quita un día que había marcado (solo si aún está PENDIENTE,
+        // o sea, sin revisar por la comisión).
+        //
+        // Solo se saca de la planilla si de verdad se borró un registro del
+        // socio: así nunca se borra un día que cargó la administración.
         case 'desmarcarDiaPT': {
             const sid = String(b.socioId || '');
             const fecha = String(b.fecha || '').substring(0, 10);
             if (!sid || !fecha) return _mockRes({ success: false, error: 'Faltan datos' });
-            const { error } = await dbSV.from('dias_pt_solicitados')
-                .delete().eq('socio_id', sid).eq('fecha', fecha).eq('estado', 'PENDIENTE');
-            if (!error) dbSV.channel('sv-dias-pt').send({ type: 'broadcast', event: 'quitado', payload: {} }).catch(() => {});
-            return _mockRes({ success: !error, error: error && error.message });
+            const { data: borrados, error } = await dbSV.from('dias_pt_solicitados')
+                .delete().eq('socio_id', sid).eq('fecha', fecha).eq('estado', 'PENDIENTE')
+                .select('id');
+            if (error) return _mockRes({ success: false, error: error.message });
+            if (!borrados || !borrados.length) {
+                return _mockRes({ success: false, error: 'Ese día ya fue revisado por la comisión' });
+            }
+            await _ptQuitarDePlanilla(sid, fecha);
+            dbSV.channel('sv-dias-pt').send({ type: 'broadcast', event: 'quitado', payload: {} }).catch(() => {});
+            return _mockRes({ success: true });
         }
 
         // Días marcados por el socio (PENDIENTE / RECHAZADO) para pintarlos en su calendario.

@@ -4542,10 +4542,20 @@
 
     // Tarjeta "Por confirmar" en la pantalla principal (clásica + premium).
     // Muestra cuánto ganará el socio PT con los días que marcó y aún no se validan.
+    // Los días marcados entran directo a la planilla y ya suman en el balance.
+    // "Por sumar" son solo los que, por un error de conexión, quedaron
+    // registrados pero sin entrar a la planilla: sumarlos además de la
+    // planilla los contaría dos veces.
+    function _ptPendientesFueraDePlanilla() {
+        if (userTypeGlobal !== 'PT') return [];
+        const enPlanilla = new Set(globalDiasCalendar.map(d => String(d.fecha).split('T')[0].substring(0, 10)));
+        return ptDiasSolicitados.filter(d => d.estado === 'PENDIENTE' && !enPlanilla.has(d.fecha));
+    }
+
     function renderPTConfirmarCard() {
         const cardCl = document.getElementById('ptConfirmarCardClasica');
         const cardPm = document.getElementById('ptConfirmarCardPm');
-        const pend = (userTypeGlobal === 'PT') ? ptDiasSolicitados.filter(d => d.estado === 'PENDIENTE') : [];
+        const pend = _ptPendientesFueraDePlanilla();
         const monto = pend.reduce((a, d) => {
             const live = (ptMapVP[d.fecha]?.totalVP || 0) * ptPuntos;
             return a + (live > 0 ? live : (Number(d.valor) || 0));
@@ -4558,7 +4568,7 @@
         const vpPend = pend.reduce((a, d) => a + (ptMapVP[d.fecha]?.totalVP || 0), 0);
         const vpTotal = vpConfirmado + vpPend;
         const show = pend.length > 0;
-        const diasTxt = pend.length + ' día' + (pend.length > 1 ? 's' : '') + ' marcado' + (pend.length > 1 ? 's' : '') + ' · a la espera de validación';
+        const diasTxt = pend.length + ' día' + (pend.length > 1 ? 's' : '') + ' registrado' + (pend.length > 1 ? 's' : '') + ' · todavía sin sumar (se reintenta solo)';
         if (cardCl) {
             cardCl.style.display = show ? 'block' : 'none';
             if (show) {
@@ -4584,15 +4594,18 @@
         if (ptCargandoDia) return;
         if (userTypeGlobal !== 'PT' || !currentUser) return;
 
-        // No permitir tocar un día ya confirmado (está en la planilla)
-        const yaConfirmado = globalDiasCalendar.some(d => String(d.fecha).split('T')[0].substring(0, 10) === fKey);
-        if (yaConfirmado) { showToast('Sistema', 'Este día ya fue confirmado por la comisión.'); return; }
+        // Un día de la planilla se puede quitar solo si lo marcó el socio y la
+        // comisión todavía no lo revisa. Los cargados o revisados por la
+        // comisión no se tocan desde acá.
+        const existente = ptDiasSolicitados.find(d => d.fecha === fKey);
+        const enPlanilla = globalDiasCalendar.some(d => String(d.fecha).split('T')[0].substring(0, 10) === fKey);
+        const esMioSinRevisar = !!(existente && existente.estado === 'PENDIENTE');
+        if (enPlanilla && !esMioSinRevisar) { showToast('Sistema', 'Este día ya fue revisado por la comisión.'); return; }
 
         // No permitir marcar días futuros
         const hoyKey = (function () { const n = new Date(); return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0'); })();
         if (fKey > hoyKey) { showToast('Sistema', 'No puedes marcar días futuros.'); return; }
 
-        const existente = ptDiasSolicitados.find(d => d.fecha === fKey);
         ptCargandoDia = true;
         try {
             if (existente && existente.estado === 'PENDIENTE') {
@@ -4604,10 +4617,11 @@
                 const j = await res.json();
                 if (j.success) {
                     ptDiasSolicitados = ptDiasSolicitados.filter(d => d.fecha !== fKey);
-                    showToast('Turno', 'Día quitado.');
-                } else { showToast('Turno', 'No se pudo quitar el día.'); }
+                    showToast('Turno', 'Día quitado de tu balance.');
+                    refresh();          // el balance baja de inmediato
+                } else { showToast('Turno', j.error || 'No se pudo quitar el día.'); }
             } else {
-                // Marcar el día (por confirmar). Valor estimado según la recaudación del día.
+                // Marcar el día: entra a la planilla y suma de inmediato.
                 const vp = ptMapVP[fKey]?.totalVP || 0;
                 const valorEstimado = Math.round(vp * ptPuntos);
                 const res = await fetch(SCRIPT_URL_SOCIOS, {
@@ -4626,7 +4640,10 @@
                 if (j.success) {
                     ptDiasSolicitados = ptDiasSolicitados.filter(d => d.fecha !== fKey);
                     ptDiasSolicitados.push({ fecha: fKey, estado: 'PENDIENTE', valor: valorEstimado, motivo: '' });
-                    showToast('Turno', 'Día marcado — queda por confirmar por la comisión.');
+                    showToast('Turno', j.sumado === false
+                        ? 'Día registrado, pero no se pudo sumar todavía. La comisión lo verá.'
+                        : 'Día registrado y sumado a tu balance.');
+                    refresh();          // el balance sube de inmediato
                 } else { showToast('Turno', 'No se pudo marcar el día.'); }
             }
         } catch (e) {
@@ -4672,12 +4689,12 @@
         // Resumen "por confirmar" + total estimado para el socio Part-Time
         const _resumenPT = document.getElementById('calPTResumen');
         if (_resumenPT) {
-            const _pend = (userTypeGlobal === 'PT') ? ptDiasSolicitados.filter(d => d.estado === 'PENDIENTE') : [];
+            const _pend = _ptPendientesFueraDePlanilla();
             const _pendMonto = _pend.reduce((a, d) => a + _ptValorDia(d), 0);
             if (_pend.length > 0) {
                 _resumenPT.style.display = 'block';
                 document.getElementById('calPTPendMonto').textContent = '+' + formatMoney(_pendMonto);
-                document.getElementById('calPTPendDias').textContent = _pend.length + ' día' + (_pend.length > 1 ? 's' : '') + ' marcado' + (_pend.length > 1 ? 's' : '') + ' · a la espera de validación';
+                document.getElementById('calPTPendDias').textContent = _pend.length + ' día' + (_pend.length > 1 ? 's' : '') + ' registrado' + (_pend.length > 1 ? 's' : '') + ' · todavía sin sumar';
                 document.getElementById('calPTTotalEst').textContent = formatMoney(totalPeriodo + _pendMonto);
             } else {
                 _resumenPT.style.display = 'none';
@@ -4710,12 +4727,11 @@
         }
         // Ayuda para el socio PT
         if (esPT) {
-            const pend = ptDiasSolicitados.filter(d => d.estado === 'PENDIENTE');
             const hint = document.getElementById('calPTHint');
             if (hint) {
                 hint.style.display = 'block';
-                hint.innerHTML = 'Toca un día para marcar tu turno. Queda <b style="color:#b45309">por confirmar</b> hasta que la comisión lo valide.'
-                    + (pend.length ? ' <b>' + pend.length + '</b> día' + (pend.length > 1 ? 's' : '') + ' por confirmar.' : '');
+                hint.innerHTML = 'Toca un día para registrar tu turno: <b style="color:#047857">se suma a tu balance de inmediato</b>. '
+                    + 'Si te equivocaste, tócalo de nuevo para quitarlo mientras la comisión no lo haya revisado.';
             }
         } else {
             const hint = document.getElementById('calPTHint');
@@ -4796,32 +4812,34 @@
             }).join('');
         }
 
-        // Días marcados por el socio PT que aún están por confirmar / rechazados
+        // Días marcados por el socio PT que todavía no entraron a la planilla
+        // (error de conexión al marcar) y días que la comisión quitó. Los que
+        // ya están en la planilla salen arriba, en los días trabajados.
         if (userTypeGlobal === 'PT') {
             const pend = [...ptDiasSolicitados].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
-            const pendientes = pend.filter(d => d.estado === 'PENDIENTE');
+            const pendientes = _ptPendientesFueraDePlanilla().sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
             const rechazados = pend.filter(d => d.estado === 'RECHAZADO');
             if (pendientes.length) {
-                detalleHTML += '<p style="font-size:9px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 10px;">Por confirmar (' + pendientes.length + ')</p>';
+                detalleHTML += '<p style="font-size:9px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 10px;">Registrados, todavía sin sumar (' + pendientes.length + ')</p>';
                 detalleHTML += pendientes.map(function (d) {
                     const vpNoche = ptMapVP[d.fecha]?.totalVP || 0;
                     return '<div class="flex justify-between items-center rounded-2xl p-4" style="background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.35);">'
                         + '<div>'
                         + '<p class="text-xs font-semibold mb-0.5" style="color:#92400e;">' + formatDateText(d.fecha) + '</p>'
                         + '<p class="text-[11px]" style="color:#b45309;">VP por noche: ' + (vpNoche > 0 ? formatMoney(vpNoche) : 'sin recaudación aún') + '</p>'
-                        + '<p class="text-[11px]" style="color:#b45309;">⏳ Esperando validación de la comisión</p>'
+                        + '<p class="text-[11px]" style="color:#b45309;">⏳ No se pudo sumar al marcarlo; la comisión lo verá</p>'
                         + '</div>'
                         + '<span class="font-bold text-base" style="color:#b45309;">~' + formatMoney(_ptValorDia(d)) + '</span>'
                         + '</div>';
                 }).join('');
             }
             if (rechazados.length) {
-                detalleHTML += '<p style="font-size:9px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 10px;">Rechazados (' + rechazados.length + ')</p>';
+                detalleHTML += '<p style="font-size:9px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 10px;">Quitados por la comisión (' + rechazados.length + ')</p>';
                 detalleHTML += rechazados.map(function (d) {
                     return '<div class="rounded-2xl p-4" style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.28);">'
                         + '<div class="flex justify-between items-center">'
                         + '<p class="text-xs font-semibold mb-0.5" style="color:#991b1b;">' + formatDateText(d.fecha) + '</p>'
-                        + '<span class="text-[11px] font-bold" style="color:#b91c1c;">Rechazado</span>'
+                        + '<span class="text-[11px] font-bold" style="color:#b91c1c;">Quitado por la comisión</span>'
                         + '</div>'
                         + (d.motivo ? '<p class="text-[11px] mt-1" style="color:#7f1d1d;">Motivo: ' + d.motivo + '</p>' : '')
                         + '<p class="text-[10px] mt-1" style="color:#b91c1c;">Toca el día en el calendario para volver a marcarlo.</p>'
@@ -5699,7 +5717,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'event_note',
             color: '#705d00',
             title: 'Calendario de Ausencias y Turnos',
-            body: 'El botón <b>"Ver Calendario"</b> aparece en tu Balance si eres <b>Part-Time</b> o si tienes <b>ausencias</b> registradas.<br><br>🟢 <b>Verde (Part-Time):</b> Los días que trabajaste — esos suman puntos a tu propina.<br>🔴 <b>Rojo (Planta):</b> Los días que faltaste — esos restan puntos de tu propina.<br><br>📆 <b>Si faltaste varios días seguidos</b> (una licencia, por ejemplo), abajo aparecen como <b>un solo tramo</b>: <b>desde cuándo hasta cuándo</b>, cuántos días son y <b>cuánto dejas de percibir</b> en total. Tócalo para abrirlo y ver día por día cuánto fue cada uno.<br><br>Si ves un día marcado incorrectamente, avísale a la administración por Mensajes.',
+            body: 'El botón <b>"Ver Calendario"</b> aparece en tu Balance si eres <b>Part-Time</b> o si tienes <b>ausencias</b> registradas.<br><br>🟢 <b>Verde (Part-Time):</b> Los días que trabajaste — esos suman puntos a tu propina.<br>🔴 <b>Rojo (Planta):</b> Los días que faltaste — esos restan puntos de tu propina.<br><br>📆 <b>Si faltaste varios días seguidos</b> (una licencia, por ejemplo), abajo aparecen como <b>un solo tramo</b>: <b>desde cuándo hasta cuándo</b>, cuántos días son y <b>cuánto dejas de percibir</b> en total. Tócalo para abrirlo y ver día por día cuánto fue cada uno.<br><br>🟢 <b>Part-Time:</b> toca un día para registrar tu turno. <b>Se suma a tu balance de inmediato</b>, sin esperar a la comisión. Si te equivocaste, tócalo otra vez para quitarlo (mientras la comisión no lo haya revisado). La comisión revisa las marcas y corrige si hay un error.<br><br>Si ves un día marcado incorrectamente, avísale a la administración por Mensajes.',
             preview: `
               <div style="background:#fff;border:1px solid #e1e3e4;border-radius:18px;padding:14px;">
                 <div style="font-size:14px;font-weight:800;color:#191c1d;font-family:Manrope,sans-serif;margin-bottom:2px;">Calendario Marzo 2026</div>

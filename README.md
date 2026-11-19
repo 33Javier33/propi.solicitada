@@ -343,6 +343,18 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-11-19 — Part-Time: el día marcado suma al instante, sin esperar confirmación (SW v200)
+
+- Cuando el socio Part-Time marca un día en su calendario, **el día entra directo a la planilla real** (`dias_pt`). Suma en su balance y en el pago de socios-comicion de inmediato, sin esperar confirmación.
+- Además queda el registro en `dias_pt_solicitados` como PENDIENTE, que ahora significa **por revisar**. La comisión solo corrige: marca como revisado lo que está bien, o quita de la planilla lo que es un error.
+- **El socio puede deshacer su propia marca** tocando el día otra vez, mientras la comisión no la haya revisado. El balance baja en el momento.
+- **Nunca borra un día cargado por la administración.** Solo se saca de la planilla si de verdad se borró un registro del socio que estaba por revisar.
+- Si la escritura en la planilla falla, el registro igual queda y la app avisa «registrado, todavía sin sumar». Solo esos días aparecen aparte; los que ya entraron a la planilla no se cuentan dos veces.
+- Textos y ayuda del calendario actualizados: «se suma a tu balance de inmediato»; los días que quita la comisión salen como «Quitado por la comisión».
+
+Probado de punta a punta en el navegador con la app real y una base simulada: suma al marcar, baja al quitar, no deja quitar un día de la administración, deja de sumar cuando la comisión lo quita, y no permite días futuros. Contra la versión anterior, la prueba falla en la suma inmediata.
+
+
 #### 2026-11-19 — «Solicitar Egreso» pasa a ser «Registro de Anticipo» y descuenta al instante (SW v199)
 
 - El botón, el formulario y la ayuda se llaman ahora **Registro de Anticipo**. El socio registra el anticipo que le entregó el encargado: monto, encargado y, si quiere, el desglose de billetes.
