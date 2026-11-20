@@ -343,6 +343,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-11-20 — El socio Part-Time siempre ve su calendario (SW v201)
+
+- **Bug:** el botón «Ver Calendario» solo aparecía si el socio ya tenía días en la planilla. Al empezar un período (planilla vacía), el Part-Time no veía el botón y no tenía cómo marcar su primer día.
+- **Causa:** `hayCalendario = globalDiasCalendar.length > 0`. Viene de agosto. Se notó ahora porque el período nuevo empezó el 15/11 con las planillas vacías.
+- **Arreglo:** `hayCalendario = esPT || globalDiasCalendar.length > 0`. El Part-Time ve el calendario siempre. Para Planta sigue igual: aparece solo si tiene ausencias.
+
+Probado en el navegador con un Part-Time con la planilla vacía: ve el botón, abre el calendario, marca su primer día y suma al instante. Con la versión anterior el botón quedaba oculto.
+
+
 #### 2026-11-19 — Part-Time: el día marcado suma al instante, sin esperar confirmación (SW v200)
 
 - Cuando el socio Part-Time marca un día en su calendario, **el día entra directo a la planilla real** (`dias_pt`). Suma en su balance y en el pago de socios-comicion de inmediato, sin esperar confirmación.

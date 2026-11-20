@@ -2587,7 +2587,11 @@
             })();
 
             const btn=document.getElementById('calendarBtnContainer');
-            const hayCalendario = globalDiasCalendar.length > 0;
+            // El Part-Time necesita el calendario SIEMPRE: es donde marca sus días.
+            // Antes solo aparecía si ya tenía días en la planilla, así que al
+            // empezar un período (planilla vacía) no tenía cómo marcar el primero.
+            // Para Planta sigue igual: aparece solo si tiene ausencias.
+            const hayCalendario = esPT || globalDiasCalendar.length > 0;
             if(hayCalendario) btn.classList.remove('hidden'); else btn.classList.add('hidden');
             // Versión premium: mismo criterio para el acceso "Ver Calendario"
             const btnPm = document.getElementById('pmCalBtn');
