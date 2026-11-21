@@ -343,6 +343,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-11-21 — El anticipo por confirmar también sale en Últimos Movimientos (SW v204)
+
+- El anticipo que el socio registra desde la app ahora aparece arriba en **Últimos Movimientos**, con el monto ya descontado (igual que en el balance), el encargado, la fecha y la etiqueta **PENDIENTE** (`.mov-pendiente` en `app.css`). Sale en las vistas clásica y premium.
+- Cuenta como pedido en «Llevas N pedidos · te restan X».
+- Cuando la administración lo confirma, el renglón PENDIENTE desaparece y queda el anticipo normal, una sola vez. Si se cancela o se rechaza, también desaparece.
+- La guía de ayuda (helpSlides) lo explica.
+
 #### 2026-11-21 — Pts Planta y Total Puntos junto al divisor (SW v203)
 
 - En el modal de recaudación, el campo del divisor muestra como texto de ayuda los puntos de hoy (p. ej. «Pts Planta 810 · Total Puntos 836»). Debajo hay dos botones que lo rellenan con un toque.

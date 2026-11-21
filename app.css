@@ -1456,3 +1456,9 @@
     border: 1px solid rgba(147, 197, 253, 0.35);
     pointer-events: none;
 }
+
+/* Etiqueta «PENDIENTE» en Últimos Movimientos: anticipo registrado por el
+   socio que la administración aún no confirma (el monto ya está descontado). */
+.mov-pendiente { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: 0.06em; vertical-align: 1px;
+    background: #fbbf24; color: #451a03; }   /* ámbar sólido: se lee en tema claro y oscuro */

@@ -2382,11 +2382,24 @@
                 fecha:e.fecha, monto:e.monto, cantidad:e.monto,
                 desc:'💝 ' + _motivoDonacion(e.detalle), _donacion:true
             }));
-            const merged=[...pedidos,...donacionesMov].sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+            // Anticipos registrados por el socio que la administración aún no
+            // confirma: van arriba de todo, con el monto ya descontado (igual que
+            // en el balance) y la etiqueta «PENDIENTE». Al confirmarse pasan a ser
+            // un anticipo normal de la lista y este renglón desaparece.
+            const _fechaLocal = (iso) => {
+                const d = new Date(iso);
+                if (isNaN(d)) return String(iso || '').substring(0, 10);
+                return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            };
+            const pendMovs=pendientesAnt.filter(p=>Number(p.monto)>0).map(p=>({
+                fecha:_fechaLocal(p.created_at), monto:Number(p.monto), cantidad:Number(p.monto),
+                desc:'Anticipo registrado' + (p.encargado ? ' · ' + p.encargado : ''), _pendiente:true
+            })).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+            const merged=[...pendMovs, ...[...pedidos,...donacionesMov].sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)))];
             // Contador de pedidos: "Llevas N pedidos · te restan X · máximo 8" (clásico y premium)
             (function(){
                 const MOVS_MAX = 8;            // máximo de pedidos/anticipos por período
-                const cnt = pedidos.length;
+                const cnt = pedidos.length + pendMovs.length;   // el pendiente también es un pedido
                 const restan = Math.max(0, MOVS_MAX - cnt);
                 const restanCol = restan === 0 ? '#ef4444' : (restan <= 2 ? '#f59e0b' : '#16a34a');
                 const html = `Llevas <b>${cnt}</b> pedido${cnt===1?'':'s'} · te restan <b style="color:${restanCol}">${restan}</b> · máximo ${MOVS_MAX}`;
@@ -2399,11 +2412,11 @@
                 listaContainer.innerHTML=merged.map(a=>`
                 <div class="movement-row"${a._donacion?' style="align-items:flex-start;"':''}>
                     <div class="movement-icon" style="background:${a._donacion?'rgba(219,39,119,0.12)':'rgba(239,68,68,0.10)'};">
-                        <span class="material-symbols-outlined text-[18px]" style="color:${a._donacion?'#db2777':'#ef4444'};">${a._donacion?'volunteer_activism':'arrow_downward'}</span>
+                        <span class="material-symbols-outlined text-[18px]" style="color:${a._donacion?'#db2777':'#ef4444'};">${a._donacion?'volunteer_activism':(a._pendiente?'hourglass_top':'arrow_downward')}</span>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-lm-primary${a._donacion?'':' truncate'}"${a._donacion?' style="white-space:normal;overflow-wrap:anywhere;line-height:1.35;"':''}>${a.desc||a.tipo||'Anticipo'}</p>
-                        <p class="text-[11px] text-lm-muted mt-0.5">${cleanDateStr(a.fecha)}</p>
+                        <p class="text-[11px] text-lm-muted mt-0.5">${cleanDateStr(a.fecha)}${a._pendiente?' <span class="mov-pendiente">PENDIENTE</span>':''}</p>
                     </div>
                     <b class="text-lm-red text-sm font-bold shrink-0">-${formatMoney(a.cantidad||a.monto)}</b>
                 </div>`).join('');
@@ -2419,8 +2432,8 @@
                 _pmMovs.innerHTML = (merged.length > 0)
                     ? merged.map(a => `<div style="display:flex;align-items:${a._donacion?'flex-start':'center'};justify-content:space-between;padding:14px;border-bottom:1px solid #43474b;">
                         <div style="display:flex;align-items:center;gap:12px;min-width:0;">
-                            <div style="width:40px;height:40px;border-radius:50%;background:${a._donacion?'rgba(244,114,182,0.16)':'rgba(255,180,171,0.12)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:${a._donacion?'#f472b6':'#ffb4ab'};font-size:18px;">${a._donacion?'volunteer_activism':'arrow_downward'}</span></div>
-                            <div style="min-width:0;"><p style="font-size:14px;font-weight:600;color:#e1e3e4;margin:0;${a._donacion?'white-space:normal;overflow-wrap:anywhere;line-height:1.35;':'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'}">${a.desc || a.tipo || 'Anticipo'}</p><p style="font-size:11px;color:#c3c7cb;margin:2px 0 0;">${cleanDateStr(a.fecha)}</p></div>
+                            <div style="width:40px;height:40px;border-radius:50%;background:${a._donacion?'rgba(244,114,182,0.16)':'rgba(255,180,171,0.12)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="color:${a._donacion?'#f472b6':'#ffb4ab'};font-size:18px;">${a._donacion?'volunteer_activism':(a._pendiente?'hourglass_top':'arrow_downward')}</span></div>
+                            <div style="min-width:0;"><p style="font-size:14px;font-weight:600;color:#e1e3e4;margin:0;${a._donacion?'white-space:normal;overflow-wrap:anywhere;line-height:1.35;':'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'}">${a.desc || a.tipo || 'Anticipo'}</p><p style="font-size:11px;color:#c3c7cb;margin:2px 0 0;">${cleanDateStr(a.fecha)}${a._pendiente?' <span class="mov-pendiente">PENDIENTE</span>':''}</p></div>
                         </div>
                         <b style="color:#ffb4ab;font-size:14px;flex-shrink:0;margin-left:10px;white-space:nowrap;">-${formatMoney(a.cantidad || a.monto)}</b>
                     </div>`).join('')
@@ -5660,7 +5673,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'request_quote',
             color: '#0284c7',
             title: 'Registro de Anticipo',
-            body: 'Junto al botón anterior está <b>"Registro de Anticipo"</b> (celeste). Con él registras el <b>anticipo de propina</b> que te entregó el encargado.<br><br>Ingresas el <b>monto</b>, el <b>encargado</b> que te lo entregó y, si quieres, un detalle.<br><br>💸 <b>El monto se descuenta de tu balance de inmediato</b>: no tienes que esperar a la administración. En tu Balance verás la tarjeta <b>"Anticipo registrado · por confirmar"</b>.<br><br>✅ Cuando la administración lo confirme, pasa a ser un anticipo normal en <b>Últimos Movimientos</b> (no se descuenta dos veces).<br><br>↩️ Si lo cancelas, o la administración lo rechaza, el monto vuelve a tu balance.',
+            body: 'Junto al botón anterior está <b>"Registro de Anticipo"</b> (celeste). Con él registras el <b>anticipo de propina</b> que te entregó el encargado.<br><br>Ingresas el <b>monto</b>, el <b>encargado</b> que te lo entregó y, si quieres, un detalle.<br><br>💸 <b>El monto se descuenta de tu balance de inmediato</b>: no tienes que esperar a la administración. En tu Balance verás la tarjeta <b>"Anticipo registrado · por confirmar"</b>, y en <b>Últimos Movimientos</b> aparece con el monto ya descontado y la etiqueta <b>PENDIENTE</b>.<br><br>✅ Cuando la administración lo confirme, la etiqueta desaparece y queda como un anticipo normal (no se descuenta dos veces).<br><br>↩️ Si lo cancelas, o la administración lo rechaza, el monto vuelve a tu balance.',
             preview: `
               <div>
                 <div style="background:#f8fafc;border-radius:16px;padding:14px;border:1px solid #e1e3e4;margin-bottom:10px;">
