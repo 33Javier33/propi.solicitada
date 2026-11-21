@@ -343,6 +343,13 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-11-21 — Recaudación "Total General" y aviso del divisor (SW v202)
+
+- Nuevo botón **Total General (todas las áreas)** en el modal de recaudación, para las noches en que solo se sabe el total y no el monto de cada área.
+- Regla (`_recConflictoGeneral` en `supabase-api.js`): una noche se carga **por área o con un Total General, nunca ambas**. Si se intenta mezclar, se muestra el aviso y no se guarda.
+- El divisor sigue siendo optativo, pero ahora muestra un aviso de que es importante agregarlo. Si ya está cargado para esa fecha, se rellena solo y el aviso se oculta. Si se envía sin divisor, se pide confirmar.
+- La guía de ayuda (helpSlides) menciona Total General y el divisor.
+
 #### 2026-11-20 — El socio Part-Time siempre ve su calendario (SW v201)
 
 - **Bug:** el botón «Ver Calendario» solo aparecía si el socio ya tenía días en la planilla. Al empezar un período (planilla vacía), el Part-Time no veía el botón y no tenía cómo marcar su primer día.

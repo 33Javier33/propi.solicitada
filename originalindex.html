@@ -3039,7 +3039,10 @@
                 <button class="rec-tipo-btn" data-tipo="EfectivoMDA" onclick="selRecTipo('EfectivoMDA')">💵 EfectivoMDA</button>
                 <button class="rec-tipo-btn" data-tipo="SalaDeJuegos" onclick="selRecTipo('SalaDeJuegos')">🎰 SalaDeJuegos</button>
                 <button class="rec-tipo-btn" data-tipo="Boveda" onclick="selRecTipo('Boveda')">🏦 Bóveda</button>
+                <!-- Cuando no se sabe cuánto fue cada área, solo el total de la noche. -->
+                <button class="rec-tipo-btn" data-tipo="TotalGeneral" onclick="selRecTipo('TotalGeneral')" style="grid-column:1 / -1;">📋 Total General · todas las áreas</button>
             </div>
+            <p id="recGeneralNota" style="display:none;font-size:0.72em;color:#64748b;margin:-10px 0 16px;line-height:1.4">Úsalo solo si no sabes el monto de cada área. Una noche va <b>por área o con total general</b>, no las dos.</p>
 
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Fecha</p>
             <input type="date" id="recFecha" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
@@ -3048,8 +3051,8 @@
             <input type="tel" id="recMonto" placeholder="$0" oninput="fmtRecMonto(this)" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:1.1rem;font-weight:700;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
 
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Divisor <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
-            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px">Si no sabes el divisor de hoy, déjalo en blanco.</p>
-            <input type="number" id="recDivisor" placeholder="Ej: 52" min="1" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:22px">
+            <div id="recDivisorAviso" style="font-size:0.74em;color:#9a3412;background:#fff7ed;border:1px solid #fdba74;border-radius:10px;padding:8px 10px;margin-bottom:8px;line-height:1.4">⚠️ <b>Es importante agregar el divisor.</b> Sin él no se calcula el valor del punto de esa noche. Si todavía no lo sabes, puedes dejarlo en blanco.</div>
+            <input type="number" id="recDivisor" oninput="pintarAvisoDivisor()" placeholder="Ej: 52" min="1" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:22px">
 
             <button id="btnEnviarRec" onclick="enviarRec()" style="width:100%;padding:15px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
                 Registrar Recaudación
@@ -3142,9 +3145,9 @@
 </div><!-- /appContainer -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
-<script src="supabase-api.js"></script>
+<script src="supabase-api.js?v=202"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=200"></script>
+<script src="app.js?v=201"></script>
 <script src="version.js?v=5"></script>
 
 

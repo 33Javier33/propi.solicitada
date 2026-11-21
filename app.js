@@ -3587,6 +3587,8 @@
             if (b.dataset.tipo === tipo) b.classList.add('active');
             else b.classList.remove('active');
         });
+        const _nota = document.getElementById('recGeneralNota');
+        if (_nota) _nota.style.display = tipo === 'TotalGeneral' ? 'block' : 'none';
         if (typeof recPresTipo === 'function') recPresTipo(tipo); // presencia: tipo en curso
     };
 
@@ -3663,7 +3665,11 @@
             });
         }
         document.getElementById('recMonto').value = '';
-        document.getElementById('recDivisor').value = '';
+        _ponerDivisorConocido();
+        if (_elF.dataset.divEnganche !== '1') {
+            _elF.dataset.divEnganche = '1';
+            _elF.addEventListener('change', _ponerDivisorConocido);
+        }
         // Mostrar el total de puntos como dato de referencia
         const _pts = _recCalcTotalPuntos();
         const elTP = document.getElementById('recInfoTotalPuntos');
@@ -3686,6 +3692,28 @@
         if (typeof recPresRender === 'function') { recPresRender(); setTimeout(recPresRender, 800); }
     };
 
+    // Divisor ya cargado para una noche (de los datos que trajo el balance).
+    function _divisorConocido(fecha) {
+        const rec = (_lastGood && Array.isArray(_lastGood.recData)) ? _lastGood.recData : [];
+        const r = rec.find(x => String(x.fecha || '').substring(0, 10) === fecha && parseFloat(x.divisor) > 0);
+        return r ? parseFloat(r.divisor) : 0;
+    }
+
+    // El aviso «es importante agregar el divisor» se ve solo con el campo vacío.
+    window.pintarAvisoDivisor = () => {
+        const v = parseFloat(String(document.getElementById('recDivisor').value || '').replace(',', '.')) || 0;
+        const av = document.getElementById('recDivisorAviso');
+        if (av) av.style.display = v > 0 ? 'none' : 'block';
+    };
+
+    // Si la noche elegida ya tiene divisor, se trae al campo.
+    function _ponerDivisorConocido() {
+        const f = document.getElementById('recFecha').value;
+        const d = _divisorConocido(f);
+        document.getElementById('recDivisor').value = d > 0 ? String(d) : '';
+        pintarAvisoDivisor();
+    }
+
     window.cerrarModalRec = () => {
         document.getElementById('modalRecaudacion').style.display = 'none';
         if (typeof recPresSalir === 'function') recPresSalir(); // presencia: salió del modal
@@ -3704,6 +3732,11 @@
         const divisorRaw = parseFloat(document.getElementById('recDivisor').value) || 0;
         if (!fecha) return showToast('Selecciona una fecha', 'error');
         if (!monto) return showToast('Ingresa un monto válido', 'error');
+        // Divisor: opcional, pero con aviso. Si la noche ya tiene uno, no se pregunta.
+        if (!(divisorRaw > 0) && !(_divisorConocido(fecha) > 0) && !confirm(
+            '⚠️ No agregaste el divisor de esta noche.\n\n'
+            + 'Es importante: sin él no se calcula el valor del punto.\n\n'
+            + '¿Registrar igual sin divisor?')) return;
         const btn = document.getElementById('btnEnviarRec');
         btn.disabled = true; btn.textContent = 'Registrando...';
         try {
@@ -5582,7 +5615,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'add_circle',
             color: '#6366f1',
             title: 'Registrar la Recaudación del Día',
-            body: 'En el Balance hay un botón morado <b>"Recaudación del Día"</b>. Sirve para registrar lo recaudado en la noche <b>directamente desde tu app</b>, aunque no tengas la app de Recaudaciones Diarias instalada.<br><br>Al tocarlo se abre un formulario donde eliges:<br><br>🏷️ <b>Categoría:</b> TarjetaMDA, EfectivoMDA, SalaDeJuegos o Bóveda.<br>📅 <b>Fecha</b> y 💵 <b>Monto</b> recaudado.<br>➗ <b>Divisor</b> (opcional): si no lo sabes, déjalo en blanco.<br><br>Arriba verás el <b>total de puntos</b> del reparto como dato de referencia.<br><br>📄 Dentro del mismo formulario hay un botón <b>"Abrir Diario de Recaudación"</b> que te lleva al <b>diario completo</b> de recaudaciones. Así entre todos mantienen la información al día.',
+            body: 'En el Balance hay un botón morado <b>"Recaudación del Día"</b>. Si no sabes cuánto fue cada área, usa <b>"Total General"</b> para registrar solo el total de la noche (una noche va por área <b>o</b> con total general, no las dos). El <b>divisor</b> es opcional pero importante: sin él no se calcula el valor del punto.<br><br>Sirve para registrar lo recaudado en la noche <b>directamente desde tu app</b>, aunque no tengas la app de Recaudaciones Diarias instalada.<br><br>Al tocarlo se abre un formulario donde eliges:<br><br>🏷️ <b>Categoría:</b> TarjetaMDA, EfectivoMDA, SalaDeJuegos o Bóveda.<br>📅 <b>Fecha</b> y 💵 <b>Monto</b> recaudado.<br>➗ <b>Divisor</b> (opcional): si no lo sabes, déjalo en blanco.<br><br>Arriba verás el <b>total de puntos</b> del reparto como dato de referencia.<br><br>📄 Dentro del mismo formulario hay un botón <b>"Abrir Diario de Recaudación"</b> que te lleva al <b>diario completo</b> de recaudaciones. Así entre todos mantienen la información al día.',
             preview: `
               <div>
                 <div style="display:flex;gap:8px;margin-bottom:12px;">

@@ -46,7 +46,7 @@ window.logActividad = function (evento, nombre, socioId, detalle) {
 (function () {
     const DB = dbRV;                 // cliente del proyecto de recaudaciones
     const APP = 'Bóveda Personal';   // etiqueta de esta app
-    const TIPO_LABEL = { TarjetaMDA: 'Tarjeta MDA', EfectivoMDA: 'Efectivo MDA', SalaDeJuegos: 'Sala de Juegos', Boveda: 'Bóveda' };
+    const TIPO_LABEL = { TarjetaMDA: 'Tarjeta MDA', EfectivoMDA: 'Efectivo MDA', SalaDeJuegos: 'Sala de Juegos', Boveda: 'Bóveda', TotalGeneral: 'Total General (todas las áreas)' };
     const KEY = 'rp_' + Math.random().toString(36).slice(2) + Date.now();
     let ch = null, mio = null, toastT = null, listo = false, hbT = null, otrosDb = [];
     let bannerT = null, anunciados = {};   // banner superior: solo avisa a los que RECIÉN llegan
@@ -302,6 +302,27 @@ async function _migrarASupabase(gasJson) {
 
 // Cache de sesión para días PT desde GAS (evita re-fetch en cada refresh)
 let _diasPtGasCache = null;
+
+// ── Una noche se carga POR ÁREA o con un TOTAL GENERAL, nunca las dos ──────────
+// «TotalGeneral» es para cuando no se conoce el monto de cada área, solo el total
+// de la noche. Mezclarlas en una misma fecha contaría la misma plata dos veces.
+// Devuelve el motivo del bloqueo, o null. Si no se puede leer la base, no bloquea.
+// Las mismas reglas están en socios-comicion y diario.propi.
+async function _recConflictoGeneral(fecha, tipo, excluirId) {
+    try {
+        const { data, error } = await dbRV.from('recaudaciones').select('id, tipo').eq('fecha', fecha);
+        if (error || !data) return null;
+        const tipos = data.filter(r => String(r.id) !== String(excluirId || '')).map(r => r.tipo);
+        const esGen = tipo === 'TotalGeneral';
+        if (esGen && tipos.includes('TotalGeneral'))
+            return 'Esa noche ya tiene un Total General. Si el monto está mal, pide que lo corrijan en vez de agregar otro.';
+        if (esGen && tipos.length)
+            return 'Esa noche ya tiene montos por área. No se puede agregar un Total General: la recaudación se contaría dos veces.';
+        if (!esGen && tipos.includes('TotalGeneral'))
+            return 'Esa noche está cargada con un Total General. No se pueden agregar montos por área: la recaudación se contaría dos veces.';
+        return null;
+    } catch (e) { return null; }
+}
 
 // ── Planilla Part-Time (tabla dias_pt: una fila por socio con el arreglo de días) ──
 // Se lee y se vuelve a escribir la fila completa, uniendo con lo que ya hay, igual
@@ -1022,6 +1043,9 @@ async function _recHandler(url, options) {
         }
 
         case 'addRecaudacion': {
+            // Una noche se carga POR ÁREA o con un TOTAL GENERAL, nunca las dos.
+            const _conf = await _recConflictoGeneral(b.fecha, b.tipo || 'Sin Tipo');
+            if (_conf) return _mockRes({ success: false, error: _conf });
             const base = { id: crypto.randomUUID(), fecha: b.fecha, tipo: b.tipo || 'Sin Tipo', monto: Number(b.monto) || 0 };
             let res = await dbRV.from('recaudaciones').insert({ ...base, registrado_por_id: b.registrado_por_id || null, registrado_por_nombre: b.registrado_por_nombre || null });
             // Si las columnas aún no existen en Supabase, reintentar sin ellas
