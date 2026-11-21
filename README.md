@@ -343,6 +343,10 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-11-21 — Texto «El desarrollador» actualizado (SW v205)
+
+- La ficha «Acerca de» ahora habla en pasado del período como Encargado del Fondo (15/11/2025 – 15/11/2026), y dice que hoy continúa como socio y responsable del desarrollo y la mantención de la plataforma.
+
 #### 2026-11-21 — El anticipo por confirmar también sale en Últimos Movimientos (SW v204)
 
 - El anticipo que el socio registra desde la app ahora aparece arriba en **Últimos Movimientos**, con el monto ya descontado (igual que en el balance), el encargado, la fecha y la etiqueta **PENDIENTE** (`.mov-pendiente` en `app.css`). Sale en las vistas clásica y premium.
@@ -411,7 +415,7 @@ El texto decía que desde el **15 de noviembre de 2025** «cumple el rol de Enca
 
 Redactado para que sea cierto **hoy y después**, sin tener que volver a tocarlo cuando llegue la fecha:
 
-> Colaborador del Casino de Puerto Varas desde **2013**, actualmente ejerce como **Croupier**. Encargado del **Fondo Solidario de Propina** desde el **15 de noviembre de 2025 hasta el 15 de noviembre de 2026**, velando por los derechos económicos de todos los socios. Seguirá como **socio del fondo** y a cargo del desarrollo y la mantención de esta plataforma.
+> Colaborador del Casino de Puerto Varas desde **2013**, donde actualmente se desempeña como **Croupier**. Fue **Encargado del Fondo Solidario de Propina** entre el **15 de noviembre de 2025 y el 15 de noviembre de 2026**, período en el que veló por los derechos económicos de todos los socios. Hoy continúa como **socio del fondo** y es responsable del desarrollo y la mantención de esta plataforma.
 
 También: el nombre pasa de «Carlos» a **«Carlos P. Nauto»**, y se retira la línea *«Encargado Fondo Solidario · Desde 15/11/2025»* que iba bajo él — decía lo mismo sin el término y quedaba contradiciendo al párrafo.
 
