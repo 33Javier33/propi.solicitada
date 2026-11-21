@@ -1593,6 +1593,13 @@
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Divisor <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
             <div id="recDivisorAviso" style="font-size:0.74em;color:#9a3412;background:#fff7ed;border:1px solid #fdba74;border-radius:10px;padding:8px 10px;margin-bottom:8px;line-height:1.4">⚠️ <b>Es importante agregar el divisor.</b> Sin él no se calcula el valor del punto de esa noche. Si todavía no lo sabes, puedes dejarlo en blanco.</div>
             <input type="number" id="recDivisor" oninput="pintarAvisoDivisor()" placeholder="Ej: 52" min="1" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:22px">
+            <!-- Referencia: Pts Planta / Total Puntos de hoy (los del panel de socios-comicion).
+                 Texto de ayuda del campo + botones que lo rellenan; nunca se guardan solos. -->
+            <div id="recDivPuntos" style="display:none;flex-wrap:wrap;align-items:center;gap:6px;margin:-14px 0 20px">
+                <span style="font-size:0.7em;color:#94a3b8;width:100%">Puntos de hoy · toca para usar:</span>
+                <button type="button" data-campo="planta" onclick="usarPuntosDivisor(this)" style="border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;border-radius:999px;padding:5px 11px;font-size:0.78em;font-weight:600;cursor:pointer">Pts Planta <b>—</b></button>
+                <button type="button" data-campo="total" onclick="usarPuntosDivisor(this)" style="border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;border-radius:999px;padding:5px 11px;font-size:0.78em;font-weight:600;cursor:pointer">Total Puntos <b>—</b></button>
+            </div>
 
             <button id="btnEnviarRec" onclick="enviarRec()" style="width:100%;padding:15px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,0.35)">
                 Registrar Recaudación
@@ -1685,9 +1692,9 @@
 </div><!-- /appContainer -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
-<script src="supabase-api.js?v=202"></script>
+<script src="supabase-api.js?v=203"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=201"></script>
+<script src="app.js?v=202"></script>
 <script src="version.js?v=5"></script>
 
 

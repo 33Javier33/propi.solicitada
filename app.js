@@ -3666,6 +3666,7 @@
         }
         document.getElementById('recMonto').value = '';
         _ponerDivisorConocido();
+        _pintarPuntosDivisor();
         if (_elF.dataset.divEnganche !== '1') {
             _elF.dataset.divEnganche = '1';
             _elF.addEventListener('change', _ponerDivisorConocido);
@@ -3713,6 +3714,28 @@
         document.getElementById('recDivisor').value = d > 0 ? String(d) : '';
         pintarAvisoDivisor();
     }
+
+    // Pts Planta / Total Puntos de hoy junto al divisor: texto de ayuda del
+    // campo y botones que lo rellenan. Solo referencia: el socio decide.
+    async function _pintarPuntosDivisor() {
+        const inp = document.getElementById('recDivisor');
+        const caja = document.getElementById('recDivPuntos');
+        if (!inp || !caja || typeof window.puntosSociosActuales !== 'function') return;
+        const p = await window.puntosSociosActuales();
+        if (!p || !(p.total > 0)) return;            // sin datos: queda el «Ej: 52»
+        inp.placeholder = 'Pts Planta ' + p.planta + ' · Total Puntos ' + p.total;
+        caja.querySelector('[data-campo="planta"] b').textContent = p.planta;
+        caja.querySelector('[data-campo="total"] b').textContent = p.total;
+        caja.dataset.planta = p.planta; caja.dataset.total = p.total;
+        caja.style.display = 'flex';
+    }
+    window.usarPuntosDivisor = (btn) => {
+        const caja = document.getElementById('recDivPuntos');
+        const v = caja && caja.dataset[btn.dataset.campo];
+        if (!v) return;
+        document.getElementById('recDivisor').value = v;
+        pintarAvisoDivisor();
+    };
 
     window.cerrarModalRec = () => {
         document.getElementById('modalRecaudacion').style.display = 'none';

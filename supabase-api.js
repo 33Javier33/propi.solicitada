@@ -1166,3 +1166,48 @@ navigator.sendBeacon = function(url, data) {
     }
     return _origBeacon(url, data);
 };
+
+// ══════════════════════════════════════════════════════════════════════
+// PUNTOS ACTUALES DE LOS SOCIOS (referencia para el divisor)
+//
+// Son los mismos dos números del panel de socios-comicion: «Pts Planta» y
+// «Total Puntos». Se suman los puntos de los socios activos cuyos puntos
+// ya empezaron a correr (la primera entrega es el primer día 15 después
+// de cumplir un mes de contrato, o la fecha de inicio puesta a mano).
+// Cambian solos cuando socios-comicion sube o baja puntos.
+// Se usan solo como sugerencia junto al divisor: nunca se guardan solos.
+// ══════════════════════════════════════════════════════════════════════
+function _puntosEmpezaron(s, hoy) {
+    let ini = null;
+    const fip = String(s.fecha_inicio_puntos || '').substring(0, 10);
+    const fin = String(s.fecha_ingreso || '').substring(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(fip) && fip !== fin) {
+        const [a, m] = fip.split('-').map(Number);
+        ini = new Date(a, m - 1, 15);
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(fin)) {
+        const [a, m, d] = fin.split('-').map(Number);
+        const ultimo = new Date(a, m + 1, 0).getDate();
+        const unMes = new Date(a, m, Math.min(d, ultimo));      // cumple un mes
+        ini = unMes.getDate() <= 15 ? new Date(unMes.getFullYear(), unMes.getMonth(), 15)
+                                    : new Date(unMes.getFullYear(), unMes.getMonth() + 1, 15);
+    }
+    return !ini || hoy >= ini;
+}
+let _puntosSociosCache = null;      // { planta, total, t }
+window.puntosSociosActuales = async function () {
+    if (_puntosSociosCache && Date.now() - _puntosSociosCache.t < 60000) return _puntosSociosCache;
+    try {
+        const { data, error } = await dbSV.from('socios')
+            .select('contrato, puntos, activo, puntos_activos, fecha_ingreso, fecha_inicio_puntos');
+        if (error || !Array.isArray(data)) return _puntosSociosCache;
+        const hoy = new Date();
+        const act = data.filter(s => s.activo !== false && s.puntos_activos !== false && _puntosEmpezaron(s, hoy));
+        const pts = s => Number(s.puntos) > 0 ? Number(s.puntos) : 0;
+        _puntosSociosCache = {
+            planta: act.filter(s => s.contrato === 'Planta').reduce((a, s) => a + pts(s), 0),
+            total:  act.reduce((a, s) => a + pts(s), 0),
+            t: Date.now()
+        };
+        return _puntosSociosCache;
+    } catch (e) { return _puntosSociosCache; }
+};
