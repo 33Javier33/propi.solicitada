@@ -343,6 +343,12 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-11-24 — Recaudación del Día: cómo corregir un monto mal ingresado (SW v206)
+
+- En el modal «Recaudación del Día», sobre el botón «Abrir Diario de Recaudación», hay una nota: desde la app solo se agregan registros, y para corregir o borrar un monto hay que entrar al diario y editarlo en el Historial.
+- El aviso tras registrar también lo recuerda. **Bug corregido:** el aviso mostraba «Recaudación registrada ✓: success» porque `showToast` de esta app recibe (autor, mensaje) y se le pasaba un tipo.
+- La guía de ayuda (helpSlides) lo explica.
+
 #### 2026-11-21 — Texto «El desarrollador» actualizado (SW v205)
 
 - La ficha «Acerca de» ahora habla en pasado del período como Encargado del Fondo (15/11/2025 – 15/11/2026), y dice que hoy continúa como socio y responsable del desarrollo y la mantención de la plataforma.

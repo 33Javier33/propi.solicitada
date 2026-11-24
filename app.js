@@ -3797,7 +3797,7 @@
                     const _nom = (typeof getDisplayName === 'function') ? getDisplayName() : ((currentUser.Nombre || '') + ' ' + (currentUser.Apellido || '')).trim();
                     recPresAgrego(_nom, _recTipoSelected);
                 }
-                showToast('Recaudación registrada ✓', 'success');
+                showToast('Recaudación registrada ✓', 'si te equivocaste en un monto, corrígelo en «Abrir Diario de Recaudación»');
                 cerrarModalRec();
             } else {
                 showToast('Error: ' + (json.error || 'No se pudo guardar'), 'error');
@@ -5651,7 +5651,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'add_circle',
             color: '#6366f1',
             title: 'Registrar la Recaudación del Día',
-            body: 'En el Balance hay un botón morado <b>"Recaudación del Día"</b>. Si no sabes cuánto fue cada área, usa <b>"Total General"</b> para registrar solo el total de la noche (una noche va por área <b>o</b> con total general, no las dos). El <b>divisor</b> es opcional pero importante: sin él no se calcula el valor del punto.<br><br>Sirve para registrar lo recaudado en la noche <b>directamente desde tu app</b>, aunque no tengas la app de Recaudaciones Diarias instalada.<br><br>Al tocarlo se abre un formulario donde eliges:<br><br>🏷️ <b>Categoría:</b> TarjetaMDA, EfectivoMDA, SalaDeJuegos o Bóveda.<br>📅 <b>Fecha</b> y 💵 <b>Monto</b> recaudado.<br>➗ <b>Divisor</b> (opcional): si no lo sabes, déjalo en blanco.<br><br>Arriba verás el <b>total de puntos</b> del reparto como dato de referencia.<br><br>📄 Dentro del mismo formulario hay un botón <b>"Abrir Diario de Recaudación"</b> que te lleva al <b>diario completo</b> de recaudaciones. Así entre todos mantienen la información al día.',
+            body: 'En el Balance hay un botón morado <b>"Recaudación del Día"</b>. Si no sabes cuánto fue cada área, usa <b>"Total General"</b> para registrar solo el total de la noche (una noche va por área <b>o</b> con total general, no las dos). El <b>divisor</b> es opcional pero importante: sin él no se calcula el valor del punto.<br><br>Sirve para registrar lo recaudado en la noche <b>directamente desde tu app</b>, aunque no tengas la app de Recaudaciones Diarias instalada.<br><br>Al tocarlo se abre un formulario donde eliges:<br><br>🏷️ <b>Categoría:</b> TarjetaMDA, EfectivoMDA, SalaDeJuegos o Bóveda.<br>📅 <b>Fecha</b> y 💵 <b>Monto</b> recaudado.<br>➗ <b>Divisor</b> (opcional): si no lo sabes, déjalo en blanco.<br><br>Arriba verás el <b>total de puntos</b> del reparto como dato de referencia.<br><br>📄 Dentro del mismo formulario hay un botón <b>"Abrir Diario de Recaudación"</b> que te lleva al <b>diario completo</b> de recaudaciones. Así entre todos mantienen la información al día.<br><br>✏️ <b>¿Te equivocaste en un monto?</b> Desde tu app solo se agregan registros: para <b>corregirlo o borrarlo</b>, entra en <b>"Abrir Diario de Recaudación"</b> y edítalo en el Historial.',
             preview: `
               <div>
                 <div style="display:flex;gap:8px;margin-bottom:12px;">
