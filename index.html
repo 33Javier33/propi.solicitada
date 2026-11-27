@@ -1633,6 +1633,12 @@
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Monto del anticipo <span style="font-size:0.85em;color:#dc2626;font-weight:800;text-transform:none;">(obligatorio)</span></p>
             <input type="tel" id="egresoMonto" placeholder="$0" oninput="fmtEgresoMonto(this)" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:1.1rem;font-weight:700;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px">
 
+            <!-- Fecha escrita en la papeleta del anticipo: con ella la administración
+                 lo registra en su día real (no el día en que se anotó en la app). -->
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Fecha de la papeleta <span style="font-size:0.85em;color:#dc2626;font-weight:800;text-transform:none;">(obligatorio)</span></p>
+            <input type="date" id="egresoFecha" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:6px;font-family:inherit;">
+            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:16px;line-height:1.4;">La fecha que lleva la <b>papeleta</b> del anticipo, para que cuadre con su día real.</p>
+
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
             <textarea id="egresoNota" rows="2" placeholder="Ej: gasto imprevisto" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px;resize:none;font-family:inherit"></textarea>
 
@@ -1699,9 +1705,9 @@
 </div><!-- /appContainer -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
-<script src="supabase-api.js?v=203"></script>
+<script src="supabase-api.js?v=207"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=204"></script>
+<script src="app.js?v=205"></script>
 <script src="version.js?v=5"></script>
 
 

@@ -2392,7 +2392,7 @@
                 return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
             };
             const pendMovs=pendientesAnt.filter(p=>Number(p.monto)>0).map(p=>({
-                fecha:_fechaLocal(p.created_at), monto:Number(p.monto), cantidad:Number(p.monto),
+                fecha:(window.fechaPapeletaDe && window.fechaPapeletaDe(p)) || _fechaLocal(p.created_at), monto:Number(p.monto), cantidad:Number(p.monto),
                 desc:'Anticipo registrado' + (p.encargado ? ' · ' + p.encargado : ''), _pendiente:true
             })).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
             const merged=[...pendMovs, ...[...pedidos,...donacionesMov].sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)))];
@@ -3921,6 +3921,9 @@
         if (!currentUser) return;
         document.getElementById('egresoMonto').value = '';
         document.getElementById('egresoNota').value = '';
+        // Fecha de la papeleta: parte en hoy y no acepta fechas futuras.
+        const _ef = document.getElementById('egresoFecha');
+        if (_ef) { const _h = _hoyISOEgr(); _ef.value = _h; _ef.max = _h; }
         const _se = document.getElementById('egresoEncargado');
         const _so = document.getElementById('egresoEncargadoOtro');
         if (_se) _se.value = '';
@@ -3996,6 +3999,11 @@
         inp.value = v ? '$' + parseInt(v).toLocaleString('es-ES') : '';
     };
 
+    function _hoyISOEgr() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
     window.enviarEgreso = async () => {
         if (!currentUser) return;
         const monto = parseInt((document.getElementById('egresoMonto').value || '').replace(/\D/g, '')) || 0;
@@ -4005,6 +4013,8 @@
         let encargado = _selEnc ? _selEnc.value : '';
         if (encargado === '__otro__') encargado = (_otroEnc ? _otroEnc.value : '').trim();
         const billetes = _egrLeerBilletes();
+        const _elFecha = document.getElementById('egresoFecha');
+        const fecha = _elFecha ? String(_elFecha.value || '') : '';
         const btn = document.getElementById('btnEnviarEgreso');
 
         // Validación: monto y encargado son obligatorios. El desglose es opcional,
@@ -4018,6 +4028,8 @@
             }
         };
         if (!monto) return faltante('Falta el monto del anticipo', document.getElementById('egresoMonto'));
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return faltante('Falta la fecha de la papeleta', _elFecha);
+        if (fecha > _hoyISOEgr()) return faltante('La fecha no puede ser futura', _elFecha);
         if (!encargado) {
             const esOtro = _selEnc && _selEnc.value === '__otro__';
             return faltante('Falta indicar el encargado', esOtro ? _otroEnc : _selEnc);
@@ -4037,7 +4049,7 @@
                     action: 'solicitarEgreso',
                     socioId: String(currentUser.ID),
                     socioNombre: (currentUser.Nombre + ' ' + currentUser.Apellido).trim(),
-                    monto, nota, encargado, billetes
+                    monto, nota, encargado, billetes, fecha
                 })
             });
             const json = await res.json();
@@ -5673,7 +5685,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'request_quote',
             color: '#0284c7',
             title: 'Registro de Anticipo',
-            body: 'Junto al botón anterior está <b>"Registro de Anticipo"</b> (celeste). Con él registras el <b>anticipo de propina</b> que te entregó el encargado.<br><br>Ingresas el <b>monto</b>, el <b>encargado</b> que te lo entregó y, si quieres, un detalle.<br><br>💸 <b>El monto se descuenta de tu balance de inmediato</b>: no tienes que esperar a la administración. En tu Balance verás la tarjeta <b>"Anticipo registrado · por confirmar"</b>, y en <b>Últimos Movimientos</b> aparece con el monto ya descontado y la etiqueta <b>PENDIENTE</b>.<br><br>✅ Cuando la administración lo confirme, la etiqueta desaparece y queda como un anticipo normal (no se descuenta dos veces).<br><br>↩️ Si lo cancelas, o la administración lo rechaza, el monto vuelve a tu balance.',
+            body: 'Junto al botón anterior está <b>"Registro de Anticipo"</b> (celeste). Con él registras el <b>anticipo de propina</b> que te entregó el encargado.<br><br>Ingresas el <b>monto</b>, la <b>fecha de la papeleta</b> (la que lleva escrita, para que cuadre con el día real del anticipo), el <b>encargado</b> que te lo entregó y, si quieres, un detalle.<br><br>💸 <b>El monto se descuenta de tu balance de inmediato</b>: no tienes que esperar a la administración. En tu Balance verás la tarjeta <b>"Anticipo registrado · por confirmar"</b>, y en <b>Últimos Movimientos</b> aparece con el monto ya descontado y la etiqueta <b>PENDIENTE</b>.<br><br>✅ Cuando la administración lo confirme, la etiqueta desaparece y queda como un anticipo normal (no se descuenta dos veces).<br><br>↩️ Si lo cancelas, o la administración lo rechaza, el monto vuelve a tu balance.',
             preview: `
               <div>
                 <div style="background:#f8fafc;border-radius:16px;padding:14px;border:1px solid #e1e3e4;margin-bottom:10px;">

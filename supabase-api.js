@@ -352,6 +352,13 @@ async function _ptQuitarDePlanilla(sid, fecha) {
     } catch (e) { return false; }
 }
 
+// Fecha de la papeleta de un anticipo registrado (AAAA-MM-DD), leída de la
+// nota («Fecha papeleta: DD-MM-AAAA»). Vacía si es un registro antiguo.
+window.fechaPapeletaDe = function (sol) {
+    const m = String((sol && sol.nota) || '').match(/Fecha papeleta:\s*(\d{2})-(\d{2})-(\d{4})/);
+    return m ? m[3] + '-' + m[2] + '-' + m[1] : '';
+};
+
 // ── HANDLER: SOCIOS ────────────────────────────────────────────────────────────
 async function _sociosHandler(url, options) {
     const b = await _body(options);
@@ -367,12 +374,19 @@ async function _sociosHandler(url, options) {
             const _bil = (b.billetes && typeof b.billetes === 'object') ? b.billetes : null;
             const _bilTxt = _bil ? Object.keys(_bil).sort((x, y) => y - x)
                 .map(d => _bil[d] + '×$' + Number(d).toLocaleString('es-CL')).join(', ') : '';
+            // La fecha de la papeleta va al comienzo de la nota con un formato
+            // fijo («Fecha papeleta: DD-MM-AAAA»): la tabla no tiene columna para
+            // ella, y así socios-comicion la lee para registrar el anticipo en su
+            // día real. Ver fechaPapeletaDe().
+            const _fp = /^\d{4}-\d{2}-\d{2}$/.test(String(b.fecha || '')) ? String(b.fecha) : '';
+            const _fpTxt = _fp ? 'Fecha papeleta: ' + _fp.split('-').reverse().join('-') : '';
+            const _notaSocio = String(b.nota || '').trim();
             const _base = {
                 id,
                 socio_id: String(b.socioId || ''),
                 socio_nombre: b.socioNombre || '',
                 monto: Number(b.monto) || 0,
-                nota: b.nota || '',
+                nota: [_fpTxt, _notaSocio].filter(Boolean).join(' · '),
                 estado: 'PENDIENTE'
             };
             // Se intenta guardar el encargado en su columna; si aún no existe en

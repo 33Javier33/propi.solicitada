@@ -343,6 +343,14 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-11-27 — Registro de Anticipo: fecha de la papeleta (SW v207)
+
+- Nuevo campo obligatorio **Fecha de la papeleta** en «Registro de Anticipo». Parte en hoy, no acepta fechas futuras y es la fecha escrita en la papeleta que firma el socio.
+- La tabla `solicitudes_egreso` no tiene columna para ella, así que se guarda al comienzo de la nota con formato fijo: «Fecha papeleta: DD-MM-AAAA». `fechaPapeletaDe()` en `supabase-api.js` la lee.
+- En **Últimos Movimientos**, el anticipo PENDIENTE muestra la fecha de la papeleta en vez del día en que se anotó en la app.
+- socios-comicion la usa al confirmar: el anticipo real queda registrado con la fecha de la papeleta.
+- La guía de ayuda (helpSlides) lo menciona.
+
 #### 2026-11-24 — Recaudación del Día: cómo corregir un monto mal ingresado (SW v206)
 
 - En el modal «Recaudación del Día», sobre el botón «Abrir Diario de Recaudación», hay una nota: desde la app solo se agregan registros, y para corregir o borrar un monto hay que entrar al diario y editarlo en el Historial.
