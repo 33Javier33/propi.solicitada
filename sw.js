@@ -1,4 +1,4 @@
-const CACHE_NAME = 'boveda-personal-v207';
+const CACHE_NAME = 'boveda-personal-v208';
 
 const urlsToCache = [
     'index.html',
@@ -6,6 +6,7 @@ const urlsToCache = [
     'app.js',
     'supabase-api.js',
     'qr-entrada.js',
+    'den-resalta.js',
     'manifest.json',
     'img/icon-192x192.png',
     'img/icon-512x512.png'

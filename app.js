@@ -3930,6 +3930,10 @@
         if (_so) { _so.value = ''; _so.style.display = 'none'; }
         _cargarEncargados();
         _egrRenderBilletes();
+        _egrPintarVerif();
+        egrMostrarDetalle(false);
+        const _caja = document.getElementById('modalEgresoCaja');
+        if (_caja) _caja.scrollTop = 0;
         document.getElementById('modalEgreso').style.display = 'flex';
     };
 
@@ -3994,9 +3998,84 @@
         document.getElementById('modalEgreso').style.display = 'none';
     };
     window.fmtEgresoMonto = (inp) => {
-        setTimeout(() => { try { _egrTotalBilletes(); } catch (e) {} }, 0);
+        setTimeout(() => { try { _egrTotalBilletes(); _egrPintarVerif(); } catch (e) {} }, 0);
         const v = inp.value.replace(/\D/g, '');
         inp.value = v ? '$' + parseInt(v).toLocaleString('es-ES') : '';
+    };
+
+    // ── «Verificación de billetes» ──────────────────────────────────────
+    // El detalle del dinero recibido es opcional: queda colapsado tras un
+    // botón que abre su propia ventana. Ahí se anotan las cantidades; al
+    // confirmar se cierra y en el formulario queda el resumen verificado.
+    let _egrVerifPrevio = null;            // cantidades al abrir (para Cancelar)
+    function _egrMontoActual() {
+        const el = document.getElementById('egresoMonto');
+        return parseInt(((el && el.value) || '').replace(/\D/g, '')) || 0;
+    }
+    function _egrPintarVerif() {
+        const box = document.getElementById('egresoVerifEstado');
+        const txt = document.getElementById('btnVerifBilletesTxt');
+        if (!box) return;
+        const bil = _egrLeerBilletes();
+        const total = Object.keys(bil).reduce((s, d) => s + Number(d) * bil[d], 0);
+        const monto = _egrMontoActual();
+        if (!total) {
+            box.style.display = 'none'; box.textContent = '';
+            if (txt) txt.textContent = 'Verificación de billetes';
+            return;
+        }
+        if (txt) txt.textContent = 'Editar verificación de billetes';
+        const det = Object.keys(bil).sort((a, b) => b - a).map(d => bil[d] + '×' + _egrFmt(d)).join(' · ');
+        if (monto && total === monto) {
+            box.setAttribute('style', 'display:block;margin-top:8px;padding:9px 12px;border-radius:12px;font-size:0.78rem;font-weight:700;line-height:1.4;background:#ecfdf5;border:1px solid #6ee7b7;color:#166534;');
+            box.textContent = '✓ Verificado: ' + _egrFmt(total) + ' — ' + det;
+        } else {
+            box.setAttribute('style', 'display:block;margin-top:8px;padding:9px 12px;border-radius:12px;font-size:0.78rem;font-weight:700;line-height:1.4;background:#fffbeb;border:1px solid #fcd34d;color:#b45309;');
+            box.textContent = '⚠ El detalle suma ' + _egrFmt(total) + (monto ? ' y el monto es ' + _egrFmt(monto) : '') + '. Revísalo en «Editar verificación».';
+        }
+    }
+    window.abrirVerifBilletes = () => {
+        _egrVerifPrevio = _egrLeerBilletes();
+        const monto = _egrMontoActual();
+        const ref = document.getElementById('verifMontoRef');
+        if (ref) ref.innerHTML = monto
+            ? 'Anota <b>cuántos</b> billetes o monedas de cada valor te entregaron. Deben sumar el monto del anticipo: <b>' + _egrFmt(monto) + '</b>.'
+            : 'Anota <b>cuántos</b> billetes o monedas de cada valor te entregaron. Al confirmar, el total quedará como <b>monto del anticipo</b>.';
+        _egrTotalBilletes();
+        document.getElementById('modalVerifBilletes').style.display = 'flex';
+        setTimeout(() => { const f = document.getElementById('egrBil-' + EGR_DENOMS[0]); if (f) f.focus(); }, 150);
+    };
+    window.cancelarVerifBilletes = () => {
+        const prev = _egrVerifPrevio || {};
+        EGR_DENOMS.forEach(d => { const el = document.getElementById('egrBil-' + d); if (el) el.value = prev[d] ? String(prev[d]) : ''; });
+        _egrTotalBilletes();
+        document.getElementById('modalVerifBilletes').style.display = 'none';
+        _egrPintarVerif();
+    };
+    window.confirmarVerifBilletes = () => {
+        const total = _egrTotalBilletes();
+        let monto = _egrMontoActual();
+        if (total && !monto) {                 // sin monto aún: el verificado pasa a ser el monto
+            const el = document.getElementById('egresoMonto');
+            el.value = String(total); fmtEgresoMonto(el); monto = total;
+        }
+        if (total && total !== monto) {        // no cuadra: no se cierra, el aviso ya lo explica
+            const b = document.getElementById('btnConfirmarVerif');
+            b.textContent = 'No cuadra con ' + _egrFmt(monto);
+            setTimeout(() => { b.textContent = '✓ Confirmar'; }, 2200);
+            const av = document.getElementById('egresoBilletesAviso');
+            if (av) try { av.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+            return;
+        }
+        document.getElementById('modalVerifBilletes').style.display = 'none';
+        _egrPintarVerif();
+    };
+    window.egrMostrarDetalle = (ver) => {
+        const box = document.getElementById('egresoDetalleBox');
+        const btn = document.getElementById('btnEgresoDetalle');
+        if (box) box.style.display = ver ? 'block' : 'none';
+        if (btn) btn.style.display = ver ? 'none' : 'inline-block';
+        if (ver) setTimeout(() => { const n = document.getElementById('egresoNota'); if (n) n.focus(); }, 60);
     };
 
     function _hoyISOEgr() {
@@ -4037,7 +4116,7 @@
         const totalDesglose = Object.keys(billetes)
             .reduce((suma, d) => suma + Number(d) * Number(billetes[d]), 0);
         if (totalDesglose && totalDesglose !== monto) {
-            return faltante('El desglose no cuadra con el monto', document.getElementById('egresoBilletes'));
+            return faltante('El detalle de billetes no cuadra con el monto', document.getElementById('btnVerifBilletes'));
         }
 
         btn.disabled = true; btn.textContent = 'Enviando...';
@@ -5685,7 +5764,7 @@ th { background:#f0f0f0; padding:2px; border-bottom:1px solid #ccc; }
             icon: 'request_quote',
             color: '#0284c7',
             title: 'Registro de Anticipo',
-            body: 'Junto al botón anterior está <b>"Registro de Anticipo"</b> (celeste). Con él registras el <b>anticipo de propina</b> que te entregó el encargado.<br><br>Ingresas el <b>monto</b>, la <b>fecha de la papeleta</b> (la que lleva escrita, para que cuadre con el día real del anticipo), el <b>encargado</b> que te lo entregó y, si quieres, un detalle.<br><br>💸 <b>El monto se descuenta de tu balance de inmediato</b>: no tienes que esperar a la administración. En tu Balance verás la tarjeta <b>"Anticipo registrado · por confirmar"</b>, y en <b>Últimos Movimientos</b> aparece con el monto ya descontado y la etiqueta <b>PENDIENTE</b>.<br><br>✅ Cuando la administración lo confirme, la etiqueta desaparece y queda como un anticipo normal (no se descuenta dos veces).<br><br>↩️ Si lo cancelas, o la administración lo rechaza, el monto vuelve a tu balance.',
+            body: 'Junto al botón anterior está <b>"Registro de Anticipo"</b> (celeste). Con él registras el <b>anticipo de propina</b> que te entregó el encargado.<br><br>Ingresas el <b>monto</b>, la <b>fecha de la papeleta</b> (la que lleva escrita, para que cuadre con el día real del anticipo), el <b>encargado</b> que te lo entregó y, si quieres, un detalle. El detalle de billetes también es opcional: toca <b>"Verificación de billetes"</b>, anota cuántos de cada valor te dieron (el valor en que estás se pinta de azul) y <b>Confirmar</b>; queda marcado como verificado. El botón <b>Registrar anticipo</b> siempre queda a la vista abajo.<br><br>💸 <b>El monto se descuenta de tu balance de inmediato</b>: no tienes que esperar a la administración. En tu Balance verás la tarjeta <b>"Anticipo registrado · por confirmar"</b>, y en <b>Últimos Movimientos</b> aparece con el monto ya descontado y la etiqueta <b>PENDIENTE</b>.<br><br>✅ Cuando la administración lo confirme, la etiqueta desaparece y queda como un anticipo normal (no se descuenta dos veces).<br><br>↩️ Si lo cancelas, o la administración lo rechaza, el monto vuelve a tu balance.',
             preview: `
               <div>
                 <div style="background:#f8fafc;border-radius:16px;padding:14px;border:1px solid #e1e3e4;margin-bottom:10px;">

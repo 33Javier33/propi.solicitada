@@ -343,6 +343,15 @@ git push -u origin main
 
 ## Historial de Cambios
 
+#### 2026-11-27 — Registro de Anticipo: «Verificación de billetes», botón fijo y denominación resaltada (SW v208)
+
+- El **detalle del dinero recibido** (opcional) ahora está colapsado tras el botón **«💵 Verificación de billetes»**, que abre su propia ventana (`#modalVerifBilletes`) con la grilla.
+- **Confirmar** solo cierra la ventana si el total cuadra con el monto. En el formulario queda «✓ Verificado: $X — 1×$20.000 · …». Si aún no hay monto, el total verificado pasa a ser el monto. **Cancelar** deshace lo cambiado esa vez.
+- El **detalle** escrito (opcional) también queda colapsado tras «+ Agregar un detalle».
+- El botón **Registrar anticipo** queda pegado abajo (`position: sticky`) y siempre a la vista al hacer scroll.
+- Nuevo `den-resalta.js` (también en socios-comicion): al poner el cursor en una cantidad de una grilla de billetes, se pinta su denominación ($20.000…) y la fila, para saber a qué billete va el número. Es genérico: solo actúa con etiquetas que son denominaciones reales y dentro de una grilla. Se agregó al precache del SW.
+- La guía de ayuda (helpSlides) lo explica.
+
 #### 2026-11-27 — Registro de Anticipo: fecha de la papeleta (SW v207)
 
 - Nuevo campo obligatorio **Fecha de la papeleta** en «Registro de Anticipo». Parte en hoy, no acepta fechas futuras y es la fecha escrita en la papeleta que firma el socio.

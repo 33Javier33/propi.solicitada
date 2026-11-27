@@ -1623,7 +1623,7 @@
 
     <!-- MODAL SOLICITAR EGRESO -->
     <div id="modalEgreso" onclick="if(event.target===this)cerrarModalEgreso()" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);align-items:flex-end">
-        <div style="background:#f8fafc;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;box-shadow:0 -8px 32px rgba(0,0,0,0.18);max-height:90vh;overflow-y:auto">
+        <div id="modalEgresoCaja" style="background:#f8fafc;border-radius:24px 24px 0 0;padding:24px 20px 0;width:100%;box-shadow:0 -8px 32px rgba(0,0,0,0.18);max-height:90vh;overflow-y:auto">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
                 <h3 style="font-size:1.05rem;font-weight:800;color:#1e293b">Registro de Anticipo</h3>
                 <button onclick="cerrarModalEgreso()" style="background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center">✕</button>
@@ -1639,8 +1639,12 @@
             <input type="date" id="egresoFecha" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:6px;font-family:inherit;">
             <p style="font-size:0.72em;color:#94a3b8;margin-bottom:16px;line-height:1.4;">La fecha que lleva la <b>papeleta</b> del anticipo, para que cuadre con su día real.</p>
 
+            <!-- Detalle opcional: colapsado detrás de un enlace para no alargar el formulario. -->
+            <button type="button" id="btnEgresoDetalle" onclick="egrMostrarDetalle(true)" style="background:none;border:none;padding:2px 0;margin:0 0 14px;font-size:0.8rem;font-weight:700;color:#0284c7;cursor:pointer;font-family:inherit;">+ Agregar un detalle <span style="font-weight:600;color:#94a3b8;">(opcional)</span></button>
+            <div id="egresoDetalleBox" style="display:none">
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
             <textarea id="egresoNota" rows="2" placeholder="Ej: gasto imprevisto" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:16px;resize:none;font-family:inherit"></textarea>
+            </div>
 
             <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Encargado que te entregó el anticipo <span style="font-size:0.85em;color:#dc2626;font-weight:800;text-transform:none;">(obligatorio)</span></p>
             <select id="egresoEncargado" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:600;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:6px;font-family:inherit;">
@@ -1649,13 +1653,35 @@
             <input type="text" id="egresoEncargadoOtro" placeholder="Escribe el nombre del encargado" style="display:none;width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:0.95rem;font-weight:500;color:#1e293b;background:#fff;box-sizing:border-box;margin-bottom:6px;font-family:inherit;">
             <p style="font-size:0.72em;color:#94a3b8;margin-bottom:16px;line-height:1.4;">Indica quién te entregó el dinero, para que la administración pueda verificarlo.</p>
 
-            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Detalle del dinero recibido <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
-            <p style="font-size:0.72em;color:#94a3b8;margin-bottom:8px;line-height:1.4;">Anota <b>cuántos</b> billetes o monedas de cada valor te entregaron. Puedes dejarlo en blanco, pero <b>si lo completas, el total debe ser igual al monto del anticipo.</b></p>
-            <div id="egresoBilletes" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:0;margin-bottom:22px;overflow:hidden;"></div>
+            <!-- Detalle del dinero recibido: opcional y colapsado. Se completa en
+                 su propia ventana («Verificación de billetes») y aquí queda el resumen. -->
+            <p style="font-size:0.68em;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Detalle del dinero recibido <span style="font-size:0.85em;color:#cbd5e1;font-weight:600;text-transform:none;">(opcional)</span></p>
+            <button type="button" id="btnVerifBilletes" onclick="abrirVerifBilletes()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:#fff;border:1.5px dashed #7dd3fc;border-radius:14px;font-size:0.92rem;font-weight:700;color:#0369a1;cursor:pointer;font-family:inherit;">💵 <span id="btnVerifBilletesTxt">Verificación de billetes</span></button>
+            <div id="egresoVerifEstado" style="display:none;margin-top:8px;padding:9px 12px;border-radius:12px;font-size:0.78rem;font-weight:700;line-height:1.4;"></div>
+            <div style="height:18px"></div>
 
-            <button id="btnEnviarEgreso" onclick="enviarEgreso()" style="width:100%;padding:15px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
-                Registrar anticipo
-            </button>
+            <!-- Botón siempre a la vista: queda pegado abajo mientras se hace scroll. -->
+            <div style="position:sticky;bottom:0;z-index:2;margin:0 -20px;padding:12px 20px calc(14px + env(safe-area-inset-bottom));background:#f8fafc;border-top:1px solid rgba(148,163,184,0.25);">
+                <button id="btnEnviarEgreso" onclick="enviarEgreso()" style="width:100%;padding:15px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;border:none;border-radius:16px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(14,165,233,0.35)">
+                    Registrar anticipo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VENTANA «VERIFICACIÓN DE BILLETES» (detalle del dinero del anticipo) -->
+    <div id="modalVerifBilletes" onclick="if(event.target===this)cancelarVerifBilletes()" style="display:none;position:fixed;inset:0;z-index:210;background:rgba(0,0,0,0.55);align-items:flex-end">
+        <div style="background:#f8fafc;border-radius:24px 24px 0 0;padding:22px 20px 0;width:100%;box-shadow:0 -8px 32px rgba(0,0,0,0.25);max-height:92vh;overflow-y:auto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <h3 style="font-size:1.05rem;font-weight:800;color:#1e293b">💵 Verificación de billetes</h3>
+                <button onclick="cancelarVerifBilletes()" style="background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>
+            <p id="verifMontoRef" style="font-size:0.8rem;color:#64748b;line-height:1.45;margin-bottom:12px"></p>
+            <div id="egresoBilletes" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:0;margin-bottom:16px;overflow:hidden;"></div>
+            <div style="position:sticky;bottom:0;z-index:2;margin:0 -20px;padding:12px 20px calc(14px + env(safe-area-inset-bottom));background:#f8fafc;border-top:1px solid rgba(148,163,184,0.25);display:flex;gap:10px;">
+                <button type="button" onclick="cancelarVerifBilletes()" style="flex:1;padding:14px;background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;font-size:0.95rem;font-weight:700;color:#64748b;cursor:pointer;font-family:inherit;">Cancelar</button>
+                <button type="button" id="btnConfirmarVerif" onclick="confirmarVerifBilletes()" style="flex:2;padding:14px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:16px;font-size:0.95rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(16,185,129,0.3)">✓ Confirmar</button>
+            </div>
         </div>
     </div>
 
@@ -1707,7 +1733,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script src="supabase-api.js?v=207"></script>
 <script src="qr-entrada.js"></script>
-<script src="app.js?v=205"></script>
+<script src="den-resalta.js?v=1"></script>
+<script src="app.js?v=206"></script>
 <script src="version.js?v=5"></script>
 
 
